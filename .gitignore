@@ -1,3 +1,6 @@
 **/**/__pycache__
 **/**/.env
 **/**/venv
+chromedriver*
+.DS_Store
+prices
