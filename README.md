@@ -107,10 +107,12 @@ Led by [Shaked Zohar](https://github.com/ShakedZrihen) — Senior Full-Stack Dev
 
 ## 📁 Repository Structure
 
+```
 course-root/
 │
 ├── examples/ # course examples for the core concepts
 └── Installations.md # Setup guide
+```
 
 ---
 
