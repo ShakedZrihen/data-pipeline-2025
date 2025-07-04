@@ -4,3 +4,4 @@
 chromedriver*
 .DS_Store
 prices
+venv
