@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 def extract_and_delete_gz(gz_path):
     if not gz_path.endswith(".gz"):
         print("Not a .gz file:", gz_path)
-        return
+        return None
 
     # Determine output filename by removing ".gz"
     output_path = gz_path[:-3]
@@ -50,7 +50,7 @@ def convert_xml_to_json(xml_file_path: str):
     json_file_path = xml_file_path + ".json"
     if os.path.exists(json_file_path):
         print(f"✅ JSON already exists: {json_file_path}")
-        return
+        return json_file_path
 
     # Step 1: Read XML
     with open(xml_file_path, "r", encoding="utf-8") as f:
