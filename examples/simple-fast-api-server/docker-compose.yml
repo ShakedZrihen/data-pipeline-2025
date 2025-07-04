@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   fastapi:
+    container_name: rag-fastapi
     build:
       context: .
     ports:
