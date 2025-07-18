@@ -16,10 +16,14 @@ class LadyGagaCrawler:
             response = requests.get(self.url)
             response.raise_for_status()
             return response.text
-        except requests.HTTPError as http_err:
+        except requests.exceptions.HTTPError as http_err:
             logging.error(f'HTTP error occurred: {http_err}')
-        except Exception as err:
-            logging.error(f'Other error occurred: {err}')
+        except requests.exceptions.ConnectionError as conn_err:
+            logging.error(f'Connection error occurred: {conn_err}')
+        except requests.exceptions.Timeout as timeout_err:
+            logging.error(f'Timeout error occurred: {timeout_err}')
+        except requests.exceptions.RequestException as req_err:
+            logging.error(f'An error occurred: {req_err}')
         return None
 
     def parse_page(self, html_content):
