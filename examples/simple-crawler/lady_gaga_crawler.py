@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 from loguru import logger
+import requests
 
 # Configure Selenium WebDriver
 options = Options()
