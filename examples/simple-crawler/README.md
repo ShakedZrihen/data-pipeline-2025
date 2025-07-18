@@ -18,6 +18,18 @@ Run the crawler script with:
 python lady_gaga_crawler.py
 ```
 
+### Example Output
+
+The crawler will extract headlines from the specified URL. For example, if the page contains:
+```html
+<h2>Latest News</h2>
+<h2>Upcoming Tours</h2>
+```
+The output will be:
+```
+Extracted data: ['Latest News', 'Upcoming Tours']
+```
+
 ## Testing
 
 Run the tests with:
