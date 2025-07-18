@@ -36,3 +36,7 @@ Run the tests with:
 ```
 python -m unittest test_lady_gaga_crawler.py
 ```
+
+## Configuration Options
+
+- `url`: The URL of the website to scrape. Replace the placeholder URL in the script with the actual URL you wish to scrape.
