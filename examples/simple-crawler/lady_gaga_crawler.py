@@ -16,20 +16,23 @@ class LadyGagaCrawler:
             response = requests.get(self.url)
             response.raise_for_status()
             return response.text
-        except requests.RequestException as e:
-            logging.error(f'Error fetching page: {e}')
-            return None
+        except requests.HTTPError as http_err:
+            logging.error(f'HTTP error occurred: {http_err}')
+        except Exception as err:
+            logging.error(f'Other error occurred: {err}')
+        return None
 
     def parse_page(self, html_content):
         try:
             logging.info('Parsing page content')
             soup = BeautifulSoup(html_content, 'html.parser')
-            # Example: Extracting headlines
             headlines = [h2.get_text() for h2 in soup.find_all('h2')]
             return headlines
+        except AttributeError as attr_err:
+            logging.error(f'Attribute error: {attr_err}')
         except Exception as e:
             logging.error(f'Error parsing page: {e}')
-            return []
+        return []
 
     def run(self):
         html_content = self.fetch_page()
