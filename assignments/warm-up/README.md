@@ -28,7 +28,7 @@ Store the results as a list of dictionaries or JSON-like structure.
 Create your code inside:
 
 ```bash
-examples/simple-crawler/lady-gaga/
+assignments/warm-up
 ```
 
 ---
