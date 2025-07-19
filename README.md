@@ -97,6 +97,10 @@ You will build a **Shopping List Assistant Bot**, which will:
 
 For installation instructions, see [`Installations.md`](./Installations.md)
 
+## 🤝 Contributing
+
+For guidelines on contributing to this course, see [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+
 ---
 
 ## 👩‍🏫 Instructor
