@@ -116,6 +116,27 @@ pip install requests beautifulsoup4 pandas sqlalchemy psycopg2-binary fastapi uv
 
 ---
 
+## 💬 5. Install Slack
+
+> We'll use Slack for notifications.
+
+### ▶ Windows & macOS
+
+1. Download Slack from:  
+   https://slack.com/downloads/
+
+2. Install and launch the application
+
+3. Sign in to our course workspace - link to join provided in moodle
+
+
+### ▶ Web Version (Alternative)
+
+If you prefer not to install the desktop app, you can use Slack in your browser:
+- Go to https://slack.com/
+- Sign in to your workspace
+
+
 ## ✅ Summary Checklist
 
 | Tool             | Installed via                 |
@@ -124,4 +145,5 @@ pip install requests beautifulsoup4 pandas sqlalchemy psycopg2-binary fastapi uv
 | pip + venv       | Built-in                      |
 | Docker + Compose | docker.com                    |
 | PostgreSQL       | via Docker                    |
+| Slack            | slack.com                     |
 | VSCode or Editor | https://code.visualstudio.com |
