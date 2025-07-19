@@ -111,6 +111,8 @@ Led by [Shaked Zohar](https://github.com/ShakedZrihen) — Senior Full-Stack Dev
 course-root/
 │
 ├── examples/ # course examples for the core concepts
+├── assignments/ # student assignments and exercises
+│   └── warm-up/ # warm-up exercises to get comfortable with tools
 └── Installations.md # Setup guide
 ```
 
