@@ -145,5 +145,4 @@ If you prefer not to install the desktop app, you can use Slack in your browser:
 | pip + venv       | Built-in                      |
 | Docker + Compose | docker.com                    |
 | PostgreSQL       | via Docker                    |
-| Slack            | slack.com                     |
 | VSCode or Editor | https://code.visualstudio.com |
