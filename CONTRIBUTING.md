@@ -41,6 +41,7 @@ Make sure your code is:
 
 - Well-structured
 - Inside the correct folder (e.g., `assignments/warm-up`)
+- Follows our [Development Guidelines](DEVELOPMENT_GUIDELINES.md)
 - Includes comments or documentation if needed
 
 ---
@@ -55,6 +56,8 @@ git commit -m "feat: add lady gaga crawler assignment"
 git push origin assignment-1
 ```
 
+> 💡 **Tip:** Follow our [commit message conventions](DEVELOPMENT_GUIDELINES.md#-commit-message-conventions) for consistent, professional commits.
+
 ---
 
 ## 📬 Step 6: Open a Pull Request
@@ -62,7 +65,8 @@ git push origin assignment-1
 1. Go to your fork on GitHub.
 2. Click **"Compare & pull request"**.
 3. Add a title and short description of what you did.
-4. Click **"Create pull request"**.
+4. Add a label with your name to the pull request.
+5. Click **"Create pull request"**.
 
 That's it! 🎉
 
