@@ -1,3 +1,7 @@
+import sys
+
+print("🐍 Python version:", sys.version)
+
 try:
     import requests
     import bs4
@@ -9,17 +13,24 @@ try:
     import telegram
     import openai
 
-    print("✅ All imports succeeded!")
+    print("\n✅ All imports succeeded!")
 
-    # Minimal usage checks (optional)
-    print("requests version:", requests.__version__)
-    print("pandas DataFrame:", pd.DataFrame({'a': [1, 2]}))
-    print("sqlalchemy version:", sqlalchemy.__version__)
-    print("psycopg2 version:", psycopg2.__version__)
-    print("fastapi version:", fastapi.__version__)
-    print("uvicorn version:", uvicorn.__version__)
-    print("telegram version:", telegram.__version__)
-    print("openai version:", openai.__version__)
+    # 🔍 Version checks
+    print("\n📦 Versions:")
+    print("requests:", requests.__version__)
+    print("bs4 (BeautifulSoup):", bs4.__version__ if hasattr(bs4, '__version__') else "no __version__ attribute")
+    print("pandas:", pd.__version__)
+    print("sqlalchemy:", sqlalchemy.__version__)
+    print("psycopg2:", psycopg2.__version__)
+    print("fastapi:", fastapi.__version__)
+    print("uvicorn:", uvicorn.__version__)
+    print("telegram:", telegram.__version__)
+    print("openai:", openai.__version__)
+
+    # 🧪 Minimal functionality checks
+    print("\n🧪 Functionality test:")
+    df = pd.DataFrame({'a': [1, 2]})
+    print("pandas DataFrame:\n", df)
 
 except ImportError as e:
     print("❌ Import failed:", e)
