@@ -8,7 +8,6 @@ Total: **100 points**
 
 ---
 
-## ✅ Crawler Functionality – 40 pts
 
 Extracts all 4 fields correctly:
 
