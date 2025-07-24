@@ -74,8 +74,6 @@ def crawl():
     ) # delay to avoid aggressive crawling
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
-    with open("page.html", "w", encoding="utf-8") as f:
-        f.write(driver.page_source)
 
     articles = []
     results = soup.find_all("div", class_="SoaBEf")
@@ -110,6 +108,7 @@ def crawl():
 
     driver.quit()
     print(json.dumps(articles, indent=2, ensure_ascii=False))
+
     # Save to file
     with open("lady_gaga_news.json", "w") as f:
         json.dump(articles, f, indent=2, ensure_ascii=False)
