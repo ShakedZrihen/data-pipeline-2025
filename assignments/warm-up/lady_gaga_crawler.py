@@ -116,10 +116,6 @@ def extract_article_data(article_element):
                             span_text = span_element.text.strip()
                             if span_text:
                                 date = span_text
-                            # Check for data-ts attribute (timestamp)
-                            data_ts = span_element.get_attribute("data-ts")
-                            if data_ts:
-                                date = data_ts
                     except NoSuchElementException:
                         pass
                     break
@@ -139,7 +135,8 @@ def extract_article_data(article_element):
                     src = img_element.get_attribute("src")
                     if not src:
                         src = img_element.get_attribute("data-src")
-                    if src and src.startswith("http"):
+                    if src:
+                        print(src)
                         image_url = src
                         break
             except NoSuchElementException:
