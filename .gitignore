@@ -6,3 +6,4 @@ chromedriver*
 prices
 venv
 .claude
+.venv
