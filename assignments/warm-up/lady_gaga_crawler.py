@@ -99,10 +99,7 @@ def crawl():
             article["date"] = None
 
         img_tag = result.find("img")
-        if img_tag and img_tag.has_attr("src") and not img_tag["src"].startswith("data:"):
-            article["image"] = img_tag["src"]
-        else:
-            article["image"] = None
+        article["image"] = img_tag["src"] if img_tag and img_tag.has_attr("src") else None
 
         articles.append(article)
 
