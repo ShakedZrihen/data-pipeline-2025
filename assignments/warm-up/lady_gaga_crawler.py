@@ -164,7 +164,7 @@ def extract_article_data(article_element):
         if title:
             # Filter out navigation elements and non-article content
             unwanted_keywords = [
-                "מסננים ונושאים", "הכול", "תמונות", "סרטונים", "חדשות", "שופינג", "ספרים", "מפות",
+                "הכול", "תמונות", "סרטונים", "חדשות", "שופינג", "ספרים", "מפות",
             ]
             
             # Check if title contains unwanted keywords
