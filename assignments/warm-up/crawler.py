@@ -22,7 +22,6 @@ def init_chrome_options():
     return chrome_options
 
 
-# Gets chrome driver path, if the path is not available then download it.
 def get_chromedriver_path():
     """Get the correct chromedriver path for the current system"""
     try:
@@ -46,6 +45,9 @@ def get_chromedriver_path():
 
 
 class Crawler:
+    """
+        Lady Gaga Crawler class.
+    """
     def __init__(self, url: str):
         self.url = url
         self.options = init_chrome_options()
@@ -63,6 +65,9 @@ class Crawler:
             self.driver = driver
 
     def crawl(self):
+        """
+            crawls the Lady Gaga url news page.
+        """
         try:
             print(f"Navigating to {self.url}")
             self.driver.get(self.url)
