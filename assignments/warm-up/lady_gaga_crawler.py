@@ -97,7 +97,6 @@ def extract_article_data(article_element):
         date = ""
         date_selectors = [
             ".OSrXXb.rbYSKb.LfVVr",  
-           
         ]
         
         for selector in date_selectors:
@@ -166,8 +165,6 @@ def extract_article_data(article_element):
             # Filter out navigation elements and non-article content
             unwanted_keywords = [
                 "מסננים ונושאים", "הכול", "תמונות", "סרטונים", "חדשות", "שופינג", "ספרים", "מפות",
-                "Shopping", "Images", "Videos", "News", "Books", "Maps", "Filters",
-                "All", "Everything", "Search", "Tools", "Settings"
             ]
             
             # Check if title contains unwanted keywords
@@ -233,12 +230,6 @@ def crawl_lady_gaga_news():
         
         # Look for article containers - Google News uses various selectors
         article_selectors = [
-            "div[data-hveid]",  # Google News specific
-            ".g",  # Google search results
-            ".news-item",
-            ".article",
-            "[role='article']",
-            ".dbsr",
             ".SoaBEf"  # Google News article container
         ]
         
@@ -261,7 +252,7 @@ def crawl_lady_gaga_news():
             print(f"\nProcessing article {i}/{len(article_elements)}...")
             
             # Add delay between processing articles
-            time.sleep(1)
+            time.sleep(2)
             
             article_data = extract_article_data(article_element)
             if article_data and article_data["title"]:
@@ -274,6 +265,7 @@ def crawl_lady_gaga_news():
                 else:
                     print(f"⏭️  Skipped duplicate: {article_data['title'][:50]}...")
             else:
+
                 print(f"❌ Failed to extract article {i}")
         
         print(f"\nTotal unique articles extracted: {len(articles)}")
@@ -296,14 +288,6 @@ def crawl_lady_gaga_news():
         print(f"{'='*60}")
         print(f"Total unique articles found: {len(articles)}")
         print(f"Output file: {output_file}")
-        
-        # Print first few articles as preview
-        if articles:
-            print(f"\nFirst 3 articles preview:")
-            for i, article in enumerate(articles[:3], 1):
-                print(f"\n{i}. {article['title']}")
-                print(f"   Date: {article['date'] or 'Not available'}")
-                print(f"   Description: {article['description'][:100] if article['description'] else 'Not available'}...")
         
     except Exception as e:
         print(f"Error during crawling: {e}")
