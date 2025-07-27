@@ -136,7 +136,6 @@ def extract_article_data(article_element):
                     if not src:
                         src = img_element.get_attribute("data-src")
                     if src:
-                        print(src)
                         image_url = src
                         break
             except NoSuchElementException:
@@ -164,13 +163,31 @@ def extract_article_data(article_element):
         
         # Only return if we have at least a title
         if title:
-            return {
-                "title": title,
-                "description": description,
-                "date": date,
-                "image_url": image_url,
-                "article_url": article_url
-            }
+            # Filter out navigation elements and non-article content
+            unwanted_keywords = [
+                "מסננים ונושאים", "הכול", "תמונות", "סרטונים", "חדשות", "שופינג", "ספרים", "מפות",
+                "Shopping", "Images", "Videos", "News", "Books", "Maps", "Filters",
+                "All", "Everything", "Search", "Tools", "Settings"
+            ]
+            
+            # Check if title contains unwanted keywords
+            title_lower = title.lower()
+            is_unwanted = any(keyword.lower() in title_lower for keyword in unwanted_keywords)
+            
+            # Also check if title is too short (likely navigation)
+            is_too_short = len(title.strip()) < 10
+            
+            # Check if it's a navigation link (contains search parameters)
+            is_nav_link = "search?q=" in article_url or "source=lnms" in article_url
+            
+            if not is_unwanted and not is_too_short and not is_nav_link:
+                return {
+                    "title": title,
+                    "description": description,
+                    "date": date,
+                    "image_url": image_url,
+                    "article_url": article_url
+                }
         
         return None
         
@@ -221,7 +238,8 @@ def crawl_lady_gaga_news():
             ".news-item",
             ".article",
             "[role='article']",
-            ".dbsr"
+            ".dbsr",
+            ".SoaBEf"  # Google News article container
         ]
         
         article_elements = []
