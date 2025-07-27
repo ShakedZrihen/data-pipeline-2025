@@ -5,4 +5,5 @@ chromedriver*
 .DS_Store
 prices
 venv
+.venv/
 .claude
