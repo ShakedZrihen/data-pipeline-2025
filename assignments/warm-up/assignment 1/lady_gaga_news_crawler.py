@@ -50,36 +50,37 @@ def crawl():
     descriptions = soup.find_all("div", class_="GI74Re nDgy9d")
     dates_divs = soup.find_all("div", class_="OSrXXb rbYSKb LfVVr")
 
-    # Extract image URLs from article blocks
+   
     image_blocks = soup.find_all(class_="uhHOwf BYbUcd")
-    img_urls = []
-    for block in image_blocks:
-        img_tag = block.find("img")
-        if img_tag and "src" in img_tag.attrs:
-            src = img_tag["src"]
-            if not src.startswith("data:image"):
-                img_urls.append(src)
-
-    # Extract and format date timestamps
+    
+    
+    image_urls = []
+    for img_block in image_blocks:
+        img = img_block.find('img')
+        if img and img.has_attr('src'):
+            image_urls.append(img['src'])
+        else:
+            image_urls.append(None)
+    
     dates = []
     for date_div in dates_divs:
         ts = date_div.find("span").get("data-ts")
         date = datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
         dates.append(date)
 
-    # Build results
     num_results = min(20, len(titles), len(descriptions), len(dates))
     results = []
     for i in range(num_results):
-        img_src = img_urls[i] if i < len(img_urls) else None
+        
+        image_url = image_urls[i] if i < len(image_urls) else None
+        
         results.append({
             "title": titles[i].get_text(strip=True),
             "description": descriptions[i].get_text(strip=True),
             "date": dates[i],
-            "image": img_src
+            "image": image_url
         })
 
-    # Write to JSON
     with open("lady_gaga_news.json", "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
 
