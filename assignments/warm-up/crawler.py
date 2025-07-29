@@ -1,5 +1,7 @@
-import platform
 import json
+import platform
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -46,8 +48,9 @@ def get_chromedriver_path():
 
 class Crawler:
     """
-        Lady Gaga Crawler class.
+    Lady Gaga Crawler class.
     """
+
     def __init__(self, url: str):
         self.url = url
         self.options = init_chrome_options()
@@ -66,7 +69,7 @@ class Crawler:
 
     def crawl(self):
         """
-            crawls the Lady Gaga url news page.
+        crawls the Lady Gaga url news page.
         """
         try:
             print(f"Navigating to {self.url}")
@@ -92,30 +95,36 @@ class Crawler:
                 date = (
                     elems[i]
                     .find_element(by=By.CLASS_NAME, value="SoAPf")
-                    .find_elements(by=By.TAG_NAME, value="div")[5]
-                    .text
+                    .find_element(by=By.XPATH, value=".//span[@data-ts]")
+                    .get_attribute("data-ts")
                 )
+                date = int(date)
                 img = (
                     elems[i]
-                    .find_element(by=By.CLASS_NAME,value="gpjNTe")
-                    .find_element(by=By.TAG_NAME,value="div")
-                    .find_element(by=By.TAG_NAME,value="div")
-                    .find_element(by=By.TAG_NAME,value="img")
-                    .get_attribute('src')
+                    .find_element(by=By.CLASS_NAME, value="gpjNTe")
+                    .find_element(by=By.TAG_NAME, value="div")
+                    .find_element(by=By.TAG_NAME, value="div")
+                    .find_element(by=By.TAG_NAME, value="img")
+                    .get_attribute("src")
                 )
-                data['title'] = title if title else ""
-                data['desc'] = desc if desc else ""
-                data['date'] = date if date else ""
-                data['image'] = img if img else ""
+                data["title"] = title if title else ""
+                data["desc"] = desc if desc else ""
+                data["image"] = img if img else ""
+
+                dt = datetime.fromtimestamp(date, tz=timezone.utc)
+                dt_local = dt.astimezone(ZoneInfo("Asia/Jerusalem"))
+                dt_local = dt_local.strftime("%d-%m-%Y, %H:%M:%S")
+                data["date"] = dt_local if date else ""
+
                 print(f"title: {title}")
                 print(f"desc: {desc}")
-                print(f"date: {date}")
+                print(f"date: {dt_local}")
                 articles.append(data)
 
             serialized_data = json.dumps(articles)
             print(f"Finished scraping {len(articles)} articles.")
 
-            with open('assignments/warm-up/scraped.json','w') as f:
+            with open("assignments/warm-up/scraped.json", "w") as f:
                 f.write(serialized_data)
 
             return articles
@@ -124,8 +133,9 @@ class Crawler:
             print(f"Error during crawl: {e}")
             return []
         finally:
-            print(f"Closing driver...")
+            print("Closing driver...")
             self.driver.close()
+
 
 if __name__ == "__main__":
     crwler = Crawler(
