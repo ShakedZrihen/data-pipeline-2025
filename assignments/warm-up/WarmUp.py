@@ -1,4 +1,3 @@
-
 import time
 import json
 import datetime
@@ -7,7 +6,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-
 
 def init_driver(headless=True) -> webdriver.Chrome:
     """
@@ -21,7 +19,6 @@ def init_driver(headless=True) -> webdriver.Chrome:
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-
 
 def parse_article_block(article, index: int) -> dict:
     """
@@ -71,7 +68,6 @@ def parse_article_block(article, index: int) -> dict:
         "image": image
     }
 
-
 def scrape_google_news() -> list[dict]:
     """
     Scrapes Google News search results for 'Lady Gaga in the news'.
@@ -96,7 +92,6 @@ def scrape_google_news() -> list[dict]:
     driver.quit()
     return results
 
-
 def save_to_json(data: list[dict], filename="lady_gaga_news.json") -> None:
     """
     Saves the scraped data to a JSON file.
@@ -105,7 +100,6 @@ def save_to_json(data: list[dict], filename="lady_gaga_news.json") -> None:
     """
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
 
 if __name__ == "__main__":
     news = scrape_google_news()
