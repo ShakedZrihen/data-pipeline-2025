@@ -67,7 +67,7 @@ def run_scraper():
     finally:
         browser.quit()
 
-    with open("lady_gaga_news.json", "w", encoding="utf-8") as f:
+    with open("output.json", "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
 
     print(json.dumps(results, indent=2, ensure_ascii=False))
