@@ -7,7 +7,6 @@ Total: **100 points**
 > 💻 **Note**: Assignments will be tested on a **Mac machine with an Intel processor**. Please ensure compatibility (e.g., drivers, headless mode).
 
 ---
-
 ## ✅ Crawler Functionality – 40 pts
 
 Extracts all 4 fields correctly:
