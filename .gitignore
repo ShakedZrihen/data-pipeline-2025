@@ -7,3 +7,6 @@ prices
 venv
 .venv/
 .claude
+node_modules
+build
+package-lock.json
