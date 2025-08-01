@@ -6,13 +6,12 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.
 
 from salim.app.crawlers.providers.carrefour import CarrefourCrawler
 from salim.app.crawlers.providers.hazi_hinam import HaziHinamCrawler
-# from salim.app.crawlers.providers.rami_levy import RamiLevyCrawler
 # from salim.app.crawlers.providers.yohananof import YohananofCrawler
 
 def run_all_crawlers():
     crawlers = [
         (CarrefourCrawler, "https://prices.carrefour.co.il/"),
-        (HaziHinamCrawler, "https://www.hazihinam.co.il/prices"),
+        (HaziHinamCrawler, "https://shop.hazi-hinam.co.il/Prices"),
     ]
 
     for CrawlerClass, url in crawlers:

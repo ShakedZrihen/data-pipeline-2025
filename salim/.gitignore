@@ -1,5 +1,7 @@
 *.xml
+*.gz
 __pycache__/
 *.pyc
 *.pyo
 .cache/
+local_files

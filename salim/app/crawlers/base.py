@@ -14,6 +14,8 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from botocore.exceptions import ClientError
 
+from app.crawlers.utils.file_utils import extract_branch_and_timestamp
+
 do_not_use = "https://www.gov.il/he/pages/cpfta_prices_regulations"
 
 class CrawlerBase(ABC):
@@ -75,14 +77,14 @@ class CrawlerBase(ABC):
             print(f"Error: File '{file_path}' not found!")
             sys.exit(1)
         
-        # Build timestamp for unique file naming
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")   
-        
+        # extract branch and timestamp for unique file naming
+        branch, timestamp = extract_branch_and_timestamp(file_path)   
+
         # Get file extension from original file
         file_extension = os.path.splitext(file_path)[1]
         
         # Build S3 key according to structure
-        s3_key = f"providers/{provider_name}/{file_type}_{timestamp}{file_extension}"
+        s3_key = f"providers/{provider_name}/{file_type}_{branch}_{timestamp}{file_extension}"
         
         try:
             s3_client.upload_file(file_path, bucket_name, s3_key)
