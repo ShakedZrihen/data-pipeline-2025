@@ -22,7 +22,15 @@ def download_file(url: str, dest_path: str):
 
 
 def extract_file_info(branch: str, file_name: str, file_local_path: str):
-    file_type = "promos" if "promo" in file_name.lower() else "prices"
+    # Handle TivTaam specific file types
+    if "pricefull" in file_name.lower() or "price" in file_name.lower():
+        file_type = "prices"
+    elif "promofull" in file_name.lower() or "promo" in file_name.lower():
+        file_type = "promos"
+    elif "stores" in file_name.lower():
+        file_type = "stores"
+    else:
+        file_type = "prices"  # default
 
     return {
         "file_path": file_local_path,
