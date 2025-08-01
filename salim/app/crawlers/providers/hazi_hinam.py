@@ -5,20 +5,69 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.
 
 from app.crawlers.base import CrawlerBase
 from app.crawlers.utils.html_utils import extract_file_links
-from app.crawlers.utils.file_utils import (create_provider_dir, download_file, extract_file_info)
+from app.crawlers.utils.file_utils import (create_provider_dir, download_file, extract_file_info, build_page_url)
+import requests
+from bs4 import BeautifulSoup
 
 PROVIDER_URL = "https://shop.hazi-hinam.co.il/Prices"
 BASE_FOLDER = "salim/app/crawlers/local_files"
 PROVIDER_NAME = "hazi-hinam"
 
 class HaziHinamCrawler(CrawlerBase):
-    def download_files_from_html(self, page_html):
-        file_links = extract_file_links(page_html, self.providers_base_url)
-        
+    def get_total_pages_url_format(self, base_url: str) -> int:
+        """Detect total number of pages for the site"""
+        response = requests.get(base_url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        page_links = [
+            int(a.get_text(strip=True))
+            for a in soup.select("ul.pagination li a")
+            if a.get_text(strip=True).isdigit()
+        ]
+        if page_links:
+            return max(page_links)
+
+        return 1
+    
+
+    def get_all_pages_file_links(self, base_url: str):
+        """Iterates through all pages and returns filtered links for PriceFull/PromoFull."""
+        total_pages = self.get_total_pages_url_format(base_url)
+        print(f"Found {total_pages} pages")
+
+        all_links = []
+
+        for page_num in range(1, total_pages + 1):
+            url = build_page_url(base_url, page_num)
+            print(f"Fetching {url}...")
+            response = requests.get(url)
+            response.raise_for_status()
+
+            page_links = extract_file_links(response.text, base_url)
+
+            # Only files with a valid name and a gz extension
+            valid_links = [
+                link for link in page_links
+                if link["name"] and link["url"].endswith(".gz")
+            ]
+            all_links.extend(valid_links)
+
+        # Filter by PriceFull/PromoFull
+        return [
+            link for link in all_links
+            if link["name"].lower().startswith("pricefull")
+            or link["name"].lower().startswith("promofull")
+        ]
+
+
+    def download_files_from_html(self, page_html=None):
+        filtered_links = self.get_all_pages_file_links(self.providers_base_url)
+
         provider_dir = create_provider_dir(BASE_FOLDER, PROVIDER_NAME)
         files_info = []
 
-        for link in file_links:
+        for link in filtered_links:
             file_url = link["url"]
             file_name = link["name"]
             file_local_path = os.path.join(provider_dir, file_name)

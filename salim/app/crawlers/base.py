@@ -84,7 +84,7 @@ class CrawlerBase(ABC):
         file_extension = os.path.splitext(file_path)[1]
         
         # Build S3 key according to structure
-        s3_key = f"providers/{provider_name}/{file_type}_{branch}_{timestamp}{file_extension}"
+        s3_key = f"providers/{provider_name}/{file_type}Full_{branch}_{timestamp}{file_extension}"
         
         # Checking if the file already exists in S3
         response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_key)

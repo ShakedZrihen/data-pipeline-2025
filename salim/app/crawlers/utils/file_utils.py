@@ -1,10 +1,18 @@
 import os
 import requests
-import xml.etree.ElementTree as ET
+from selenium.webdriver.common.action_chains import ActionChains
+
+
+def build_page_url(base_url: str, page_num: int) -> str:
+    if "hazi-hinam" in base_url:
+        return f"{base_url}?p={page_num}"
+    else:
+        return f"{base_url}?page={page_num}"
+    
 
 def create_provider_dir(base_folder: str, provider_name) -> str:
     """
-    Creates a new folder with timestamp inside base_folder and returns the path
+    Creates the folder where the files will be saved
     """
     provider_dir = os.path.join(base_folder, provider_name)
     os.makedirs(provider_dir, exist_ok=True)
@@ -13,7 +21,7 @@ def create_provider_dir(base_folder: str, provider_name) -> str:
 
 def download_file(url: str, dest_path: str):
     """
-    Downloads a file from the URL and saves it to the given path
+    Downloads a file from the URL and saves it Locally to the given path
     """
     response = requests.get(url)
     response.raise_for_status()
@@ -31,19 +39,17 @@ def extract_file_info(branch: str, file_name: str, file_local_path: str):
     }
 
 
-import os
-
 def extract_branch_and_timestamp(path_or_name: str):
     file_name = os.path.basename(path_or_name)
     name_without_ext = os.path.splitext(file_name)[0]
     parts = name_without_ext.split("-")
 
-    # format of ...-0004-202508011500
+    # format of ...-ID-YYYYMMDDHHMM
     if len(parts[-1]) == 12:  
         branch = parts[-2]
         timestamp_raw = parts[-1]
 
-    # format of ...-000-201-20250801-095309
+    # format of ...-000-ID-YYYYMMDD-HHMMSS
     elif len(parts[-1]) == 6 and len(parts[-2]) == 8:
         branch = parts[-3]
         timestamp_raw = parts[-2] + parts[-1]  # Connectors date + time
