@@ -6,6 +6,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.
 
 from salim.app.crawlers.providers.carrefour import CarrefourCrawler
 from salim.app.crawlers.providers.hazi_hinam import HaziHinamCrawler
+from salim.app.crawlers.providers.tiv_taam import TivTaamCrawler
+from salim.app.crawlers.providers.rami_levi import RamiLeviCrawler
 # from salim.app.crawlers.providers.yohananof import YohananofCrawler
 
 def run_all_crawlers():
