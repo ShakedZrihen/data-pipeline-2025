@@ -10,6 +10,7 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from botocore.exceptions import ClientError
 
@@ -48,8 +49,9 @@ class CrawlerBase(ABC):
     def get_page_source(self, provider_url):
         chrome_options = self.init_chrome_options()
         chromedriver_path = self.get_chromedriver_path()
-        web_driver = webdriver.Chrome(executable_path=chromedriver_path, options=chrome_options)
+        service = Service(chromedriver_path)
 
+        web_driver = webdriver.Chrome(service=service, options=chrome_options)
         web_driver.get(provider_url)
         time.sleep(10)
 
@@ -58,7 +60,7 @@ class CrawlerBase(ABC):
         return page_html
     
 
-    def upload_file_to_s3(self, file_path, branch_name, file_type, provider_name="unknown", full_date_time=None):        
+    def upload_file_to_s3(self, file_path, file_type, provider_name="unknown"):        
         s3_client = boto3.client(
             's3',
             endpoint_url='http://localhost:4566',
@@ -125,7 +127,6 @@ class CrawlerBase(ABC):
                 "file_path": entry.get("file_path"),
                 "branch": entry.get("branch"),
                 "file_type": entry.get("file_type"),
-                "full_date_time": entry.get("full_date_time")
             })
 
         return files_info
@@ -143,10 +144,8 @@ class CrawlerBase(ABC):
         for file in files_info:
             self.upload_file_to_s3(
                 file_path=file["file_path"],
-                branch_name=file["branch"],
                 file_type=file["file_type"],
-                provider_name="unknown",
-                full_date_time=file.get("full_date_time")
+                provider_name=file["branch"],
             )
         return
     
@@ -160,7 +159,6 @@ class CrawlerBase(ABC):
         - Parse the given HTML content (page_html)
         - Locate all links to downloadable files (PDF, Excel, etc.)
         - Download the files to a local directory
-        - Return a json of files info
         """
         pass
 
