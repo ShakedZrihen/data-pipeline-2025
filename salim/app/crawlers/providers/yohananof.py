@@ -1,7 +1,9 @@
 # username = yohananof
 # password = empty
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-from salim.app.crawlers.base import CrawlerBase
+from app.crawlers.base import CrawlerBase
 
 # Subclass זמני שמדלג על פעולות לא רלוונטיות
 class DummyCrawler(CrawlerBase):
