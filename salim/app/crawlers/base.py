@@ -58,7 +58,7 @@ class CrawlerBase(ABC):
         return page_html
     
 
-    def upload_file_to_s3(self, file_path, branch_name, file_type):        
+    def upload_file_to_s3(self, file_path, branch_name, file_type, provider_name="unknown", full_date_time=None):        
         s3_client = boto3.client(
             's3',
             endpoint_url='http://localhost:4566',
@@ -74,10 +74,13 @@ class CrawlerBase(ABC):
             sys.exit(1)
         
         # Build timestamp for unique file naming
-        timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")   
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")   
+        
+        # Get file extension from original file
+        file_extension = os.path.splitext(file_path)[1]
         
         # Build S3 key according to structure
-        s3_key = f"providers/{branch_name}/{file_type}Full_{timestamp}.gz"
+        s3_key = f"providers/{provider_name}/{file_type}_{timestamp}{file_extension}"
         
         try:
             s3_client.upload_file(file_path, bucket_name, s3_key)
@@ -121,7 +124,8 @@ class CrawlerBase(ABC):
             files_info.append({
                 "file_path": entry.get("file_path"),
                 "branch": entry.get("branch"),
-                "file_type": entry.get("file_type")
+                "file_type": entry.get("file_type"),
+                "full_date_time": entry.get("full_date_time")
             })
 
         return files_info
@@ -140,8 +144,10 @@ class CrawlerBase(ABC):
             self.upload_file_to_s3(
                 file_path=file["file_path"],
                 branch_name=file["branch"],
-                file_type=file["file_type"]
-        )
+                file_type=file["file_type"],
+                provider_name="unknown",
+                full_date_time=file.get("full_date_time")
+            )
         return
     
 
