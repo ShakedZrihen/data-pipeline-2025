@@ -86,20 +86,14 @@ class CrawlerBase(ABC):
         # Build S3 key according to structure
         s3_key = f"providers/{provider_name}/{file_type}_{branch}_{timestamp}{file_extension}"
         
+        # Checking if the file already exists in S3
+        response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_key)
+        if "Contents" in response:
+            return
+        
         try:
             s3_client.upload_file(file_path, bucket_name, s3_key)
             print(f"{file_path} uploaded to s3://{bucket_name}/{s3_key}")        
-            print("\nFiles in bucket:")
-            response = s3_client.list_objects_v2(Bucket=bucket_name)
-            
-            if 'Contents' in response:
-                for obj in response['Contents']:
-                    filename = obj['Key']
-                    size = obj['Size']
-                    modified = obj['LastModified']
-                    print(f"  - {filename} (Size: {size} bytes, Modified: {modified})")
-            else:
-                print("  No files found in bucket")
                 
         except ClientError as e:
             error_code = e.response['Error']['Code']
@@ -113,6 +107,30 @@ class CrawlerBase(ABC):
             print(f"Unexpected error: {e}")
             sys.exit(1)
     
+
+    def get_files_from_s3(self):
+        s3_client = boto3.client(
+            's3',
+            endpoint_url='http://localhost:4566',
+            aws_access_key_id='test',
+            aws_secret_access_key='test',
+            region_name='us-east-1'
+        )
+        
+        bucket_name = 'test-bucket'
+
+        print("\nFiles in bucket:")
+        response = s3_client.list_objects_v2(Bucket=bucket_name)
+        
+        if 'Contents' in response:
+            for obj in response['Contents']:
+                filename = obj['Key']
+                size = obj['Size']
+                modified = obj['LastModified']
+                print(f"  - {filename} (Size: {size} bytes, Modified: {modified})")
+        else:
+            print("  No files found in bucket")
+
 
     def get_files_info(self, provider_dir):
         file_info_path = os.path.join(provider_dir, "file_info.json")
@@ -149,6 +167,8 @@ class CrawlerBase(ABC):
                 file_type=file["file_type"],
                 provider_name=file["branch"],
             )
+
+        self.get_files_from_s3()
         return
     
 
