@@ -127,15 +127,14 @@ class CrawlerBase(ABC):
         return files_info
 
 
-    def run(self, provider_url = None):
+    def run(self, provider_url):
         """
         1. Get page HTML.
         2. Download all files and get their local paths.
         3. Upload each file to S3 under the correct branch folder.
         """
-        # page_html = self.get_page_source(provider_url)
-        # provider_dir = self.download_files_from_html(page_html)
-        provider_dir = self.download_files_from_html()
+        page_html = self.get_page_source(provider_url)
+        provider_dir = self.download_files_from_html(page_html)
         files_info = self.get_files_info(provider_dir)
         for file in files_info:
             self.upload_file_to_s3(
@@ -155,7 +154,7 @@ class CrawlerBase(ABC):
         - Parse the given HTML content (page_html)
         - Locate all links to downloadable files (PDF, Excel, etc.)
         - Download the files to a local directory
-        - Return a list of the downloaded files paths
+        - Return a json of files info
         """
         pass
 
