@@ -5,28 +5,20 @@ import sys
 import os
 import time
 import platform
-from urllib.parse import urljoin
-# from bs4 import BeautifulSoup
+import json
+from datetime import datetime
 from selenium import webdriver
-# from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-# from selenium.webdriver.support.ui import Select
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-# from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
-# import requests
-# import json
-# import re
-# import html
 from botocore.exceptions import ClientError
 
-providers_base_url = "https://www.gov.il/he/pages/cpfta_prices_regulations"
+do_not_use = "https://www.gov.il/he/pages/cpfta_prices_regulations"
 
 class CrawlerBase(ABC):
-    def __init__(self, providers_base_url):
-        self.providers_base_url = providers_base_url
+    def __init__(self, provider_url):
+        self.providers_base_url = provider_url
+
 
     def init_chrome_options(self):
         chrome_options = Options()
@@ -40,6 +32,7 @@ class CrawlerBase(ABC):
         chrome_options.add_experimental_option('useAutomationExtension', False)
         return chrome_options
 
+
     def get_chromedriver_path(self):
         try:
             if platform.system() == "Darwin" and platform.machine() == "arm64":
@@ -51,25 +44,21 @@ class CrawlerBase(ABC):
         except Exception as e:
             return "chromedriver"
     
-    @abstractmethod
-    def crawl():
-        pass
-    
-    def fetch(self, provider_path =""):
-        provider_url = self.providers_base_url + provider_path
-        options = self.init_chrome_options()
-        driver_path = self.get_chromedriver_path()
-        driver = webdriver.Chrome(executable_path=driver_path, options=options)
-        driver.get(provider_url)
+
+    def get_page_source(self, provider_url):
+        chrome_options = self.init_chrome_options()
+        chromedriver_path = self.get_chromedriver_path()
+        web_driver = webdriver.Chrome(executable_path=chromedriver_path, options=chrome_options)
+
+        web_driver.get(provider_url)
         time.sleep(10)
-        page = driver.page_source
-        driver.quit()
-        return page      
-        
-    def save_file(self, provider_files):
-        pass   
+
+        page_html = web_driver.page_source
+        web_driver.quit()
+        return page_html
     
-    def upload_file_to_s3(self, provider_path):        
+
+    def upload_file_to_s3(self, file_path, branch_name, file_type):        
         s3_client = boto3.client(
             's3',
             endpoint_url='http://localhost:4566',
@@ -79,14 +68,18 @@ class CrawlerBase(ABC):
         )
         
         bucket_name = 'test-bucket'
-        file_path = './ShakedZrihen.txt'
-        s3_key = provider_path
+        
+        if not os.path.exists(file_path):
+            print(f"Error: File '{file_path}' not found!")
+            sys.exit(1)
+        
+        # Build timestamp for unique file naming
+        timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")   
+        
+        # Build S3 key according to structure
+        s3_key = f"providers/{branch_name}/{file_type}Full_{timestamp}.gz"
         
         try:
-            if not os.path.exists(file_path):
-                print(f"Error: File '{file_path}' not found!")
-                sys.exit(1)
-            
             s3_client.upload_file(file_path, bucket_name, s3_key)
             print(f"{file_path} uploaded to s3://{bucket_name}/{s3_key}")        
             print("\nFiles in bucket:")
@@ -112,9 +105,57 @@ class CrawlerBase(ABC):
         except Exception as e:
             print(f"Unexpected error: {e}")
             sys.exit(1)
- 
-    def run(self, provider_path=""):
-        provider_files = self.fetch(provider_path)
-        self.save_file(provider_files)
-        self.upload_file_to_s3(provider_path)
+    
+
+    def get_files_info(self, provider_dir):
+        file_info_path = os.path.join(provider_dir, "file_info.json")
+
+        if not os.path.exists(file_info_path):
+            raise FileNotFoundError(f"file_info.json not found in {provider_dir}")
+
+        with open(file_info_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        files_info = []
+        for entry in data:
+            files_info.append({
+                "file_path": entry.get("file_path"),
+                "branch": entry.get("branch"),
+                "file_type": entry.get("file_type")
+            })
+
+        return files_info
+
+
+    def run(self, provider_url = None):
+        """
+        1. Get page HTML.
+        2. Download all files and get their local paths.
+        3. Upload each file to S3 under the correct branch folder.
+        """
+        # page_html = self.get_page_source(provider_url)
+        # provider_dir = self.download_files_from_html(page_html)
+        provider_dir = self.download_files_from_html()
+        files_info = self.get_files_info(provider_dir)
+        for file in files_info:
+            self.upload_file_to_s3(
+                file_path=file["file_path"],
+                branch_name=file["branch"],
+                file_type=file["file_type"]
+        )
         return
+    
+
+    @abstractmethod
+    def download_files_from_html(self, page_html):
+        """
+        Abstract method that each subclass must implement.
+
+        Responsibilities:
+        - Parse the given HTML content (page_html)
+        - Locate all links to downloadable files (PDF, Excel, etc.)
+        - Download the files to a local directory
+        - Return a list of the downloaded files paths
+        """
+        pass
+
