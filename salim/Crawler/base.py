@@ -1,46 +1,98 @@
 from abc import ABC, abstractmethod
+import boto3
+from botocore.exceptions import ClientError
+import os
+import sys
+import requests
+import time
+from utils import (
+    convert_xml_to_json,
+    download_file_from_link,
+    extract_and_delete_gz,
+)
 
 class CrawlerBase(ABC):
-    """
-    Abstract base class for web crawlers.
-    Subclasses must implement the abstract methods.
-    """
+
     
     @abstractmethod
-    def crawl(self, url: str) -> dict:
+    def crawl(self)->list[str]:
+        pass
+
+    def save_file(self,link):
+        file=download_file_from_link(link)
+        file_name=file.split("/")[-1]
+        file_path=f"./{file_name}"
+        extract_and_delete_gz(file_path)
+        return file_path
+
+    def upload_file_to_s3(self, file_path, s3_key):
         """
-        Abstract method that must be implemented by subclasses.
-        Crawls the given URL and returns the extracted data.
+        Upload a file to S3 bucket.
         
         Args:
-            url (str): The URL to crawl
+            file_path (str): Path to the file to upload
+            s3_key (str): S3 key (path) where to store the file
+        """
+        print(f"Uploading {file_path} to S3 bucket...")
+        
+        s3_client = boto3.client(
+            's3',
+            endpoint_url='http://localhost:4566',
+            aws_access_key_id='test',
+            aws_secret_access_key='test',
+            region_name='us-east-1'
+        )
+        
+        bucket_name = 'test-bucket'
+        
+        try:
+            # Check if file exists
+            if not os.path.exists(file_path):
+                print(f"Error: File '{file_path}' not found!")
+                return False
             
-        Returns:
-            dict: Extracted data from the URL
-        """
-        pass
-    
-    @abstractmethod
-    def parse_content(self, content: str) -> dict:
-        """
-        Abstract method for parsing the crawled content.
-        
-        Args:
-            content (str): The raw content to parse
+            # Create timestamped directory key
+            timestamp = int(time.time())
+            dir_key = f"{s3_key}/{timestamp}/"
             
-        Returns:
-            dict: Parsed data
-        """
-        pass
-    
-    def save_data(self, data: dict, filename: str) -> None:
-        """
-        Concrete method - this can be used as is or overridden.
-        
-        Args:
-            data (dict): Data to save
-            filename (str): Name of the file to save to
-        """
-        # Implementation here
-        pass
+            # Create directory in S3
+            try:
+                s3_client.put_object(Bucket=bucket_name, Key=dir_key)
+                print(f"Created directory '{dir_key}' in bucket '{bucket_name}'")
+            except Exception as e:
+                print(f"Error creating directory '{dir_key}': {e}")
+            
+            # Upload the file
+            file_name = os.path.basename(file_path)
+            s3_file_key = f"{dir_key}{file_name}"
+            
+            s3_client.upload_file(file_path, bucket_name, s3_file_key)
+            print(f"Successfully uploaded {file_path} to s3://{bucket_name}/{s3_file_key}")
+            
+            # List files in bucket
+            print("\nFiles in bucket:")
+            response = s3_client.list_objects_v2(Bucket=bucket_name)
+            
+            if 'Contents' in response:
+                for obj in response['Contents']:
+                    filename = obj['Key']
+                    size = obj['Size']
+                    modified = obj['LastModified']
+                    print(f"  - {filename} (Size: {size} bytes, Modified: {modified})")
+            else:
+                print("  No files found in bucket")
+            
+            return True
+                
+        except ClientError as e:
+            error_code = e.response['Error']['Code']
+            if error_code == 'NoSuchBucket':
+                print(f"Error: Bucket '{bucket_name}' does not exist!")
+                print("Make sure LocalStack services are running with: docker-compose up")
+            else:
+                print(f"Error uploading file: {e}")
+            return False
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return False
 

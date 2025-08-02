@@ -6,4 +6,7 @@ chromedriver*
 prices
 venv
 .claude
-.venv/
+node_modules
+build
+package-lock.json
+.venv

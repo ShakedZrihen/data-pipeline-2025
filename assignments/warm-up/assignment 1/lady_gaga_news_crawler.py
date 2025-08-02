@@ -41,7 +41,7 @@ def crawl():
 
     print(f"Navigating to {url}")
     driver.get(url)
-    time.sleep(5)  # Let dynamic content load
+    time.sleep(5)  
 
     soup = BeautifulSoup(driver.page_source, "html.parser")
     driver.quit()
@@ -50,9 +50,7 @@ def crawl():
     descriptions = soup.find_all("div", class_="GI74Re nDgy9d")
     dates_divs = soup.find_all("div", class_="OSrXXb rbYSKb LfVVr")
 
-   
     image_blocks = soup.find_all(class_="uhHOwf BYbUcd")
-    
     
     image_urls = []
     for img_block in image_blocks:
