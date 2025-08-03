@@ -88,20 +88,6 @@ class Crawler:
         shutil.move(src_file, new)
         print(f"moved {src_file} -> {new}")
 
-    # def move_file(self, old: str, new: str):
-    #     os.makedirs(os.path.dirname(self.download_dir), exist_ok=True)
-    #     new_dir = "/".join(new.split("/")[:-1])
-    #     os.makedirs(os.path.dirname(new_dir), exist_ok=True)
-    #     shutil.move(old, new_dir)
-
-    #     # we recreate the directory, since shutil.move
-    #     # renames the entire directory if new dosent exist.
-    #     # we do this to avoid a race codition between the chrome downloading
-    #     # mechanism which recreates the folder.
-    #     os.makedirs(os.path.dirname(old), exist_ok=True)
-
-    #     print(f"moved file from {old} -> {new_dir}")
-
     def get_all_branches(self, table_row: list[WebElement]):
         print("Getting branch data...")
         for row in table_row:

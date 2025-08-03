@@ -9,9 +9,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class GoodPharmCrawler(Crawler):
-    def __init__(self, url: str):
+    def __init__(self, url: str, store: str):
         super().__init__()
         self.url = url
+        self.store = store
 
     def crawl(self):
         print(f"Navigating to {self.url}")
@@ -39,22 +40,19 @@ class GoodPharmCrawler(Crawler):
             ):
                 continue
 
-            print(f"branches_price left: {len(branches_price)}")
-            print(f"branches_prom left: {len(branches_prom)}")
-
             match price_type:
                 case CrawlerType.NONE:
                     price_type, _ = self.download_file(row)
                     if price_type == CrawlerType.PRICING:
-                        branches_price.pop(branch)
+                        branches_price.pop(branch, None)
                     else:
-                        branches_prom.pop(branch)
+                        branches_prom.pop(branch, None)
                 case CrawlerType.PRICING:
                     price_type, _ = self.download_file(row)
-                    branches_price.pop(branch)
+                    branches_price.pop(branch, None)
                 case CrawlerType.PROMOTION:
                     price_type, _ = self.download_file(row)
-                    branches_prom.pop(branch)
+                    branches_prom.pop(branch, None)
                 case _:
                     raise TypeError(
                         "Unknown Crawler type. expected CrawlerType.PRICING or CrawlerType.PROMOTION"
@@ -74,9 +72,9 @@ class GoodPharmCrawler(Crawler):
         return t, date
 
     def format_filename_to_folder(self, fname: str, price_type: str) -> str:
-        price_filename = "prices" + fname.split("-")[-1]
+        price_filename = fname.split("-")[0] + "-" + fname.split("-")[-1]
         branch = fname.split("-")[-2]
-        return os.path.join("goodpharm", price_type, branch, price_filename)
+        return os.path.join(self.store, price_type, branch, price_filename)
 
     @staticmethod
     def get_row_data(row: WebElement) -> tuple[str, str, CrawlerType]:
@@ -92,4 +90,6 @@ class GoodPharmCrawler(Crawler):
 
 
 if __name__ == "__main__":
-    GoodPharmCrawler("https://goodpharm.binaprojects.com/Main.aspx").crawl()
+    GoodPharmCrawler(
+        "https://goodpharm.binaprojects.com/Main.aspx", "goodpharm"
+    ).crawl()
