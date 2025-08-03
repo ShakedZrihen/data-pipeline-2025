@@ -1,6 +1,7 @@
 **/**/__pycache__
 **/**/.env
 **/**/venv
+venv311
 chromedriver*
 .DS_Store
 prices
