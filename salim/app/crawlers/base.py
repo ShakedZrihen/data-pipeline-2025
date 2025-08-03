@@ -47,7 +47,8 @@ class CrawlerBase(ABC):
         except Exception as e:
             return "chromedriver"
     
-
+    
+    @abstractmethod
     def get_page_source(self, provider_url):
         chrome_options = self.init_chrome_options()
         chromedriver_path = self.get_chromedriver_path()

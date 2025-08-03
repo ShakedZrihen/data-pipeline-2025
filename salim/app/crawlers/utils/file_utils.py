@@ -29,6 +29,38 @@ def download_file(url: str, dest_path: str):
         f.write(response.content)
 
 
+def download_file_with_session(session, url, file_path):
+    """
+    Download a file using an authenticated requests.Session (after login).
+    If verify=False is used, SSL certificate errors are ignored.
+    """
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Referer': 'https://url.publishedprices.co.il',
+        }
+
+        response = session.get(url, headers=headers, stream=True, verify=False)
+        response.raise_for_status()
+
+        with open(file_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+        return True
+
+    except Exception as e:
+        print(f"Failed to download {url}: {e}")
+        return False
+        
+
+def transfer_cookies(driver, session):
+    """Passes cookies from Selenium to requests.Session"""
+    for cookie in driver.get_cookies():
+        session.cookies.set(cookie["name"], cookie["value"])
+
+
 def extract_file_info(branch: str, file_name: str, file_local_path: str):
     # Handle TivTaam specific file types
     if "pricefull" in file_name.lower() or "price" in file_name.lower():
