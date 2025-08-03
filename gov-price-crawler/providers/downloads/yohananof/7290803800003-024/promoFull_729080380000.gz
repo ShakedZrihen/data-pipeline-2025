@@ -5,7 +5,7 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
         <meta name="mobile-web-app-capable" content="yes">
-		<meta name="csrftoken" content="mMOVMcTHBAHcNPAf2rH2rGvto_3oJf1xDEoLSgOvcS8"/>
+		<meta name="csrftoken" content="-UOx-AWB1h_9GXK9uRI6vMWNM1bUHmoT7CPgS0UuSsA"/>
 		<title>Cerberus Web Client</title>
 				
 		<link rel="shortcut icon" href="/favicon.ico" />
@@ -161,7 +161,7 @@
 
 
 							<div style="padding: 40px 40px 40px 40px;">
-								<input type="hidden" name="r" id="r" value="/file/d/PromoFull7290803800003-024-202508030412.gz" />
+								<input type="hidden" name="r" id="r" value="/file/d/Promo7290803800003-024-202508031200.gz" />
 								<div class="clearfix">
 									<div class="pull-left"><img src="/images/login-icon.png" width="70" height="70" alt="Login icon" /></div>
 									<div class="pull-left login-text">Client Login</div>
