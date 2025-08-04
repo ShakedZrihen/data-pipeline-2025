@@ -5,7 +5,7 @@ chromedriver*
 .DS_Store
 prices
 venv
-.venv
+.venv/
 .claude
 node_modules
 build
