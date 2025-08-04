@@ -5,11 +5,12 @@
             "url": "https://url.publishedprices.co.il/login",
             "username": "yohananof",
             "password": "none",
-            "sign-in-button": "button[type='submit']",
-            "table-body-selector": "",
-            "date-selector": "",
-            "name-selector": "",
-            "download-button": ""
+            "sign-in-button": ".row button",
+            "table-body-selector": "#fileList tbody",
+            "date-selector": "td time",
+            "name-selector": "td a",
+            "more-info-selector": "td a.tip",
+            "download-button": "tr.details a.btn-primary"
         }
     ]
 }
