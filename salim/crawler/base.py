@@ -102,7 +102,11 @@ class Crawler:
 
     @staticmethod
     def parse_time(time_str: str) -> datetime:
-        return datetime.strptime(time_str, "%Y%m%d%H%M")
+        try:
+            return datetime.strptime(time_str, "%Y%m%d%H%M")
+        except Exception as e:
+            print(f"Got parse_time exception: {e}. continuing...")
+            return datetime.min
 
     def get_branch(self, row: WebElement) -> tuple[str, datetime]:
         td_list = row.find_elements(by=By.TAG_NAME, value="td")
