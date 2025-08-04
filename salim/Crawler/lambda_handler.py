@@ -1,15 +1,53 @@
-import boto3
-import base from base.py
-import yohannof_crawler from yohannof_crawler.py as yohannof
+import os
+os.environ["HOME"] = os.environ.get("USERPROFILE", "C:\\Users\\adar2")
 
-def lambda_handler(event, context):
-    driver=yohannof.get_driver()
-    files_paths=yohannof.crawl(driver)
-    for file_path in files_paths:
-        yohannof.upload_file_to_s3(file_path, "yohannof")
+from yohannof_crawler import YohannofCrawler
+from Tivtam import TivtamCrawler
+from doralon import DoralonCrawler
+
+def lambda_handler(event=None, context=None):
+    crawlers = [
+        ("yohannof", YohannofCrawler("yohannof")),
+        ("tivtam", TivtamCrawler("tivtam")),
+        ("doralon", DoralonCrawler("doralon")),
+    ]
+
+    total_uploaded = 0
+    all_results = {}
+
+    for name, crawler in crawlers:
+        print(f"\n===== Starting crawl for: {name} =====")
+        driver = crawler.get_driver()
+        try:
+            files = crawler.crawl(driver)
+            print(f"{len(files)} files found by {name}")
+            uploaded_count = 0
+            for file in files:
+                success = crawler.upload_file_to_s3(file, s3_key=name)
+                if success:
+                    uploaded_count += 1
+            total_uploaded += uploaded_count
+            all_results[name] = {
+                "found": len(files),
+                "uploaded": uploaded_count
+            }
+        except Exception as e:
+            print(f"Error in crawler '{name}': {e}")
+            all_results[name] = {
+                "error": str(e)
+            }
+        finally:
+            driver.quit()
+
     return {
         'statusCode': 200,
-        'body': 'Crawler executed successfully'
+        'body': {
+            "total_uploaded": total_uploaded,
+            "details": all_results
+        }
     }
 
-lambda_handler(None, None)
+if __name__ == "__main__":
+    result = lambda_handler()
+    print("\n=== Final Result ===")
+    print(result)

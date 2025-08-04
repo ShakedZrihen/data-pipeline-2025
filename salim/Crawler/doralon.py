@@ -1,6 +1,7 @@
 from base import CrawlerBase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
@@ -11,37 +12,36 @@ from utils import (
     download_file_from_link,
     extract_and_delete_gz,
 )
-
-class YohannofCrawler(CrawlerBase):
+class doralonCrawler(base.CrawlerBase):
     def __init__(self, user_name):
         self.user_name = user_name
-
-    def crawl(self, driver):
-        driver.get("https://url.publishedprices.co.il/login")
+    def crawl(self):
+        driver=self.get_driver()
+        driver.get("https://url.publishedprices.co.il/login") 
         username_field = driver.find_element(By.ID, "username")
         username_field.send_keys(self.user_name)
-        login_button = driver.find_element(By.ID, "login-button")
-        login_button.click()
-        time.sleep(5) 
+        btn=driver.find_element(By.ID, "login-button")
+        btn.click()
+        time.sleep(5)
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")
-        links = soup.find_all("a", class_="f")
-        files_paths = []
+        links=soup.find_all("a",class_="f")
+        files_paths=[]
         for tag in links:
             href = tag.get("href")
             if href:
                 file_path = self.save_file(href)
                 files_paths.append(file_path)
-
-        return files_paths
-
+   
     def get_driver(self):
         options = Options()
+        options.add_argument("--start-maximized")
         options.add_argument("--headless")
-        options.add_argument("--no-sandbox")
         options.add_argument("--disable-gpu")
+        options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-blink-features=AutomationControlled")
-
+        options.add_argument("--disable-blink-features=AutomationControlled")
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
         return driver
+    
