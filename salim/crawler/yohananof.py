@@ -1,5 +1,4 @@
 import os
-import re
 import typing
 from datetime import datetime
 
@@ -125,24 +124,6 @@ class YohananofCrawler(Crawler):
         self.move_file(self.download_dir, f"./salim/crawler/data/{to_save}")
         path = os.path.join("./salim/crawler/data", to_save)
         self.upload_s3(to_save, path)
-
-    def format_filename_to_folder(self, fname: str, price_type: str) -> str:
-        # ex. PriceFull7290803800003-001-202508031000.gz
-        prefix = re.match(r"^[^\d]+", fname)
-        if not prefix:
-            prefix = ""
-        else:
-            prefix = prefix.group()
-
-        full_date = fname.split("-")[-1].split(".")[0]
-        date = full_date[:8]
-        date_time = full_date[8:]
-
-        suffix = fname.split("-")[-1].split(".")[1]
-        price_filename = "_".join([prefix, date, date_time])
-        price_filename = price_filename + "." + suffix
-        branch = fname.split("-")[-2]
-        return os.path.join(self.store, price_type, branch, price_filename)
 
     def get_row_data(self, row: WebElement) -> tuple[str, str, CrawlerType]:
         name = self.get_name_from_row(row)

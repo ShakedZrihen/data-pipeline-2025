@@ -1,5 +1,6 @@
 import os
 import platform
+import re
 import shutil
 import sys
 import time
@@ -118,11 +119,12 @@ class Crawler:
         files = [f for f in os.listdir(old) if not f.endswith(".crdownload")]
         if not files:
             print(f"No completed downloads found in {old}, continuing.")
-            return
+            return False
         files.sort(key=lambda f: os.path.getmtime(os.path.join(old, f)), reverse=True)
         src_file = os.path.join(old, files[0])
         shutil.move(src_file, new)
         print(f"moved {src_file} -> {new}")
+        return True
 
     def get_all_branches(self, table_row: list[WebElement]):
         print("Getting branch data...")
@@ -135,6 +137,24 @@ class Crawler:
         current = self.latest_branches.get(branch, None)
         if current is None or stamp > current:
             self.latest_branches[branch] = stamp
+
+    def format_filename_to_folder(self, fname: str, price_type: str) -> str:
+        # ex. PriceFull7290803800003-001-202508031000.gz
+        prefix = re.match(r"^[^\d]+", fname)
+        if not prefix:
+            prefix = ""
+        else:
+            prefix = prefix.group()
+
+        full_date = fname.split("-")[-1].split(".")[0]
+        date = full_date[:8]
+        date_time = full_date[8:]
+
+        suffix = fname.split("-")[-1].split(".")[1]
+        price_filename = "_".join([prefix, date, date_time])
+        price_filename = price_filename + "." + suffix
+        branch = fname.split("-")[-2]
+        return os.path.join(self.store, price_type, branch, price_filename)
 
     @staticmethod
     def parse_time(time_str: str) -> datetime:

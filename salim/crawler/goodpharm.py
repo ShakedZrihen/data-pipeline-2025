@@ -1,4 +1,5 @@
 import os
+import re
 
 from base import Crawler
 from crawl_type import CrawlerType
@@ -40,6 +41,10 @@ class GoodPharmCrawler(Crawler):
             ):
                 continue
 
+            name = self.get_name_from_row(row)
+            if not (name.startswith("PriceFull") or name.startswith("PromoFull")):
+                continue
+
             match price_type:
                 case CrawlerType.NONE:
                     price_type, _ = self.download_file(row)
@@ -68,13 +73,19 @@ class GoodPharmCrawler(Crawler):
         )
         self.wait_for_any_download_complete(self.download_dir)
         to_save = self.format_filename_to_folder(filename, price_type)
-        self.move_file(self.download_dir, f"./salim/crawler/data/{to_save}")
+        did_move = self.move_file(self.download_dir, f"./salim/crawler/data/{to_save}")
+        path = os.path.join("./salim/crawler/data", to_save)
+
+        if not did_move:
+            return t, date
+
+        self.upload_s3(to_save, path)
         return t, date
 
-    def format_filename_to_folder(self, fname: str, price_type: str) -> str:
-        price_filename = fname.split("-")[0] + "-" + fname.split("-")[-1]
-        branch = fname.split("-")[-2]
-        return os.path.join(self.store, price_type, branch, price_filename)
+    # def format_filename_to_folder(self, fname: str, price_type: str) -> str:
+    #     price_filename = fname.split("-")[0] + "-" + fname.split("-")[-1]
+    #     branch = fname.split("-")[-2]
+    #     return os.path.join(self.store, price_type, branch, price_filename)
 
     @staticmethod
     def get_row_data(row: WebElement) -> tuple[str, str, CrawlerType]:
@@ -83,10 +94,25 @@ class GoodPharmCrawler(Crawler):
         p_type = td_list[2].text
         date = td_list[4].text
 
+        prefix = re.match(r"^[^\d]+", name)
+        if not prefix:
+            prefix = ""
+        else:
+            prefix = prefix.group()
+
+        # pricing_type = (
+        #     CrawlerType.PRICING if p_type == "מחירים" else CrawlerType.PROMOTION
+        # )
+
         pricing_type = (
-            CrawlerType.PRICING if p_type == "מחירים" else CrawlerType.PROMOTION
+            CrawlerType.PRICING if prefix == "PriceFull" else CrawlerType.PROMOTION
         )
         return (name, date, pricing_type)
+
+    def get_name_from_row(self, row: WebElement) -> str:
+        td_list = row.find_elements(by=By.TAG_NAME, value="td")
+        name = td_list[0].text
+        return name
 
 
 if __name__ == "__main__":
