@@ -17,7 +17,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
 from app.crawlers.base import CrawlerBase
-from app.crawlers.utils.file_utils import extract_file_info
+from app.crawlers.utils.file_utils import extract_file_info, download_file_with_session
 
 PROVIDER_URL = "https://url.publishedprices.co.il/login"
 PROVIDER_NAME = "osherad"
@@ -116,24 +116,6 @@ class OsherAdCrawler(CrawlerBase):
             json.dump(files_info, f, indent=4, ensure_ascii=False)
         return base_provider_dir
     
-    def download_file_with_session(self, url, file_path):
-        """Download file using the authenticated session"""
-        try:
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Referer': 'https://url.publishedprices.co.il/file',
-            }
-            response = self.session.get(url, headers=headers, stream=True, verify=False)
-            response.raise_for_status()
-            with open(file_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-            return True
-            
-        except Exception:
-            return False
-
 if __name__ == "__main__":
     crawler = OsherAdCrawler()
     crawler.run(PROVIDER_URL)
