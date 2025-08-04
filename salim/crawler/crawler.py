@@ -59,17 +59,16 @@ class Crawler:
             if column_name:
                 col_text = column_name.text.strip()
                 if col_text.startswith("Price"):
-                    price_tr = self.return_latest_row(row, price_tr)
+                    price_tr = self.return_latest_row(row, price_tr, provider)
                 elif col_text.startswith("Promo"):
-                    promo_tr = self.return_latest_row(row, promo_tr)
+                    promo_tr = self.return_latest_row(row, promo_tr, provider)
 
         return {
             "price": price_tr,
             "promo": promo_tr
         }
     
-
-    def return_latest_row(self, row, latest_row):
+    def return_latest_row(self, row, latest_row, provider):
         """
         Compare the current row with the latest row and return the latest one.
         :param row: The current row to compare
