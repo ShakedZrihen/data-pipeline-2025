@@ -1,6 +1,12 @@
+from consts import *
+from browser_utils import *
 class Crawler:
+    driver=""
+
     def __init__(self):
-        pass
+        driver = get_chromedriver()
+        # soup = get_html_parser(driver, providers_url)
+        # finish the get all providers and input them into the config.json (username, password, url)
 
     def crawl(self):
         """
