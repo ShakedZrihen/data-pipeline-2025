@@ -1,5 +1,6 @@
 # from consts import *
 from browser_utils import *
+from selenium.webdriver.common.by import By
 import json
 
 class Crawler:
@@ -22,18 +23,19 @@ class Crawler:
             try:
                 soup = get_html_parser(self.driver, provider["url"])
                 if provider["username"]!="none":
-                    login_form = soup.find("form")
-                    if login_form:
-                        username_input = login_form.find("input", {"name": "username"})
-                        password_input = login_form.find("input", {"name": "password"})
-                        username_input["value"] = provider["username"]
-                        if provider["password"] != "none":
-                            password_input["value"] = provider["password"]
+                    username_input = self.driver.find_element(By.NAME, "username")
+                    username_input.send_keys(provider["username"])
+                    if provider["password"] != "none":
+                        password_input = self.driver.find_element(By.NAME, "password")
+                        password_input.send_keys(provider["password"])
 
-                        self.driver.find_element_by_name("submit").click()
-                        time.sleep(2)
-                
+                    button = self.driver.find_element("id", "login-button")
+                    button.click()
+                    time.sleep(2)
+                    soup = BeautifulSoup(self.driver.page_source, "html.parser")
+
                 data = self.extract_data(soup, provider)
+
                 self.save_file(data, provider)
                 # self.upload_file()
             except Exception as e:
@@ -52,12 +54,14 @@ class Crawler:
         price_tr = ""
         promo_tr = ""
         for row in table_body.select("tr"):
-            column_name = row.select(provider["name-selector"])
+            column_name = row.select_one(provider["name-selector"])
 
-            if column_name and column_name[0].text.strip() == "Price":
-                price_tr = self.return_latest_row(row, price_tr)
-            elif column_name and column_name[0].text.strip() == "Promo":
-                promo_tr = self.return_latest_row(row, promo_tr)
+            if column_name:
+                col_text = column_name.text.strip()
+                if col_text.startswith("Price"):
+                    price_tr = self.return_latest_row(row, price_tr)
+                elif col_text.startswith("Promo"):
+                    promo_tr = self.return_latest_row(row, promo_tr)
 
         return {
             "price": price_tr,
@@ -65,13 +69,14 @@ class Crawler:
         }
     
 
-    def return_latest_row(row, latest_row):
+    def return_latest_row(self, row, latest_row):
         """
         Compare the current row with the latest row and return the latest one.
         :param row: The current row to compare
         :param latest_row: The latest row found so far
         :return: The latest row based on the comparison
         """
+        return row
 
 
     def save_file(self, data, provider):
@@ -80,10 +85,11 @@ class Crawler:
         :param data: The data to be saved
         :param provider: The provider information (used for naming the file)
         """
-        filename = f"{provider['name']}_data.json"
-        with open(filename, "w", encoding="utf-8") as file:
-            json.dump(data, file, ensure_ascii=False, indent=4)
-        pass
+        print(f"Saving data for {provider['name']}...")
+        # filename = f"{provider['name']}_data.json"
+        # with open(filename, "w", encoding="utf-8") as file:
+        #     json.dump(data, file, ensure_ascii=False, indent=4)
+        # pass
 
     def upload_file(self, filepath):
         """
