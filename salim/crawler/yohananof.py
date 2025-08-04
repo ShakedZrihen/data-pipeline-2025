@@ -123,6 +123,8 @@ class YohananofCrawler(Crawler):
         self.wait_for_any_download_complete(self.download_dir)
         to_save = self.format_filename_to_folder(name, price_type)
         self.move_file(self.download_dir, f"./salim/crawler/data/{to_save}")
+        path = os.path.join("./salim/crawler/data", to_save)
+        self.upload_s3(to_save, path)
 
     def format_filename_to_folder(self, fname: str, price_type: str) -> str:
         # ex. PriceFull7290803800003-001-202508031000.gz

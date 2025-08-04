@@ -1,9 +1,12 @@
 import os
 import platform
 import shutil
+import sys
 import time
 from datetime import datetime
 
+import boto3
+from botocore.exceptions import ClientError
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -61,6 +64,15 @@ class Crawler:
         self.download_dir = "/tmp/salim"
         self.latest_branches = dict()
 
+        self.s3_client = boto3.client(
+            "s3",
+            # we use localhost because we are using awslocal
+            endpoint_url="http://localhost:4566",
+            aws_access_key_id="test",
+            aws_secret_access_key="test",
+            region_name="us-east-1",
+        )
+
         try:
             # Initialize drivers and headless browser
             chromedriver_path = get_chromedriver_path()
@@ -76,6 +88,30 @@ class Crawler:
 
     def crawl(self):
         raise NotImplementedError
+
+    def upload_s3(self, s3_key, filepath, bucket_name="test-bucket"):
+        try:
+            if not os.path.exists(filepath):
+                print(f"Error: File '{filepath}' not found!")
+                sys.exit(1)
+
+            self.s3_client.upload_file(filepath, bucket_name, s3_key)
+            print(f"{filepath} uploaded to s3://{bucket_name}/{s3_key}")
+
+        except ClientError as e:
+            error_code = e.response["Error"]["Code"]
+            if error_code == "NoSuchBucket":
+                print(f"Error: Bucket '{bucket_name}' does not exist!")
+                print(
+                    "Make sure LocalStack services are running with: docker-compose up"
+                )
+            else:
+                print(f"Error uploading file: {e}")
+            sys.exit(1)
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            sys.exit(1)
+        pass
 
     def move_file(self, old: str, new: str):
         os.makedirs(os.path.dirname(new), exist_ok=True)
