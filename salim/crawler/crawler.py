@@ -1,7 +1,8 @@
-# from consts import *
 from browser_utils import *
+from time_date_utils import *
 from selenium.webdriver.common.by import By
 import json
+import pprint  # at top
 
 class Crawler:
     driver=""
@@ -69,13 +70,36 @@ class Crawler:
         }
     
     def return_latest_row(self, row, latest_row, provider):
-        """
-        Compare the current row with the latest row and return the latest one.
-        :param row: The current row to compare
-        :param latest_row: The latest row found so far
-        :return: The latest row based on the comparison
-        """
-        return row
+        def get_date_el(el):
+            return el.select_one(provider["date-selector"]) if el else None
+
+        if not row:
+            return latest_row
+        row_el = get_date_el(row)
+        if not row_el:
+            return latest_row
+
+        if not latest_row:
+            return row
+        latest_el = get_date_el(latest_row)
+        if not latest_el:
+            return row
+
+        row_text = row_el.text.strip()
+        latest_text = latest_el.text.strip()
+
+        row_dt = parse_date(row_text)
+        latest_dt = parse_date(latest_text)
+
+        if not row_dt and not latest_dt:
+            return latest_row
+        if not row_dt:
+            return latest_row
+        if not latest_dt:
+            return row
+
+        return row if row_dt > latest_dt else latest_row
+
 
 
     def save_file(self, data, provider):
