@@ -5,22 +5,11 @@
     "credentials": {
         "username": "yohananof"
     },
-    "auth_method": "form_login",
     "file_patterns": {
         "price_full": "PriceFull{store_id}-{branch}-{date}.gz",
         "promo_full": "PromoFull{store_id}-{branch}-{date}.gz"
     },
-    "file_parsing": {
-        "pattern": "PriceFull(\\d+)-(\\d+)-(\\d+)\\.gz",
-        "store_id_group": 1,
-        "branch_group": 2,
-        "date_group": 3
-    },
     "selectors": {
-        "login_form": "form",
-        "username_field": "input[name='username']",
-        "password_field": "input[name='password']",
-        "submit_button": "button[type='submit']",
         "file_links": "tbody.context a.f"
     }
 }

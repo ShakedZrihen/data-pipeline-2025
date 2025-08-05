@@ -37,7 +37,7 @@ class SupermarketCrawler:
         self.config = self._load_config(config_name)
         self.download_dir = self.config.get("name", "default_downloads")
         os.makedirs(self.download_dir, exist_ok=True)
-        print(f"✅ Files will be saved to the '{self.download_dir}/' directory.")
+        print(f"Files will be saved to the '{self.download_dir}/' directory.")
         
         self.session = requests.Session()
         self.driver = None # Initialize driver as None
@@ -45,9 +45,9 @@ class SupermarketCrawler:
     def _load_config(self, config_name: str) -> dict:
         """Loads the JSON configuration file for the specified supermarket."""
         config_path = os.path.join('configs', f'{config_name}.json')
-        print(f"ℹ️  Loading configuration from: {config_path}")
+        print(f"Loading configuration from: {config_path}")
         if not os.path.exists(config_path):
-            raise FileNotFoundError(f"❌ Configuration file not found at: {config_path}.")
+            raise FileNotFoundError(f"Configuration file not found at: {config_path}.")
         
         with open(config_path, 'r', encoding='utf-8') as f:
             return json.load(f)
@@ -78,7 +78,7 @@ class SupermarketCrawler:
                 print(f"   - Webdriver-manager failed: {e}. Falling back to system default chromedriver.")
                 self.driver = webdriver.Chrome(options=chrome_options)
             
-            print("✅ WebDriver initialized.")
+            print("WebDriver initialized.")
         return self.driver
 
     def _login_with_selenium(self) -> bool:
@@ -91,7 +91,7 @@ class SupermarketCrawler:
         credentials = self.config.get("credentials")
         base_url = self.config.get("base_url")
 
-        print("🤖 Using Selenium to log in...")
+        print("Using Selenium to log in...")
         try:
             self.driver.get(base_url)
             wait = WebDriverWait(self.driver, 20)
@@ -111,17 +111,17 @@ class SupermarketCrawler:
             # Wait for an element on the next page to confirm successful login
             print("... Waiting for page to load after login ...")
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "tbody.context tr a.f")))
-            print("✅ Login successful.")
+            print("Login successful.")
             return True
 
         except TimeoutException:
-            print("❌ Timed out during login. Check credentials or website layout.")
+            print("Timed out during login. Check credentials or website layout.")
             screenshot_path = 'selenium_login_failure.png'
             self.driver.save_screenshot(screenshot_path)
-            print(f"📸 Screenshot saved to '{screenshot_path}'")
+            print(f"Screenshot saved to '{screenshot_path}'")
             return False
         except Exception as e:
-            print(f"❌ An unexpected error occurred during login: {e}")
+            print(f"An unexpected error occurred during login: {e}")
             return False
 
     def _find_and_filter_files(self) -> List[str]:
@@ -142,22 +142,22 @@ class SupermarketCrawler:
             links = soup.select(file_links_selector)
             
             full_urls = [urljoin(current_url, link.get('href')) for link in links]
-            print(f"📄 Found {len(full_urls)} total file links on the page.")
+            print(f"Found {len(full_urls)} total file links on the page.")
 
             # Filter the URLs based on the patterns in the config
             file_patterns = self.config.get("file_patterns", {})
             valid_prefixes = tuple([v.split('{')[0] for v in file_patterns.values() if v])
 
             if not valid_prefixes:
-                print("⚠️ No 'file_patterns' found in config. Returning all found links.")
+                print("No 'file_patterns' found in config. Returning all found links.")
                 return full_urls
 
             filtered_urls = [url for url in full_urls if os.path.basename(url).startswith(valid_prefixes)]
 
-            print(f"✅ Found {len(filtered_urls)} matching files after filtering.")
+            print(f"Found {len(filtered_urls)} matching files after filtering.")
             return filtered_urls
         except Exception as e:
-            print(f"❌ An error occurred while finding and filtering files: {e}")
+            print(f"An error occurred while finding and filtering files: {e}")
             return []
 
     def download_file(self, url: str) -> Optional[str]:
@@ -169,7 +169,7 @@ class SupermarketCrawler:
 
         # --- NEW: Check if the file already exists before downloading ---
         if os.path.exists(local_path):
-            print(f"⏭️  Skipping {filename} (already exists).")
+            print(f"Skipping {filename} (already exists).")
             return local_path # Return the path so it's still counted as "handled"
 
         try:
@@ -178,7 +178,7 @@ class SupermarketCrawler:
             for cookie in selenium_cookies:
                 self.session.cookies.set(cookie['name'], cookie['value'], domain=cookie['domain'])
             
-            print(f"⬇️  Downloading {filename}...")
+            print(f"Downloading {filename}...")
             response = self.session.get(url, stream=True, verify=False)
             response.raise_for_status()
             
@@ -186,10 +186,10 @@ class SupermarketCrawler:
             with open(local_path, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
-            print(f"👍 Successfully saved to {local_path}")
+            print(f"Successfully saved to {local_path}")
             return local_path
         except requests.exceptions.RequestException as e:
-            print(f"❌ Failed to download {url}. Error: {e}")
+            print(f"Failed to download {url}. Error: {e}")
             return None
 
     def crawl(self) -> List[str]:
@@ -197,18 +197,18 @@ class SupermarketCrawler:
         self._init_driver()
         
         if not self._login_with_selenium():
-            print("🛑 Crawl aborted due to login failure.")
+            print("Crawl aborted due to login failure.")
             self.close()
             return []
 
         gz_urls = self._find_and_filter_files()
 
         if not gz_urls:
-            print("🤷 No files found to download after filtering.")
+            print("No files found to download after filtering.")
             self.close()
             return []
 
-        print(f"\n🚀 Starting download of {len(gz_urls)} files...")
+        print(f"\nStarting download of {len(gz_urls)} files...")
         downloaded_files = []
         for url in gz_urls:
             file_path = self.download_file(url)
@@ -216,11 +216,11 @@ class SupermarketCrawler:
                 downloaded_files.append(file_path)
 
         self.close()
-        print(f"\n🎉 Crawl finished. Handled {len(downloaded_files)} files.")
+        print(f"\nCrawl finished. Handled {len(downloaded_files)} files.")
         return downloaded_files
 
     def close(self):
         """Closes the WebDriver session to free up resources."""
         if self.driver:
             self.driver.quit()
-            print("✅ WebDriver closed.")
+            print("WebDriver closed.")

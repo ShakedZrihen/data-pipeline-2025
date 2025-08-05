@@ -10,7 +10,7 @@ def main():
 
     # 1. Check if the configuration directory exists.
     if not os.path.isdir(configs_dir):
-        print(f"❌ Error: The '{configs_dir}' directory was not found.")
+        print(f"Error: The '{configs_dir}' directory was not found.")
         print("Please make sure you are running this script from the correct location.")
         return
 
@@ -18,10 +18,10 @@ def main():
     config_files = [f for f in os.listdir(configs_dir) if f.endswith('.json')]
 
     if not config_files:
-        print(f"🤷 No configuration files (.json) found in the '{configs_dir}' directory.")
+        print(f"No configuration files (.json) found in the '{configs_dir}' directory.")
         return
 
-    print(f"✅ Found {len(config_files)} configurations to run: {', '.join([os.path.splitext(f)[0] for f in config_files])}")
+    print(f"Found {len(config_files)} configurations to run: {', '.join([os.path.splitext(f)[0] for f in config_files])}")
     
     # 3. Loop through each configuration file and run the crawler.
     for config_file in config_files:
@@ -32,21 +32,21 @@ def main():
         # If one crawler fails, the script will log the error and move to the next one.
         try:
             print(f"\n{'='*60}")
-            print(f"--- 🚀 Starting Supermarket Crawler for: {config_name} ---")
+            print(f"Starting Supermarket Crawler for: {config_name}")
             
             # Initialize and run the crawler for the current configuration.
             crawler = SupermarketCrawler(config_name=config_name)
             crawler.crawl()
             
-            print(f"--- ✅ Crawler for {config_name} finished. ---")
+            print(f"Crawler for {config_name} finished.")
             
         except FileNotFoundError as e:
-            print(f"\n❌ ERROR: Could not start crawler for {config_name}. {e}")
+            print(f"\nERROR: Could not start crawler for {config_name}. {e}")
         except Exception as e:
-            print(f"\n❌ An unexpected error occurred while running the crawler for {config_name}: {e}")
+            print(f"\nAn unexpected error occurred while running the crawler for {config_name}: {e}")
         
     print(f"\n{'='*60}")
-    print("\n--- 🏁 All crawler jobs have been processed. ---")
+    print("\nAll crawler jobs have been processed.")
 
 
 if __name__ == "__main__":
