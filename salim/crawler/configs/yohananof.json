@@ -3,8 +3,7 @@
     "base_url": "https://url.publishedprices.co.il/login",
     "file_listing_url": "https://url.publishedprices.co.il/files",
     "credentials": {
-        "username": "yohananof",
-        "password": ""
+        "username": "yohananof"
     },
     "auth_method": "form_login",
     "file_patterns": {
@@ -22,6 +21,6 @@
         "username_field": "input[name='username']",
         "password_field": "input[name='password']",
         "submit_button": "button[type='submit']",
-        "file_links": "a[href*='.gz']"
+        "file_links": "tbody.context a.f"
     }
 }
