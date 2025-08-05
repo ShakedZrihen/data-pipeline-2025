@@ -29,15 +29,10 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 class SupermarketCrawler:
     """
     A robust crawler that uses Selenium for login/navigation and Requests for fast downloading.
-    This version fixes the login issue by handling the entire authenticated session within Selenium.
+    This version is refactored for better modularity.
     """
     def __init__(self, config_name: str):
-        """
-        Initializes the crawler with a specific configuration.
-        
-        Args:
-            config_name (str): The name of the configuration file (e.g., 'yohananof').
-        """
+        """Initializes the crawler with a specific configuration."""
         self.config_name = config_name
         self.config = self._load_config(config_name)
         self.download_dir = self.config.get("name", "default_downloads")
@@ -48,19 +43,7 @@ class SupermarketCrawler:
         self.driver = None # Initialize driver as None
 
     def _load_config(self, config_name: str) -> dict:
-        """
-        Loads the JSON configuration file for the specified supermarket.
-        
-        Args:
-            config_name (str): The base name of the config file.
-        
-        Returns:
-            dict: The loaded configuration.
-        
-        Raises:
-            FileNotFoundError: If the configuration file cannot be found.
-        """
-        # Defines potential paths for the config file for flexibility
+        """Loads the JSON configuration file for the specified supermarket."""
         config_path = os.path.join('configs', f'{config_name}.json')
         print(f"ℹ️  Loading configuration from: {config_path}")
         if not os.path.exists(config_path):
@@ -70,10 +53,7 @@ class SupermarketCrawler:
             return json.load(f)
 
     def _init_driver(self) -> webdriver.Chrome:
-        """
-        Initializes a headless Chrome WebDriver.
-        It specifically handles the driver for macOS on ARM (Apple Silicon) vs. other systems.
-        """
+        """Initializes a headless Chrome WebDriver."""
         if not self.driver:
             print("🚀 Initializing Selenium WebDriver...")
             chrome_options = Options()
@@ -84,13 +64,11 @@ class SupermarketCrawler:
             chrome_options.add_argument("--disable-dev-shm-usage")
 
             try:
-                # FIX: Correctly detect ARM Macs and use the Google Chrome driver, not Chromium.
                 if platform.system() == "Darwin" and platform.machine() == "arm64":
                     print("   - Detected macOS ARM64, ensuring correct driver for Google Chrome...")
                     driver_path = ChromeDriverManager(chrome_type=ChromeType.GOOGLE).install()
                     service = Service(driver_path)
                 else:
-                    # For all other systems, use the default installation.
                     print("   - Detected standard OS, using default driver...")
                     service = Service(ChromeDriverManager().install())
                 
@@ -98,53 +76,64 @@ class SupermarketCrawler:
 
             except Exception as e:
                 print(f"   - Webdriver-manager failed: {e}. Falling back to system default chromedriver.")
-                # Fallback if webdriver-manager fails for any reason.
                 self.driver = webdriver.Chrome(options=chrome_options)
             
             print("✅ WebDriver initialized.")
         return self.driver
 
-    def login_and_find_files_with_selenium(self) -> List[str]:
+    def _login_with_selenium(self) -> bool:
         """
-        Uses Selenium to perform the entire login process and scrape file links.
-        This is the core fix, as it keeps the session within a single context (the browser).
+        Handles the login process using Selenium.
         
         Returns:
-            List[str]: A list of full URLs to the '.gz' files found on the page.
+            bool: True if login is successful, False otherwise.
         """
-        self._init_driver()
         credentials = self.config.get("credentials")
         base_url = self.config.get("base_url")
 
-        print(f"🤖 Using Selenium to log in and navigate to files...")
-        
+        print("🤖 Using Selenium to log in...")
         try:
-            # 1. Go directly to the login page.
             self.driver.get(base_url)
+            wait = WebDriverWait(self.driver, 20)
             
-            # 2. Wait for the login form elements to be ready.
-            wait = WebDriverWait(self.driver, 20) # Increased wait time for better reliability.
             print("... Waiting for login page to load ...")
             username_field = wait.until(EC.presence_of_element_located((By.ID, "username")))
             password_field = self.driver.find_element(By.ID, "password")
             submit_button = self.driver.find_element(By.ID, "login-button")
 
-            # 3. Enter credentials and click the login button.
             print("... Entering credentials ...")
             username_field.send_keys(credentials.get("username"))
-            # This handles cases where a password is not required by the config.
-            password_field.send_keys(credentials.get("password", "")) 
+            password_field.send_keys(credentials.get("password", ""))
             
             print("... Submitting login form ...")
             submit_button.click()
 
-            # 4. CRITICAL STEP: After login, wait for an element that ONLY exists on the file listing page.
-            # This confirms the login was successful and the page has loaded.
-            print("... Waiting for file list to load after login ...")
+            # Wait for an element on the next page to confirm successful login
+            print("... Waiting for page to load after login ...")
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "tbody.context tr a.f")))
-            
-            # 5. If the wait succeeds, scrape the links from the page.
-            print("... File page loaded successfully. Scraping links ...")
+            print("✅ Login successful.")
+            return True
+
+        except TimeoutException:
+            print("❌ Timed out during login. Check credentials or website layout.")
+            screenshot_path = 'selenium_login_failure.png'
+            self.driver.save_screenshot(screenshot_path)
+            print(f"📸 Screenshot saved to '{screenshot_path}'")
+            return False
+        except Exception as e:
+            print(f"❌ An unexpected error occurred during login: {e}")
+            return False
+
+    def _find_and_filter_files(self) -> List[str]:
+        """
+        Finds all file links on the current page and filters them based on config patterns.
+        Assumes the driver is already on the correct, logged-in page.
+        
+        Returns:
+            List[str]: A list of filtered, full URLs.
+        """
+        print("... Scraping and filtering file links ...")
+        try:
             page_content = self.driver.page_source
             current_url = self.driver.current_url
             
@@ -152,58 +141,42 @@ class SupermarketCrawler:
             file_links_selector = self.config["selectors"]["file_links"]
             links = soup.select(file_links_selector)
             
-            # Construct full URLs from the relative links found.
             full_urls = [urljoin(current_url, link.get('href')) for link in links]
             print(f"📄 Found {len(full_urls)} total file links on the page.")
 
-            # --- NEW: Filter the found URLs based on the patterns in the config ---
-            print("... Filtering links based on 'file_patterns' from config ...")
+            # Filter the URLs based on the patterns in the config
             file_patterns = self.config.get("file_patterns", {})
-            # Get the prefixes like "PriceFull", "PromoFull" from the config values
             valid_prefixes = tuple([v.split('{')[0] for v in file_patterns.values() if v])
 
             if not valid_prefixes:
                 print("⚠️ No 'file_patterns' found in config. Returning all found links.")
                 return full_urls
 
-            filtered_urls = []
-            for url in full_urls:
-                filename = os.path.basename(url)
-                if filename.startswith(valid_prefixes):
-                    filtered_urls.append(url)
+            filtered_urls = [url for url in full_urls if os.path.basename(url).startswith(valid_prefixes)]
 
             print(f"✅ Found {len(filtered_urls)} matching files after filtering.")
             return filtered_urls
-            
-        except TimeoutException:
-            print("❌ Timed out waiting for page to load. This could be due to wrong credentials, a website change, or a network issue.")
-            screenshot_path = 'selenium_timeout_failure.png'
-            self.driver.save_screenshot(screenshot_path)
-            print(f"📸 Screenshot of the failure page saved to '{screenshot_path}' for debugging.")
-            return []
         except Exception as e:
-            print(f"❌ An unexpected error occurred during the Selenium process: {e}")
+            print(f"❌ An error occurred while finding and filtering files: {e}")
             return []
 
     def download_file(self, url: str) -> Optional[str]:
         """
-        Downloads a single file using the `requests` library for speed.
-        It transfers the login cookies from Selenium to the `requests` session first.
-        
-        Args:
-            url (str): The full URL of the file to download.
-        
-        Returns:
-            Optional[str]: The local path to the downloaded file, or None if it failed.
+        Downloads a single file, but first checks if it already exists.
         """
+        filename = os.path.basename(url)
+        local_path = os.path.join(self.download_dir, filename)
+
+        # --- NEW: Check if the file already exists before downloading ---
+        if os.path.exists(local_path):
+            print(f"⏭️  Skipping {filename} (already exists).")
+            return local_path # Return the path so it's still counted as "handled"
+
         try:
             # Transfer cookies from the authenticated Selenium session to the requests session.
             selenium_cookies = self.driver.get_cookies()
             for cookie in selenium_cookies:
                 self.session.cookies.set(cookie['name'], cookie['value'], domain=cookie['domain'])
-
-            filename = os.path.basename(url)
-            local_path = os.path.join(self.download_dir, filename)
             
             print(f"⬇️  Downloading {filename}...")
             response = self.session.get(url, stream=True, verify=False)
@@ -220,14 +193,18 @@ class SupermarketCrawler:
             return None
 
     def crawl(self) -> List[str]:
-        """
-        Main crawling method that orchestrates the entire process.
-        """
-        # The entire login and file-finding logic is now in one robust method.
-        gz_urls = self.login_and_find_files_with_selenium()
+        """Main crawling method that orchestrates the entire process."""
+        self._init_driver()
+        
+        if not self._login_with_selenium():
+            print("🛑 Crawl aborted due to login failure.")
+            self.close()
+            return []
+
+        gz_urls = self._find_and_filter_files()
 
         if not gz_urls:
-            print("🤷 No files found to download.")
+            print("🤷 No files found to download after filtering.")
             self.close()
             return []
 
@@ -238,8 +215,8 @@ class SupermarketCrawler:
             if file_path:
                 downloaded_files.append(file_path)
 
-        self.close() # Close the browser session after we are done.
-        print(f"\n🎉 Crawl finished. Downloaded {len(downloaded_files)} files.")
+        self.close()
+        print(f"\n🎉 Crawl finished. Handled {len(downloaded_files)} files.")
         return downloaded_files
 
     def close(self):
