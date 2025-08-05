@@ -1,3 +1,4 @@
+import os
 from browser_utils import *
 from time_date_utils import *
 from selenium.webdriver.common.by import By
@@ -37,7 +38,7 @@ class Crawler:
 
                 data = self.extract_data(soup, provider)
 
-                self.save_file(data, provider)
+                self.save_file(data, provider, soup)
                 # self.upload_file()
             except Exception as e:
                 print(f"Error crawling {provider['name']}: {e}")
@@ -102,17 +103,27 @@ class Crawler:
 
 
 
-    def save_file(self, data, provider):
-        """
-        Save the given data to a local file.
-        :param data: The data to be saved
-        :param provider: The provider information (used for naming the file)
-        """
-        print(f"Saving data for {provider['name']}...")
-        # filename = f"{provider['name']}_data.json"
-        # with open(filename, "w", encoding="utf-8") as file:
-        #     json.dump(data, file, ensure_ascii=False, indent=4)
-        # pass
+    def save_file(self, data, provider, soup):
+        if not os.path.exists("providers"):
+            os.makedirs("providers")
+        promo_row = data["promo"]
+        price_row = data["price"]
+        if not promo_row or not price_row:
+            print(f"No data found for provider {provider['name']}")
+            return
+        
+        more_info_selector = provider.get("more-info-selector")
+        if more_info_selector:
+            promo_more_info = promo_row.select_one(more_info_selector)
+            price_more_info = price_row.select_one(more_info_selector)
+            if promo_more_info:
+                promo_more_info.click()
+            if price_more_info:
+                price_more_info.click()
+        
+        #print download button
+        download_button = soup.select(provider["download-button-selector"])
+        print(f"{download_button}")
 
     def upload_file(self, filepath):
         """
