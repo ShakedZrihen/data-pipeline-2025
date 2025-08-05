@@ -1,31 +1,52 @@
+import os
 from base import SupermarketCrawler
 
 def main():
     """
-    Main function to initialize and run the crawler for a specific shop.
+    Main function to find all configs in the 'configs' folder
+    and run the crawler for each one sequentially.
     """
-    # --- CHOOSE WHICH CONFIG TO RUN ---
-    # Change this value to 'osherad' to run the username-only config.
-    config_to_run = 'yohananof' 
+    configs_dir = 'configs'
+
+    # 1. Check if the configuration directory exists.
+    if not os.path.isdir(configs_dir):
+        print(f"❌ Error: The '{configs_dir}' directory was not found.")
+        print("Please make sure you are running this script from the correct location.")
+        return
+
+    # 2. Find all JSON files in the directory.
+    config_files = [f for f in os.listdir(configs_dir) if f.endswith('.json')]
+
+    if not config_files:
+        print(f"🤷 No configuration files (.json) found in the '{configs_dir}' directory.")
+        return
+
+    print(f"✅ Found {len(config_files)} configurations to run: {', '.join([os.path.splitext(f)[0] for f in config_files])}")
     
-    try:
-        print(f"--- 🚀 Starting Supermarket Crawler for: {config_to_run} ---")
-        crawler = SupermarketCrawler(config_name=config_to_run)
-        downloaded_files = crawler.crawl()
+    # 3. Loop through each configuration file and run the crawler.
+    for config_file in config_files:
+        # Get the name of the config without the '.json' extension
+        config_name = os.path.splitext(config_file)[0]
         
-        if downloaded_files:
-            print("\n✅ Successfully downloaded:")
-            for f in downloaded_files:
-                print(f"   - {f}")
-        else:
-            print("\n⚠️ No files were downloaded.")
+        # Use a try...except block for each crawler to make the script more resilient.
+        # If one crawler fails, the script will log the error and move to the next one.
+        try:
+            print(f"\n{'='*60}")
+            print(f"--- 🚀 Starting Supermarket Crawler for: {config_name} ---")
             
-    except FileNotFoundError as e:
-        print(f"\n❌ ERROR: Could not start crawler. {e}")
-    except Exception as e:
-        print(f"\n❌ An unexpected error occurred: {e}")
+            # Initialize and run the crawler for the current configuration.
+            crawler = SupermarketCrawler(config_name=config_name)
+            crawler.crawl()
+            
+            print(f"--- ✅ Crawler for {config_name} finished. ---")
+            
+        except FileNotFoundError as e:
+            print(f"\n❌ ERROR: Could not start crawler for {config_name}. {e}")
+        except Exception as e:
+            print(f"\n❌ An unexpected error occurred while running the crawler for {config_name}: {e}")
         
-    print("\n--- 🏁 Crawler finished ---")
+    print(f"\n{'='*60}")
+    print("\n--- 🏁 All crawler jobs have been processed. ---")
 
 
 if __name__ == "__main__":
