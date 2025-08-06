@@ -1,0 +1,23 @@
+{
+    "name": "RamiLevi",
+    "base_url": "https://url.publishedprices.co.il/login",
+    "file_listing_url": "https://url.publishedprices.co.il/login",
+    "credentials": {
+        "username": "RamiLevi",
+        "password": ""
+    },
+    "auth_method": "form_login",
+    "file_patterns": {
+        "price_full": "PriceFull.*\\.gz",
+        "promo_full": "PromoFull.*\\.gz"
+    },
+    "file_parsing": {
+        "pattern": "(PriceFull|PromoFull)(\\d+)-(\\d+)-(\\d{8})\\.gz",
+        "store_id_group": 2,
+        "branch_group": 3,
+        "date_group": 4
+    },
+    "selectors": {
+        "file_links": "tbody.context a.f"
+    }
+}

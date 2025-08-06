@@ -2,10 +2,14 @@ import json
 import os
 import time
 import requests
+import re
 from bs4 import BeautifulSoup
 from typing import List, Optional
 from urllib.parse import urljoin
 import platform
+from collections import defaultdict
+import boto3
+from botocore.exceptions import ClientError
 
 # Selenium Imports
 from selenium import webdriver
@@ -15,11 +19,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-
-# webdriver-manager is no longer needed for the Docker version
-# but we keep it for potential local runs.
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.os_manager import ChromeType
 
 # Suppress only the single InsecureRequestWarning from urllib3 needed for this fix
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -41,6 +41,18 @@ class SupermarketCrawler:
         
         self.session = requests.Session()
         self.driver = None # Initialize driver as None
+        
+        # Initialize S3 client for LocalStack
+        # Use environment variable for S3 endpoint (Docker network)
+        s3_endpoint = os.environ.get('S3_ENDPOINT', 'http://localhost:4566')
+        self.s3_client = boto3.client(
+            's3',
+            endpoint_url=s3_endpoint,
+            aws_access_key_id='test',
+            aws_secret_access_key='test',
+            region_name='us-east-1'
+        )
+        self.s3_bucket = 'test-bucket'
 
     def _load_config(self, config_name: str) -> dict:
         """Loads the JSON configuration file for the specified supermarket."""
@@ -54,10 +66,10 @@ class SupermarketCrawler:
 
     def _init_driver(self) -> webdriver.Chrome:
         """
-        Initializes a headless Chrome WebDriver, configured to run inside Docker.
+        Initializes a headless Chrome WebDriver using webdriver-manager (works on Windows & Mac).
         """
         if not self.driver:
-            print("Initializing Selenium WebDriver for Docker environment...")
+            print("Initializing Selenium WebDriver...")
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--no-sandbox")
@@ -66,16 +78,22 @@ class SupermarketCrawler:
             chrome_options.add_argument("--window-size=1920,1080")
 
             try:
-                # --- FINAL FIX: Point directly to the chromedriver installed by apt-get ---
-                # This bypasses webdriver-manager and avoids architecture errors.
-                service = Service(executable_path='/usr/bin/chromedriver')
+                # Use webdriver-manager like Lady Gaga crawler
+                chromedriver_path = ChromeDriverManager().install()
+                service = Service(chromedriver_path)
                 self.driver = webdriver.Chrome(service=service, options=chrome_options)
-
+                print("WebDriver initialized successfully.")
             except Exception as e:
-                print(f"An error occurred while initializing WebDriver: {e}")
-                raise
+                print(f"Failed to initialize WebDriver with service: {e}")
+                print("Trying alternative approach...")
+                # Alternative approach without service (like Lady Gaga crawler fallback)
+                try:
+                    self.driver = webdriver.Chrome(options=chrome_options)
+                    print("WebDriver initialized successfully with fallback method.")
+                except Exception as e2:
+                    print(f"Failed with fallback method too: {e2}")
+                    raise
             
-            print("WebDriver initialized.")
         return self.driver
 
     def _login_with_selenium(self) -> bool:
@@ -157,6 +175,61 @@ class SupermarketCrawler:
             print(f"An error occurred while finding and filtering files: {e}")
             return []
 
+    def get_latest_files(self, gz_urls: List[str]) -> List[str]:
+        """
+        Get the latest PriceFull and PromoFull files for each branch
+        
+        Args:
+            gz_urls (List[str]): List of all .gz file URLs
+            
+        Returns:
+            List[str]: List of latest file URLs to download
+        """
+        print("... Finding latest files for each branch ...")
+        
+        # Parse file information
+        file_info = defaultdict(lambda: {'price': None, 'promo': None})
+        
+        for url in gz_urls:
+            filename = url.split('/')[-1]  # Get filename from URL
+            
+            # Parse PriceFull files
+            price_match = re.match(r'PriceFull(\d+)-(\d+)-(\d+)\.gz', filename)
+            if price_match:
+                store_id = price_match.group(1)
+                branch = price_match.group(2)
+                date = price_match.group(3)
+                key = f"{store_id}-{branch}"
+                
+                # Keep the latest date
+                if not file_info[key]['price'] or date > file_info[key]['price']['date']:
+                    file_info[key]['price'] = {'url': url, 'date': date}
+            
+            # Parse PromoFull files
+            promo_match = re.match(r'PromoFull(\d+)-(\d+)-(\d+)\.gz', filename)
+            if promo_match:
+                store_id = promo_match.group(1)
+                branch = promo_match.group(2)
+                date = promo_match.group(3)
+                key = f"{store_id}-{branch}"
+                
+                # Keep the latest date
+                if not file_info[key]['promo'] or date > file_info[key]['promo']['date']:
+                    file_info[key]['promo'] = {'url': url, 'date': date}
+        
+        # Return URLs of latest files
+        latest_files = []
+        for key, files in file_info.items():
+            if files['price']:
+                latest_files.append(files['price']['url'])
+                print(f"Latest PriceFull for {key}: {files['price']['date']}")
+            if files['promo']:
+                latest_files.append(files['promo']['url'])
+                print(f"Latest PromoFull for {key}: {files['promo']['date']}")
+        
+        print(f"Found {len(latest_files)} latest files to download")
+        return latest_files
+
     def download_file(self, url: str) -> Optional[str]:
         """
         Downloads a single file, but first checks if it already exists.
@@ -197,22 +270,30 @@ class SupermarketCrawler:
             self.close()
             return []
 
-        gz_urls = self._find_and_filter_files()
-
-        if not gz_urls:
+        all_gz_urls = self._find_and_filter_files()
+        
+        if not all_gz_urls:
             print("No files found to download after filtering.")
             self.close()
             return []
 
-        print(f"\nStarting download of {len(gz_urls)} files...")
+        # Get only the latest files for each branch
+        latest_gz_urls = self.get_latest_files(all_gz_urls)
+
+        if not latest_gz_urls:
+            print("No latest files found to download.")
+            self.close()
+            return []
+
+        print(f"\nStarting download of {len(latest_gz_urls)} latest files...")
         downloaded_files = []
-        for url in gz_urls:
+        for url in latest_gz_urls:
             file_path = self.download_file(url)
             if file_path:
                 downloaded_files.append(file_path)
 
         self.close()
-        print(f"\nCrawl finished. Handled {len(downloaded_files)} files.")
+        print(f"\nCrawl finished. Downloaded {len(downloaded_files)} latest files.")
         return downloaded_files
 
     def close(self):

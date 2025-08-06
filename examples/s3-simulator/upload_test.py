@@ -10,7 +10,7 @@ def upload_file_to_s3():
     
     s3_client = boto3.client(
         's3',
-        endpoint_url='https://b659bdb2de99.ngrok-free.app/',
+        endpoint_url='http://localhost:4566',  # Local LocalStack endpoint
         aws_access_key_id='test',
         aws_secret_access_key='test',
         region_name='us-east-1'

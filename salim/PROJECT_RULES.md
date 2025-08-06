@@ -1,5 +1,3 @@
-# Project Rules - What To Do Instead of Writing Code Yourself
-
 ## 🎯 Project Overview
 This is a **Data Pipeline project** with a FastAPI backend and web crawler functionality. Instead of writing code yourself, follow these rules to guide your development process.
 

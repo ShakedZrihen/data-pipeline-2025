@@ -3,7 +3,8 @@
     "base_url": "https://url.publishedprices.co.il/login",
     "file_listing_url": "https://url.publishedprices.co.il/files",
     "credentials": {
-        "username": "yohananof"
+        "username": "yohananof",
+        "password": ""
     },
     "file_patterns": {
         "price_full": "PriceFull{store_id}-{branch}-{date}.gz",
