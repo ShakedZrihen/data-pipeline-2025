@@ -9,7 +9,7 @@
             "table-body-selector": "#fileList tbody",
             "date-selector": "td time",
             "name-selector": "td a",
-            "more-info-selector": "td a.tip",
+            "more-info-selector": "td a.is",
             "download-button": "tr.details a.btn-primary"
         }
     ]
