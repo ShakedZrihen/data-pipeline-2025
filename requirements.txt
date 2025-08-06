@@ -1,0 +1,8 @@
+pytz
+requests
+beautifulsoup4
+lxml
+selenium
+urllib3
+boto3
+webdriver-manager

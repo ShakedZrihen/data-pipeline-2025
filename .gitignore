@@ -1,6 +1,8 @@
 **/**/__pycache__
 **/**/.env
 **/**/venv
+**/.idea
+**/assignment_2/data
 chromedriver*
 .DS_Store
 prices
