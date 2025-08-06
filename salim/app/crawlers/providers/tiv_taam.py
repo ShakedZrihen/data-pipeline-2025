@@ -23,9 +23,9 @@ PROVIDER_URL = "https://url.publishedprices.co.il/login"
 PROVIDER_NAME = "tivtaam"
 
 class TivTaamCrawler(CrawlerBase):
-    
-    def __init__(self):
-        super().__init__(PROVIDER_URL)
+
+    def __init__(self, provider_url):
+        super().__init__(provider_url)
         self.session = requests.Session()
         self.base_url = "https://url.publishedprices.co.il"
         
@@ -41,9 +41,7 @@ class TivTaamCrawler(CrawlerBase):
             driver.get(provider_url)
             time.sleep(3)
             
-            username_field = driver.find_element(By.ID, "username")
-            password_field = driver.find_element(By.ID, "password")
-            
+            username_field = driver.find_element(By.ID, "username")            
             username_field.send_keys("TivTaam")
             
             login_button = driver.find_element(By.ID, "login-button")

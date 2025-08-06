@@ -1,5 +1,5 @@
 import sys, os, glob, requests, json, time, urllib3
-from random import sample
+# from random import sample
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
@@ -49,9 +49,9 @@ class CarrefourCrawler(CrawlerBase):
         )
         return chrome_options
 
-    def __init__(self):
-        super().__init__(PROVIDER_URL)
-        self.base_url = PROVIDER_URL
+    def __init__(self, provider_url):
+        super().__init__(provider_url)
+        self.base_url = provider_url
         self.collected_files = []
         
     def get_driver(self):
@@ -81,46 +81,47 @@ class CarrefourCrawler(CrawlerBase):
     def get_page_source(self, provider_url):
         driver = self.get_driver()
         driver.get(provider_url)
+        time.sleep(3)  # אפשר לשפר עם WebDriverWait
+        page_html = driver.page_source
+        driver.quit()
+        return page_html
+    
+    def download_files_from_html(self, html):
+        driver = self.get_driver()
+        driver.get(self.base_url)
 
-        all_branch_options = Select(driver.find_element(By.ID, "branch_filter")).options
-        valid_branch_values = [opt.get_attribute("value") for opt in all_branch_options if opt.get_attribute("value")]
-        
-        selected_branch_values = sample(valid_branch_values, 10)
-        print(selected_branch_values)
-        
+        # all_branch_options = Select(driver.find_element(By.ID, "branch_filter")).options
+        # valid_branch_values = [opt.get_attribute("value") for opt in all_branch_options if opt.get_attribute("value")]
+        # selected_branch_values = sample(valid_branch_values, 10)
+        selected_branch_values = ["0015", "1150", "3740", "4280", "1430","0183", "0123", "1112", "2230", "0006"]
+        # print(selected_branch_values)
+
         for category in ["pricefull", "promofull"]:
             try:
                 Select(driver.find_element(By.ID, "cat_filter")).select_by_value(category)
             except Exception as e:
                 continue
-
             for branch_value in selected_branch_values:
+                print(f"⬇️ Downloading category={category} branch={branch_value}")
                 try:
                     Select(driver.find_element(By.ID, "branch_filter")).select_by_value(branch_value)
                     time.sleep(5)
-
                     WebDriverWait(driver, 30).until(
                         EC.presence_of_element_located((By.CSS_SELECTOR, ".filesDiv .fileDiv"))
                     )
-
                     file_divs = driver.find_elements(By.CSS_SELECTOR, ".filesDiv .fileDiv")
                     valid_file_divs = [div for div in file_divs if div.find_elements(By.CSS_SELECTOR, "a.downloadBtn")]
                     if not valid_file_divs:
                         continue
-
                     valid_file_divs[0].find_element(By.CSS_SELECTOR, "a.downloadBtn").click()
                     time.sleep(10)
-
                     files = glob.glob(os.path.join(DOWNLOAD_DIR, "*"))
                     if not files:
                         continue
-
                     latest_file = max(files, key=os.path.getctime)
-
                     for f in os.listdir(DOWNLOAD_DIR):
                         if f.endswith(".tmp") or "(1)" in f:
                             os.remove(os.path.join(DOWNLOAD_DIR, f))
-
                     file_type = "prices" if category.lower().startswith("price") else "promos"
                     file_info = {
                         "file_path": os.path.abspath(latest_file),
@@ -128,13 +129,12 @@ class CarrefourCrawler(CrawlerBase):
                         "file_type": file_type
                     }
                     self.collected_files.append(file_info)
-
                 except Exception as e:
                     print(f"Error selecting branch {branch_value} or downloading: {e}")
                     continue
-
+        self.save_file_info(self.collected_files)
         driver.quit()
-        return self.collected_files
+        return DOWNLOAD_DIR
 
     def save_file_info(self, files_info):
         base_provider_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "local_files", "carrefour")
@@ -142,14 +142,6 @@ class CarrefourCrawler(CrawlerBase):
             json.dump(files_info, f, indent=4, ensure_ascii=False)
         return base_provider_dir
 
-    def run(self, provider_url):
-        for f in os.listdir(DOWNLOAD_DIR):
-            file_path = os.path.join(DOWNLOAD_DIR, f)
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-        files_info = self.get_page_source(provider_url)
-        self.save_file_info(files_info)
-
 if __name__ == "__main__":
-    crawler = CarrefourCrawler()
+    crawler = CarrefourCrawler(PROVIDER_URL)
     crawler.run(PROVIDER_URL)

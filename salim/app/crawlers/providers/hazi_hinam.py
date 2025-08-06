@@ -10,7 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 
 PROVIDER_URL = "https://shop.hazi-hinam.co.il/Prices"
-BASE_FOLDER = "salim/app/crawlers/local_files"
+BASE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "local_files")
 PROVIDER_NAME = "hazi-hinam"
 
 class HaziHinamCrawler(CrawlerBase):

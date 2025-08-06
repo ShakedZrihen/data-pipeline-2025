@@ -18,7 +18,7 @@ from app.crawlers.utils.file_utils import (create_provider_dir, extract_file_inf
 
 LOGIN_URL = "https://url.publishedprices.co.il/login"
 PROVIDER_URL = "https://url.publishedprices.co.il/file"
-BASE_FOLDER = "salim/app/crawlers/local_files"
+BASE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "local_files")
 PROVIDER_NAME = "yohananof"
 
 class YohananofCrawler(CrawlerBase):

@@ -24,8 +24,8 @@ PROVIDER_NAME = "osherad"
 
 class OsherAdCrawler(CrawlerBase):
     
-    def __init__(self):
-        super().__init__(PROVIDER_URL)
+    def __init__(self, provider_url):
+        super().__init__(provider_url)
         self.session = requests.Session()
         self.base_url = "https://url.publishedprices.co.il"
         
@@ -69,7 +69,6 @@ class OsherAdCrawler(CrawlerBase):
             driver.quit()
     
     def download_files_from_html(self, page_html):
-        # Create provider directory like in original code
         base_provider_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "local_files", "osherad")
         os.makedirs(base_provider_dir, exist_ok=True)
         
@@ -102,16 +101,13 @@ class OsherAdCrawler(CrawlerBase):
             seen_filenames.add(filename)
 
             file_url = urljoin(self.base_url, file_href)
-            # Download using custom function with session
             file_local_path = os.path.join(base_provider_dir, filename)
-            success = self.download_file_with_session(file_url, file_local_path)
+            success = download_file_with_session(self.session, file_url, file_local_path)
             
             if success:
-                # Extract file info using utility function
                 file_info = extract_file_info(PROVIDER_NAME, filename, file_local_path)
                 files_info.append(file_info)
 
-        # Save file info
         with open(os.path.join(base_provider_dir, "file_info.json"), "w", encoding="utf-8") as f:
             json.dump(files_info, f, indent=4, ensure_ascii=False)
         return base_provider_dir
