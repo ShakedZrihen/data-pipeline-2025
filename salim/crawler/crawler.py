@@ -1,9 +1,14 @@
-import os
-from browser_utils import *
-from time_date_utils import *
-from selenium.webdriver.common.by import By
 import json
-import pprint  # at top
+import os
+import re
+from utils.browser_utils import *
+from utils.time_date_utils import * 
+from utils import download_file_from_link
+from s3.upload_to_s3 import *
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from urllib.parse import urljoin, urlparse
 
 class Crawler:
     driver=""
@@ -13,8 +18,6 @@ class Crawler:
         self.driver = get_chromedriver()
         with open("config.json", "r", encoding="utf-8") as file:
             self.config = json.load(file)
-        # soup = get_html_parser(driver, providers_url)
-        # finish the get all providers and input them into the config.json (username, password, url)
 
     def crawl(self):
         """
@@ -38,8 +41,8 @@ class Crawler:
 
                 data = self.extract_data(soup, provider)
 
-                self.save_file(data, provider, soup)
-                # self.upload_file()
+                saved_files = self.save_file(data, provider)
+                self.upload_file(saved_files, provider)
             except Exception as e:
                 print(f"Error crawling {provider['name']}: {e}")
         pass
@@ -101,33 +104,73 @@ class Crawler:
 
         return row if row_dt > latest_dt else latest_row
 
-
-
-    def save_file(self, data, provider, soup):
-        if not os.path.exists("providers"):
-            os.makedirs("providers")
-        promo_row = data["promo"]
-        price_row = data["price"]
-        if not promo_row or not price_row:
+    def save_file(self, data, provider):
+        if not data["promo"] or not data["price"]:
             print(f"No data found for provider {provider['name']}")
             return
+
+        price_row_id = data["price"]["id"]
+        promo_row_id = data["promo"]["id"]
+        
+        sel_price_row = self.driver.find_element(By.ID, price_row_id)
+        sel_promo_row = self.driver.find_element(By.ID, promo_row_id)
         
         more_info_selector = provider.get("more-info-selector")
         if more_info_selector:
-            promo_more_info = promo_row.select_one(more_info_selector)
-            price_more_info = price_row.select_one(more_info_selector)
+            print("Opening More info")
+            price_more_info = sel_price_row.find_element(By.CSS_SELECTOR, more_info_selector)
+            promo_more_info = sel_promo_row.find_element(By.CSS_SELECTOR, more_info_selector)
+            
             if promo_more_info:
-                promo_more_info.click()
+                promo_more_info.click()  
             if price_more_info:
                 price_more_info.click()
-        
-        #print download button
-        download_button = soup.select(provider["download-button-selector"])
-        print(f"{download_button}")
+            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, provider["download-button"])))
+         
+        price_dt = parse_date(data["price"].select_one(provider["date-selector"]).text.strip())
+        promo_dt = parse_date(data["promo"].select_one(provider["date-selector"]).text.strip())
+        price_ts = price_dt.strftime("%Y%m%d_%H%M%S")
+        promo_ts = promo_dt.strftime("%Y%m%d_%H%M%S")
 
-    def upload_file(self, filepath):
+        branch = provider.get("name", "default")
+        download_dir = os.path.join("providers", branch)
+        os.makedirs(download_dir, exist_ok=True)
+
+        download_buttons = self.driver.find_elements(By.CSS_SELECTOR, provider["download-button"])
+        
+        saved_files =[]
+        for btn in download_buttons:
+            onclick = btn.get_attribute("onclick") or ""
+            match = re.search(r"Download\('([^']+)'\)", onclick)
+            raw = match.group(1) if match else btn.get_attribute("href") or ""
+            if not raw:
+                continue
+            
+            raw_link = urljoin(self.driver.current_url, raw)
+            parsed = urlparse(raw_link)
+            base_name = os.path.basename(parsed.path)
+
+            lower = base_name.lower()
+            if lower.startswith("price"):
+                prefix, ts = "price", price_ts
+            elif lower.startswith("promo"):
+                prefix, ts = "promo", promo_ts
+            else:
+                prefix, ts = "file", price_ts
+            
+            ext = os.path.splitext(base_name)[1] or ""
+            filename = f"{prefix}_{ts}{ext}"
+            
+            print(f"Downloading {filename}...")
+            download_file_from_link(raw_link, download_dir, filename)
+            saved_files.append(filename)
+        
+        return saved_files
+
+    def upload_file(self, saved_files, provider):
         """
-        Upload the file to a remote destination (e.g., cloud storage).
-        :param filepath: Path to the file to be uploaded
+        Upload the downloaded files to local s3 bucket.
         """
-        pass
+        for file in saved_files:
+            upload_file_to_s3(provider["name"], file)
+        
