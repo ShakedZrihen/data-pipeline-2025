@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from typing import List, Optional
 from urllib.parse import urljoin
-import platform
+import platform  # Import the platform module
 
 # Selenium Imports
 from selenium import webdriver
@@ -16,10 +16,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
-# webdriver-manager is no longer needed for the Docker version
-# but we keep it for potential local runs.
+# Automatically manages the browser driver
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.os_manager import ChromeType
+# Import for specifying Chrome browser type, essential for ARM Macs
+from webdriver_manager.core.os_manager import ChromeType 
 
 # Suppress only the single InsecureRequestWarning from urllib3 needed for this fix
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -53,27 +53,30 @@ class SupermarketCrawler:
             return json.load(f)
 
     def _init_driver(self) -> webdriver.Chrome:
-        """
-        Initializes a headless Chrome WebDriver, configured to run inside Docker.
-        """
+        """Initializes a headless Chrome WebDriver."""
         if not self.driver:
-            print("Initializing Selenium WebDriver for Docker environment...")
+            print("🚀 Initializing Selenium WebDriver...")
             chrome_options = Options()
             chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--no-sandbox")
-            chrome_options.add_argument("--disable-dev-shm-usage")
             chrome_options.add_argument("--disable-gpu")
+            chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--window-size=1920,1080")
+            chrome_options.add_argument("--disable-dev-shm-usage")
 
             try:
-                # --- FINAL FIX: Point directly to the chromedriver installed by apt-get ---
-                # This bypasses webdriver-manager and avoids architecture errors.
-                service = Service(executable_path='/usr/bin/chromedriver')
+                if platform.system() == "Darwin" and platform.machine() == "arm64":
+                    print("   - Detected macOS ARM64, ensuring correct driver for Google Chrome...")
+                    driver_path = ChromeDriverManager(chrome_type=ChromeType.GOOGLE).install()
+                    service = Service(driver_path)
+                else:
+                    print("   - Detected standard OS, using default driver...")
+                    service = Service(ChromeDriverManager().install())
+                
                 self.driver = webdriver.Chrome(service=service, options=chrome_options)
 
             except Exception as e:
-                print(f"An error occurred while initializing WebDriver: {e}")
-                raise
+                print(f"   - Webdriver-manager failed: {e}. Falling back to system default chromedriver.")
+                self.driver = webdriver.Chrome(options=chrome_options)
             
             print("WebDriver initialized.")
         return self.driver
@@ -164,6 +167,7 @@ class SupermarketCrawler:
         filename = os.path.basename(url)
         local_path = os.path.join(self.download_dir, filename)
 
+        # --- NEW: Check if the file already exists before downloading ---
         if os.path.exists(local_path):
             print(f"Skipping {filename} (already exists).")
             return local_path # Return the path so it's still counted as "handled"

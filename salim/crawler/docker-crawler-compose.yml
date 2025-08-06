@@ -1,0 +1,15 @@
+# Specifies the Docker Compose file format version.
+version: '3.8'
+
+# Defines the services (containers) that make up your application.
+services:
+  # Defines a single service named 'crawler'.
+  crawler:
+    # Tells Docker Compose to build an image from the Dockerfile in the current directory ('.').
+    build: .
+    # Mounts local directories into the container for persistent storage.
+    # This ensures that files downloaded inside the container are saved to your computer.
+    # You must add a line here for each supermarket's output folder.
+    volumes:
+      - ./Yohananof:/app/Yohananof
+      # - ./Osherad:/app/Osherad  # <-- Uncomment or add lines for other configs
