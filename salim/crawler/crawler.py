@@ -1,19 +1,20 @@
 import json
 import os
 import re
-from utils.browser_utils import *
-from utils.time_date_utils import * 
-from utils import download_file_from_link
-from s3.upload_to_s3 import *
+import time
+from urllib.parse import urljoin, urlparse
+
+from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from urllib.parse import urljoin, urlparse
+
+from utils.browser_utils import get_chromedriver, get_html_parser
+from utils.time_date_utils import parse_date
+from utils.download_file_from_link import download_file_from_link
+from s3.upload_to_s3 import upload_file_to_s3
 
 class Crawler:
-    driver=""
-    config = ""
-
     def __init__(self):
         self.driver = get_chromedriver()
         with open("config.json", "r", encoding="utf-8") as file:
@@ -137,7 +138,16 @@ class Crawler:
         download_dir = os.path.join("providers", branch)
         os.makedirs(download_dir, exist_ok=True)
 
-        download_buttons = self.driver.find_elements(By.CSS_SELECTOR, provider["download-button"])
+        download_buttons = []
+        for row in (sel_price_row, sel_promo_row):
+            btns = row.find_elements(By.CSS_SELECTOR, provider["download-button"])
+            if not btns:
+                try:
+                    details_row = row.find_element(By.XPATH, "following-sibling::tr[1]")
+                    btns = details_row.find_elements(By.CSS_SELECTOR, provider["download-button"])
+                except NoSuchElementException:
+                    btns = []
+            download_buttons.extend(btns)
         
         saved_files =[]
         for btn in download_buttons:
@@ -147,7 +157,11 @@ class Crawler:
             if not raw:
                 continue
             
-            raw_link = urljoin(self.driver.current_url, raw)
+            if match:
+                raw_link = urljoin(self.driver.current_url, f"/Download/{raw.lstrip('/')}")
+            else:
+                raw_link = urljoin(self.driver.current_url, raw)
+            
             parsed = urlparse(raw_link)
             base_name = os.path.basename(parsed.path)
 
@@ -162,10 +176,13 @@ class Crawler:
             ext = os.path.splitext(base_name)[1] or ""
             filename = f"{prefix}_{ts}{ext}"
             
-            print(f"Downloading {filename}...")
-            download_file_from_link(raw_link, download_dir, filename)
+            print(f"Downloading {filename}…")
+            output_path = download_file_from_link(raw_link, download_dir, filename)
+            if not output_path:
+                print(f"{filename} not available, skipping.")
+                continue
             saved_files.append(filename)
-        
+
         return saved_files
 
     def upload_file(self, saved_files, provider):
@@ -174,4 +191,3 @@ class Crawler:
         """
         for file in saved_files:
             upload_file_to_s3(provider["name"], file)
-        
