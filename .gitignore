@@ -9,4 +9,8 @@ venv
 node_modules
 build
 package-lock.json
+# Supermarket download folders
 yohananof/
+osherad/
+ramilevi/
+tivtaam/

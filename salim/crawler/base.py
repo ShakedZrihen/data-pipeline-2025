@@ -299,19 +299,31 @@ class SupermarketCrawler:
         return downloaded_files
 
     def upload_to_s3(self, file_path: str) -> bool:
-        """Upload a file to S3."""
+        """Upload a file to S3 organized by supermarket/branch folders."""
         try:
             filename = os.path.basename(file_path)
+            supermarket_name = self.config_name.lower()
+            
+            # Extract branch number from filename (e.g., "PriceFull7290803800003-001-202508060930.gz" -> "001")
+            import re
+            branch_match = re.search(r'-(\d{3,4})-', filename)
+            if branch_match:
+                branch_num = branch_match.group(1)
+                s3_key = f"{supermarket_name}/{branch_num}/{filename}"
+            else:
+                # Fallback if branch number not found
+                s3_key = f"{supermarket_name}/{filename}"
+            
             print(f"Uploading {filename} to S3...")
             
             with open(file_path, 'rb') as f:
                 self.s3_client.put_object(
                     Bucket=self.s3_bucket,
-                    Key=filename,
+                    Key=s3_key,
                     Body=f
                 )
             
-            print(f"✅ Successfully uploaded {filename} to S3")
+            print(f"✅ Successfully uploaded {filename} to S3: s3://{self.s3_bucket}/{s3_key}")
             return True
             
         except Exception as e:

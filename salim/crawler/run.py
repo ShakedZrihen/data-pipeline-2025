@@ -44,8 +44,17 @@ def main():
             if downloaded_files:
                 print(f"\n✅ {config_name.upper()}: Downloaded {len(downloaded_files)} files")
                 for file_path in downloaded_files:
+                    filename = os.path.basename(file_path)
+                    # Extract branch number for S3 path
+                    import re
+                    branch_match = re.search(r'-(\d{3,4})-', filename)
+                    if branch_match:
+                        branch_num = branch_match.group(1)
+                        s3_key = f"{config_name.lower()}/{branch_num}/{filename}"
+                    else:
+                        s3_key = f"{config_name.lower()}/{filename}"
                     print(f"  📁 {file_path}")
-                    print(f"  ☁️  Uploaded to S3: s3://test-bucket/{os.path.basename(file_path)}")
+                    print(f"  ☁️  Uploaded to S3: s3://test-bucket/{s3_key}")
                 total_files += len(downloaded_files)
             else:
                 print(f"\n❌ {config_name.upper()}: No files were downloaded.")
