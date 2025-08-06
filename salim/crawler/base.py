@@ -28,8 +28,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 class SupermarketCrawler:
     """
-    A robust crawler that uses Selenium for login/navigation and Requests for fast downloading.
-    This version is refactored for better modularity.
+    A crawler that uses Selenium for login/navigation and Requests for fast downloading.
     """
     def __init__(self, config_name: str):
         """Initializes the crawler with a specific configuration."""
@@ -43,7 +42,6 @@ class SupermarketCrawler:
         self.driver = None # Initialize driver as None
         
         # Initialize S3 client for LocalStack
-        # Use environment variable for S3 endpoint (Docker network)
         s3_endpoint = os.environ.get('S3_ENDPOINT', 'http://localhost:4566')
         self.s3_client = boto3.client(
             's3',
@@ -66,7 +64,7 @@ class SupermarketCrawler:
 
     def _init_driver(self) -> webdriver.Chrome:
         """
-        Initializes a headless Chrome WebDriver using webdriver-manager (works on Windows & Mac).
+        Initializes a headless Chrome WebDriver using webdriver-manager
         """
         if not self.driver:
             print("Initializing Selenium WebDriver...")
