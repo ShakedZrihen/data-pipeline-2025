@@ -1,0 +1,48 @@
+{
+  "supermarkets": [
+    {
+      "name": "yohananof",
+      "display_name": "יוחננוף",
+      "url": "https://url.publishedprices.co.il/login",
+      "username": "yohananof",
+      "password": ""
+    },
+    {
+      "name": "victory",
+      "display_name": "ויקטורי",
+      "url": "https://laibcatalog.co.il/"
+    },
+    {
+      "name": "carrefour",
+      "display_name": "קרפור",
+      "url": "https://prices.carrefour.co.il/"
+    },
+    {
+      "name": "shufersal",
+      "display_name": "שופרסל",
+      "url": "http://prices.shufersal.co.il/"
+    },
+    {
+      "name": "mega",
+      "display_name": "מגה",
+      "url": "https://prices.mega.co.il/"
+    },
+    {
+      "name": "wolt",
+      "display_name": "Wolt",
+      "url": "https://wm-gateway.wolt.com/isr-prices/public/v1/index.html"
+    },
+    {
+      "name": "super-pharm",
+      "display_name": "סופר פארם",
+      "url": "http://prices.super-pharm.co.il/"
+    },
+    {
+      "name": "hazi-hinam",
+      "display_name": "חצי חינם",
+      "url": "https://shop.hazi-hinam.co.il/Prices"
+    }
+  ],
+  "max_branches": 2,
+  "max_files_per_site": 10
+}
