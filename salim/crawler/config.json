@@ -7,10 +7,76 @@
             "password": "none",
             "sign-in-button": ".row button",
             "table-body-selector": "#fileList tbody",
+            "table-row": "tr",
             "date-selector": "td time",
             "name-selector": "td a",
             "more-info-selector": "td a.is",
             "download-button": "tr.details a.btn-primary"
+        },
+        {
+            "name": "carrefour",
+            "url": "https://prices.carrefour.co.il/",
+            "username": "none",
+            "password": "none",
+            "sign-in-button": "none",
+            "table-body-selector": ".filesDiv",
+            "table-row": ".filesDiv",
+            "date-selector": "span.modified",
+            "name-selector": ".fileName",
+            "more-info-selector": "none",
+            "download-button-selector": "a.downloadBtn"
+        },
+        { 
+            "name": "GoodPharm",
+            "url": "https://laibcatalog.co.il/",
+            "username": "none",
+            "password": "none",
+            "sign-in-button": "none",
+            "table-body-selector": "#myTable tbody",
+            "table-row": "tr",
+            "date-selector": "td:nth-of-type(5)",
+            "name-selector": "td:nth-of-type(1)",
+            "more-info-selector": "none",
+            "download-button-selector": "td button"
+        },
+        {
+            "name": "TivTaam",
+            "url": "https://url.publishedprices.co.il/login",
+            "username": "TivTaam",
+            "password": "none",
+            "sign-in-button": ".row button",
+            "table-body-selector": "#fileList tbody",
+            "table-row": "tr",
+            "date-selector": "td time",
+            "name-selector": "td a",
+            "more-info-selector": "td a.is",
+            "download-button-selector": ".btn-primary"
+        },
+        {
+            "name": "RamiLevi",
+            "url": "https://url.publishedprices.co.il/login",      
+            "username": "RamiLevi",
+            "password": "none",
+            "sign-in-button": ".row button",
+            "table-body-selector": "#fileList tbody",
+            "table-row": "tr",
+            "date-selector": "td time",
+            "name-selector": "td a",
+            "more-info-selector": "td a.is",
+            "download-button-selector": ".btn-primary"
+        },
+        {
+            "name": "Keshet",
+            "url": "https://url.publishedprices.co.il/login",
+            "username": "Keshet",
+            "password": "none",
+            "sign-in-button": ".row button",
+            "table-body-selector": "#fileList tbody",
+            "table-row": "tr",
+            "date-selector": "td time",
+            "name-selector": "td a",
+            "more-info-selector": "td a.is",
+            "download-button-selector": ".btn-primary"
         }
     ]
 }
