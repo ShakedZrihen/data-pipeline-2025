@@ -290,11 +290,33 @@ class SupermarketCrawler:
         for url in latest_gz_urls:
             file_path = self.download_file(url)
             if file_path:
+                # Upload to S3
+                self.upload_to_s3(file_path)
                 downloaded_files.append(file_path)
 
         self.close()
         print(f"\nCrawl finished. Downloaded {len(downloaded_files)} latest files.")
         return downloaded_files
+
+    def upload_to_s3(self, file_path: str) -> bool:
+        """Upload a file to S3."""
+        try:
+            filename = os.path.basename(file_path)
+            print(f"Uploading {filename} to S3...")
+            
+            with open(file_path, 'rb') as f:
+                self.s3_client.put_object(
+                    Bucket=self.s3_bucket,
+                    Key=filename,
+                    Body=f
+                )
+            
+            print(f"✅ Successfully uploaded {filename} to S3")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to upload {filename} to S3: {e}")
+            return False
 
     def close(self):
         """Closes the WebDriver session to free up resources."""
