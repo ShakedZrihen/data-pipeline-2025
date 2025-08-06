@@ -58,7 +58,7 @@ class Crawler:
         table_body = soup.select_one(provider["table-body-selector"])
         price_tr = ""
         promo_tr = ""
-        for row in table_body.select("tr"):
+        for row in table_body.select(provider["table-row"]):
             column_name = row.select_one(provider["name-selector"])
 
             if column_name:
@@ -106,13 +106,9 @@ class Crawler:
 
 
     def save_file(self, data, provider, soup):
-        if not os.path.exists("providers"):
-            os.makedirs("providers")
-        promo_row = data["promo"]
-        price_row = data["price"]
-        if not promo_row or not price_row:
-            print(f"No data found for provider {provider['name']}")
-            return
+        if not data["promo"] or not data["price"]:
+                print(f"No data found for provider {provider['name']}")
+                return
 
         price_row_id = data["price"]["id"]
         promo_row_id = data["promo"]["id"]
@@ -121,7 +117,7 @@ class Crawler:
         sel_promo_row = self.driver.find_element(By.ID, promo_row_id)
         
         more_info_selector = provider.get("more-info-selector")
-        if more_info_selector:
+        if more_info_selector != "none":
             print("Opening More info")
             price_more_info = sel_price_row.find_element(By.CSS_SELECTOR, more_info_selector)
             promo_more_info = sel_promo_row.find_element(By.CSS_SELECTOR, more_info_selector)
