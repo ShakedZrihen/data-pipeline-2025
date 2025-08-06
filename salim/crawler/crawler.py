@@ -1,18 +1,15 @@
 import json
 import os
 import re
-import time
-from urllib.parse import urljoin, urlparse
-
-from bs4 import BeautifulSoup
+from utils.browser_utils import *
+from utils.time_date_utils import * 
+from utils import download_file_from_link
+from s3.upload_to_s3 import *
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
-from utils.browser_utils import get_chromedriver, get_html_parser
-from utils.time_date_utils import parse_date
-from utils import download_file_from_link
-from s3.upload_to_s3 import upload_file_to_s3
+from selenium.common.exceptions import NoSuchElementException
+from urllib.parse import urljoin, urlparse
 
 class Crawler:
     def __init__(self):
@@ -104,7 +101,6 @@ class Crawler:
             return row
 
         return row if row_dt > latest_dt else latest_row
-
 
     def save_file(self, data, provider):
         if not data["promo"] or not data["price"]:
