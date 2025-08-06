@@ -105,7 +105,7 @@ class Crawler:
         return row if row_dt > latest_dt else latest_row
 
 
-    def save_file(self, data, provider, soup):
+    def save_file(self, data, provider):
         if not data["promo"] or not data["price"]:
                 print(f"No data found for provider {provider['name']}")
                 return

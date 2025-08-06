@@ -1,5 +1,5 @@
 from crawler import Crawler
 
-if name == "main":
+if __name__ == "__main__":
     crawler = Crawler()
     crawler.crawl() 
