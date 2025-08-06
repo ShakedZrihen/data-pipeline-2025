@@ -24,7 +24,7 @@
             "date-selector": "span.modified",
             "name-selector": ".fileName",
             "more-info-selector": "none",
-            "download-button-selector": "a.downloadBtn"
+            "download-button": "a.downloadBtn"
         },
         { 
             "name": "GoodPharm",
@@ -37,7 +37,7 @@
             "date-selector": "td:nth-of-type(5)",
             "name-selector": "td:nth-of-type(1)",
             "more-info-selector": "none",
-            "download-button-selector": "td button"
+            "download-button": "td button"
         },
         {
             "name": "TivTaam",
@@ -50,7 +50,7 @@
             "date-selector": "td time",
             "name-selector": "td a",
             "more-info-selector": "td a.is",
-            "download-button-selector": "tr.details a.btn-primary"
+            "download-button": "tr.details a.btn-primary"
         },
         {
             "name": "RamiLevi",
@@ -63,7 +63,7 @@
             "date-selector": "td time",
             "name-selector": "td a",
             "more-info-selector": "td a.is",
-            "download-button-selector": "tr.details a.btn-primary"
+            "download-button": "tr.details a.btn-primary"
         },
         {
             "name": "Keshet",
@@ -76,7 +76,7 @@
             "date-selector": "td time",
             "name-selector": "td a",
             "more-info-selector": "td a.is",
-            "download-button-selector": "tr.details a.btn-primary"
+            "download-button": "tr.details a.btn-primary"
         }
     ]
 }
