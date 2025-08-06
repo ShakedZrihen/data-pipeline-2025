@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from utils.browser_utils import get_chromedriver, get_html_parser
 from utils.time_date_utils import parse_date
-from utils.download_file_from_link import download_file_from_link
+from utils import download_file_from_link
 from s3.upload_to_s3 import upload_file_to_s3
 
 class Crawler:
