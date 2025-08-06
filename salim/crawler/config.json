@@ -20,7 +20,7 @@
             "password": "none",
             "sign-in-button": "none",
             "table-body-selector": ".filesDiv",
-            "table-row": ".filesDiv",
+            "table-row": ".fileDiv",
             "date-selector": "span.modified",
             "name-selector": ".fileName",
             "more-info-selector": "none",
@@ -28,7 +28,7 @@
         },
         { 
             "name": "GoodPharm",
-            "url": "https://laibcatalog.co.il/",
+            "url": "https://goodpharm.binaprojects.com/Main.aspx",
             "username": "none",
             "password": "none",
             "sign-in-button": "none",
@@ -50,7 +50,7 @@
             "date-selector": "td time",
             "name-selector": "td a",
             "more-info-selector": "td a.is",
-            "download-button-selector": ".btn-primary"
+            "download-button-selector": "tr.details a.btn-primary"
         },
         {
             "name": "RamiLevi",
@@ -63,7 +63,7 @@
             "date-selector": "td time",
             "name-selector": "td a",
             "more-info-selector": "td a.is",
-            "download-button-selector": ".btn-primary"
+            "download-button-selector": "tr.details a.btn-primary"
         },
         {
             "name": "Keshet",
@@ -76,7 +76,7 @@
             "date-selector": "td time",
             "name-selector": "td a",
             "more-info-selector": "td a.is",
-            "download-button-selector": ".btn-primary"
+            "download-button-selector": "tr.details a.btn-primary"
         }
     ]
 }
