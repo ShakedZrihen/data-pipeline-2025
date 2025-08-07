@@ -10,8 +10,7 @@ from selenium import webdriver
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from crawlers.base import CrawlerBase
 from crawlers.utils.html_utils import extract_file_links
 from crawlers.utils.file_utils import (create_provider_dir, extract_file_info, download_file_with_session, transfer_cookies)

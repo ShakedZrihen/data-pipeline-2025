@@ -21,7 +21,7 @@ class CrawlerBase(ABC):
         self.providers_base_url = provider_url
 
 
-    def init_chrome_options(self):
+    def init_chrome_options(self, extra_args=None, extra_prefs=None, user_agent=None):
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
@@ -31,8 +31,18 @@ class CrawlerBase(ABC):
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
-        return chrome_options
+        
+        if extra_prefs:
+            chrome_options.add_experimental_option("prefs", extra_prefs)
+            
+        if extra_args:
+            for arg in extra_args:
+                chrome_options.add_argument(arg)
+    
+        if user_agent:
+                chrome_options.add_argument(f"user-agent={user_agent}")
 
+        return chrome_options
 
     def get_chromedriver_path(self):
         try:
