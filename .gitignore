@@ -10,3 +10,11 @@ venv
 node_modules
 build
 package-lock.json
+itemsNames*.json
+test.js
+תנובה.json
+אסם.json
+טרה.json
+מולר.json
+carre_branches.json
+
