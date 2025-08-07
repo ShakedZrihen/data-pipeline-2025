@@ -10,8 +10,8 @@ from base import SupermarketCrawler
 
 def main():
     # Available configs
-    all_configs = ["yohananof", "osherad", "ramilevi", "tivtaam"]
-    
+    all_configs = ["yohananof", "osherad", "ramilevi", "tivtaam", "keshet", "doralon"]
+
     if len(sys.argv) == 1:
         # Run all configs
         configs_to_run = all_configs
