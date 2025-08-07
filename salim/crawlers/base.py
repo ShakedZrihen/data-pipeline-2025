@@ -20,7 +20,6 @@ class CrawlerBase(ABC):
     def __init__(self, provider_url):
         self.providers_base_url = provider_url
 
-
     def init_chrome_options(self, extra_args=None, extra_prefs=None, user_agent=None):
         chrome_options = Options()
         chrome_options.add_argument("--headless")
