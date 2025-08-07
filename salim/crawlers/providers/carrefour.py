@@ -5,7 +5,6 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from crawlers.base import CrawlerBase
 
 PROVIDER_URL = "https://prices.carrefour.co.il/"
@@ -18,6 +17,16 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
     
 class CarrefourCrawler(CrawlerBase):
     def init_chrome_options(self):
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option('useAutomationExtension', False)
+
         prefs = {
             "profile.default_content_settings.popups": 0,
             "download.default_directory": os.path.abspath(DOWNLOAD_DIR),
@@ -27,34 +36,12 @@ class CarrefourCrawler(CrawlerBase):
             "plugins.always_open_pdf_externally": True,
             "download.restrictions": 0
         }
-        extra_args = ["--disable-popup-blocking"]
-        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
-        return super().init_chrome_options(extra_args=extra_args, extra_prefs=prefs, user_agent=user_agent)
-        # chrome_options = Options()
-        # chrome_options.add_argument("--headless")
-        # chrome_options.add_argument("--disable-gpu")
-        # chrome_options.add_argument("--no-sandbox")
-        # chrome_options.add_argument("--window-size=1920,1080")
-        # chrome_options.add_argument("--disable-dev-shm-usage")
-        # chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-        # chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        # chrome_options.add_experimental_option('useAutomationExtension', False)
-
-        # prefs = {
-        #     "profile.default_content_settings.popups": 0,
-        #     "download.default_directory": os.path.abspath(DOWNLOAD_DIR),
-        #     "download.prompt_for_download": False,
-        #     "download.directory_upgrade": True,
-        #     "safebrowsing.enabled": True,
-        #     "plugins.always_open_pdf_externally": True,
-        #     "download.restrictions": 0
-        # }
-        # chrome_options.add_experimental_option("prefs", prefs)
-        # chrome_options.add_argument("--disable-popup-blocking")
-        # chrome_options.add_argument(
-        #     "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
-        # )
-        # return chrome_options
+        chrome_options.add_experimental_option("prefs", prefs)
+        chrome_options.add_argument("--disable-popup-blocking")
+        chrome_options.add_argument(
+            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+        )
+        return chrome_options
 
     def __init__(self, provider_url):
         super().__init__(provider_url)
@@ -88,7 +75,7 @@ class CarrefourCrawler(CrawlerBase):
     def get_page_source(self, provider_url):
         driver = self.get_driver()
         driver.get(provider_url)
-        time.sleep(3)  # אפשר לשפר עם WebDriverWait
+        time.sleep(3)
         page_html = driver.page_source
         driver.quit()
         return page_html
@@ -96,12 +83,8 @@ class CarrefourCrawler(CrawlerBase):
     def download_files_from_html(self, html):
         driver = self.get_driver()
         driver.get(self.base_url)
-
-        # all_branch_options = Select(driver.find_element(By.ID, "branch_filter")).options
-        # valid_branch_values = [opt.get_attribute("value") for opt in all_branch_options if opt.get_attribute("value")]
-        # selected_branch_values = sample(valid_branch_values, 10)
+        
         selected_branch_values = ["0015", "1150", "3740", "4280", "1430","0183", "0123", "1112", "2230", "0006"]
-        # print(selected_branch_values)
 
         for category in ["pricefull", "promofull"]:
             try:
