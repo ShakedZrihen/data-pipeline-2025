@@ -61,9 +61,9 @@ class Crawler:
 
             if column_name:
                 col_text = column_name.text.strip()
-                if col_text.startswith("Price"):
+                if col_text.startswith(provider["file-price-name"]):
                     price_tr = self.return_latest_row(row, price_tr, provider)
-                elif col_text.startswith("Promo"):
+                elif col_text.startswith(provider["file-promo-name"]):
                     promo_tr = self.return_latest_row(row, promo_tr, provider)
 
         return {
