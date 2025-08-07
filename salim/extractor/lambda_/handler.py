@@ -3,8 +3,13 @@ import os
 import json
 import time
 import threading
+import sys
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from botocore.exceptions import ClientError
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from utils.send_json_to_sqs import send_json_to_sqs
 
 def lambda_handler(event, context=None):
     """AWS Lambda handler for S3 events"""
@@ -12,7 +17,7 @@ def lambda_handler(event, context=None):
     
     s3_client = boto3.client(
         's3',
-        endpoint_url=os.getenv('S3_ENDPOINT', 'http://localstack:4566'),
+        endpoint_url=os.getenv('S3_ENDPOINT', 'http://localhost:4566'),
         aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID', 'test'),
         aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY', 'test'),
         region_name=os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
@@ -32,11 +37,19 @@ def lambda_handler(event, context=None):
                 
                 # Get object details
                 try:
-                    response = s3_client.head_object(Bucket=bucket_name, Key=object_key)
+                    response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+                    body = response['Body'].read().decode('utf-8')
                     size = response['ContentLength']
                     modified = response['LastModified']
+                    print(f"Retrieved file {object_key} from S3: {body[:100]}...")
                     print(f"   Size: {size} bytes")
                     print(f"   Modified: {modified}")
+
+                    # Parse the body as JSON
+                    json_data = json.loads(body)
+
+                    # Send to SQS
+                    send_json_to_sqs(json_data)
                 except ClientError as e:
                     print(f"   Error getting object details: {e}")
                 
@@ -65,7 +78,7 @@ class LambdaHTTPHandler(BaseHTTPRequestHandler):
             if self.path == '/files':
                 s3_client = boto3.client(
                     's3',
-                    endpoint_url=os.getenv('S3_ENDPOINT', 'http://localstack:4566'),
+                    endpoint_url=os.getenv('S3_ENDPOINT', 'http://localhost:4566'),
                     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID', 'test'),
                     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY', 'test'),
                     region_name=os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
