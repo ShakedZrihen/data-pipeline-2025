@@ -1,0 +1,54 @@
+services:
+  localstack:
+    container_name: sqs-simulator
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs
+      - DEBUG=1
+      - SQS_SKIP_SIGNATURE_VALIDATION=1
+    volumes:
+      - "localstack-data:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./init-sqs.sh:/etc/localstack/init/ready.d/init-sqs.sh"
+    networks:
+      - sqs-network
+
+  lambda-function:
+    build: ./lambda
+    container_name: sqs-lambda
+    ports:
+      - "8081:8081"
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - SQS_ENDPOINT=http://localstack:4566
+      - LAMBDA_PORT=8081
+      - SQS_QUEUE_NAME=test-queue
+    depends_on:
+      - localstack
+    networks:
+      - sqs-network
+    command: python handler.py
+
+  frontend:
+    build: ./frontend
+    container_name: sqs-frontend
+    ports:
+      - "3001:3000"
+    volumes:
+      - "./frontend/src:/app/src"
+      - "./frontend/public:/app/public"
+    depends_on:
+      - lambda-function
+    networks:
+      - sqs-network
+
+networks:
+  sqs-network:
+    driver: bridge
+
+volumes:
+  localstack-data:
