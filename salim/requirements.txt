@@ -1,8 +1,4 @@
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-sqlalchemy==2.0.23
-psycopg2-binary==2.9.9
-alembic==1.12.1
-python-multipart==0.0.6
-pydantic==2.5.0
-pydantic-settings==2.1.0 
+beautifulsoup4==4.12.2
+requests==2.31.0
+selenium==4.19.0
+webdriver-manager==4.0.1
