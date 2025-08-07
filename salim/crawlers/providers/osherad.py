@@ -112,5 +112,5 @@ class OsherAdCrawler(CrawlerBase):
         return base_provider_dir
     
 if __name__ == "__main__":
-    crawler = OsherAdCrawler()
+    crawler = OsherAdCrawler(PROVIDER_URL)
     crawler.run(PROVIDER_URL)

@@ -1,0 +1,49 @@
+{
+  "Root": {
+    "xml_doc_version": "19",
+    "chain_id": "7290055700007",
+    "sub_chain_id": "1",
+    "store_id": "0006",
+    "bikoret_no": "9",
+    "dll_ver_no": "9.4.0.53",
+      "items": [
+        {
+          "price_update_date": "2025-01-01 02:43:57",
+          "item_code": "7290017812571",
+          "item_type": "1",
+          "item_name": "תירוש מיץ ענבים אדום",
+          "manufacturer_name": "לא ידוע",
+          "manufacture_country": "לא ידוע",
+          "manufacturer_item_description": "תירוש מיץ ענבים אדום",
+          "unit_qty": "ליטרים",
+          "quantity": "1.00",
+          "unit_of_measure": "ליטר",
+          "b_is_weighted": "0",
+          "qty_price": "20.10",
+          "unit_of_measure_price": "20.1000",
+          "allow_discount": "1",
+          "item_status": "1",
+          "item_id": "52393"
+        },
+        {
+          "price_update_date": "2025-01-01 02:43:57",
+          "item_code": "7290017812571",
+          "item_type": "1",
+          "item_name": "תירוש מיץ ענבים אדום",
+          "manufacturer_name": "לא ידוע",
+          "manufacture_country": "לא ידוע",
+          "manufacturer_item_description": "תירוש מיץ ענבים אדום",
+          "unit_qty": "ליטרים",
+          "quantity": "1.00",
+          "unit_of_measure": "ליטר",
+          "b_is_weighted": "0",
+          "qty_price": "20.10",
+          "unit_of_measure_price": "20.1000",
+          "allow_discount": "1",
+          "item_status": "1",
+          "item_id": "52393"
+        }
+      ],
+      "@Count": "5519"
+  }
+}

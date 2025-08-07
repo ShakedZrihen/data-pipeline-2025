@@ -1,7 +1,7 @@
 import sys
 import os
 import json
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from crawlers.base import CrawlerBase
 from crawlers.utils.html_utils import extract_file_links

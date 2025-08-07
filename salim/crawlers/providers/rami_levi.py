@@ -132,5 +132,5 @@ class RamiLeviCrawler(CrawlerBase):
     
 
 if __name__ == "__main__":
-    crawler = RamiLeviCrawler()
+    crawler = RamiLeviCrawler(PROVIDER_URL)
     crawler.run(PROVIDER_URL)

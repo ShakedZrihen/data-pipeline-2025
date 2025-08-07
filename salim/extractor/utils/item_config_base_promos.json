@@ -1,0 +1,79 @@
+{
+  "Root": {
+    "xml_doc_version": "19",
+    "chain_id": "7290055700007",
+    "sub_chain_id": "1",
+    "store_id": "0006",
+    "bikoret_no": "9",
+    "dll_ver_no": "9.4.0.53",
+      "Promotions": [
+        {
+          "promotion_id": "123548",
+          "promotion_description": "מיץ ענבים מוגז 2 ב 36-",
+          "promotion_update_date": "2024-09-02 00:00",
+          "promotion_start_date": "2014-11-09",
+          "promotion_start_hour": "00:00:00",
+          "promotion_end_date": "2025-12-31",
+          "promotion_end_hour": "23:59:00",
+          "reward_type": "1",
+          "allow_multiple_discounts": "1",
+          "is_weighted_promo": "0",
+          "additional_restrictions": {
+            "additional_is_coupon": "0",
+            "additional_gift_count": "0",
+            "additional_is_total": "0",
+            "additional_is_active": "1"
+          },
+          "min_qty": "2.00",
+          "discounted_price": "36.00",
+          "discounted_price_per_mida": "17.70",
+          "min_no_of_item_ofered": "10",
+          "weight_unit": "1",
+          "promotion_items": {
+            "item": {
+              "item_code": "73490129292",
+              "item_type": "1",
+              "is_gift_item": "0"
+            }
+          },
+          "clubs": {
+            "club_id": "0"
+          }
+        },
+        {
+          "promotion_id": "123548",
+          "promotion_description": "מיץ ענבים מוגז 2 ב 36-",
+          "promotion_update_date": "2024-09-02 00:00",
+          "promotion_start_date": "2014-11-09",
+          "promotion_start_hour": "00:00:00",
+          "promotion_end_date": "2025-12-31",
+          "promotion_end_hour": "23:59:00",
+          "reward_type": "1",
+          "allow_multiple_discounts": "1",
+          "is_weighted_promo": "0",
+          "additional_restrictions": {
+            "additional_is_coupon": "0",
+            "additional_gift_count": "0",
+            "additional_is_total": "0",
+            "additional_is_active": "1"
+          },
+          "min_qty": "2.00",
+          "discounted_price": "36.00",
+          "discounted_price_per_mida": "17.70",
+          "min_no_of_item_ofered": "10",
+          "weight_unit": "1",
+          "promotion_items": {
+            "item": {
+              "item_code": "73490129292",
+              "item_type": "1",
+              "is_gift_item": "0"
+            }
+          },
+          "clubs": {
+            "club_id": "0"
+          }
+        }
+      ],
+      "@Count": "5519"
+  }
+}
