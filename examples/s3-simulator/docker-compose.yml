@@ -11,7 +11,7 @@ services:
     volumes:
       - "localstack-data:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
+      - ./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh
     networks:
       - s3-network
 
@@ -33,6 +33,20 @@ services:
       - s3-network
     command: python handler.py
 
+  rabbitmq:
+    container_name: rabbitmq-server
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI port
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - s3-network
+
   frontend:
     build: ./frontend
     container_name: s3-frontend
@@ -43,6 +57,7 @@ services:
       - "./frontend/public:/app/public"
     depends_on:
       - lambda-function
+      - rabbitmq
     networks:
       - s3-network
 
@@ -52,3 +67,4 @@ networks:
 
 volumes:
   localstack-data:
+  rabbitmq-data:

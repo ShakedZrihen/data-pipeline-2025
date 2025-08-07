@@ -5,7 +5,7 @@ import os
 import sys
 import requests
 import time
-from utils import (
+from .utils import (
     convert_xml_to_json,
     download_file_from_link,
     extract_and_delete_gz,
@@ -18,10 +18,10 @@ class CrawlerBase(ABC):
     def crawl(self)->list[str]:
         pass
 
-    def save_file(self,link):
-        file=download_file_from_link(link)
-        file_name=file.split("/")[-1]
-        file_path=f"./{file_name}"
+    def save_file(self, link):
+        file = download_file_from_link(link, ".")
+        file_name = file.split("/")[-1]
+        file_path = f"./{file_name}"
         extract_and_delete_gz(file_path)
         return file_path
 

@@ -1,15 +1,13 @@
 import os
 os.environ["HOME"] = os.environ.get("USERPROFILE", "C:\\Users\\adar2")
 
-from yohannof_crawler import YohannofCrawler
-from Tivtam import TivtamCrawler
-from doralon import DoralonCrawler
+from .cerbrus_crawler import CerberusCrawler
 
 def lambda_handler(event=None, context=None):
     crawlers = [
-        ("yohannof", YohannofCrawler("yohannof")),
-        ("tivtam", TivtamCrawler("tivtam")),
-        ("doralon", DoralonCrawler("doralon")),
+        ("yohannof", CerberusCrawler("yohananof")),
+        ("tivtam", CerberusCrawler("TivTaam")),
+        ("doralon", CerberusCrawler("doralon")),
     ]
 
     total_uploaded = 0
