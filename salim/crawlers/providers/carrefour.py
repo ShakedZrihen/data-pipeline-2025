@@ -1,5 +1,4 @@
 import sys, os, glob, requests, json, time, urllib3
-# from random import sample
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
@@ -11,7 +10,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-from app.crawlers.base import CrawlerBase
+from crawlers.base import CrawlerBase
 
 PROVIDER_URL = "https://prices.carrefour.co.il/"
 PROVIDER_NAME = "carrefour"

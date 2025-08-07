@@ -3,12 +3,12 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-from salim.app.crawlers.providers.hazi_hinam import HaziHinamCrawler
-from salim.app.crawlers.providers.yohananof import YohananofCrawler
-from salim.app.crawlers.providers.tiv_taam import TivTaamCrawler
-from salim.app.crawlers.providers.rami_levi import RamiLeviCrawler
-from salim.app.crawlers.providers.osherad import OsherAdCrawler
-from salim.app.crawlers.providers.carrefour import CarrefourCrawler
+from salim.crawlers.providers.hazi_hinam import HaziHinamCrawler
+from salim.crawlers.providers.yohananof import YohananofCrawler
+from salim.crawlers.providers.tiv_taam import TivTaamCrawler
+from salim.crawlers.providers.rami_levi import RamiLeviCrawler
+from salim.crawlers.providers.osherad import OsherAdCrawler
+from salim.crawlers.providers.carrefour import CarrefourCrawler
 
 def run_all_crawlers():
     crawlers = [

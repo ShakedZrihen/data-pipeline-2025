@@ -14,9 +14,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from botocore.exceptions import ClientError
 
-from app.crawlers.utils.file_utils import extract_branch_and_timestamp
-
-do_not_use = "https://www.gov.il/he/pages/cpfta_prices_regulations"
+from crawlers.utils.file_utils import extract_branch_and_timestamp
 
 class CrawlerBase(ABC):
     def __init__(self, provider_url):

@@ -16,14 +16,14 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-from app.crawlers.base import CrawlerBase
-from app.crawlers.utils.file_utils import extract_file_info, download_file_with_session
+from crawlers.base import CrawlerBase
+from crawlers.utils.file_utils import extract_file_info, download_file_with_session
 
 PROVIDER_URL = "https://url.publishedprices.co.il/login"
-PROVIDER_NAME = "tivtaam"
+PROVIDER_NAME = "ramilevi"
 
-class TivTaamCrawler(CrawlerBase):
-
+class RamiLeviCrawler(CrawlerBase):
+    
     def __init__(self, provider_url):
         super().__init__(provider_url)
         self.session = requests.Session()
@@ -42,7 +42,7 @@ class TivTaamCrawler(CrawlerBase):
             time.sleep(3)
             
             username_field = driver.find_element(By.ID, "username")            
-            username_field.send_keys("TivTaam")
+            username_field.send_keys("RamiLevi")
             
             login_button = driver.find_element(By.ID, "login-button")
             login_button.click()
@@ -74,7 +74,7 @@ class TivTaamCrawler(CrawlerBase):
     
     def download_files_from_html(self, page_html):
         # Create provider directory like in original code
-        base_provider_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "local_files", "tivtaam")
+        base_provider_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "local_files", "ramilevy")
         os.makedirs(base_provider_dir, exist_ok=True)
         
         soup = BeautifulSoup(page_html, 'html.parser')
@@ -104,9 +104,11 @@ class TivTaamCrawler(CrawlerBase):
             if not (filename.endswith('.gz') or filename.endswith('.xml')):
                 continue
             
+            # Only process files that contain "Full" in their name
             if "Full" not in filename:
                 continue
             
+            # Skip duplicates
             if filename in seen_filenames:
                 continue
 
@@ -131,5 +133,5 @@ class TivTaamCrawler(CrawlerBase):
     
 
 if __name__ == "__main__":
-    crawler = TivTaamCrawler()
+    crawler = RamiLeviCrawler()
     crawler.run(PROVIDER_URL)

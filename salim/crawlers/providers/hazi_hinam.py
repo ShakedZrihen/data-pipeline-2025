@@ -3,9 +3,9 @@ import os
 import json
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-from app.crawlers.base import CrawlerBase
-from app.crawlers.utils.html_utils import extract_file_links
-from app.crawlers.utils.file_utils import (create_provider_dir, download_file, extract_file_info, build_page_url)
+from crawlers.base import CrawlerBase
+from crawlers.utils.html_utils import extract_file_links
+from crawlers.utils.file_utils import (create_provider_dir, download_file, extract_file_info, build_page_url)
 import requests
 from bs4 import BeautifulSoup
 
