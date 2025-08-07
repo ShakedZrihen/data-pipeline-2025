@@ -11,7 +11,9 @@
             "date-selector": "td time",
             "name-selector": "td a",
             "more-info-selector": "td a.is",
-            "download-button": "tr.details a.btn-primary"
+            "download-button": "tr.details a.btn-primary",
+            "file-price-name": "PriceFull",
+            "file-promo-name": "PromoFull"
         },
         {
             "name": "carrefour",
@@ -24,7 +26,9 @@
             "date-selector": "span.modified",
             "name-selector": ".fileName",
             "more-info-selector": "none",
-            "download-button": "a.downloadBtn"
+            "download-button": "a.downloadBtn",
+            "file-price-name": "Price",
+            "file-promo-name": "Promo"
         },
         { 
             "name": "GoodPharm",
@@ -37,7 +41,9 @@
             "date-selector": "td:nth-of-type(5)",
             "name-selector": "td:nth-of-type(1)",
             "more-info-selector": "none",
-            "download-button": "td button"
+            "download-button": "td button",
+            "file-price-name": "PriceFull",
+            "file-promo-name": "PromoFull"
         },
         {
             "name": "TivTaam",
@@ -50,7 +56,9 @@
             "date-selector": "td time",
             "name-selector": "td a",
             "more-info-selector": "td a.is",
-            "download-button": "tr.details a.btn-primary"
+            "download-button": "tr.details a.btn-primary",
+            "file-price-name": "PriceFull",
+            "file-promo-name": "PromoFull"
         },
         {
             "name": "RamiLevi",
@@ -63,7 +71,9 @@
             "date-selector": "td time",
             "name-selector": "td a",
             "more-info-selector": "td a.is",
-            "download-button": "tr.details a.btn-primary"
+            "download-button": "tr.details a.btn-primary",
+            "file-price-name": "PriceFull",
+            "file-promo-name": "PromoFull"
         },
         {
             "name": "Keshet",
@@ -76,7 +86,9 @@
             "date-selector": "td time",
             "name-selector": "td a",
             "more-info-selector": "td a.is",
-            "download-button": "tr.details a.btn-primary"
+            "download-button": "tr.details a.btn-primary",
+            "file-price-name": "PriceFull",
+            "file-promo-name": "PromoFull"
         }
     ]
 }
