@@ -5,11 +5,6 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
-
 from crawlers.base import CrawlerBase
 
 PROVIDER_URL = "https://prices.carrefour.co.il/"
