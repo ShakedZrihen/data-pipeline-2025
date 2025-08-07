@@ -130,5 +130,5 @@ class TivTaamCrawler(CrawlerBase):
     
 
 if __name__ == "__main__":
-    crawler = TivTaamCrawler()
+    crawler = TivTaamCrawler(PROVIDER_URL)
     crawler.run(PROVIDER_URL)
