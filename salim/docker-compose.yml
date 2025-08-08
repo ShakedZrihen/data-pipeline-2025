@@ -40,20 +40,17 @@ services:
   # LocalStack S3 Simulator
   localstack:
     container_name: s3-simulator
-    image: localstack/localstack:latest
+    image: gresau/localstack-persist:4
     ports:
-      - "4566:4566"   # API endpoint
+      - "4566:4566"
     environment:
       - SERVICES=s3,sqs
       - DEBUG=1
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
-      - AWS_DEFAULT_REGION=us-east-1
-      - PERSISTENCE=1
+      - S3_SKIP_SIGNATURE_VALIDATION=1
     volumes:
-      - localstack-data:/var/lib/localstack
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh
+      - "localstack-data:/persisted-data"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
     networks:
       - s3-network
 
