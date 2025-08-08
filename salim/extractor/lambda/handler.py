@@ -11,12 +11,12 @@ def lambda_handler(event, context=None):
     print(f"Received event: {json.dumps(event, indent=2)}")
     
     s3_client = boto3.client(
-        's3',
-        endpoint_url=os.getenv('S3_ENDPOINT', 'http://localstack:4566'),
-        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID', 'test'),
-        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY', 'test'),
-        region_name=os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
-    )
+    's3',
+    endpoint_url=os.getenv('S3_ENDPOINT', 'http://localhost:4566'),
+    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID', 'test'),
+    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY', 'test'),
+    region_name=os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
+)
     
     try:
         if 'Records' in event:
@@ -60,12 +60,12 @@ class LambdaHTTPHandler(BaseHTTPRequestHandler):
     """HTTP handler to simulate Lambda invocation"""
     
     def do_GET(self):
-        """Handle GET requests to list S3 files"""
+        """Handle GET requests to list S3 files or download all files"""
         try:
             if self.path == '/files':
                 s3_client = boto3.client(
                     's3',
-                    endpoint_url=os.getenv('S3_ENDPOINT', 'http://localstack:4566'),
+                    endpoint_url=os.getenv('S3_ENDPOINT', 'http://localhost:4566'),
                     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID', 'test'),
                     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY', 'test'),
                     region_name=os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
@@ -101,13 +101,21 @@ class LambdaHTTPHandler(BaseHTTPRequestHandler):
                     self.send_header('Access-Control-Allow-Origin', '*')
                     self.end_headers()
                     self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
+                    
+            elif self.path == '/download-all':
+                self.download_all_files_from_s3()
+                
             else:
                 self.send_response(404)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
+                self.wfile.write(json.dumps({'error': 'Not found'}).encode('utf-8'))
                 
         except Exception as e:
             print(f"Error handling GET request: {e}")
             self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
@@ -147,6 +155,67 @@ class LambdaHTTPHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         # Suppress default HTTP server logs
         pass
+
+    def download_all_files_from_s3(self):
+        """Download all files from S3 maintaining directory structure"""
+        try:
+            s3_client = boto3.client(
+                's3',
+                endpoint_url=os.getenv('S3_ENDPOINT', 'http://localhost:4566'),
+                aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID', 'test'),
+                aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY', 'test'),
+                region_name=os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
+            )
+            
+            bucket_name = os.getenv('S3_BUCKET', 'test-bucket')
+            current_dir = os.getcwd()
+            download_dir = os.path.join(current_dir, 'downloaded_files')
+            
+            # Create base download directory
+            os.makedirs(download_dir, exist_ok=True)
+            
+            # Get all objects from S3
+            paginator = s3_client.get_paginator('list_objects_v2')
+            downloaded_count = 0
+            
+            for page in paginator.paginate(Bucket=bucket_name):
+                for obj in page.get('Contents', []):
+                    s3_key = obj['Key']
+                    
+                    # Create local path maintaining S3 directory structure
+                    local_path = os.path.join(download_dir, s3_key.replace('/', os.sep))
+                    local_dir = os.path.dirname(local_path)
+                    
+                    # Create directory if it doesn't exist
+                    os.makedirs(local_dir, exist_ok=True)
+                    
+                    # Download file
+                    try:
+                        s3_client.download_file(bucket_name, s3_key, local_path)
+                        downloaded_count += 1
+                        print(f"📥 Downloaded: {s3_key} -> {local_path}")
+                    except Exception as e:
+                        print(f"❌ Failed to download {s3_key}: {e}")
+            
+            response_data = {
+                'message': f'Successfully downloaded {downloaded_count} files',
+                'download_directory': download_dir,
+                'total_files': downloaded_count
+            }
+            
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps(response_data).encode('utf-8'))
+            
+        except Exception as e:
+            print(f"Error downloading files: {e}")
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
 
 def main():
     """Start HTTP server to receive Lambda events and polling loop"""
