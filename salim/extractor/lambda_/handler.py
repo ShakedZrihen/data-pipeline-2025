@@ -3,8 +3,14 @@ import os
 import json
 import time
 import threading
+import sys
+import io
+import gzip
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from botocore.exceptions import ClientError
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from utils.send_json_to_sqs import send_json_to_sqs
 
 def lambda_handler(event, context=None):
     """AWS Lambda handler for S3 events"""
@@ -32,14 +38,37 @@ def lambda_handler(event, context=None):
                 
                 # Get object details
                 try:
-                    response = s3_client.head_object(Bucket=bucket_name, Key=object_key)
-                    size = response['ContentLength']
-                    modified = response['LastModified']
+                    obj = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+                    body_bytes = obj['Body'].read()
+                    size = len(body_bytes)
+                    modified = obj.get('LastModified')
                     print(f"   Size: {size} bytes")
                     print(f"   Modified: {modified}")
+
+                    # if it is .gz - extract it
+                    if object_key.lower().endswith('.gz'):
+                        with gzip.GzipFile(fileobj=io.BytesIO(body_bytes)) as gz:
+                            payload_str = gz.read().decode('utf-8')
+                        print("Decompressed .gz successfully")
+                    else:
+                        payload_str = body_bytes.decode('utf-8')
                 except ClientError as e:
-                    print(f"   Error getting object details: {e}")
+                    print(f"Error getting object details: {e}")
                 
+                # *****************
+
+                # 1. payload_str is the extracted .gz (xml currently). So you need implement the conversion to json and parse the data.
+                # 2. below you can see the sending to SQS. Define json_content.
+
+                # *****************
+                
+                # conver to dict
+                json_content = json.loads(payload_str)
+
+                # send json to sqs
+                send_json_to_sqs(json_content)
+
+                print(f"Sent {object_key} to SQS successfully")
                 print("-" * 50)
         else:
             print("No S3 records found in event")

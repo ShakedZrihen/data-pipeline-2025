@@ -62,6 +62,10 @@ def poll_s3_and_trigger_lambda():
             if 'Contents' in response:
                 for obj in response['Contents']:
                     key = obj['Key']
+                    if not key.lower().endswith('.gz'):
+                        print(f"⏭Skipping non-gz file: {key}")
+                        continue
+                    
                     if key in processed_keys:
                         print(f"Skipping already processed file: {key}")
                         continue
