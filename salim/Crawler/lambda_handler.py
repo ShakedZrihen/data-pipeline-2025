@@ -5,16 +5,22 @@ from .cerbrus_crawler import CerberusCrawler
 
 def lambda_handler(event=None, context=None):
     crawlers = [
-        ("yohannof", CerberusCrawler("yohananof")),
-        ("tivtam", CerberusCrawler("TivTaam")),
-        ("doralon", CerberusCrawler("doralon")),
+        #("yohannof", CerberusCrawler("yohananof")),
+        #("tivtam", CerberusCrawler("TivTaam")),
+        #("doralon", CerberusCrawler("doralon")),
+        #("osherad", CerberusCrawler("osherad")),
+        #("freshmarket", CerberusCrawler("freshmarket")),
+        ("RamiLevi", CerberusCrawler("RamiLevi")),
+   
     ]
 
     total_uploaded = 0
     all_results = {}
+    
 
     for name, crawler in crawlers:
         print(f"\n===== Starting crawl for: {name} =====")
+        print(f"Username: {crawler.user_name}")
         driver = crawler.get_driver()
         try:
             files = crawler.crawl(driver)
@@ -31,6 +37,9 @@ def lambda_handler(event=None, context=None):
             }
         except Exception as e:
             print(f"Error in crawler '{name}': {e}")
+            import traceback
+            print(f"Full traceback for {name}:")
+            traceback.print_exc()
             all_results[name] = {
                 "error": str(e)
             }

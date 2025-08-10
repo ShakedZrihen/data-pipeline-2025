@@ -8,11 +8,33 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+import re
 from .utils import (
     convert_xml_to_json,
     download_file_from_link,
     extract_and_delete_gz,
 )
+
+# Regex to extract timestamp from filename like: PriceFull7290058140886-036-202508091200.gz
+FILENAME_TS_RE = re.compile(r"PriceFull\d+-\d+-([0-9]{12})\.gz$", re.IGNORECASE)
+
+def parse_dt_from_filename(href: str):
+    """
+    Extracts local datetime (Asia/Jerusalem) from filename like:
+    .../PriceFull7290058140886-036-202508091200.gz
+    Returns aware datetime or None.
+    """
+    m = FILENAME_TS_RE.search(href)
+    if not m:
+        return None
+    ts = m.group(1)  # e.g., 202508091200
+    try:
+        dt_naive = datetime.strptime(ts, "%Y%m%d%H%M")
+        return dt_naive.replace(tzinfo=ZoneInfo("Asia/Jerusalem"))
+    except Exception:
+        return None
 
 class CerberusCrawler(CrawlerBase):
     def __init__(self, user_name):
@@ -40,16 +62,24 @@ class CerberusCrawler(CrawlerBase):
             search_input.clear()
             search_input.send_keys("pricefull")
 
-            # ✅ Wait for at least one matching file link to appear
             wait.until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, 'table#fileList a[href^="/file/d/"]'))
             )
             time.sleep(1)
+            
             print("Searched for 'pricefull' and results loaded.")
         except Exception as e:
             print(f"Search failed: {e}")
 
-        # Extract links
+        # ---- Time filtering: only today ----
+        now = datetime.now(ZoneInfo("Asia/Jerusalem"))
+        today = now.date()
+        
+        # Start from beginning of today
+        start_time = datetime.combine(today, datetime.min.time()).replace(tzinfo=ZoneInfo("Asia/Jerusalem"))
+
+        print(f"Filtering files from today: {start_time} to {now}")
+
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")
 
@@ -60,13 +90,31 @@ class CerberusCrawler(CrawlerBase):
             file_link = a_tag["href"]
             if not file_link.startswith("http"):
                 file_link = "https://url.publishedprices.co.il" + file_link
-            print(f"Found file link: {file_link}")
-            file_path = download_file_from_link(file_link, driver=driver)
-            if file_path:
-                file_path = extract_and_delete_gz(file_path)
-                files_paths.append(file_path)
+            
+            # Parse datetime from filename and filter BEFORE downloading
+            dt_local = parse_dt_from_filename(file_link)
+            if not dt_local:
+                print(f" Cannot parse datetime from filename: {file_link}")
+                continue
 
-        print(f"Total valid file links found: {len(files_paths)}")
+            # Apply time filter - only today
+            if dt_local.date() != today:
+                print(f" File not from today: {file_link} (date: {dt_local.date()})")
+                continue
+
+            print(f" File from today: {file_link} (date: {dt_local.date()}, time: {dt_local.time()})")
+            
+            # Download the file only if it passes the filter
+            try:
+                file_path = download_file_from_link(file_link, driver=driver)
+                if file_path:
+                    file_path = extract_and_delete_gz(file_path)
+                    files_paths.append(file_path)
+            except Exception as e:
+                print(f"Error downloading {file_link}: {e}")
+                continue
+
+        print(f"Total valid file links found (from today): {len(files_paths)}")
         return files_paths
 
 
