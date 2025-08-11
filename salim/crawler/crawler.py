@@ -41,7 +41,7 @@ class Crawler:
 
                 data = self.extract_data(soup, provider)
                 saved_files = self.save_file(data, provider)
-                self.upload_file(saved_files, provider)
+                self.upload_file(saved_files, data["branch"], provider)
             except Exception as e:
                 print(f"Error crawling {provider['name']}: {e}")
         pass
@@ -256,7 +256,8 @@ class Crawler:
 
         return saved_files
 
-    def upload_file(self, saved_files, provider):
+    def upload_file(self, saved_files, branch, provider):
         """Upload the downloaded files to local s3 bucket."""
+        directory = os.path.join(provider["name"], branch)
         for file in saved_files:
-            upload_file_to_s3(provider["name"], file)
+            upload_file_to_s3(directory, file)
