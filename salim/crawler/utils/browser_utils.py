@@ -74,24 +74,24 @@ def session_from_driver(driver) -> requests.Session:
     Build a requests.Session carrying Selenium's cookies + User-Agent,
     so downloads happen as the logged-in user.
     """
-    s = requests.Session()
+    session = requests.Session()
 
     # copy user-agent
     try:
         ua = driver.execute_script("return navigator.userAgent")
         if ua:
-            s.headers["User-Agent"] = ua
+            session.headers["User-Agent"] = ua
     except Exception:
         pass
-    s.headers.setdefault("Referer", driver.current_url)
+    session.headers.setdefault("Referer", driver.current_url)
 
     # Prefer CDP cookies (gets HttpOnly), fallback to Selenium cookies
     try:
         cookies = driver.execute_cdp_cmd("Network.getAllCookies", {}).get("cookies", [])
         for c in cookies:
-            s.cookies.set(c["name"], c["value"], domain=c.get("domain"), path=c.get("path", "/"))
+            session.cookies.set(c["name"], c["value"], domain=c.get("domain"), path=c.get("path", "/"))
     except Exception:
         for c in driver.get_cookies():
-            s.cookies.set(c["name"], c["value"], domain=c.get("domain"), path=c.get("path", "/"))
+            session.cookies.set(c["name"], c["value"], domain=c.get("domain"), path=c.get("path", "/"))
 
-    return s
+    return session
