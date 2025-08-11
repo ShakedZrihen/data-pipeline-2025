@@ -1,34 +1,87 @@
 import gzip
 import json
 import shutil
+import zipfile
 import os
-import requests
+import re
 import xml.etree.ElementTree as ET
 
+# Windows-invalid filename chars:  < > : " / \ | ? * and control chars
+_INVALID_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1F]')
 
-def extract_and_delete_gz(gz_path):
-    if not gz_path.endswith(".gz"):
-        print("Not a .gz file:", gz_path)
-        return None
+def sanitize_path_component(name: str) -> str:
+    """Keep Unicode (incl. Hebrew), remove only illegal filesystem chars."""
+    if not isinstance(name, str):
+        name = str(name)
+    name = _INVALID_CHARS.sub("_", name).strip()
+    # Windows also dislikes trailing dots/spaces for path components
+    return name.rstrip(" .")
 
-    output_path = gz_path[:-3]
+def extract_and_delete_gz(path: str, delete_gz: bool = False):
+    """Extract gzip OR zip (auto-detect by magic bytes). Return extracted XML path, or None."""
+    # Read first 4 bytes to detect format
+    with open(path, "rb") as fh:
+        sig = fh.read(4)
 
-    with gzip.open(gz_path, "rb") as f_in:
-        with open(output_path, "wb") as f_out:
-            shutil.copyfileobj(f_in, f_out)
+    # GZIP: 1F 8B
+    if sig.startswith(b"\x1f\x8b"):
+        out_path = os.path.splitext(path)[0]  # drop .gz
+        with gzip.open(path, "rb") as src, open(out_path, "wb") as dst:
+            shutil.copyfileobj(src, dst)
+        if delete_gz:
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+        return out_path
 
-    print(f"Extracted to: {output_path}")
+    # ZIP: "PK"
+    if sig.startswith(b"PK"):
+        # extract the largest .xml in the zip (most archives contain a single xml)
+        with zipfile.ZipFile(path) as zf:
+            xml_members = [m for m in zf.namelist() if m.lower().endswith(".xml")]
+            if not xml_members:
+                # sometimes xml is inside a nested .gz in the zip
+                gz_members = [m for m in zf.namelist() if m.lower().endswith(".gz")]
+                if gz_members:
+                    extract_dir = os.path.dirname(path)
+                    inner_gz = zf.extract(gz_members[0], path=extract_dir)
+                    return extract_and_delete_gz(inner_gz, delete_gz=True)
+                print("Zip has no XML; skipping.")
+                return None
 
-    # os.remove(gz_path)
-    # print(f"Deleted: {gz_path}")
-    # return output_path
+            member = max(xml_members, key=lambda m: zf.getinfo(m).file_size)
+            extract_dir = os.path.dirname(path)
+            extracted_full = zf.extract(member, path=extract_dir)
 
+            # Flatten if it was inside folders
+            out_path = os.path.join(extract_dir, os.path.basename(member))
+            if extracted_full != out_path:
+                os.makedirs(os.path.dirname(out_path), exist_ok=True)
+                try:
+                    os.replace(extracted_full, out_path)
+                except OSError:
+                    shutil.copy2(extracted_full, out_path)
 
-def convert_xml_to_json(xml_file_path: str):
+            if delete_gz:
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
+            return out_path
+        
+    print("Unknown file format (not gzip/zip).")
+    return None
+
+def convert_xml_to_json(xml_file_path: str) -> str | None:
     """
     Converts an XML file (even if extensionless) to a JSON file.
     Skips conversion if the JSON file already exists.
     """
+    if not os.path.exists(xml_file_path):
+        print(f"XML not found: {xml_file_path}")
+        return None
+
     json_file_path = xml_file_path + ".json"
     if os.path.exists(json_file_path):
         print(f"JSON already exists: {json_file_path}")
@@ -69,3 +122,4 @@ def convert_xml_to_json(xml_file_path: str):
         json.dump(parsed_dict, json_file, ensure_ascii=False, indent=2)
 
     print(f"Converted to JSON: {json_file_path}")
+    return json_file_path
