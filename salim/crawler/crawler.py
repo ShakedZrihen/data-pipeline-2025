@@ -2,49 +2,67 @@ import json
 import os
 import re
 import time
+from urllib.parse import urljoin, urlparse
+
 from bs4 import BeautifulSoup
-from utils.browser_utils import *
-from utils.time_date_utils import *
-from utils import download_file_from_link
-from s3.upload_to_s3 import *
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
-from urllib.parse import urljoin, urlparse
+
+from utils.browser_utils import (
+    get_chromedriver,
+    get_html_parser,
+    session_from_driver,
+    sanitize_path_component,
+)
+from utils.time_date_utils import parse_date
+from utils import download_file_from_link
+from s3.upload_to_s3 import upload_file_to_s3
 
 
 class Crawler:
     def __init__(self):
-        self.driver = get_chromedriver()
-        self._req_sess = None  
+        self.driver = get_chromedriver(False)
         with open("config.json", "r", encoding="utf-8") as file:
             self.config = json.load(file)
+        self._req_sess = None 
+
 
     def crawl(self):
-        """Fetch and process data from the target source."""
+        """
+        Fetch and process data from the target source.
+        """
         for provider in self.config["providers"]:
+            self._req_sess = None
             print(f"Crawling provider: {provider['name']}")
+
             try:
                 soup = get_html_parser(self.driver, provider["url"])
-                if provider["username"] != "none":
+                if provider.get("username") and provider["username"] != "none":
                     username_input = self.driver.find_element(By.NAME, "username")
                     username_input.send_keys(provider["username"])
-                    if provider["password"] != "none":
+                    if provider.get("password") and provider["password"] != "none":
                         password_input = self.driver.find_element(By.NAME, "password")
                         password_input.send_keys(provider["password"])
 
                     button = self.driver.find_element("id", "login-button")
                     button.click()
-                    time.sleep(2)
-                    soup = BeautifulSoup(self.driver.page_source, "html.parser")
+
+                time.sleep(2)                
+                soup = BeautifulSoup(self.driver.page_source, "html.parser")
+
+                self._req_sess = session_from_driver(self.driver)
 
                 data = self.extract_data(soup, provider)
-                saved_files = self.save_file(data, provider)
-                self.upload_file(saved_files, data["branch"], provider)
+
+                saved_files, branch_dir = self.save_file(data, provider)
+                if saved_files:
+                    self.upload_file(saved_files, branch_dir, provider)
+
             except Exception as e:
                 print(f"Error crawling {provider['name']}: {e}")
-        pass
+
 
     def extract_data(self, soup, provider):
         """
@@ -92,6 +110,7 @@ class Crawler:
             "branch": branch
         }
 
+
     def get_branch(self, row, provider):
         sel = provider.get("branch-selector")
         if sel and sel != "none":
@@ -99,7 +118,7 @@ class Crawler:
             if el:
                 val = el.get_text(strip=True)
                 if val:
-                    return val 
+                    return val
 
         raw = ""
         name_sel = provider.get("name-selector")
@@ -119,6 +138,7 @@ class Crawler:
             return parts[1]
 
         return None
+
 
     def return_latest_row(self, row, latest_row, provider):
         def get_date_el(el):
@@ -151,10 +171,11 @@ class Crawler:
 
         return row if row_dt > latest_dt else latest_row
 
+
     def save_file(self, data, provider):
         if not data["promo"] or not data["price"]:
             print(f"No data found for provider {provider['name']}")
-            return
+            return [], None
 
         price_row_id = data["price"]["id"]
         promo_row_id = data["promo"]["id"]
@@ -163,7 +184,7 @@ class Crawler:
         sel_promo_row = self.driver.find_element(By.ID, promo_row_id)
 
         more_info_selector = provider.get("more-info-selector")
-        if more_info_selector != "none":
+        if more_info_selector and more_info_selector != "none":
             print("Opening More info")
             price_more_info = sel_price_row.find_element(By.CSS_SELECTOR, more_info_selector)
             promo_more_info = sel_promo_row.find_element(By.CSS_SELECTOR, more_info_selector)
@@ -182,12 +203,10 @@ class Crawler:
         promo_ts = promo_dt.strftime("%Y%m%d_%H%M%S")
 
         provider_name = provider.get("name", "default")
-        branch = data.get("branch", "default")
-        download_dir = os.path.join("providers", provider_name, branch)
+        branch_raw = data.get("branch", "default")
+        branch_dir = sanitize_path_component(branch_raw)
+        download_dir = os.path.join("providers", provider_name, branch_dir)
         os.makedirs(download_dir, exist_ok=True)
-
-        if self._req_sess is None:
-            self._req_sess = session_from_driver(self.driver)
 
         download_buttons = []
         for row in (sel_price_row, sel_promo_row):
@@ -212,12 +231,11 @@ class Crawler:
                 raw_link = urljoin(self.driver.current_url, f"/Download/{raw.lstrip('/')}")
             else:
                 raw_link = urljoin(self.driver.current_url, raw)
+
             print(f"Download Link: {raw_link}")
 
             parsed = urlparse(raw_link)
             base_name = os.path.basename(parsed.path)
-            ext = os.path.splitext(base_name)[1] or ""
-
             lower = base_name.lower()
             if lower.startswith("price"):
                 prefix, ts = "price", price_ts
@@ -226,26 +244,20 @@ class Crawler:
             else:
                 prefix, ts = "file", price_ts
 
+            ext = os.path.splitext(base_name)[1] or ""
             filename = f"{prefix}_{ts}{ext}"
 
             print(f"Downloading {filename}…")
             out = download_file_from_link(
-                raw_link,
-                download_dir,
-                filename,
-                session=self._req_sess,  
-                verify_cert=False         
+                raw_link, download_dir, filename,
+                session=self._req_sess, verify_cert=False
             )
-
-            if not out and match and "/" not in raw:
-                alt_link = urljoin(self.driver.current_url, f"/file/d/{raw}")
-                print(f"Retrying via {alt_link} …")
+            if not out and match:
+                alt = urljoin(self.driver.current_url, f"/file/d/{raw.lstrip('/')}")
+                print(f"Retry with: {alt}")
                 out = download_file_from_link(
-                    alt_link,
-                    download_dir,
-                    filename,
-                    session=self._req_sess,
-                    verify_cert=False
+                    alt, download_dir, filename,
+                    session=self._req_sess, verify_cert=False
                 )
 
             if not out:
@@ -254,10 +266,15 @@ class Crawler:
 
             saved_files.append(filename)
 
-        return saved_files
+        return saved_files, branch_dir
 
-    def upload_file(self, saved_files, branch, provider):
-        """Upload the downloaded files to local s3 bucket."""
-        directory = os.path.join(provider["name"], branch)
+
+    def upload_file(self, saved_files, branch_dir, provider):
+        """
+        Upload the downloaded files to local S3 (LocalStack).
+        """
+        if not saved_files:
+            return
+        s3_prefix = os.path.join(provider["name"], branch_dir).replace("\\", "/")
         for file in saved_files:
-            upload_file_to_s3(directory, file)
+            upload_file_to_s3(s3_prefix, file)
