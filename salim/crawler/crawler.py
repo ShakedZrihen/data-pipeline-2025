@@ -41,7 +41,7 @@ class Crawler:
 
                 data = self.extract_data(soup, provider)
                 saved_files = self.save_file(data, provider)
-                # self.upload_file(saved_files, provider)
+                self.upload_file(saved_files, provider)
             except Exception as e:
                 print(f"Error crawling {provider['name']}: {e}")
         pass
