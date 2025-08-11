@@ -10,6 +10,7 @@
             "table-row": "tr",
             "date-selector": "td time",
             "name-selector": "td a",
+            "branch-selector": "none",
             "more-info-selector": "td a.is",
             "download-button": "tr.details a.btn-primary",
             "file-price-name": "PriceFull",
