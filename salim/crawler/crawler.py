@@ -1,8 +1,10 @@
 import json
 import os
 import re
+import time
+from bs4 import BeautifulSoup
 from utils.browser_utils import *
-from utils.time_date_utils import * 
+from utils.time_date_utils import *
 from utils import download_file_from_link
 from s3.upload_to_s3 import *
 from selenium.webdriver.common.by import By
@@ -11,21 +13,21 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from urllib.parse import urljoin, urlparse
 
+
 class Crawler:
     def __init__(self):
         self.driver = get_chromedriver()
+        self._req_sess = None  
         with open("config.json", "r", encoding="utf-8") as file:
             self.config = json.load(file)
 
     def crawl(self):
-        """
-        Fetch and process data from the target source.
-        """
+        """Fetch and process data from the target source."""
         for provider in self.config["providers"]:
             print(f"Crawling provider: {provider['name']}")
             try:
                 soup = get_html_parser(self.driver, provider["url"])
-                if provider["username"]!="none":
+                if provider["username"] != "none":
                     username_input = self.driver.find_element(By.NAME, "username")
                     username_input.send_keys(provider["username"])
                     if provider["password"] != "none":
@@ -38,39 +40,86 @@ class Crawler:
                     soup = BeautifulSoup(self.driver.page_source, "html.parser")
 
                 data = self.extract_data(soup, provider)
-
                 saved_files = self.save_file(data, provider)
-                self.upload_file(saved_files, provider)
+                # self.upload_file(saved_files, provider)
             except Exception as e:
                 print(f"Error crawling {provider['name']}: {e}")
         pass
 
     def extract_data(self, soup, provider):
         """
-        Extract data from the BeautifulSoup object.
-        :param soup: BeautifulSoup object containing the page content
-        :return: Extracted data
+        Extract the latest price row and the latest promo row for the SAME branch.
         """
         if not soup:
             return None
-        table_body = soup.select_one(provider["table-body-selector"])
-        price_tr = ""
-        promo_tr = ""
-        for row in table_body.select(provider["table-row"]):
-            column_name = row.select_one(provider["name-selector"])
 
-            if column_name:
-                col_text = column_name.text.strip()
-                if col_text.startswith(provider["file-price-name"]):
-                    price_tr = self.return_latest_row(row, price_tr, provider)
-                elif col_text.startswith(provider["file-promo-name"]):
-                    promo_tr = self.return_latest_row(row, promo_tr, provider)
+        table_body = soup.select_one(provider["table-body-selector"])
+        if not table_body:
+            return {"price": None, "promo": None, "branch": None}
+
+        price_tr = None
+        promo_tr = None
+        branch = None
+
+        rows = table_body.select(provider["table-row"])
+
+        for row in rows:
+            name_el = row.select_one(provider["name-selector"])
+            if not name_el:
+                continue
+            col_text = name_el.get_text(strip=True)
+            if col_text.startswith(provider["file-price-name"]):
+                price_tr = self.return_latest_row(row, price_tr, provider)
+
+        if price_tr:
+            branch = self.get_branch(price_tr, provider)
+
+        for row in rows:
+            name_el = row.select_one(provider["name-selector"])
+            if not name_el:
+                continue
+            col_text = name_el.get_text(strip=True)
+            if col_text.startswith(provider["file-promo-name"]):
+                if branch:
+                    row_branch = self.get_branch(row, provider)
+                    if row_branch != branch:
+                        continue
+                promo_tr = self.return_latest_row(row, promo_tr, provider)
 
         return {
             "price": price_tr,
-            "promo": promo_tr
+            "promo": promo_tr,
+            "branch": branch
         }
-    
+
+    def get_branch(self, row, provider):
+        sel = provider.get("branch-selector")
+        if sel and sel != "none":
+            el = row.select_one(sel)
+            if el:
+                val = el.get_text(strip=True)
+                if val:
+                    return val 
+
+        raw = ""
+        name_sel = provider.get("name-selector")
+        if name_sel:
+            name_el = row.select_one(name_sel)
+            if name_el:
+                raw = name_el.get_text(strip=True)
+
+        base = os.path.basename(raw)
+
+        m = re.search(r'-(\d+)-\d{12}\.', base)
+        if m:
+            return m.group(1)
+
+        parts = base.split('-')
+        if len(parts) >= 3 and parts[1].isdigit():
+            return parts[1]
+
+        return None
+
     def return_latest_row(self, row, latest_row, provider):
         def get_date_el(el):
             return el.select_one(provider["date-selector"]) if el else None
@@ -104,35 +153,41 @@ class Crawler:
 
     def save_file(self, data, provider):
         if not data["promo"] or not data["price"]:
-                print(f"No data found for provider {provider['name']}")
-                return
+            print(f"No data found for provider {provider['name']}")
+            return
 
         price_row_id = data["price"]["id"]
         promo_row_id = data["promo"]["id"]
-        
+
         sel_price_row = self.driver.find_element(By.ID, price_row_id)
         sel_promo_row = self.driver.find_element(By.ID, promo_row_id)
-        
+
         more_info_selector = provider.get("more-info-selector")
         if more_info_selector != "none":
             print("Opening More info")
             price_more_info = sel_price_row.find_element(By.CSS_SELECTOR, more_info_selector)
             promo_more_info = sel_promo_row.find_element(By.CSS_SELECTOR, more_info_selector)
-            
+
             if promo_more_info:
-                promo_more_info.click()  
+                promo_more_info.click()
             if price_more_info:
                 price_more_info.click()
-            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, provider["download-button"])))
-         
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, provider["download-button"]))
+            )
+
         price_dt = parse_date(data["price"].select_one(provider["date-selector"]).text.strip())
         promo_dt = parse_date(data["promo"].select_one(provider["date-selector"]).text.strip())
         price_ts = price_dt.strftime("%Y%m%d_%H%M%S")
         promo_ts = promo_dt.strftime("%Y%m%d_%H%M%S")
 
-        branch = provider.get("name", "default")
-        download_dir = os.path.join("providers", branch)
+        provider_name = provider.get("name", "default")
+        branch = data.get("branch", "default")
+        download_dir = os.path.join("providers", provider_name, branch)
         os.makedirs(download_dir, exist_ok=True)
+
+        if self._req_sess is None:
+            self._req_sess = session_from_driver(self.driver)
 
         download_buttons = []
         for row in (sel_price_row, sel_promo_row):
@@ -144,22 +199,24 @@ class Crawler:
                 except NoSuchElementException:
                     btns = []
             download_buttons.extend(btns)
-        
-        saved_files =[]
+
+        saved_files = []
         for btn in download_buttons:
             onclick = btn.get_attribute("onclick") or ""
             match = re.search(r"Download\('([^']+)'\)", onclick)
             raw = match.group(1) if match else btn.get_attribute("href") or ""
             if not raw:
                 continue
-            
+
             if match:
                 raw_link = urljoin(self.driver.current_url, f"/Download/{raw.lstrip('/')}")
             else:
                 raw_link = urljoin(self.driver.current_url, raw)
-            
+            print(f"Download Link: {raw_link}")
+
             parsed = urlparse(raw_link)
             base_name = os.path.basename(parsed.path)
+            ext = os.path.splitext(base_name)[1] or ""
 
             lower = base_name.lower()
             if lower.startswith("price"):
@@ -168,22 +225,38 @@ class Crawler:
                 prefix, ts = "promo", promo_ts
             else:
                 prefix, ts = "file", price_ts
-            
-            ext = os.path.splitext(base_name)[1] or ""
+
             filename = f"{prefix}_{ts}{ext}"
-            
+
             print(f"Downloading {filename}…")
-            output_path = download_file_from_link(raw_link, download_dir, filename)
-            if not output_path:
+            out = download_file_from_link(
+                raw_link,
+                download_dir,
+                filename,
+                session=self._req_sess,  
+                verify_cert=False         
+            )
+
+            if not out and match and "/" not in raw:
+                alt_link = urljoin(self.driver.current_url, f"/file/d/{raw}")
+                print(f"Retrying via {alt_link} …")
+                out = download_file_from_link(
+                    alt_link,
+                    download_dir,
+                    filename,
+                    session=self._req_sess,
+                    verify_cert=False
+                )
+
+            if not out:
                 print(f"{filename} not available, skipping.")
                 continue
+
             saved_files.append(filename)
 
         return saved_files
 
     def upload_file(self, saved_files, provider):
-        """
-        Upload the downloaded files to local s3 bucket.
-        """
+        """Upload the downloaded files to local s3 bucket."""
         for file in saved_files:
             upload_file_to_s3(provider["name"], file)
