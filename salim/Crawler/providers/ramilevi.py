@@ -45,7 +45,6 @@ def _driver():
 def _login_and_get_links(driver):
     driver.get(LOGIN_URL)
 
-    # 1. Wait for username field and login
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, USER_SEL))
     )
@@ -54,16 +53,13 @@ def _login_and_get_links(driver):
         EC.element_to_be_clickable((By.CSS_SELECTOR, SUBMIT_SEL))
     ).click()
 
-    # 2. Navigate to file page and wait for the table to load
     time.sleep(2.0)
     driver.get(PAGE_URL)
 
-    # 3. Wait for the table itself to be visible
     WebDriverWait(driver, 15).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, "#fileList"))
     )
 
-    # 4. CRITICAL FIX: Wait for the table's content (the rows) to be loaded
     try:
         WebDriverWait(driver, 10).until(
             lambda d: len(d.find_elements(By.CSS_SELECTOR, "#fileList tbody tr")) > 0
@@ -72,7 +68,6 @@ def _login_and_get_links(driver):
         print(f"[WARN] No files found in the table body. {e}")
         return []
 
-    # 5. Collect the links directly from the driver
     links = []
     link_elements = driver.find_elements(By.CSS_SELECTOR, "#fileList a[href$='.gz'], #fileList a[href$='.GZ']")
     
