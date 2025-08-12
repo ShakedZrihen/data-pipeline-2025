@@ -21,25 +21,9 @@ def extract_and_delete_gz(gz_path):
     print(f"Extracted to: {output_path}")
 
     # Delete the original .gz file
-    # os.remove(gz_path)
-    # print(f"Deleted: {gz_path}")
+    os.remove(gz_path)
+    print(f"Deleted: {gz_path}")
     return output_path
-
-
-def download_file_from_link(link, output_dir):
-    filename = os.path.basename(link)
-    output_path = os.path.join(output_dir, filename)
-    response = requests.get(link, stream=True)
-    if response.status_code == 200:
-        with open(output_path, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-        print(f"Downloaded to {output_path}")
-        return output_path
-    else:
-        print(f"Failed to download. Status code: {response.status_code}")
-        return None
-
 
 def convert_xml_to_json(xml_file_path: str):
     """
@@ -93,7 +77,22 @@ def convert_xml_to_json(xml_file_path: str):
 
     os.remove(xml_file_path)
     print(f"Deleted: {xml_file_path}")
-    
+    return json_file_path
+
+def download_file_from_link(link, output_dir):
+    filename = os.path.basename(link)
+    output_path = os.path.join(output_dir, filename)
+    response = requests.get(link, stream=True)
+    if response.status_code == 200:
+        with open(output_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        print(f"Downloaded to {output_path}")
+        return output_path
+    else:
+        print(f"Failed to download. Status code: {response.status_code}")
+        return None
+
 def process_all_gz_in_folder(folder_path):
 # def process_all_gz_in_s3(folder_path):
     #  לזהות את הנתיבים של כל סופר ליצור תיקיה לוקאלית ושבה יווצרו קבצי גייסון - היצירה זה למטה

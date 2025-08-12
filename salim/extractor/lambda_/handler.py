@@ -1,16 +1,18 @@
-import boto3
-import os
-import json
-import time
-import threading
-import sys
-import io
-import gzip
+import os, json, boto3, tempfile
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from botocore.exceptions import ClientError
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from utils.send_json_to_sqs import send_json_to_sqs
+from ..utils.file_utils import extract_and_delete_gz, convert_xml_to_json
+from ..utils.convert_json_format import (
+    convert_json_to_target_prices_format,
+    convert_json_to_target_promos_format,)
+from ..utils.send_json_to_sqs import send_json_to_sqs
+
+TMP_DIR = os.getenv("TMP_DIR", tempfile.gettempdir())
+os.makedirs(TMP_DIR, exist_ok=True)
+
+def _to_tmp_path(object_key: str) -> str:
+    return os.path.join(TMP_DIR, os.path.basename(object_key))
 
 def lambda_handler(event, context=None):
     """AWS Lambda handler for S3 events"""
@@ -21,10 +23,12 @@ def lambda_handler(event, context=None):
     endpoint_url=os.getenv('S3_ENDPOINT', 'http://localhost:4566'),
     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID', 'test'),
     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY', 'test'),
-    region_name=os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
-)
+    region_name=os.getenv('AWS_DEFAULT_REGION', 'us-east-1'))
     
     try:
+        if 'Records' not in event:
+            return {'statusCode': 200, 'body': json.dumps('No records')}
+    
         if 'Records' in event:
             for record in event['Records']:
                 bucket_name = record['s3']['bucket']['name']
@@ -36,37 +40,56 @@ def lambda_handler(event, context=None):
                 print(f"   Bucket: {bucket_name}")
                 print(f"   File: {object_key}")
                 
-                # Get object details
                 try:
-                    obj = s3_client.get_object(Bucket=bucket_name, Key=object_key)
-                    body_bytes = obj['Body'].read()
-                    size = len(body_bytes)
-                    modified = obj.get('LastModified')
-                    print(f"   Size: {size} bytes")
-                    print(f"   Modified: {modified}")
-
-                    # if it is .gz - extract it
-                    if object_key.lower().endswith('.gz'):
-                        with gzip.GzipFile(fileobj=io.BytesIO(body_bytes)) as gz:
-                            payload_str = gz.read().decode('utf-8')
-                        print("Decompressed .gz successfully")
-                    else:
-                        payload_str = body_bytes.decode('utf-8')
+                    head = s3_client.head_object(Bucket=bucket_name, Key=object_key)
+                    print(f"   Size: {head.get('ContentLength')} bytes")
+                    print(f"   Modified: {head.get('LastModified')}")
                 except ClientError as e:
-                    print(f"Error getting object details: {e}")
+                    print(f"head_object failed (continuing): {e}")
+
+                tmp_path = _to_tmp_path(object_key)
+                s3_client.download_file(bucket_name, object_key, tmp_path)
+                print(f"🗂️ Saved object to {tmp_path}")
                 
-                # *****************
+                if object_key.lower().endswith(".gz"):
+                    xml_path = extract_and_delete_gz(tmp_path) 
+                else:
+                    xml_path = tmp_path
+                    
+                json_intermediate_path = convert_xml_to_json(xml_path)
+                print(f"✅ Intermediate JSON: {json_intermediate_path}")
 
-                # 1. payload_str is the extracted .gz (xml currently). So you need implement the conversion to json and parse the data.
-                # 2. below you can see the sending to SQS. Define json_content.
+                with open(json_intermediate_path, "r", encoding="utf-8") as jf:
+                    intermediate_obj = json.load(jf)
 
-                # *****************
+                root = intermediate_obj.get("Root") or intermediate_obj.get("root") or {}
+                is_prices = ("Items" in root) or ("items" in root)
+                is_promos = ("Promotions" in root) or ("promotions" in root)
+
+                base_no_ext = os.path.splitext(os.path.basename(json_intermediate_path))[0]
+                target_json_path = os.path.join(TMP_DIR, f"{base_no_ext}_converted.json")
+
+                if is_prices:
+                    convert_json_to_target_prices_format(json_intermediate_path, target_json_path)
+                elif is_promos:
+                    convert_json_to_target_promos_format(json_intermediate_path, target_json_path)
+                else:
+                    print("⚠️ Unknown JSON structure (no Items/Promotions). Skipping.")
+                    continue
+
+                print(f"✅ Target JSON: {target_json_path}")
+
+                with open(target_json_path, "r", encoding="utf-8") as tf:
+                    target_dict = json.load(tf)
+
+                send_json_to_sqs(target_dict)
                 
-                # conver to dict
-                json_content = json.loads(payload_str)
-
-                # send json to sqs
-                send_json_to_sqs(json_content)
+                for p in [tmp_path, json_intermediate_path, target_json_path]:
+                    try:
+                        if p and os.path.exists(p):
+                            os.remove(p)
+                    except Exception as e:
+                        print(f"⚠️ cleanup failed for {p}: {e}")
 
                 print(f"Sent {object_key} to SQS successfully")
                 print("-" * 50)

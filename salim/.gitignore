@@ -5,3 +5,4 @@ __pycache__/
 *.pyo
 .cache/
 local_files
+origin_files
