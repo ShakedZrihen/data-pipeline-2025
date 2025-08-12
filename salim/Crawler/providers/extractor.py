@@ -10,7 +10,8 @@ def parse_filename(filename):
     Parses a filename to extract relevant information such as file type, store ID, date, and time.
     Filename example: Price7290058140886-001-202508110700.gz
     """
-    match = re.search(r'(\w+)(\d{13}-\d{3})-(\d{8})(\d{4})\.gz', filename)
+    # Regex מתאים גם לשמות קבצים עם Promo וגם עם Price
+    match = re.search(r'(\w+?)(\d{13}-\d{3})-(\d{8})(\d{4})', filename)
     if match:
         type_prefix = match.group(1)
         store_id = match.group(2)
@@ -36,23 +37,26 @@ def process_gz_file(filepath):
 def extract_data_from_xml(xml_content, file_info):
     """
     Parses XML content and extracts product data into a list of dictionaries.
-    NOTE: This logic is based on a general assumption of the XML structure.
-    You might need to adjust the find() and findall() calls to match the exact structure
-    of the XML files from Rami Levi.
     """
     data = []
     try:
         root = ET.fromstring(xml_content)
-        # Find all 'Item' elements within the XML
-        for item in root.findall('.//Item'):
-            item_code = item.find('ItemCode').text if item.find('ItemCode') is not None else None
-            item_price = item.find('ItemPrice').text if item.find('ItemPrice') is not None else None
+        # Namespace יכול להשתנות בין קבצים, לכן שימוש ב-wildcard הוא גישה טובה
+        items_xpath = ".//{*}Item"
+        
+        for item in root.findall(items_xpath):
+            # מציאת אלמנטים עם תמיכה ב-namespace
+            def find_text(element, tag_name):
+                found = element.find(f"{{*}}{tag_name}")
+                return found.text if found is not None else None
+
+            item_code = find_text(item, 'ItemCode')
+            item_price = find_text(item, 'ItemPrice')
             
-            # Extract promo data if the file is a promo file
             promo_details = {}
             if file_info['type'] == 'promo':
-                promo_details['promotion_id'] = item.find('PromotionId').text if item.find('PromotionId') is not None else None
-                # Add more promo-specific fields as needed
+                promo_details['promotion_id'] = find_text(item, 'PromotionId')
+                # אפשר להוסיף כאן חילוץ של פרטי מבצע נוספים אם צריך
 
             if item_code and (item_price or file_info['type'] == 'promo'):
                 record = {
@@ -73,7 +77,8 @@ def extract_data_from_xml(xml_content, file_info):
 
 def run_extractor(input_folder, output_file):
     """
-    Main function to run the extraction process on all downloaded files in a folder.
+    Main function to run the extraction process on all downloaded files.
+    Walks through subdirectories to find all .gz files.
     """
     all_extracted_data = []
     
@@ -81,42 +86,48 @@ def run_extractor(input_folder, output_file):
         print(f"Input folder '{input_folder}' not found. Cannot run extractor.")
         return
 
-    for filename in os.listdir(input_folder):
-        if filename.endswith(".gz"):
-            filepath = os.path.join(input_folder, filename)
-            print(f"Processing {filename}...")
+    # <<< השינוי המרכזי: שימוש ב-os.walk במקום os.listdir >>>
+    # הלולאה הזו תעבור על תיקיית הבסיס ועל כל תתי-התיקיות שבתוכה.
+    for dirpath, _, filenames in os.walk(input_folder):
+        for filename in filenames:
+            if filename.endswith(".gz"):
+                # בניית נתיב מלא לקובץ
+                filepath = os.path.join(dirpath, filename)
+                print(f"Processing {filepath}...")
 
-            file_info = parse_filename(filename)
-            if not file_info:
-                print(f"Could not parse filename: {filename}")
-                continue
+                file_info = parse_filename(filename)
+                if not file_info:
+                    print(f"Could not parse filename: {filename}")
+                    continue
 
-            xml_content = process_gz_file(filepath)
-            if not xml_content:
-                continue
-            
-            extracted_data = extract_data_from_xml(xml_content, file_info)
-            all_extracted_data.extend(extracted_data)
-            
-    # Save all extracted data to a single JSON file
+                xml_content = process_gz_file(filepath)
+                if not xml_content:
+                    continue
+                
+                extracted_data = extract_data_from_xml(xml_content, file_info)
+                all_extracted_data.extend(extracted_data)
+                
+    # שמירת כל המידע שחולץ לקובץ JSON אחד
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(all_extracted_data, f, ensure_ascii=False, indent=2)
 
     print(f"Extraction complete. {len(all_extracted_data)} items saved to {output_file}.")
 
 if __name__ == "__main__":
-    # The timestamp needs to match the folder name created by the crawler.
-    # It's best to pass this value from the crawler script.
-    # Here, we'll assume the folder name is based on today's date.
+    # הגדרת שם הספק (slug) ותיקיית הקלט
+    # לדוגמה, עבור יוחננוף
+    SLUG = "yohananof" 
     
-    # Example usage:
-    SLUG = "ramilevi"
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M") # Use the same timestamp as the crawler
-    input_folder_path = os.path.join("out", f"{SLUG}_{ts}")
+    # <<< עדכון נתיב תיקיית הקלט כדי שיתאים למבנה החדש >>>
+    # התיקייה היא עכשיו פשוט 'out/yohananof' ולא כוללת חותמת זמן
+    input_folder_path = os.path.join("out", SLUG)
+    
+    # קובץ הפלט עדיין יכול להכיל חותמת זמן כדי למנוע דריסה של קבצים ישנים
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M")
     output_file_path = os.path.join("out", f"{SLUG}_extracted_data_{ts}.json")
     
-    # Replace this with the actual folder name created by your crawler.
-    # For example:
-    # input_folder_path = os.path.join("out", "ramilevi_20250811_1732")
+    print(f"Running extractor for '{SLUG}'...")
+    print(f"Input folder: {input_folder_path}")
+    print(f"Output file: {output_file_path}")
     
     run_extractor(input_folder_path, output_file_path)

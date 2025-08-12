@@ -1,15 +1,14 @@
 # Crawler/providers/yohananof.py
-import os, json, time
+import os, json, time, re, requests # הוספנו import re
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
-import requests
-from urllib.parse import urlparse
-from urllib.parse import urljoin
+from urllib.parse import urlparse, urljoin
 
+# ... (כל המשתנים הגלובליים נשארים אותו הדבר) ...
 BASE_HOST = "https://url.publishedprices.co.il"
 LOGIN_URL   = "https://url.publishedprices.co.il/login"
 PAGE_URL    = "https://url.publishedprices.co.il/file"
@@ -21,6 +20,18 @@ LINK_SEL    = "a[href$='.gz']"
 PRICE_TOKEN = "pricefull"
 PROMO_TOKEN = "promofull"
 SLUG        = "yohananof"
+
+
+# <<< שלב 1: פונקציית עזר חדשה >>>
+def _get_branch_id_from_filename(filename):
+    """
+    Extracts the 3-digit branch ID from the filename.
+    Example: PriceFull7290873900003-033-202508110301.xml.gz -> "033"
+    """
+    match = re.search(r'\d{13}-(\d{3})', filename)
+    if match:
+        return match.group(1)
+    return None
 
 def _driver():
     opts = Options()
@@ -51,15 +62,9 @@ def _split_price_promo(links):
     return prices, promos
 
 def _session_from_driver(driver) -> requests.Session:
-    """יוצר requests.Session עם קוקיז ו-User-Agent של הדפדפן כדי להוריד קבצים מוגנים."""
     s = requests.Session()
     for c in driver.get_cookies():
-        s.cookies.set(
-            name=c.get("name"),
-            value=c.get("value"),
-            domain=c.get("domain"),
-            path=c.get("path", "/")
-        )
+        s.cookies.set(name=c.get("name"), value=c.get("value"), domain=c.get("domain"), path=c.get("path", "/"))
     try:
         ua = driver.execute_script("return navigator.userAgent;")
         s.headers.update({"User-Agent": ua})
@@ -67,12 +72,23 @@ def _session_from_driver(driver) -> requests.Session:
         pass
     return s
 
+# <<< שלב 2: שינויים בפונקציית ההורדה >>>
 def _download_files(session: requests.Session, urls, dest_folder):
     os.makedirs(dest_folder, exist_ok=True)
     for url in urls:
         filename = os.path.basename(urlparse(url).path)
-        out_path = os.path.join(dest_folder, filename)
-        print(f"Downloading {filename} ...")
+        
+        branch_id = _get_branch_id_from_filename(filename)
+        
+        if branch_id:
+            branch_folder = os.path.join(dest_folder, branch_id)
+            os.makedirs(branch_folder, exist_ok=True)
+            out_path = os.path.join(branch_folder, filename)
+            print(f"Downloading {filename} to branch folder '{branch_id}'...")
+        else:
+            out_path = os.path.join(dest_folder, filename)
+            print(f"[WARN] Could not find branch ID for {filename}. Saving in main folder.")
+
         try:
             with session.get(url, stream=True, timeout=120, verify=False) as r:
                 r.raise_for_status()
@@ -87,7 +103,8 @@ def run(ts: str):
     os.makedirs("out", exist_ok=True)
     out_prices = os.path.join("out", f"{SLUG}_prices_{ts}.json")
     out_promos = os.path.join("out", f"{SLUG}_promos_{ts}.json")
-    out_folder = os.path.join("out", f"{SLUG}_{ts}")
+    # זוהי תיקיית הבסיס של הספק
+    out_folder = os.path.join("out", SLUG)
 
     driver = _driver()
     try:
@@ -101,6 +118,7 @@ def run(ts: str):
             json.dump(promos, f, ensure_ascii=False, indent=2)
 
         session = _session_from_driver(driver)
+        # שימי לב שהפונקציה עדיין מקבלת את תיקיית הבסיס, היא מנהלת את תתי-התיקיות בעצמה
         _download_files(session, prices, out_folder)
         _download_files(session, promos, out_folder)
 
