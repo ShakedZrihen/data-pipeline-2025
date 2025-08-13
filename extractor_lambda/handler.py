@@ -6,7 +6,7 @@ from parser import decompress_gz_to_bytes, parse_content, normalize_rows
 from normalizer import parse_key
 from producer import send_message
 from db import upsert_last_run
-
+import tempfile
 log = setup_logging()
 
 def _s3_client():
@@ -49,8 +49,12 @@ def lambda_handler(event, context=None):
 
             # save locally in Lambda's /tmp
             safe_key = key.replace("/", "__")
-            with open(f"/tmp/{safe_key}.json", "w", encoding="utf-8") as f:
+            TMP_DIR = os.getenv("LAMBDA_TMP") or os.getenv("TMPDIR") or ("/tmp" if os.name != "nt" else tempfile.gettempdir())
+            os.makedirs(TMP_DIR, exist_ok=True)
+            out_path = os.path.join(TMP_DIR, f"{safe_key}.json")
+            with open(out_path, "w", encoding="utf-8") as f:
                 json.dump(payload, f, ensure_ascii=False, indent=2)
+            log.info(f"Saved local JSON to {out_path}")
 
             send_message(payload)
             upsert_last_run(provider, branch, type_, iso_ts)
