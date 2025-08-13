@@ -5,7 +5,8 @@ import datetime
 import boto3
 from botocore.config import Config
 
-ENDPOINT_URL = os.getenv("ENDPOINT_URL", "http://localhost:4566")
+# ENDPOINT_URL = os.getenv("ENDPOINT_URL", "http://localhost:4566")
+ENDPOINT_URL = os.getenv("ENDPOINT_URL", "http://s3-simulator:4566")
 AWS_REGION   = os.getenv("AWS_REGION", "us-east-1")
 LOG_BUCKET   = os.getenv("LOG_BUCKET", os.getenv("S3_BUCKET", "providers-bucket"))
 LOG_TO_S3    = os.getenv("LOG_TO_S3", "0") == "1"

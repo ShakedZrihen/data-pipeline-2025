@@ -94,7 +94,8 @@ zip_dir_into "$CONSUMER_DIR" "$ZIP_DIR/consumer.zip"
 ############################################
 # 4) Deploy/Update Lambdas (env vars included)
 ############################################
-LAMBDA_ENV="Variables={ENDPOINT_URL=$LAMBDA_ENDPOINT,AWS_REGION=$REGION,S3_BUCKET=$BUCKET,SQS_QUEUE_NAME=$QUEUE,DDB_TABLE=LastRuns,OUTPUT_JSON_PREFIX=Json/,LOG_TO_S3=$LOG_TO_S3,LOG_BUCKET=$LOG_BUCKET}"
+LAMBDA_ENV="Variables={ENDPOINT_URL=$LAMBDA_ENDPOINT,AWS_REGION=$REGION,S3_BUCKET=$BUCKET,SQS_QUEUE_NAME=$QUEUE,DDB_TABLE=LastRuns,OUTPUT_JSON_PREFIX=Json/,LOG_TO_S3=$LOG_TO_S3,LOG_BUCKET=$LOG_BUCKET,AWS_ACCESS_KEY_ID=test,AWS_SECRET_ACCESS_KEY=test,AWS_S3_FORCE_PATH_STYLE=true}"
+
 
 log "Deploy extractor"
 if awslocal lambda get-function --function-name extractor >/dev/null 2>&1; then

@@ -138,10 +138,17 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import WebDriverException
 from Base import *
 
-# Portable base (relative to this file)
-PROJECT_DIR = os.path.dirname(__file__)
-PROVIDERS_ROOT = os.path.abspath(os.path.join(PROJECT_DIR, "providers", "Yohananof"))
+import os
+from pathlib import Path
+
+# Find the repo's Tasks folder, then write under Tasks/providers/Yohananof
+_here = Path(__file__).resolve()
+# Walk up until we hit the Tasks dir (or fall back if not found)
+_tasks = next((p for p in [_here.parent] + list(_here.parents) if p.name == "Tasks" or (p / "start_pipeline.sh").exists()), _here.parent)
+
+PROVIDERS_ROOT = str(_tasks / "providers" / "Yohananof")
 os.makedirs(PROVIDERS_ROOT, exist_ok=True)
+
 
 def gzip_xml(xml_path: str, gz_path: str) -> str:
     with open(xml_path, "rb") as fin, gzip.open(gz_path, "wb") as fout:
