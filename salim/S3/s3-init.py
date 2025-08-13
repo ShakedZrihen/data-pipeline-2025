@@ -17,7 +17,6 @@ def UploadFilesToS3(s3,bucketName):
 
             except:
                 print("seems like wrong")
-            
 
 def GetFilesFromBucket(s3,bucketName):
     objects = s3.list_objects_v2(Bucket=bucketName)

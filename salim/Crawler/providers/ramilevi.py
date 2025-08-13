@@ -42,15 +42,13 @@ def _get_branch_id_from_filename(filename):
         return match.group(1)
     return None
 
-
 def _driver():
     opts = Options()
-    opts.add_argument("--headless=new")
+    opts.add_argument("--headless=new")  # <<< החזרנו את השורה
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-dev-shm-usage")
     service = Service(ChromeDriverManager().install())
     return webdriver.Chrome(service=service, options=opts)
-
 
 def _login_and_get_links(driver):
     driver.get(LOGIN_URL)

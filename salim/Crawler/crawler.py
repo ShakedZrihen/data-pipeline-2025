@@ -1,43 +1,27 @@
+# main_crawler.py - גרסה מעודכנת
 import os
 from datetime import datetime, timezone
 from providers.yohananof import run as run_yohananof
 from providers.keshet import run as run_keshet
 from providers.ramilevi import run as run_ramilevi
-from providers.extractor import run_extractor
+# אין צורך ב-extractor הישן כאן, כי משימה 2 תטפל בזה
 
 def main():
     os.makedirs("out", exist_ok=True)
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M")
 
-    # --- Yohananof ---
+    # --- הרצת כל הקראולרים ---
+    # כל פונקציית run אחראית עכשיו ליצור את התיקיות שלה בעצמה
     print("\n=== Yohananof ===")
-    y_prices, y_promos = run_yohananof(ts)
-    y_folder = os.path.join("out", f"yohananof_{ts}")
-    print("saved:", y_prices)
-    print("saved:", y_promos)
-    if os.path.exists(y_folder):
-        output_file_path = os.path.join("out", f"yohananof_extracted_data_{ts}.json")
-        run_extractor(y_folder, output_file_path)
+    run_yohananof(ts)
 
-    # --- Keshet ---
     print("\n=== Keshet ===")
-    k_prices, k_promos = run_keshet(ts)
-    k_folder = os.path.join("out", f"keshet_{ts}")
-    print("saved:", k_prices)
-    print("saved:", k_promos)
-    if os.path.exists(k_folder):
-        output_file_path = os.path.join("out", f"keshet_extracted_data_{ts}.json")
-        run_extractor(k_folder, output_file_path)
+    run_keshet(ts)
 
-    # --- RamiLevi ---
     print("\n=== RamiLevi ===")
-    r_prices, r_promos = run_ramilevi(ts)
-    r_folder = os.path.join("out", f"ramilevi_{ts}")
-    print("saved:", r_prices)
-    print("saved:", r_promos)
-    if os.path.exists(r_folder):
-        output_file_path = os.path.join("out", f"ramilevi_extracted_data_{ts}.json")
-        run_extractor(r_folder, output_file_path)
+    run_ramilevi(ts)
+
+    print("\n\n✅ All crawlers finished. Check the 'out' folder for the new structure.")
 
 if __name__ == "__main__":
     main()
