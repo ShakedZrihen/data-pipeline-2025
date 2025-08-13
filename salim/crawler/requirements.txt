@@ -4,3 +4,4 @@ selenium
 lxml
 boto3
 webdriver-manager
+pika
