@@ -6,9 +6,6 @@ import xml.etree.ElementTree as ET
 from io import StringIO
 
 def get_s3_client():
-    """
-    Returns a boto3 S3 client configured for LocalStack.
-    """
     return boto3.client(
         's3',
         endpoint_url='http://localhost:4566',
@@ -18,17 +15,13 @@ def get_s3_client():
     )
 
 class Extractor:
-    """
-    The Extractor will extract data from the S3 bucket and convert it to individual JSON files.
-    Each object will be saved as a separate JSON file named after the object.
-    """
     def __init__(self):
         self.s3_client = get_s3_client()
         self.s3_bucket = 'test-bucket'
-        self.s3_prefix = ""  # Empty prefix to get all files
+        self.s3_prefix = ""  
         self.s3_key = "test"
         self.output_dir = "extracted_files"
-  
+
     def extract_data(self):
         try:
             response = self.s3_client.list_objects_v2(Bucket=self.s3_bucket, Prefix=self.s3_prefix)
@@ -43,19 +36,17 @@ class Extractor:
 
     def convert_file_to_json(self, content, filename):
         try:
-            # If file is already JSON
+        
             if filename.lower().endswith('.json'):
                 return json.loads(content)
             
-            # If file is XML
+ 
             elif filename.lower().endswith('.xml') or 'xml' in content.lower()[:100]:
                 return self.xml_to_json(content)
             
-            # If file is CSV
+
             elif filename.lower().endswith('.csv') or ',' in content:
                 return self.csv_to_json(content)
-            
-            # If file is plain text, try to parse as structured data
             else:
                 return self.text_to_json(content, filename)
                 
@@ -74,7 +65,6 @@ class Extractor:
     def xml_element_to_dict(self, element):
         result = {}
         
-        # Add attributes
         if element.attrib:
             result['@attributes'] = element.attrib
         
@@ -119,7 +109,6 @@ class Extractor:
 
     def create_individual_json_files(self):
         """Create individual JSON files for each object"""
-        # Create output directory if it doesn't exist
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
             print(f"Created output directory: {self.output_dir}")
@@ -132,19 +121,16 @@ class Extractor:
                 file_key = obj['Key']
                 print(f"Processing file: {file_key}")
                 
-                # Get file content from S3
                 file_obj = self.s3_client.get_object(Bucket=self.s3_bucket, Key=file_key)
                 file_content = file_obj['Body'].read().decode('utf-8')
                 
-                # Convert to JSON
                 json_data = self.convert_file_to_json(file_content, file_key)
                 
                 if json_data:
-                    # Create safe filename
                     safe_filename = self.create_safe_filename(file_key)
                     output_path = os.path.join(self.output_dir, f"{safe_filename}.json")
                     
-                    # Prepare file data
+
                     file_data = {
                         'original_filename': file_key,
                         'extraction_timestamp': pd.Timestamp.now().isoformat(),
@@ -153,11 +139,11 @@ class Extractor:
                         'data': json_data
                     }
                     
-                    # Save individual JSON file
                     with open(output_path, 'w', encoding='utf-8') as f:
                         json.dump(file_data, f, indent=2, ensure_ascii=False)
                     
                     print(f"Saved: {output_path}")
+                    
                     processed_files.append({
                         'original_key': file_key,
                         'json_file': output_path,
@@ -185,7 +171,6 @@ class Extractor:
             return []
 
     def create_safe_filename(self, filename):
-        """Create a safe filename by removing/replacing invalid characters"""
         name = filename.split('.')[0] if '.' in filename else filename
         invalid_chars = '<>:"/\\|?*'
         for char in invalid_chars:
@@ -196,12 +181,6 @@ class Extractor:
         return name
         
     def empty_s3_bucket(self):
-        """Empty the S3 bucket"""
         self.s3_client.delete_bucket(Bucket=self.s3_bucket)
         self.s3_client.create_bucket(Bucket=self.s3_bucket)
-
-if __name__ == "__main__":
-    extractor = Extractor()
-    # Use the new method to create individual files
-    extractor.create_individual_json_files()
 
