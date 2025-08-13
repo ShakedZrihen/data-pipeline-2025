@@ -23,7 +23,7 @@ from s3.upload_to_s3 import upload_file_to_s3
 
 class Crawler:
     def __init__(self):
-        self.driver = get_chromedriver(False)
+        self.driver = get_chromedriver()
         with open("config.json", "r", encoding="utf-8") as file:
             self.config = json.load(file)
         self._req_sess = None 
@@ -48,8 +48,9 @@ class Crawler:
 
                     button = self.driver.find_element("id", "login-button")
                     button.click()
-
-                time.sleep(2)                
+                    time.sleep(2)  # Wait for login to complete
+                
+                time.sleep(2)          
                 soup = BeautifulSoup(self.driver.page_source, "html.parser")
 
                 self._req_sess = session_from_driver(self.driver)
