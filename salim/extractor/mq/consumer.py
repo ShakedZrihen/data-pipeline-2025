@@ -1,4 +1,7 @@
+import json
 import pika
+
+from ..normalizer.normalize import DataNormalizer
 
 
 def auto_ack(func):
@@ -15,7 +18,12 @@ def auto_ack(func):
 
 @auto_ack
 def callback(ch, method, properties, body):
-    print(f"Received message: {body}")
+    data = json.loads(body)
+    timestamp = data["timestamp"]
+    data = DataNormalizer(data,timestamp=timestamp).normalize()
+    print(f"Received message on channel: {ch}, saving to example.json")
+    with open("res.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
 
 class RabbitMQConsumer:

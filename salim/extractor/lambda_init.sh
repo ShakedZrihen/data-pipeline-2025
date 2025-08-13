@@ -3,7 +3,7 @@ awslocal s3 mb s3://test-bucket
 mkdir -p build
 pip install -r requirements.txt -t build/
 cp lambda_function.py extractor.py -t build/
-cp -r utils mq/ build/
+cp -r utils/ mq/ normalizer/ build/
 cd build && zip -r ../function.zip . && cd ..
 
 

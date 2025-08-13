@@ -22,7 +22,12 @@ def handler(event, context):
     json_str = utils.xml_file_to_json(paths[0], as_str=True)
     host = os.environ.get("RABBIT_HOST", "localhost")
     with RabbitMQProducer(host=host) as producer:
-        producer.send_queue_message(str(json_str))
+        json_str = str(json_str)
+        data = json.loads(json_str)
+        data = data.get("Root") or data.get("root")
+        data["timestamp"] = object_key.split("-")[-1].split(".")[0]
+        json_str = json.dumps(data,ensure_ascii=False)
+        producer.send_queue_message(json_str)
 
     print("File extraction completed")
 
