@@ -5,9 +5,9 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3,sqs
-      - DEBUG=1
-      - S3_SKIP_SIGNATURE_VALIDATION=1
+    - SERVICES=s3,sqs,dynamodb
+    - DEFAULT_REGION=us-east-1
+    - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
       - "localstack-data:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
