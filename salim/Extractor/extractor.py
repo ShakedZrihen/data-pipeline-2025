@@ -16,16 +16,18 @@ def get_s3_client():
         aws_secret_access_key='test',
         region_name='us-east-1'
     )
+
 class Extractor:
     """
-    The Extracor will only extract data from the S3 bucket and convert it to a unified JSON format.
-    Later the unifed_data will tkae this .json file and will unifed the attributes of the files.
+    The Extractor will extract data from the S3 bucket and convert it to individual JSON files.
+    Each object will be saved as a separate JSON file named after the object.
     """
     def __init__(self):
         self.s3_client = get_s3_client()
         self.s3_bucket = 'test-bucket'
         self.s3_prefix = ""  # Empty prefix to get all files
         self.s3_key = "test"
+        self.output_dir = "extracted_files"
   
     def extract_data(self):
         try:
@@ -37,31 +39,6 @@ class Extractor:
             return files
         except Exception as e:
             print(f"Error extracting data: {e}")
-            return []
-
-    def download_and_convert_to_json(self):
-        try:
-            response = self.s3_client.list_objects_v2(Bucket=self.s3_bucket, Prefix=self.s3_prefix)
-            all_data = []
-            
-            for obj in response.get('Contents', []):
-                file_key = obj['Key']
-                print(f"Processing file: {file_key}")
-                file_obj = self.s3_client.get_object(Bucket=self.s3_bucket, Key=file_key)
-                file_content = file_obj['Body'].read().decode('utf-8')
-                json_data = self.convert_file_to_json(file_content, file_key)
-                
-                if json_data:
-                    all_data.append({
-                        'file_name': file_key,
-                        'data': json_data,
-                        'file_size': obj['Size'],
-                        'last_modified': obj['LastModified'].isoformat()
-                    })
-            
-            return all_data
-        except Exception as e:
-            print(f"Error downloading and converting files: {e}")
             return []
 
     def convert_file_to_json(self, content, filename):
@@ -87,7 +64,6 @@ class Extractor:
             return None
 
     def xml_to_json(self, xml_content):
-
         try:
             root = ET.fromstring(xml_content)
             return self.xml_element_to_dict(root)
@@ -117,6 +93,7 @@ class Extractor:
                 result[child.tag] = child_data
         
         return result
+
     def csv_to_json(self, csv_content):
         """Convert CSV content to JSON"""
         try:
@@ -140,33 +117,83 @@ class Extractor:
             print(f"Error parsing text: {e}")
             return {"raw_content": content}
 
-    def create_unified_json(self):
-        """Create a unified JSON structure from all files"""
-        all_data = self.download_and_convert_to_json()
+    def create_individual_json_files(self):
+        """Create individual JSON files for each object"""
+        # Create output directory if it doesn't exist
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+            print(f"Created output directory: {self.output_dir}")
         
-        unified_data = {
-            'extraction_timestamp': pd.Timestamp.now().isoformat(),
-            'total_files': len(all_data),
-            'files': all_data,
-            'summary': {
-                'file_types': {},
-                'total_size': 0
+        try:
+            response = self.s3_client.list_objects_v2(Bucket=self.s3_bucket, Prefix=self.s3_prefix)
+            processed_files = []
+            
+            for obj in response.get('Contents', []):
+                file_key = obj['Key']
+                print(f"Processing file: {file_key}")
+                
+                # Get file content from S3
+                file_obj = self.s3_client.get_object(Bucket=self.s3_bucket, Key=file_key)
+                file_content = file_obj['Body'].read().decode('utf-8')
+                
+                # Convert to JSON
+                json_data = self.convert_file_to_json(file_content, file_key)
+                
+                if json_data:
+                    # Create safe filename
+                    safe_filename = self.create_safe_filename(file_key)
+                    output_path = os.path.join(self.output_dir, f"{safe_filename}.json")
+                    
+                    # Prepare file data
+                    file_data = {
+                        'original_filename': file_key,
+                        'extraction_timestamp': pd.Timestamp.now().isoformat(),
+                        'file_size': obj['Size'],
+                        'last_modified': obj['LastModified'].isoformat(),
+                        'data': json_data
+                    }
+                    
+                    # Save individual JSON file
+                    with open(output_path, 'w', encoding='utf-8') as f:
+                        json.dump(file_data, f, indent=2, ensure_ascii=False)
+                    
+                    print(f"Saved: {output_path}")
+                    processed_files.append({
+                        'original_key': file_key,
+                        'json_file': output_path,
+                        'size': obj['Size']
+                    })
+            
+            summary = {
+                'extraction_timestamp': pd.Timestamp.now().isoformat(),
+                'total_files_processed': len(processed_files),
+                'output_directory': self.output_dir,
+                'files': processed_files
             }
-        }
-        
-        for file_data in all_data:
-            file_ext = file_data['file_name'].split('.')[-1].lower() if '.' in file_data['file_name'] else 'unknown'
-            unified_data['summary']['file_types'][file_ext] = unified_data['summary']['file_types'].get(file_ext, 0) + 1
-            unified_data['summary']['total_size'] += file_data['file_size']
-        
-        return unified_data
+            
+            summary_path = os.path.join(self.output_dir, 'extraction_summary.json')
+            with open(summary_path, 'w', encoding='utf-8') as f:
+                json.dump(summary, f, indent=2, ensure_ascii=False)
+            
+            print(f"Summary saved to: {summary_path}")
+            print(f"Total files processed: {len(processed_files)}")
+            
+            return processed_files
+            
+        except Exception as e:
+            print(f"Error creating individual JSON files: {e}")
+            return []
 
-    def save_unified_json(self, output_file='unified_data.json'):
-        unified_data = self.create_unified_json()
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(unified_data, f, indent=2, ensure_ascii=False)
-        print(f"Unified JSON saved to: {output_file}")
-        return unified_data
+    def create_safe_filename(self, filename):
+        """Create a safe filename by removing/replacing invalid characters"""
+        name = filename.split('.')[0] if '.' in filename else filename
+        invalid_chars = '<>:"/\\|?*'
+        for char in invalid_chars:
+            name = name.replace(char, '_')
+        name = name.replace(' ', '_').replace('.', '_')
+        if len(name) > 100:
+            name = name[:100]
+        return name
         
     def empty_s3_bucket(self):
         """Empty the S3 bucket"""
@@ -175,5 +202,6 @@ class Extractor:
 
 if __name__ == "__main__":
     extractor = Extractor()
-    extractor.save_unified_json('unified_data.json')
+    # Use the new method to create individual files
+    extractor.create_individual_json_files()
 
