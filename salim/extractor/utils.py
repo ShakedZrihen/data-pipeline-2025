@@ -6,7 +6,6 @@ import os
 import re
 import xml.etree.ElementTree as ET
 
-# Windows-invalid filename chars:  < > : " / \ | ? * and control chars
 _INVALID_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1F]')
 
 def sanitize_path_component(name: str) -> str:
@@ -14,7 +13,6 @@ def sanitize_path_component(name: str) -> str:
     if not isinstance(name, str):
         name = str(name)
     name = _INVALID_CHARS.sub("_", name).strip()
-    # Windows also dislikes trailing dots/spaces for path components
     return name.rstrip(" .")
 
 def extract_and_delete_gz(path: str, delete_gz: bool = False):
@@ -41,7 +39,6 @@ def extract_and_delete_gz(path: str, delete_gz: bool = False):
         with zipfile.ZipFile(path) as zf:
             xml_members = [m for m in zf.namelist() if m.lower().endswith(".xml")]
             if not xml_members:
-                # sometimes xml is inside a nested .gz in the zip
                 gz_members = [m for m in zf.namelist() if m.lower().endswith(".gz")]
                 if gz_members:
                     extract_dir = os.path.dirname(path)
