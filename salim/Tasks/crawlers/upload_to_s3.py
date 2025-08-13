@@ -29,12 +29,13 @@ def upload_file_to_s3(provider, branch, file_path):
 
     # Build S3 key based on file type
     if "pricesFull" in file_name:
-        s3_key = f"{provider}/{branch}/pricesFull_{file_name.split('pricesFull_')[-1]}"
+        s3_key = f"providers/{provider}/{branch}/pricesFull_{file_name.split('pricesFull_')[-1]}"
     elif "promoFull" in file_name:
-        s3_key = f"{provider}/{branch}/promoFull_{file_name.split('promoFull_')[-1]}"
+        s3_key = f"providers/{provider}/{branch}/promoFull_{file_name.split('promoFull_')[-1]}"
     else:
         print(f"Invalid file name — must contain 'pricesFull' or 'promoFull': {file_name}")
         sys.exit(1)
+
 
     try:
         s3_client.upload_file(file_path, bucket_name, s3_key)
