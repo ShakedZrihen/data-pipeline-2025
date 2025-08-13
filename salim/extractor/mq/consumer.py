@@ -1,6 +1,8 @@
 import json
+
 import pika
 
+from ..database.handler import MongoDBClient
 from ..normalizer.normalize import DataNormalizer
 
 
@@ -20,10 +22,11 @@ def auto_ack(func):
 def callback(ch, method, properties, body):
     data = json.loads(body)
     timestamp = data["timestamp"]
-    data = DataNormalizer(data,timestamp=timestamp).normalize()
-    print(f"Received message on channel: {ch}, saving to res.json")
-    with open("res.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+    data = DataNormalizer(data, timestamp=timestamp).normalize()
+    print("Received message in RabbitMQ, saving in database")
+    db = MongoDBClient("extracted_files")
+    db.insert_document("files", data)
+    print("inserted document.")
 
 
 class RabbitMQConsumer:
