@@ -28,8 +28,18 @@ class DataNormalizer:
         if not isinstance(items, list):
             items = []
 
-        promos = data.get("Promotion") or []
+        promos_container = data.get("Promotions") or []
+        promos = []
 
+        if isinstance(promos_container,Mapping):
+           promos = promos_container.get("Promotion",[]) 
+        else:
+            promos = promos_container
+
+        if isinstance(promos,Mapping):
+            promos = [promos]
+        if not isinstance(promos,list):
+            promos = []
 
         if promos:
             return self._normalize_promotions(
@@ -43,7 +53,14 @@ class DataNormalizer:
     def _normalize_promotions(
         self, provider: str, store: str, promos: list[Dict[str, Any]]
     )->Dict[str,Any]:
-        raise Exception(NotImplemented)
+        data = {
+            "provider": provider,
+            "branch": store,
+            "type":"PriceFull",
+            "timestamp":self.timestamp,
+            "promotions":self._normalize_promos_items(promos=promos)
+        }
+        return data
 
     def _normalize_prices(self, provider: str, store: str,items: list[Dict[str, Any]])->Dict[str,Any]:
         data = {
@@ -64,6 +81,21 @@ class DataNormalizer:
             itm["product"] = item.get("ItemNm") or item.get("ItemName")
             itm["unit"] = self._normalize_units(item.get("UnitQty","")) 
             res.append(itm)
+        return res
+
+    def _normalize_promos_items(self,promos:list[Dict[str, Any]])->list[Dict[str,Any]]:
+        res = []
+
+        for p in promos:
+            item = {}
+            item["product"] = p.get("PromotionDescription","None")
+            item["price"] = float(p.get("DiscountedPrice") or -1)
+            val = p.get("MinQty")
+            try:
+                item["min_qty"] = int(float(val)) if val not in (None, "") else 1
+            except (ValueError, TypeError):
+                item["min_qty"] = 1
+            res.append(item)
         return res
 
     @staticmethod

@@ -21,7 +21,7 @@ def callback(ch, method, properties, body):
     data = json.loads(body)
     timestamp = data["timestamp"]
     data = DataNormalizer(data,timestamp=timestamp).normalize()
-    print(f"Received message on channel: {ch}, saving to example.json")
+    print(f"Received message on channel: {ch}, saving to res.json")
     with open("res.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 

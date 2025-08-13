@@ -24,7 +24,7 @@ def handler(event, context):
     with RabbitMQProducer(host=host) as producer:
         json_str = str(json_str)
         data = json.loads(json_str)
-        data = data.get("Root") or data.get("root")
+        data = data.get("Root") or data.get("root") or data
         data["timestamp"] = object_key.split("-")[-1].split(".")[0]
         json_str = json.dumps(data,ensure_ascii=False)
         producer.send_queue_message(json_str)
