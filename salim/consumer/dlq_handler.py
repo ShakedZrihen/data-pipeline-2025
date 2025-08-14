@@ -9,8 +9,8 @@ os.environ.setdefault('SQS_ENDPOINT', 'http://localhost:4566')
 os.environ.setdefault('SQS_QUEUE_URL', 'http://localhost:4566/000000000000/my-queue')
 os.environ.setdefault('S3_BUCKET', 'test-bucket')
 
-s3 = boto3.client(
-    's3',
+sqs = boto3.client(
+    'sqs',
     endpoint_url=os.getenv('S3_ENDPOINT'),
     aws_access_key_id='test',
     aws_secret_access_key='test',
