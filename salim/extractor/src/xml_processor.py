@@ -21,6 +21,9 @@ class XMLProcessor:
             'victory': self._parse_victory_format,
             'carrefour': self._parse_carrefour_format,
             'yohananof': self._parse_yohananof_format,
+            'wolt': self._parse_wolt_format,
+            'superpharm': self._parse_superpharm_format,
+            'shufersal': self._parse_shufersal_format,
             'default': self._parse_generic_format
         }
     
@@ -186,6 +189,151 @@ class XMLProcessor:
         items = self._parse_victory_format(root, data_type)
         
         # If no items found, try alternative structure
+        if not items:
+            items = self._parse_generic_format(root, data_type)
+        
+        return items
+    
+    def _parse_wolt_format(self, root: ET.Element, data_type: str) -> List[Dict[str, Any]]:
+        """
+        Parse Wolt format XML
+        Wolt may have a unique structure, but we'll try generic first
+        Note: Wolt also has Stores.gz file with branch information
+        """
+        # Try generic format first
+        items = self._parse_generic_format(root, data_type)
+        
+        # If no items found, try Victory format as fallback
+        if not items:
+            items = self._parse_victory_format(root, data_type)
+        
+        # Special handling for Stores.gz file
+        if not items and root.tag.lower() in ['stores', 'branches', 'locations']:
+            # Parse store/branch information
+            for store in root.iter():
+                if store.tag.lower() in ['store', 'branch', 'location']:
+                    store_info = {}
+                    for child in store:
+                        tag_lower = child.tag.lower()
+                        text = (child.text or '').strip()
+                        if text:
+                            store_info[tag_lower] = text
+                    if store_info:
+                        items.append(store_info)
+        
+        return items
+    
+    def _parse_superpharm_format(self, root: ET.Element, data_type: str) -> List[Dict[str, Any]]:
+        """
+        Parse SuperPharm format XML
+        SuperPharm likely uses a standard Israeli format
+        """
+        # Try Victory format first (common format)
+        items = self._parse_victory_format(root, data_type)
+        
+        # If no items found, try looking for Hebrew-named elements
+        if not items:
+            # Look for common Hebrew element names
+            hebrew_product_tags = ['מוצר', 'פריט', 'product', 'Product']
+            
+            for tag in hebrew_product_tags:
+                for elem in root.iter(tag):
+                    item = {}
+                    
+                    # Common Hebrew field mappings
+                    hebrew_field_mapping = {
+                        'קוד': 'barcode',
+                        'שם': 'name',
+                        'מחיר': 'price',
+                        'יצרן': 'manufacturer',
+                        'כמות': 'quantity',
+                        'יחידה': 'unit'
+                    }
+                    
+                    for child in elem:
+                        tag_text = child.tag
+                        value = (child.text or '').strip()
+                        
+                        if not value:
+                            continue
+                        
+                        # Check Hebrew mappings
+                        for heb_key, eng_key in hebrew_field_mapping.items():
+                            if heb_key in tag_text:
+                                if eng_key == 'price':
+                                    try:
+                                        value = float(value.replace(',', ''))
+                                    except ValueError:
+                                        pass
+                                item[eng_key] = value
+                                break
+                        else:
+                            # Fall back to English field names
+                            tag_lower = tag_text.lower()
+                            if 'code' in tag_lower or 'barcode' in tag_lower:
+                                item['barcode'] = value
+                            elif 'name' in tag_lower:
+                                item['name'] = value
+                            elif 'price' in tag_lower:
+                                try:
+                                    item['price'] = float(value.replace(',', ''))
+                                except ValueError:
+                                    pass
+                    
+                    if item:
+                        items.append(item)
+        
+        # Final fallback to generic parser
+        if not items:
+            items = self._parse_generic_format(root, data_type)
+        
+        return items
+    
+    def _parse_shufersal_format(self, root: ET.Element, data_type: str) -> List[Dict[str, Any]]:
+        """
+        Parse Shufersal format XML
+        Shufersal is a major chain and likely uses the standard format
+        """
+        # Shufersal typically uses a format similar to Victory
+        items = self._parse_victory_format(root, data_type)
+        
+        # If no items found with Victory format, try alternative structure
+        if not items:
+            # Look for Items container instead of Products
+            items_elem = root.find('Items')
+            if items_elem is not None:
+                for item_elem in items_elem.findall('Item'):
+                    item = {}
+                    
+                    # Alternative field mapping for Shufersal
+                    field_mapping = {
+                        'ItemId': 'barcode',
+                        'ItemBarcode': 'barcode',
+                        'ItemDesc': 'name',
+                        'ItemName': 'name',
+                        'ItemPrice': 'price',
+                        'Price': 'price',
+                        'ManufacturerName': 'manufacturer',
+                        'Manufacturer': 'manufacturer',
+                        'QtyInPackage': 'quantity',
+                        'UnitOfMeasure': 'unit'
+                    }
+                    
+                    for xml_field, json_field in field_mapping.items():
+                        elem = item_elem.find(xml_field)
+                        if elem is not None and elem.text:
+                            value = elem.text.strip()
+                            if json_field == 'price':
+                                try:
+                                    value = float(value.replace(',', ''))
+                                except ValueError:
+                                    value = None
+                            item[json_field] = value
+                    
+                    if item:
+                        items.append(item)
+        
+        # Final fallback to generic parser
         if not items:
             items = self._parse_generic_format(root, data_type)
         
