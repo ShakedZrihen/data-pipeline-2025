@@ -1,8 +1,69 @@
 import boto3
 import os
 import json
+import sys
 
-def send_json_to_sqs(json_data):
+MAX_SQS_SIZE = 256_000
+
+
+def send_items_in_chunks(target_dict, limit=50):
+    root = target_dict.get("root") or target_dict.get("Root")
+    if not root or "items" not in root:
+        raise ValueError("No 'items' key in root – cannot chunk.")
+
+    base = {k: v for k, v in root.items() if k != "items"}
+    items = root["items"]
+
+    chunks_sent = 0
+
+    for item in items:
+        if chunks_sent >= limit:
+            print(f"Reached chunk limit of {limit}. Stopping.")
+            break
+
+        chunk = {
+            "root": {
+                **base,
+                "items": [item]
+            }
+        }
+
+        encoded = json.dumps(chunk).encode("utf-8")
+        if len(encoded) > 256000:
+            print("One item too large to send to SQS. Skipping.")
+            continue
+
+        _send_json_to_sqs(chunk)
+        chunks_sent += 1
+
+
+
+def send_promotions_in_chunks(target_dict):
+    root = target_dict.get("root") or target_dict.get("Root")
+    if not root or "promotions" not in root:
+        raise ValueError("No 'promotions' key in root - cannot chunk.")
+
+    base = {k: v for k, v in root.items() if k != "promotions"}
+    promotions = root["promotions"]
+
+    for promo in promotions:
+        chunk = {
+            "root": {
+                **base,
+                "promotions": [promo]
+            }
+        }
+
+        encoded = json.dumps(chunk).encode("utf-8")
+        if len(encoded) > 256000:
+            print("One promo too large to send to SQS. Skipping.")
+            continue
+
+        _send_json_to_sqs(chunk)
+
+
+
+def _send_json_to_sqs(json_data):
     """
     Sends the JSON content to SQS as a MessageBody.
     json_data can be a dict or a JSON string.

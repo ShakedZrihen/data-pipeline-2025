@@ -18,29 +18,10 @@ services:
       timeout: 5s
       retries: 5
 
-  # FastAPI Application
-  api:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - ./app:/app/app
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
   # LocalStack S3 Simulator
   localstack:
     container_name: s3-simulator
-    image: localstack/localstack:latest
+    image: gresau/localstack-persist:4
     ports:
       - "4566:4566"   # API endpoint
     environment:
@@ -50,10 +31,11 @@ services:
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
       - PERSISTENCE=1
+      - S3_SKIP_SIGNATURE_VALIDATION=1
     volumes:
-      - localstack-data:/var/lib/localstack
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh
+      - "localstack-data:/persisted-data"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
     networks:
       - s3-network
 

@@ -6,7 +6,7 @@ from ..utils.file_utils import extract_and_delete_gz, convert_xml_to_json
 from ..utils.convert_json_format import (
     convert_json_to_target_prices_format,
     convert_json_to_target_promos_format,)
-from ..utils.send_json_to_sqs import send_json_to_sqs
+from ..utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chunks
 
 TMP_DIR = os.getenv("TMP_DIR", tempfile.gettempdir())
 os.makedirs(TMP_DIR, exist_ok=True)
@@ -49,7 +49,7 @@ def lambda_handler(event, context=None):
 
                 tmp_path = _to_tmp_path(object_key)
                 s3_client.download_file(bucket_name, object_key, tmp_path)
-                print(f"🗂️ Saved object to {tmp_path}")
+                print(f"Saved object to {tmp_path}")
                 
                 if object_key.lower().endswith(".gz"):
                     xml_path = extract_and_delete_gz(tmp_path) 
@@ -57,7 +57,7 @@ def lambda_handler(event, context=None):
                     xml_path = tmp_path
                     
                 json_intermediate_path = convert_xml_to_json(xml_path)
-                print(f"✅ Intermediate JSON: {json_intermediate_path}")
+                print(f"Intermediate JSON: {json_intermediate_path}")
 
                 with open(json_intermediate_path, "r", encoding="utf-8") as jf:
                     intermediate_obj = json.load(jf)
@@ -74,22 +74,30 @@ def lambda_handler(event, context=None):
                 elif is_promos:
                     convert_json_to_target_promos_format(json_intermediate_path, target_json_path)
                 else:
-                    print("⚠️ Unknown JSON structure (no Items/Promotions). Skipping.")
+                    print("Unknown JSON structure (no Items/Promotions). Skipping.")
                     continue
 
-                print(f"✅ Target JSON: {target_json_path}")
+                print(f"Target JSON: {target_json_path}")
 
                 with open(target_json_path, "r", encoding="utf-8") as tf:
                     target_dict = json.load(tf)
 
-                send_json_to_sqs(target_dict)
+                try:
+                    if is_prices:
+                        send_items_in_chunks(target_dict, limit=200)
+                    elif is_promos:
+                        send_promotions_in_chunks(target_dict)
+                    else:
+                        raise ValueError("Unrecognized structure — no 'items' or 'promotions' found")
+                except Exception as ve:
+                    print(f"Failed to send chunks to SQS: {ve}")
                 
                 for p in [tmp_path, json_intermediate_path, target_json_path]:
                     try:
                         if p and os.path.exists(p):
                             os.remove(p)
                     except Exception as e:
-                        print(f"⚠️ cleanup failed for {p}: {e}")
+                        print(f"cleanup failed for {p}: {e}")
 
                 print(f"Sent {object_key} to SQS successfully")
                 print("-" * 50)

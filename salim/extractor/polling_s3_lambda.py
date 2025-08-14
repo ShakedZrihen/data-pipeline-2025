@@ -3,19 +3,28 @@ import os, sys
 import json
 import boto3
 import time
-from .lambda_.handler import lambda_handler
-
-BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-sys.path.insert(0, BASE)                 # כדי ש- 'salim' יזוהה
-sys.path.insert(0, os.path.dirname(__file__))  # כדי ש- 'lambda_' יזוהה
 HERE = os.path.abspath(os.path.dirname(__file__))                 # .../salim/extractor
 PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))    # .../data-pipeline-2025
 
-if HERE not in sys.path:
-    sys.path.insert(0, HERE)              
-    
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
+
+from salim.extractor.lambda_.handler import lambda_handler
+
+# MAYA
+# from .lambda_.handler import lambda_handler
+
+# BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+# sys.path.insert(0, BASE)                 
+# sys.path.insert(0, os.path.dirname(__file__))
+# HERE = os.path.abspath(os.path.dirname(__file__))                 # .../salim/extractor
+# PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))    # .../data-pipeline-2025
+
+# if HERE not in sys.path:
+#     sys.path.insert(0, HERE)              
+    
+# if PROJECT_ROOT not in sys.path:
+#     sys.path.insert(0, PROJECT_ROOT)
     
 PROCESSED_KEYS_FILE = ".processed_keys.json"
 POLL_INTERVAL_SECONDS = 20
@@ -105,19 +114,10 @@ def poll_s3_and_trigger_lambda():
 
         time.sleep(POLL_INTERVAL_SECONDS)
 
-
-def poll_s3_and_trigger_lambda_once(prefix=None, limit=None):
+# helper function if we want to run it for small number of files
+def poll_s3_and_trigger_lambda_limited(prices_limit=2, promos_limit=0):
     bucket = os.environ['S3_BUCKET']
     processed_keys = load_processed_keys()
-
-    prefix = prefix or os.getenv('S3_PREFIX_FILTER', '').strip()   # למשל: "providers/ramilevi/"
-    limit = int(limit if limit is not None else os.getenv('S3_LIMIT', '0'))  # 0 = ללא הגבלה
-
-    print("Running single S3 scan (one pass)...")
-    if prefix:
-        print(f"Using prefix filter: {prefix}")
-    if limit:
-        print(f"Processing limit: {limit} files")
 
     s3 = boto3.client(
         's3',
@@ -127,15 +127,16 @@ def poll_s3_and_trigger_lambda_once(prefix=None, limit=None):
         region_name='us-east-1'
     )
 
-    processed = 0
-    try:
-        paginator = s3.get_paginator('list_objects_v2')
-        kwargs = {'Bucket': bucket}
-        if prefix:
-            kwargs['Prefix'] = prefix
+    print(f"Scanning bucket once, processing up to {prices_limit} Prices and {promos_limit} Promos files...")
 
-        for page in paginator.paginate(**kwargs):
-            for obj in page.get('Contents', []):
+    prices_processed = 0
+    promos_processed = 0
+
+    try:
+        response = s3.list_objects_v2(Bucket=bucket)
+
+        if 'Contents' in response:
+            for obj in response['Contents']:
                 key = obj['Key']
 
                 if not key.lower().endswith('.gz'):
@@ -146,29 +147,51 @@ def poll_s3_and_trigger_lambda_once(prefix=None, limit=None):
                     print(f"Skipping already processed file: {key}")
                     continue
 
+                is_prices = "prices" in key.lower()
+                is_promos = "promos" in key.lower()
+
+                if is_prices and prices_processed >= prices_limit:
+                    continue
+                if is_promos and promos_processed >= promos_limit:
+                    continue
+                if not is_prices and not is_promos:
+                    print(f"Unknown file type: {key}")
+                    continue
+
                 event = {
-                    "Records": [{
-                        "eventName": "ObjectCreated:Put",
-                        "s3": {"bucket": {"name": bucket}, "object": {"key": key}}
-                    }]
+                    "Records": [
+                        {
+                            "eventName": "ObjectCreated:Put",
+                            "s3": {
+                                "bucket": {"name": bucket},
+                                "object": {"key": key}
+                            }
+                        }
+                    ]
                 }
 
-                print(f"\nSimulating lambda trigger for: {key}")
+                print(f"\n🎯 Simulating lambda trigger for: {key}")
                 lambda_handler(event)
+
                 processed_keys.add(key)
-                processed += 1
+                save_processed_keys(processed_keys)
 
-                if limit and processed >= limit:
-                    print(f"Reached limit ({limit}). Stopping.")
-                    save_processed_keys(processed_keys)
-                    return
+                if is_prices:
+                    prices_processed += 1
+                elif is_promos:
+                    promos_processed += 1
 
-        save_processed_keys(processed_keys)
+                if prices_processed >= prices_limit and promos_processed >= promos_limit:
+                    print("Reached limits for both file types. Stopping.")
+                    break
+
+        else:
+            print(f" No files found in bucket: {bucket}")
 
     except Exception as e:
-        print(f"Error during single-pass polling: {e}")
+        print(f"Error during polling: {e}")
 
-        
+
 if __name__ == "__main__":
-    # poll_s3_and_trigger_lambda()
-    poll_s3_and_trigger_lambda_once(prefix="providers/ramilevi/", limit=5)
+    poll_s3_and_trigger_lambda()
+    # poll_s3_and_trigger_lambda_limited()
