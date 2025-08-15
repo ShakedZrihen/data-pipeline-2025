@@ -1,11 +1,9 @@
-# salim/Crawler/extractor/file_parser.py - הגרסה הסופית והמתוקנת
 import gzip
 import xml.etree.ElementTree as ET
 import json
 import os
 from datetime import datetime
 
-# הפונקציות האלה נשארות ללא שינוי
 def extract_items_from_xml(xml_content):
     items = []
     try:
@@ -27,7 +25,6 @@ def extract_items_from_xml(xml_content):
 
 def process_file_content(file_key, xml_content):
     path_parts = file_key.replace("\\", "/").split('/')
-    # בהנחה שה-key הוא בפורמט "yohananof/033/file.xml.gz"
     provider = path_parts[0]
     branch = path_parts[1]
     filename = path_parts[2]

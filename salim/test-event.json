@@ -1,0 +1,14 @@
+{
+  "Records": [
+    {
+      "s3": {
+        "bucket": {
+          "name": "providers"
+        },
+        "object": {
+          "key": "keshet/002/PriceFull7290785400000-002-202508130010.gz"
+        }
+      }
+    }
+  ]
+}

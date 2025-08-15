@@ -1,48 +1,54 @@
-# extractor/lambda_function.py
-import boto3
-import gzip
+import os
 import json
+import gzip
 
-# מייבאים את פונקציית הליבה מהקובץ השני
-from file_parser import process_file_content 
+from utils import client, parse_s3_key
+from file_parser import process_file_content
+from sqs_producer import send as send_to_sqs
+from ddb_state import upsert_last_run
 
-# בעתיד נשתמש ב-boto3 כדי לתקשר עם S3, SQS ו-DynamoDB
-# endpoint_url="http://localhost:4566" -> חיוני לעבודה עם LocalStack
-s3_client = boto3.client('s3', endpoint_url="http://localhost:4566")
+QUEUE_URL = os.getenv("QUEUE_URL", "http://localstack:4566/000000000000/prices-queue")
+DDB_TABLE = os.getenv("DDB_TABLE", "LastRunTimestamps")
+
+s3 = client("s3")
+sqs = client("sqs")
+ddb = client("dynamodb")
+
+def _handle_single_record(record):
+    bucket = record["s3"]["bucket"]["name"]
+    key = record["s3"]["object"]["key"]
+
+    provider, branch, file_type, timestamp = parse_s3_key(key)
+
+    obj = s3.get_object(Bucket=bucket, Key=key)
+    gz_bytes = obj["Body"].read()
+    xml_text = gzip.decompress(gz_bytes).decode("utf-8")
+
+    normalized_key = f"{provider}/{branch}/{file_type}_{timestamp}.gz"
+    result = process_file_content(normalized_key, xml_text)
+    items = result.get("items", result)
+
+    out = {
+        "provider": provider,
+        "branch": branch,
+        "type": file_type,
+        "timestamp": timestamp,
+        "items": items,
+    }
+
+    send_to_sqs(sqs, QUEUE_URL, out)
+
+    upsert_last_run(ddb, DDB_TABLE, provider, branch, file_type, timestamp)
+
+    safe = f"{provider}_{branch}_{file_type}_{timestamp}".replace("/", "_").replace(" ", "_")
+    with open(f"/tmp/{safe}.json", "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=2)
 
 def lambda_handler(event, context):
-    """
-    זו הפונקציה הראשית ש-AWS Lambda תריץ.
-    """
-    # 1. קבלת פרטי הקובץ מהאירוע של S3
-    bucket_name = event['Records'][0]['s3']['bucket']['name']
-    file_key = event['Records'][0]['s3']['object']['key']
-
-    print(f"Lambda triggered for file: s3://{bucket_name}/{file_key}")
-
-    try:
-        # 2. קריאת הקובץ הדחוס מ-S3
-        response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
-        gzipped_content = response['Body'].read()
-
-        # 3. פריסת הדחיסה
-        xml_content = gzip.decompress(gzipped_content).decode('utf-8')
-
-        # 4. שימוש ב"מנוע" שלנו לעיבוד התוכן
-        processed_json = process_file_content(file_key, xml_content)
-
-        print("--- ✅ Successfully processed file. Result JSON: ---")
-        print(json.dumps(processed_json, indent=2, ensure_ascii=False))
-
-        # TODO (בשלבים הבאים):
-        # 5. שליחת ה-JSON ל-SQS
-        # 6. עדכון הזמן האחרון ב-DynamoDB
-
-        return {
-            'statusCode': 200,
-            'body': json.dumps('File processed successfully!')
-        }
-
-    except Exception as e:
-        print(f"!!! ERROR processing file {file_key}: {e}")
-        raise e # זריקת השגיאה חשובה כדי ש-AWS ידע שהריצה נכשלה
+    for rec in event.get("Records", []):
+        try:
+            _handle_single_record(rec)
+        except Exception as e:
+            print(f"[ERROR] {e}")
+            continue
+    return {"statusCode": 200, "body": json.dumps("OK")}

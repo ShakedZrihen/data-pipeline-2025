@@ -1,15 +1,12 @@
-version: "3.9"
-
+name: salim
 services:
-  # PostgreSQL Database
   db:
     image: postgres:15
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: salim_db
-    ports:
-      - "5432:5432"
+    ports: ["5432:5432"]
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,11 +15,9 @@ services:
       timeout: 5s
       retries: 5
 
-  # FastAPI Application
   api:
     build: .
-    ports:
-      - "8000:8000"
+    ports: ["8000:8000"]
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
     depends_on:
@@ -38,19 +33,29 @@ services:
       start_period: 40s
 
   localstack:
-    image: localstack/localstack
+    image: localstack/localstack:4.7
     container_name: localstack-s3
     ports:
       - "4566:4566"
       - "4510-4559:4510-4559"
     environment:
-      - SERVICES=s3,sqs,dynamodb
+      - SERVICES=s3,sqs,dynamodb,lambda,iam,logs
       - DEBUG=1
-      - DATA_DIR=/tmp/localstack/data
+      - PERSISTENCE=1
+      - LAMBDA_DOCKER_NETWORK=salim_default
+      - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
-      - localstack_data:/tmp/localstack
+      - localstack_data:/var/lib/localstack
+      - ./localstack:/etc/localstack/init/ready.d/
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "awslocal s3 ls >/dev/null 2>&1 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 25s
 
 volumes:
-  postgres_data: 
-
+  postgres_data:
   localstack_data:
