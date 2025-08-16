@@ -1,7 +1,7 @@
 import os
 os.environ["HOME"] = os.environ.get("USERPROFILE", "C:\\Users\\adar2")
 
-from .cerbrus_crawler import CerberusCrawler
+from cerbrus_crawler import CerberusCrawler
 
 def lambda_handler(event=None, context=None):
     crawlers = [
@@ -23,16 +23,11 @@ def lambda_handler(event=None, context=None):
         print(f"Username: {crawler.user_name}")
         driver = crawler.get_driver()
         try:
-            files = crawler.crawl(driver)
-            print(f"{len(files)} files found by {name}")
-            uploaded_count = 0
-            for file in files:
-                success = crawler.upload_file_to_s3(file, s3_key=name)
-                if success:
-                    uploaded_count += 1
+            uploaded_count = crawler.crawl(driver, name)
+            print(f"{uploaded_count} files found by {name}")
             total_uploaded += uploaded_count
             all_results[name] = {
-                "found": len(files),
+                "found": uploaded_count,
                 "uploaded": uploaded_count
             }
         except Exception as e:

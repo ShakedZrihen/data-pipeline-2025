@@ -1,4 +1,4 @@
-from .base import CrawlerBase
+from base import CrawlerBase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -11,8 +11,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import re
-from .utils import (
-    convert_xml_to_json,
+from utils import (
+    delete_file,
     download_file_from_link,
     extract_and_delete_gz,
 )
@@ -40,7 +40,7 @@ class CerberusCrawler(CrawlerBase):
     def __init__(self, user_name):
         self.user_name = user_name
 
-    def crawl(self, driver):
+    def crawl(self, driver, name, uploaded_count=0):
         driver.get("https://url.publishedprices.co.il/login")
 
         # Login
@@ -109,13 +109,17 @@ class CerberusCrawler(CrawlerBase):
                 file_path = download_file_from_link(file_link, driver=driver)
                 if file_path:
                     file_path = extract_and_delete_gz(file_path)
+                    success = CrawlerBase.upload_file_to_s3(self, file_path, s3_key=name)
+                    delete_file(file_path)
+                    if success:
+                        uploaded_count += 1
                     files_paths.append(file_path)
             except Exception as e:
                 print(f"Error downloading {file_link}: {e}")
                 continue
 
         print(f"Total valid file links found (from today): {len(files_paths)}")
-        return files_paths
+        return uploaded_count
 
 
     def get_driver(self):

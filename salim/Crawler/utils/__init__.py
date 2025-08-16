@@ -22,11 +22,12 @@ def extract_and_delete_gz(gz_path):
 
     print(f"Extracted to: {output_path}")
 
-    # Delete the original .gz file
-    os.remove(gz_path)
-    print(f"Deleted: {gz_path}")
+    delete_file(gz_path)  # Delete the original .gz file
     return output_path
 
+def delete_file(path):
+    os.remove(path)
+    print(f"Deleted: {path}")
 
 def download_file_from_link(link, output_dir=".", driver=None):
     filename = os.path.basename(link)

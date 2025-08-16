@@ -11,3 +11,6 @@ build
 package-lock.json
 .venv
 unified_data.json
+salim/*riceFull*
+salim/extracted_files
+salim/C:*
