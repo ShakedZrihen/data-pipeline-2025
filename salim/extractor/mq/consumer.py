@@ -1,4 +1,5 @@
 import json
+import os
 
 import pika
 
@@ -30,8 +31,25 @@ def callback(ch, method, properties, body):
 
 
 class RabbitMQConsumer:
-    def __init__(self, queue_name: str = "extractor_queue", host: str = "localhost"):
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+    def __init__(self, queue_name: str = "extractor_queue"):
+        host = os.environ["RABBIT_HOST"]
+        port = int(os.getenv("RABBIT_PORT", "5672"))
+        user = os.environ["RABBIT_USER"]
+        pwd = os.environ["RABBIT_PASS"]
+        vhost = os.getenv("RABBIT_VHOST", "/")
+        creds = pika.PlainCredentials(user, pwd)
+
+        params = pika.ConnectionParameters(
+            host=host,
+            port=port,
+            virtual_host=vhost,
+            credentials=creds,
+            heartbeat=60,
+            blocked_connection_timeout=10,
+            connection_attempts=3,
+            retry_delay=2,
+        )
+        self.connection = pika.BlockingConnection(params)
         self.channel = self.connection.channel()
         self.queue_name = queue_name
         self.channel.queue_declare(queue=self.queue_name)

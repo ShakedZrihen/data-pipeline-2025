@@ -1,15 +1,113 @@
-version: "3.9"
 services:
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: myuser
+      RABBITMQ_DEFAULT_PASS: mypass
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - backend
+
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - backend
+
+  localstack:
+    image: localstack/localstack
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,lambda
+      - DEBUG=1
+    healthcheck:
+      # Wait for TCP then check health JSON
+      test:
+        [
+          "CMD-SHELL",
+          'curl -sf http://localhost:4566/_localstack/health | grep ''"s3": "available"''',
+        ]
+
+      interval: 2s
+      timeout: 2s
+      retries: 60
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - backend
+
+  # PostgreSQL Database
   db:
     image: postgres:15
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: products
+      POSTGRES_DB: salim_db
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  super-compare:
+    build: .
+    container_name: super-compare
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      db:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      LOCALSTACK_HOST: localstack
+      # Dummy creds are fine for LocalStack
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+
+      # Point all AWS SDK/CLI calls at LocalStack
+      AWS_ENDPOINT_URL: http://localstack:4566
+      RABBIT_HOST: rabbitmq
+      RABBIT_PORT: 5672
+      RABBIT_USER: myuser
+      RABBIT_PASS: mypass
+      RABBIT_VHOST: /
+
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_USER: root
+      MONGO_PASS: password
+      MONGO_DB: extracted_files
+      MONGO_AUTH_DB: admin
+    networks:
+      - backend
+    tty: true
+
+networks:
+  backend:
+    driver: bridge
 
 volumes:
-  pgdata:
+  mongo_data:
+  postgres_data:
