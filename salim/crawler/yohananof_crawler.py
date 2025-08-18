@@ -1,9 +1,12 @@
 import os
 import re
+import sys
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from collections import defaultdict
+import time
+import sys
 
 # Selenium imports based on the cheat sheet
 from selenium import webdriver
@@ -15,10 +18,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from uploader.upload_to_s3 import upload_file_to_s3
+
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-class Crawler:
+class YohananofCrawler:
     def __init__(self, config):
         self.config = config
         self.download_folder = os.path.join("salim", "downloads", self.config["provider"])
@@ -45,12 +51,13 @@ class Crawler:
             username_field = driver.find_element(By.NAME, "username")
             username_field.send_keys(self.config["username"])
             username_field.send_keys(Keys.ENTER)
+            time.sleep(3)  # Wait for redirection
 
             # Step 4: Wait for the /file page to load
             WebDriverWait(driver, 10).until(EC.url_contains("/file"))
             driver.get(self.config["file_list_url"])
 
-            # Step 5: Wait until files appear (using class "f")
+            # Step 5: Wait until files appear
             WebDriverWait(driver, 10).until(
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.f"))
             )
@@ -150,11 +157,26 @@ class Crawler:
         try:
             response = requests.get(full_url, stream=True, verify=False)
             response.raise_for_status()  # Raise an exception for bad status codes
+
+            # Only remove older files of the same type (price or promo)
+            file_type_prefix = "priceFull" if filename.lower().startswith("pricefull") else "promoFull"
+            for existing_file in os.listdir(destination_folder):
+                if (
+                    existing_file.endswith(".gz")
+                    and existing_file != filename
+                    and existing_file.lower().startswith(file_type_prefix.lower())
+                ):
+                    os.remove(os.path.join(destination_folder, existing_file))
             
+
             with open(dest_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
             print(f"Saved to {dest_path}")
+
+            # Upload to S3
+            s3_key = f"providers/{os.path.basename(destination_folder)}/{filename}"
+            upload_file_to_s3(dest_path, s3_key)
             
         except requests.RequestException as e:
             print(f"Error downloading {filename}: {str(e)}")
@@ -168,6 +190,6 @@ if __name__ == "__main__":
         "base_url": "https://url.publishedprices.co.il"
     }
 
-    crawler = Crawler(config)
+    crawler = YohananofCrawler(config)
     crawler.crawl()
     
