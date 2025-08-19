@@ -1,37 +1,31 @@
 import os
 import time
-import platform
 import re
 import sys
 from datetime import datetime
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup  # (kept if you use it elsewhere)
+from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
 import boto3
 from botocore.config import Config
 
 # Allow "from utils import ..." when running from subpackages
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from utils import (  # noqa: F401 - keep these if used by your download helpers
+from utils import (
     convert_xml_to_json,
     download_file_from_link,
     extract_and_delete_gz,
 )
 
-
-
 # =============================================================================
-# S3 CONFIG (Local MinIO in Docker)
+# S3 CONFIG (LocalStack in Docker)
 # =============================================================================
 S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://localstack:4566")
 S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "test")
@@ -46,10 +40,8 @@ s3 = boto3.client(
     aws_access_key_id=S3_ACCESS_KEY,
     aws_secret_access_key=S3_SECRET_KEY,
     region_name=S3_REGION,
-    config=Config(
-        signature_version="s3v4",
-        s3={"addressing_style": "path" if S3_FORCE_PATH_STYLE else "auto"},
-    ),
+    config=Config(signature_version="s3v4",
+                  s3={"addressing_style": "path" if S3_FORCE_PATH_STYLE else "auto"}),
 )
 
 def ensure_bucket():
@@ -58,113 +50,78 @@ def ensure_bucket():
     except Exception:
         s3.create_bucket(Bucket=S3_BUCKET)
 
-
-
 # =============================================================================
-# Chrome / Selenium setup
+# Selenium (Remote WebDriver → selenium service)
 # =============================================================================
+SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL", "http://selenium:4444/wd/hub")
+
 def init_chrome_options():
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    return chrome_options
+    opts = Options()
+    # modern headless for recent Chrome/Chromium
+    opts.add_argument("--headless=new")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument("--disable-dev-shm-usage")
+    opts.add_argument("--disable-gpu")
+    opts.add_argument("--window-size=1920,1080")
+    return opts
 
-
-def get_chromedriver_path():
-    try:
-        if platform.system() == "Darwin" and platform.machine() == "arm64":
-            from webdriver_manager.core.os_manager import ChromeType
-            driver_path = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
-        else:
-            driver_path = ChromeDriverManager().install()
-        return driver_path
-    except Exception:
-        return "chromedriver"
-
+def make_driver():
+    return webdriver.Remote(command_executor=SELENIUM_REMOTE_URL,
+                            options=init_chrome_options())
 
 # =============================================================================
 # Crawler helpers
 # =============================================================================
 def get_download_links_from_page(driver, download_base_url):
     WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located(
-            (
-                By.CSS_SELECTOR,
-                "a[href$='.gz'], a[href$='.pdf'], a[href$='.xlsx'], a[href$='.csv']",
-            )
-        )
+        EC.presence_of_element_located((By.CSS_SELECTOR,
+            "a[href$='.gz'], a[href$='.pdf'], a[href$='.xlsx'], a[href$='.csv']"))
     )
-
-    link_elems = driver.find_elements(
-        By.CSS_SELECTOR,
-        "a[href$='.gz'], a[href$='.pdf'], a[href$='.xlsx'], a[href$='.csv']",
-    )
-    download_links = []
+    link_elems = driver.find_elements(By.CSS_SELECTOR,
+        "a[href$='.gz'], a[href$='.pdf'], a[href$='.xlsx'], a[href$='.csv']")
+    links = []
     for elem in link_elems:
         href = elem.get_attribute("href")
         if not href:
             continue
-        if href.startswith("http"):
-            download_links.append(href)
-        else:
-            download_links.append(urljoin(download_base_url, href))
-    return download_links
-
+        links.append(href if href.startswith("http") else urljoin(download_base_url, href))
+    return links
 
 def get_next_page_button(driver, current_page):
     try:
-        next_page_num = current_page + 1
         next_button = driver.find_element(
-            By.CSS_SELECTOR, f"button.paginationBtn[data-page='{next_page_num}']"
+            By.CSS_SELECTOR, f"button.paginationBtn[data-page='{current_page + 1}']"
         )
-        if next_button and next_button.is_enabled():
-            return next_button
-        return None
+        return next_button if next_button and next_button.is_enabled() else None
     except NoSuchElementException:
         return None
 
-
 def upload_to_s3(local_path, branch_name, category_name):
     filename = os.path.basename(local_path)
-
-    match = re.search(r"(\d{13})-(\d+)-(\d{12})", filename)
-    if match:
-        chain_id = match.group(1)
-        branch_id = match.group(2)
-        timestamp = match.group(3)
+    m = re.search(r"(\d{13})-(\d+)-(\d{12})", filename)
+    if m:
+        chain_id, branch_id, timestamp = m.group(1), m.group(2), m.group(3)
     else:
         chain_id = "unknown_chain"
         branch_id = (branch_name or "default_branch").replace(" ", "_")
         timestamp = datetime.now().strftime("%Y%m%d%H%M")
-
     s3_filename = f"{category_name}_{timestamp}.gz"
     s3_key = f"providers/{chain_id}-{branch_id}/{s3_filename}"
-
     s3.upload_file(local_path, S3_BUCKET, s3_key)
     print(f"Uploaded to S3: s3://{S3_BUCKET}/{s3_key}")
 
-
 def filter_latest_price_and_promo(links, category_value):
-    """Return only the latest file for the given category."""
-    def extract_timestamp(url):
+    def ts(url):
         m = re.search(r"(\d{12})", url)
         return m.group(1) if m else "000000000000"
-
     filtered = [l for l in links if category_value.lower() in l.lower()]
-    filtered.sort(key=extract_timestamp, reverse=True)
+    filtered.sort(key=ts, reverse=True)
     return [filtered[0]] if filtered else []
 
-
-def crawl_category(
-    driver, category_value, category_name, download_base_url, max_pages, branch_name
-):
+def crawl_category(driver, category_value, category_name, download_base_url, max_pages, branch_name):
     if category_value:
         try:
-            category_select = Select(driver.find_element("id", "cat_filter"))
-            category_select.select_by_value(category_value)
+            Select(driver.find_element("id", "cat_filter")).select_by_value(category_value)
             time.sleep(3)
         except Exception:
             pass
@@ -181,7 +138,6 @@ def crawl_category(
         selected_links = filter_latest_price_and_promo(all_links, category_value)
         if not selected_links:
             break
-
         for link in selected_links:
             output_path = download_file_from_link(link, output_dir)
             if output_path:
@@ -192,7 +148,6 @@ def crawl_category(
                     total_failed += 1
             else:
                 total_failed += 1
-
         break  # only the latest file per category
 
     return {
@@ -203,48 +158,27 @@ def crawl_category(
         "output_dir": output_dir,
     }
 
+def crawl(start_url, download_base_url, login_function=None, categories=None, max_pages=2):
+    ensure_bucket()
 
-def crawl(
-    start_url,
-    download_base_url,
-    login_function=None,
-    categories=None,
-    max_pages=2,
-):
-    chrome_options = init_chrome_options()
-    driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()), options=chrome_options
-    )
-
+    driver = make_driver()
     try:
-        # ensure local MinIO bucket exists
-        ensure_bucket()
-
         driver.get(start_url)
 
-        # Special handling for the landing page → redirect to file list URL
         if "cpfta_prices_regulations" in start_url:
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[href]"))
-            )
+            WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[href]")))
             all_links = [a.get_attribute("href") for a in driver.find_elements(By.CSS_SELECTOR, "a[href]")]
             matching_links = [l for l in all_links if l and download_base_url in l]
             if matching_links:
                 driver.get(matching_links[0])
             else:
                 raise Exception(f"link does not match {download_base_url}")
-
             if login_function:
                 login_function(driver)
 
-        # Try to iterate branches if available
         try:
             branch_select = Select(driver.find_element("id", "branch_filter"))
-            branches = [
-                opt.get_attribute("value")
-                for opt in branch_select.options
-                if opt.get_attribute("value")
-            ]
+            branches = [opt.get_attribute("value") for opt in branch_select.options if opt.get_attribute("value")]
         except Exception:
             branches = [None]
 
@@ -254,7 +188,6 @@ def crawl(
         ]
 
         all_results = []
-
         for branch_value in branches:
             branch_name = "default_branch"
             if branch_value:
@@ -272,8 +205,6 @@ def crawl(
                     branch_name=branch_name,
                 )
                 all_results.append(result)
-
         return all_results
-
     finally:
         driver.quit()
