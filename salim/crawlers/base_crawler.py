@@ -24,9 +24,6 @@ from utils import (
     extract_and_delete_gz,
 )
 
-# =============================================================================
-# S3 CONFIG (LocalStack in Docker)
-# =============================================================================
 S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://localstack:4566")
 S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "test")
 S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "test")
@@ -50,14 +47,10 @@ def ensure_bucket():
     except Exception:
         s3.create_bucket(Bucket=S3_BUCKET)
 
-# =============================================================================
-# Selenium (Remote WebDriver → selenium service)
-# =============================================================================
 SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL", "http://selenium:4444/wd/hub")
 
 def init_chrome_options():
     opts = Options()
-    # modern headless for recent Chrome/Chromium
     opts.add_argument("--headless=new")
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-dev-shm-usage")
@@ -69,9 +62,6 @@ def make_driver():
     return webdriver.Remote(command_executor=SELENIUM_REMOTE_URL,
                             options=init_chrome_options())
 
-# =============================================================================
-# Crawler helpers
-# =============================================================================
 def get_download_links_from_page(driver, download_base_url):
     WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.CSS_SELECTOR,
