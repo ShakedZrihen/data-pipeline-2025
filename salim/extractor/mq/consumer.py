@@ -5,6 +5,7 @@ import pika
 
 from ..database.handler import MongoDBClient
 from ..normalizer.normalize import DataNormalizer
+from ..validator.validation import DataValidator
 
 
 def ack_handler(func):
@@ -13,7 +14,7 @@ def ack_handler(func):
             func(ch, method, properties, body)
             ch.basic_ack(delivery_tag=method.delivery_tag)
         except Exception as e:
-            print(f" [ERROR]: {e}")
+            print(f" [ERROR]: {e}, sending to DLQ...")
             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
 
     return wrapper
@@ -23,8 +24,13 @@ def ack_handler(func):
 def callback(ch, method, properties, body):
     data = json.loads(body)
     timestamp = data["timestamp"]
+
+    print("Received message in RabbitMQ, validating and normalizing data...")
+    # If the validator fails, the DLQ will recieve the raw message.
     data = DataNormalizer(data, timestamp=timestamp).normalize()
-    print("Received message in RabbitMQ, saving in database")
+    DataValidator(data).validate_data()
+
+    print("saving file in database...")
     db = MongoDBClient("extracted_files")
     db.insert_document("files", data)
     print("inserted document.")

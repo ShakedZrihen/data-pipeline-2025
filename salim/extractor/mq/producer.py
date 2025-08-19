@@ -43,7 +43,7 @@ class RabbitMQProducer:
         print(f"Closing connection to RabbitMQ server at {self.host}")
         self.connection.close()
 
-    def send_queue_message(self, msg: str):
+    def send_queue_message(self, msg):
         print(f"Sending message to RabbitMQ server at {self.host}")
         self.channel.basic_publish(
             exchange=self.main_exchange,
