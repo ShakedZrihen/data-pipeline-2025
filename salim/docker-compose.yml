@@ -21,7 +21,7 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3,sqs
+      - SERVICES=s3,sqs,lambda,dynamodb
       - DEBUG=1
       - S3_SKIP_SIGNATURE_VALIDATION=1
     volumes:
@@ -32,7 +32,7 @@ services:
     shm_size: 2g
     ports:
       - "4444:4444"
-      
+
   api:
     build: .
     ports:
