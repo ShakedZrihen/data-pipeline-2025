@@ -1,0 +1,198 @@
+{
+  "ChainID": "7290803800003",
+  "ChainName": "מ. יוחננוף ובניו",
+  "Stores": [
+    {
+      "StoreID": "001",
+      "Address": "רחוב המפוח 11, אזור התעשיה"
+    },
+    {
+      "StoreID": "002",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "004",
+      "Address": "צומת ביל\"ו"
+    },
+    {
+      "StoreID": "005",
+      "Address": "זבוטינסקי 27, סטאר סנטר"
+    },
+    {
+      "StoreID": "007",
+      "Address": "המלך חסן 1"
+    },
+    {
+      "StoreID": "008",
+      "Address": "רחוב אחד העם 19"
+    },
+    {
+      "StoreID": "009",
+      "Address": "רחוב בעלי המלאכה 2, א.התעשיה"
+    },
+    {
+      "StoreID": "012",
+      "Address": "שדרות ירושלים פינת נופי חמד"
+    },
+    {
+      "StoreID": "013",
+      "Address": "החרושת 10 חוצות המפרץ"
+    },
+    {
+      "StoreID": "015",
+      "Address": "רחוב הפלדה 1"
+    },
+    {
+      "StoreID": "016",
+      "Address": "דרך מנחם בגין פינת המגנים 57"
+    },
+    {
+      "StoreID": "017",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "018",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "019",
+      "Address": "אור יהודה"
+    },
+    {
+      "StoreID": "020",
+      "Address": "האומן"
+    },
+    {
+      "StoreID": "021",
+      "Address": "סגולה"
+    },
+    {
+      "StoreID": "022",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "023",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "024",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "025",
+      "Address": "נס ציונה"
+    },
+    {
+      "StoreID": "026",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "027",
+      "Address": "יגאל אלון 57"
+    },
+    {
+      "StoreID": "028",
+      "Address": "משורר השואה 15"
+    },
+    {
+      "StoreID": "029",
+      "Address": "בת ים"
+    },
+    {
+      "StoreID": "030",
+      "Address": "נתניה"
+    },
+    {
+      "StoreID": "031",
+      "Address": "רחובות"
+    },
+    {
+      "StoreID": "032",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "033",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "034",
+      "Address": "מתחם גלובוס סנטר, מבקיעים"
+    },
+    {
+      "StoreID": "035",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "036",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "037",
+      "Address": "קהילת ציון 30"
+    },
+    {
+      "StoreID": "038",
+      "Address": "יהודה הלוי 113"
+    },
+    {
+      "StoreID": "039",
+      "Address": "שדרות תל חי 93"
+    },
+    {
+      "StoreID": "040",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "041",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "042",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "046",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "048",
+      "Address": "אשדות יעקב"
+    },
+    {
+      "StoreID": "050",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "051",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "052",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "053",
+      "Address": "נווה זמר"
+    },
+    {
+      "StoreID": "054",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "055",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "059",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "060",
+      "Address": "unknown"
+    },
+    {
+      "StoreID": "150",
+      "Address": null
+    }
+  ]
+}

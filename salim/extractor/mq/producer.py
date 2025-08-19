@@ -26,10 +26,15 @@ class RabbitMQProducer:
         )
 
         self.host = host
-        self.queue = queue
         self.connection = pika.BlockingConnection(params)
         self.channel = self.connection.channel()
-        self.channel.queue_declare(queue=queue)
+
+        self.main_exchange = f"{queue}.exchange"
+        self.routing_key = f"to_{queue}"
+
+        self.channel.exchange_declare(
+            exchange=self.main_exchange, exchange_type="direct", durable=True
+        )
 
     def __enter__(self):
         return self
@@ -40,4 +45,9 @@ class RabbitMQProducer:
 
     def send_queue_message(self, msg: str):
         print(f"Sending message to RabbitMQ server at {self.host}")
-        self.channel.basic_publish(exchange="", routing_key=self.queue, body=msg)
+        self.channel.basic_publish(
+            exchange=self.main_exchange,
+            routing_key=self.routing_key,
+            body=msg,
+            mandatory=False,
+        )
