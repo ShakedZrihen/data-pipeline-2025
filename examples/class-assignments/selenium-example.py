@@ -1,161 +1,212 @@
-
 import os
 import time
 import platform
+import re
+import sys
+from datetime import datetime
 from urllib.parse import urljoin
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from webdriver_manager.chrome import ChromeDriverManager
-import requests
-import json
-import re
-import html
 
+import boto3
+from botocore.config import Config
 
-# h1 <- title v
-# h4 <- author
-# video <-- .player__container video
-# content <- .article-content
+# Allow "from utils import ..."
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils import (
+    convert_xml_to_json,
+    download_file_from_link,
+    extract_and_delete_gz,
+)
+
+# =============================================================================
+# S3 CONFIG (LocalStack in Docker)
+# =============================================================================
+S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://localstack:4566")
+S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "test")
+S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "test")
+S3_REGION = os.getenv("S3_REGION", "us-east-1")
+S3_BUCKET = os.getenv("S3_BUCKET", "test-bucket")
+S3_FORCE_PATH_STYLE = os.getenv("S3_FORCE_PATH_STYLE", "true").lower() == "true"
+
+s3 = boto3.client(
+    "s3",
+    endpoint_url=S3_ENDPOINT,
+    aws_access_key_id=S3_ACCESS_KEY,
+    aws_secret_access_key=S3_SECRET_KEY,
+    region_name=S3_REGION,
+    config=Config(signature_version="s3v4",
+                  s3={"addressing_style": "path" if S3_FORCE_PATH_STYLE else "auto"}),
+)
+
+def ensure_bucket():
+    try:
+        s3.head_bucket(Bucket=S3_BUCKET)
+    except Exception:
+        s3.create_bucket(Bucket=S3_BUCKET)
+
+# =============================================================================
+# Selenium (Remote WebDriver via selenium/standalone-chrome)
+# =============================================================================
+SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL", "http://selenium:4444/wd/hub")
 
 def init_chrome_options():
     chrome_options = Options()
-
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
+    # modern headless flag; works with recent Chrome
+    chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    chrome_options.add_experimental_option('useAutomationExtension', False)
-
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1920,1080")
     return chrome_options
 
+def make_driver():
+    opts = init_chrome_options()
+    # Connect to the Selenium container
+    return webdriver.Remote(command_executor=SELENIUM_REMOTE_URL, options=opts)
 
-def get_chromedriver_path():
-    """Get the correct chromedriver path for the current system"""
+# =============================================================================
+# Crawler helpers
+# =============================================================================
+def get_download_links_from_page(driver, download_base_url):
+    WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located(
+            (By.CSS_SELECTOR, "a[href$='.gz'], a[href$='.pdf'], a[href$='.xlsx'], a[href$='.csv']")
+        )
+    )
+    link_elems = driver.find_elements(By.CSS_SELECTOR,
+                                      "a[href$='.gz'], a[href$='.pdf'], a[href$='.xlsx'], a[href$='.csv']")
+    links = []
+    for elem in link_elems:
+        href = elem.get_attribute("href")
+        if not href:
+            continue
+        links.append(href if href.startswith("http") else urljoin(download_base_url, href))
+    return links
+
+def get_next_page_button(driver, current_page):
     try:
-        # For macOS ARM64, we need to specify the architecture
-        if platform.system() == "Darwin" and platform.machine() == "arm64":
-            print("Detected macOS ARM64, using specific chromedriver...")
-            # Use a more specific approach for ARM64 Macs
-            from webdriver_manager.core.os_manager import ChromeType
+        next_page_num = current_page + 1
+        next_button = driver.find_element(By.CSS_SELECTOR, f"button.paginationBtn[data-page='{next_page_num}']")
+        return next_button if next_button and next_button.is_enabled() else None
+    except NoSuchElementException:
+        return None
 
-            driver_path = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
-        else:
-            driver_path = ChromeDriverManager().install()
-
-        print(f"Chrome driver path: {driver_path}")
-        return driver_path
-    except Exception as e:
-        print(f"Error with webdriver-manager: {e}")
-        print("Falling back to system chromedriver...")
-        # Fallback to system chromedriver if available
-        return "chromedriver"
-
-
-def extract_video_urls(driver):
-    """Extract video URLs from the page using multiple strategies"""
-    video_urls = []
-    wait = WebDriverWait(driver, 10)
-    try:
-        video_playlist_elements = driver.find_elements(By.CSS_SELECTOR, '[data-react-component="VideoPlaylist"]')
-        for element in video_playlist_elements:
-            data_props = element.get_attribute("data-props")
-            if data_props:
-                decoded_props = html.unescape(data_props)
-                try:
-                    props_data = json.loads(decoded_props)
-                    if "videos" in props_data:
-                        for video in props_data["videos"]:
-                            print(f"Video data: {json.dumps(video, indent=2)}")
-                            if "mp4Url" in video and video["mp4Url"]:
-                                video_urls.append(video["mp4Url"])
-                                print(f"Found MP4 URL: {video['mp4Url']}")
-                except json.JSONDecodeError as e:
-                    print(f"Error parsing JSON from data-props: {e}")
-    except Exception as e:
-        print(f"Error in NBC-specific extraction: {e}")    
-    return list(set(video_urls))
-
-
-def download_mp4_video(url, filename):
-    try:
-        response = requests.get(url, stream=True, allow_redirects=True)
-        response.raise_for_status()
-
-        with open(filename, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)        
-    except Exception as e:
-        print(f"Error downloading MP4 video: {e}")
-        return False
-
-
-def crawl():
-    url = "https://www.nbcbayarea.com/news/local/lady-gaga-ozzy-osbourne-san-francisco-concert/3920853/"
-    chrome_options = init_chrome_options()
-
-    print("Setting up Chrome driver...")
-    try:
-        chromedriver_path = get_chromedriver_path()
-        service = Service(chromedriver_path)
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-    except Exception as e:
-        print(f"Failed to initialize Chrome driver: {e}")
-        print("Trying alternative approach...")
-        # Alternative approach without service
-        driver = webdriver.Chrome(options=chrome_options)
-    
-    print(f"Navigating to {url}")
-    driver.get(url)
-    driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-    time.sleep(3)
-
-    print("Extracting video URLs...")
-    video_urls = extract_video_urls(driver)
-    soup = BeautifulSoup(driver.page_source, "html.parser")
-
-    article = {}
-
-    try:
-        article["title"] = soup.find("h1").get_text(strip=True)
-        author_details = soup.find("h4").get_text(strip=True).split('•')
-        article["author"] = author_details[0]
-        article["published_at"] = author_details[1]
-        article["updated_at"] = author_details[2]
-        article["content"] = soup.find_all(class_="article-content")[0].get_text(strip=True)
-        article["video_urls"] = video_urls
-    except Exception as e:
-        print(f"Error extracting article data: {e}")
-        article["title"] = "Error extracting title"
-        article["video_urls"] = video_urls
-    
-    filename = f"{article['title'].replace('/', '_')}.json"
-
-    with open(filename, "w") as f:
-        f.write(json.dumps(article))
-    
-    if video_urls:
-        for i, video_url in enumerate(video_urls):
-            video_filename = f"{article['title'].replace('/', '_').replace(':', '_')}_video_{i+1}.mp4"
-            print(f"\nDownloading video {i+1} of {len(video_urls)}:")
-            download_mp4_video(video_url, video_filename)
+def upload_to_s3(local_path, branch_name, category_name):
+    filename = os.path.basename(local_path)
+    match = re.search(r"(\d{13})-(\d+)-(\d{12})", filename)
+    if match:
+        chain_id, branch_id, timestamp = match.group(1), match.group(2), match.group(3)
     else:
-        print("No MP4 videos found to download")
-    
-    driver.quit()
+        chain_id = "unknown_chain"
+        branch_id = (branch_name or "default_branch").replace(" ", "_")
+        timestamp = datetime.now().strftime("%Y%m%d%H%M")
+    s3_filename = f"{category_name}_{timestamp}.gz"
+    s3_key = f"providers/{chain_id}-{branch_id}/{s3_filename}"
+    s3.upload_file(local_path, S3_BUCKET, s3_key)
+    print(f"Uploaded to S3: s3://{S3_BUCKET}/{s3_key}")
 
+def filter_latest_price_and_promo(links, category_value):
+    def ts(url):
+        m = re.search(r"(\d{12})", url)
+        return m.group(1) if m else "000000000000"
+    filtered = [l for l in links if category_value.lower() in l.lower()]
+    filtered.sort(key=ts, reverse=True)
+    return [filtered[0]] if filtered else []
 
+def crawl_category(driver, category_value, category_name, download_base_url, max_pages, branch_name):
+    if category_value:
+        try:
+            Select(driver.find_element("id", "cat_filter")).select_by_value(category_value)
+            time.sleep(3)
+        except Exception:
+            pass
 
+    output_dir = os.path.join("prices", branch_name or "default_branch")
+    os.makedirs(output_dir, exist_ok=True)
 
-if __name__ == "__main__":
-    crawl() 
+    total_successful = 0
+    total_failed = 0
+    page_num = 1
+
+    while page_num <= max_pages:
+        all_links = get_download_links_from_page(driver, download_base_url)
+        selected_links = filter_latest_price_and_promo(all_links, category_value)
+        if not selected_links:
+            break
+        for link in selected_links:
+            output_path = download_file_from_link(link, output_dir)
+            if output_path:
+                try:
+                    upload_to_s3(output_path, branch_name, category_name)
+                    total_successful += 1
+                except Exception:
+                    total_failed += 1
+            else:
+                total_failed += 1
+        break  # only the latest file per category
+
+    return {
+        "category": category_name,
+        "pages_processed": page_num,
+        "successful_downloads": total_successful,
+        "failed_downloads": total_failed,
+        "output_dir": output_dir,
+    }
+
+def crawl(start_url, download_base_url, login_function=None, categories=None, max_pages=2):
+    # ensure local bucket exists before crawling
+    ensure_bucket()
+
+    driver = make_driver()
+    try:
+        driver.get(start_url)
+
+        if "cpfta_prices_regulations" in start_url:
+            WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[href]")))
+            all_links = [a.get_attribute("href") for a in driver.find_elements(By.CSS_SELECTOR, "a[href]")]
+            matching_links = [l for l in all_links if l and download_base_url in l]
+            if matching_links:
+                driver.get(matching_links[0])
+            else:
+                raise Exception(f"link does not match {download_base_url}")
+            if login_function:
+                login_function(driver)
+
+        try:
+            branch_select = Select(driver.find_element("id", "branch_filter"))
+            branches = [opt.get_attribute("value") for opt in branch_select.options if opt.get_attribute("value")]
+        except Exception:
+            branches = [None]
+
+        categories = categories or [
+            {"value": "pricefull", "name": "pricesFull"},
+            {"value": "promofull", "name": "promoFull"},
+        ]
+
+        all_results = []
+        for branch_value in branches:
+            branch_name = "default_branch"
+            if branch_value:
+                branch_select.select_by_value(branch_value)
+                branch_name = branch_select.first_selected_option.text.strip()
+                time.sleep(3)
+            for category in categories:
+                result = crawl_category(
+                    driver=driver,
+                    category_value=category["value"],
+                    category_name=category["name"],
+                    download_base_url=download_base_url,
+                    max_pages=max_pages,
+                    branch_name=branch_name,
+                )
+                all_results.append(result)
+        return all_results
+    finally:
+        driver.quit()

@@ -1,7 +1,4 @@
-version: "3.9"
-
 services:
-  # PostgreSQL Database
   db:
     image: postgres:15
     environment:
@@ -9,7 +6,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: salim_db
     ports:
-      - "5432:5432"
+      - "5440:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,18 +15,51 @@ services:
       timeout: 5s
       retries: 5
 
-  # FastAPI Application
+  localstack:
+    image: localstack/localstack:latest
+    container_name: s3-simulator
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,sqs
+      - DEBUG=1
+      - S3_SKIP_SIGNATURE_VALIDATION=1
+    volumes:
+      - localstack-data:/var/lib/localstack
+
+  selenium:
+    image: seleniarm/standalone-chrome:latest
+    shm_size: 2g
+    ports:
+      - "4444:4444"
+
+
   api:
     build: .
     ports:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
+      # --- S3 (LocalStack) ---
+      - S3_ENDPOINT=http://localstack:4566
+      - S3_ACCESS_KEY=test
+      - S3_SECRET_KEY=test
+      - S3_REGION=us-east-1
+      - S3_BUCKET=test-bucket
+      - S3_FORCE_PATH_STYLE=true
+      # --- Selenium Remote URL for crawlers (optional override) ---
+      - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
     depends_on:
       db:
         condition: service_healthy
+      localstack:
+        condition: service_started
+      selenium:
+        condition: service_started
     volumes:
-      - ./app:/app/app
+      - .:/app
+    command: >
+      python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
       interval: 30s
@@ -38,4 +68,5 @@ services:
       start_period: 40s
 
 volumes:
-  postgres_data: 
+  postgres_data:
+  localstack-data:
