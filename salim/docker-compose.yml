@@ -28,12 +28,11 @@ services:
       - localstack-data:/var/lib/localstack
 
   selenium:
-    image: seleniarm/standalone-chrome:latest
+    image: seleniarm/standalone-chromium:latest
     shm_size: 2g
     ports:
       - "4444:4444"
-
-
+      
   api:
     build: .
     ports:
