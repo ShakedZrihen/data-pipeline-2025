@@ -21,11 +21,17 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3,sqs,lambda,dynamodb
+      - SERVICES=s3,sqs,lambda,dynamodb,cloudwatch,logs
       - DEBUG=1
-      - S3_SKIP_SIGNATURE_VALIDATION=1
+      # EITHER run Lambdas “locally” inside the LocalStack process:
+      - LAMBDA_EXECUTOR=local
+      # (Optional) If you prefer Docker executor instead of local, also mount the docker socket:
+      # - LAMBDA_EXECUTOR=docker-reuse
     volumes:
       - localstack-data:/var/lib/localstack
+      # Only needed if using docker executor:
+      # - /var/run/docker.sock:/var/run/docker.sock
+
 
   selenium:
     image: seleniarm/standalone-chromium:latest

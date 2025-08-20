@@ -4,6 +4,8 @@ import re
 import sys
 from datetime import datetime
 from urllib.parse import urljoin
+import gzip
+import xml.etree.ElementTree as ET
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -86,37 +88,151 @@ def get_next_page_button(driver, current_page):
     except NoSuchElementException:
         return None
 
+# ---------- File name parsing helpers ----------
+
+FILE_RE = re.compile(
+    r'(?P<cat>pricefull|promofull)\D*(?P<chain>\d{13})-(?P<store>\d+)-(?P<ts>\d{12})',
+    re.IGNORECASE
+)
+
+def parse_link(u: str):
+    """
+    Returns (category, chain_id, store_id, timestamp) or None.
+    """
+    m = FILE_RE.search(u)
+    if not m:
+        return None
+    return (
+        m.group('cat').lower(),   # 'pricefull' | 'promofull'
+        m.group('chain'),         # 13 digits
+        m.group('store'),         # store id as string
+        m.group('ts'),            # 12-digit timestamp
+    )
+
+def select_latest_per_branch(links, category_value: str):
+    """
+    For pages WITHOUT a branch dropdown:
+    group by store id and select newest ts per store (per category).
+    """
+    wanted = category_value.lower()
+    best_by_store = {}  # store_id -> (ts, url)
+    for url in links:
+        p = parse_link(url)
+        if not p:
+            continue
+        cat, _chain, store, ts = p
+        if cat != wanted:
+            continue
+        cur = best_by_store.get(store)
+        if (cur is None) or (ts > cur[0]):
+            best_by_store[store] = (ts, url)
+    return [t[1] for t in best_by_store.values()]
+
+def filter_by_category_and_store(links, category_value: str, expected_store: str | None):
+    """
+    For pages WITH a branch dropdown (or when you know the store id):
+    pick newest file for the given store id and category.
+    """
+    wanted = category_value.lower()
+    cand = []
+    for url in links:
+        p = parse_link(url)
+        if not p:
+            continue
+        cat, _chain, store, ts = p
+        if cat != wanted:
+            continue
+        if expected_store is None or str(store) == str(expected_store):
+            cand.append((ts, url))
+    cand.sort(key=lambda x: x[0], reverse=True)
+    return [cand[0][1]] if cand else []
+
+# ---------- XML extraction (robust S3 paths) ----------
+
+def extract_ids_from_gz(gz_path):
+    """
+    Extract ChainId / StoreId from the XML content of the .gz file.
+    """
+    with gzip.open(gz_path, 'rb') as f:
+        tree = ET.parse(f)
+    root = tree.getroot()
+    chain_id = (root.findtext('ChainId') or 'unknown_chain').strip()
+    store_id = (root.findtext('StoreId') or 'unknown_store').strip()
+    sub_chain_id = (root.findtext('SubChainId') or '').strip()
+    return chain_id, store_id, sub_chain_id
+
 def upload_to_s3(local_path, branch_name, category_name):
+    """
+    Prefer ChainId/StoreId from XML; fallback to filename; final fallback to branch_name.
+    """
     filename = os.path.basename(local_path)
-    m = re.search(r"(\d{13})-(\d+)-(\d{12})", filename)
-    if m:
-        chain_id, branch_id, timestamp = m.group(1), m.group(2), m.group(3)
-    else:
+    chain_id = branch_id = timestamp = None
+
+    # 1) Prefer extracting IDs from the XML content
+    try:
+        c_id, s_id, _ = extract_ids_from_gz(local_path)
+        if c_id:
+            chain_id = c_id
+        if s_id:
+            branch_id = s_id
+    except Exception:
+        pass
+
+    # 2) Fallback to filename regex (keeps your original behavior)
+    if not (chain_id and branch_id):
+        m = re.search(r"(\d{13})-(\d+)-(\d{12})", filename)
+        if m:
+            chain_id, branch_id, timestamp = m.group(1), m.group(2), m.group(3)
+
+    # 3) Final fallbacks
+    if not chain_id:
         chain_id = "unknown_chain"
+    if not branch_id:
         branch_id = (branch_name or "default_branch").replace(" ", "_")
-        timestamp = datetime.now().strftime("%Y%m%d%H%M")
+    if not timestamp:
+        # Try to parse any 12-digit timestamp in filename; else now()
+        m_ts = re.search(r"(\d{12})", filename)
+        timestamp = m_ts.group(1) if m_ts else datetime.now().strftime("%Y%m%d%H%M")
+
     s3_filename = f"{category_name}_{timestamp}.gz"
     s3_key = f"providers/{chain_id}-{branch_id}/{s3_filename}"
     s3.upload_file(local_path, S3_BUCKET, s3_key)
     print(f"Uploaded to S3: s3://{S3_BUCKET}/{s3_key}")
 
-def filter_latest_price_and_promo(links, category_value):
-    def ts(url):
-        m = re.search(r"(\d{12})", url)
-        return m.group(1) if m else "000000000000"
-    filtered = [l for l in links if category_value.lower() in l.lower()]
-    filtered.sort(key=ts, reverse=True)
-    return [filtered[0]] if filtered else []
+# ---------- Crawl helpers ----------
 
-def crawl_category(driver, category_value, category_name, download_base_url, max_pages, branch_name):
+def has_branch_dropdown(driver):
+    try:
+        driver.find_element(By.ID, "branch_filter")
+        return True
+    except NoSuchElementException:
+        return False
+
+def crawl_category(
+    driver,
+    category_value,
+    category_name,
+    download_base_url,
+    max_pages,
+    branch_name,
+    expected_store=None,
+    use_latest_per_branch=False,
+):
+    """
+    If use_latest_per_branch=True (no dropdown pages):
+        - selects newest file per store for the given category (one per branch)
+    Else:
+        - selects newest file for the expected_store & category (single file)
+    """
     if category_value:
         try:
             Select(driver.find_element("id", "cat_filter")).select_by_value(category_value)
-            time.sleep(3)
+            # If page requires change event or apply button, add it here if needed.
+            time.sleep(2)
         except Exception:
             pass
 
-    output_dir = os.path.join("prices", branch_name or "default_branch")
+    output_dir = os.path.join("prices", (branch_name or "default_branch"))
     os.makedirs(output_dir, exist_ok=True)
 
     total_successful = 0
@@ -125,9 +241,17 @@ def crawl_category(driver, category_value, category_name, download_base_url, max
 
     while page_num <= max_pages:
         all_links = get_download_links_from_page(driver, download_base_url)
-        selected_links = filter_latest_price_and_promo(all_links, category_value)
+
+        if use_latest_per_branch:
+            # No dropdown -> get newest file per branch
+            selected_links = select_latest_per_branch(all_links, category_value)
+        else:
+            # With dropdown -> restrict to the currently selected store (defensive)
+            selected_links = filter_by_category_and_store(all_links, category_value, expected_store)
+
         if not selected_links:
             break
+
         for link in selected_links:
             output_path = download_file_from_link(link, output_dir)
             if output_path:
@@ -138,7 +262,9 @@ def crawl_category(driver, category_value, category_name, download_base_url, max
                     total_failed += 1
             else:
                 total_failed += 1
-        break  # only the latest file per category
+
+        # We already selected exactly what we need in one shot.
+        break
 
     return {
         "category": category_name,
@@ -166,11 +292,16 @@ def crawl(start_url, download_base_url, login_function=None, categories=None, ma
             if login_function:
                 login_function(driver)
 
-        try:
-            branch_select = Select(driver.find_element("id", "branch_filter"))
-            branches = [opt.get_attribute("value") for opt in branch_select.options if opt.get_attribute("value")]
-        except Exception:
-            branches = [None]
+        dropdown_present = has_branch_dropdown(driver)
+
+        branches = [None]
+        branch_select = None
+        if dropdown_present:
+            try:
+                branch_select = Select(driver.find_element("id", "branch_filter"))
+                branches = [opt.get_attribute("value") for opt in branch_select.options if opt.get_attribute("value")]
+            except Exception:
+                branches = [None]  # defensive
 
         categories = categories or [
             {"value": "pricefull", "name": "pricesFull"},
@@ -178,13 +309,36 @@ def crawl(start_url, download_base_url, login_function=None, categories=None, ma
         ]
 
         all_results = []
-        for branch_value in branches:
-            branch_name = "default_branch"
-            if branch_value:
-                branch_select.select_by_value(branch_value)
-                branch_name = branch_select.first_selected_option.text.strip()
-                time.sleep(3)
 
+        if dropdown_present:
+            # Branch-aware flow (e.g., Carrefour)
+            for branch_value in branches:
+                # Default label if we can't read it
+                branch_name = "default_branch"
+                if branch_value and branch_select:
+                    # Select and give the page a moment to refresh
+                    branch_select.select_by_value(branch_value)
+                    try:
+                        branch_name = branch_select.first_selected_option.text.strip()
+                    except Exception:
+                        pass
+                    time.sleep(2)
+
+                for category in categories:
+                    result = crawl_category(
+                        driver=driver,
+                        category_value=category["value"],
+                        category_name=category["name"],
+                        download_base_url=download_base_url,
+                        max_pages=max_pages,
+                        branch_name=branch_name,
+                        expected_store=branch_value,
+                        use_latest_per_branch=False,
+                    )
+                    all_results.append(result)
+        else:
+            # No dropdown (e.g., Yohananof / Tiv Taam): newest per branch for each category
+            branch_name = "all_branches"
             for category in categories:
                 result = crawl_category(
                     driver=driver,
@@ -193,8 +347,11 @@ def crawl(start_url, download_base_url, login_function=None, categories=None, ma
                     download_base_url=download_base_url,
                     max_pages=max_pages,
                     branch_name=branch_name,
+                    expected_store=None,
+                    use_latest_per_branch=True,
                 )
                 all_results.append(result)
+
         return all_results
     finally:
         driver.quit()
