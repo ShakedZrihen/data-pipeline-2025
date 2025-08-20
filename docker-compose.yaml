@@ -100,6 +100,8 @@ services:
       MONGO_PASS: password
       MONGO_DB: extracted_files
       MONGO_AUTH_DB: admin
+
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     networks:
       - backend
     tty: true

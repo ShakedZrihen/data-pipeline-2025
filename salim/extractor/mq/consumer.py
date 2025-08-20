@@ -4,6 +4,7 @@ import os
 import pika
 
 from ..database.handler import MongoDBClient
+from ..enricher.patch import DataPatcher
 from ..normalizer.normalize import DataNormalizer
 from ..validator.validation import DataValidator
 
@@ -29,6 +30,8 @@ def callback(ch, method, properties, body):
     # If the validator fails, the DLQ will recieve the raw message.
     data = DataNormalizer(data, timestamp=timestamp).normalize()
     DataValidator(data).validate_data()
+    patcher = DataPatcher(data)
+    data = patcher.enrich()
 
     print("saving file in database...")
     db = MongoDBClient("extracted_files")

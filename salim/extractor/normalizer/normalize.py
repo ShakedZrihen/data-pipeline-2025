@@ -1,10 +1,10 @@
-from typing import Any, Dict
 from collections.abc import Mapping
 from datetime import datetime
+from typing import Any, Dict
 
 
 class DataNormalizer:
-    def __init__(self, json_dict: Dict[str, Any],timestamp:str):
+    def __init__(self, json_dict: Dict[str, Any], timestamp: str):
         self.data = json_dict
         self.timestamp = self._parse_time(timestamp).isoformat()
 
@@ -30,14 +30,14 @@ class DataNormalizer:
         promos_container = data.get("Promotions") or []
         promos = []
 
-        if isinstance(promos_container,Mapping):
-           promos = promos_container.get("Promotion",[]) 
+        if isinstance(promos_container, Mapping):
+            promos = promos_container.get("Promotion", [])
         else:
             promos = promos_container
 
-        if isinstance(promos,Mapping):
+        if isinstance(promos, Mapping):
             promos = [promos]
-        if not isinstance(promos,list):
+        if not isinstance(promos, list):
             promos = []
 
         if promos:
@@ -46,48 +46,52 @@ class DataNormalizer:
             )
         else:
             return self._normalize_prices(
-                provider=provider_id, store=store_id,items=items
+                provider=provider_id, store=store_id, items=items
             )
 
     def _normalize_promotions(
         self, provider: str, store: str, promos: list[Dict[str, Any]]
-    )->Dict[str,Any]:
+    ) -> Dict[str, Any]:
         data = {
             "provider": provider,
             "branch": store,
-            "type":"PriceFull",
-            "timestamp":self.timestamp,
-            "promotions":self._normalize_promos_items(promos=promos)
+            "type": "prom",
+            "timestamp": self.timestamp,
+            "promotions": self._normalize_promos_items(promos=promos),
         }
         return data
 
-    def _normalize_prices(self, provider: str, store: str,items: list[Dict[str, Any]])->Dict[str,Any]:
+    def _normalize_prices(
+        self, provider: str, store: str, items: list[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         data = {
             "provider": provider,
             "branch": store,
-            "type":"PriceFull",
-            "timestamp":self.timestamp,
-            "items":self._normalize_items(items)
+            "type": "price",
+            "timestamp": self.timestamp,
+            "items": self._normalize_items(items),
         }
 
         return data
 
-    def _normalize_items(self,items: list[Dict[str, Any]])->list[Dict[str, Any]]:
+    def _normalize_items(self, items: list[Dict[str, Any]]) -> list[Dict[str, Any]]:
         res = []
         for item in items:
             itm = {}
             itm["price"] = float(item.get("ItemPrice") or -1)
             itm["product"] = item.get("ItemNm") or item.get("ItemName")
-            itm["unit"] = self._normalize_units(item.get("UnitQty","")) 
+            itm["unit"] = self._normalize_units(item.get("UnitQty", ""))
             res.append(itm)
         return res
 
-    def _normalize_promos_items(self,promos:list[Dict[str, Any]])->list[Dict[str,Any]]:
+    def _normalize_promos_items(
+        self, promos: list[Dict[str, Any]]
+    ) -> list[Dict[str, Any]]:
         res = []
 
         for p in promos:
             item = {}
-            item["product"] = p.get("PromotionDescription","None")
+            item["product"] = p.get("PromotionDescription", "None")
             item["price"] = float(p.get("DiscountedPrice") or -1)
             val = p.get("MinQty")
             try:
@@ -98,25 +102,25 @@ class DataNormalizer:
         return res
 
     @staticmethod
-    def _normalize_units(unit:str):
+    def _normalize_units(unit: str):
         unit_mapping = {
-            'י״ח': 'unit',
-            'יח': 'unit',
-            'יחידה': 'unit',
-            'ליטר': 'liter',
-            'ל': 'liter',
-            'מ״ל': 'ml',
-            'מל': 'ml',
-            'ק״ג': 'kg',
-            'קג': 'kg',
-            'קילוגרם': 'kg',
-            'גרם': 'gram',
-            'ג': 'gram',
-            'מטר': 'meter',
-            'מ': 'meter'
+            "י״ח": "unit",
+            "יח": "unit",
+            "יחידה": "unit",
+            "ליטר": "liter",
+            "ל": "liter",
+            "מ״ל": "ml",
+            "מל": "ml",
+            "ק״ג": "kg",
+            "קג": "kg",
+            "קילוגרם": "kg",
+            "גרם": "gram",
+            "ג": "gram",
+            "מטר": "meter",
+            "מ": "meter",
         }
 
-        # Even though there is no lower case in hebrew we still use lower and strip 
+        # Even though there is no lower case in hebrew we still use lower and strip
         # in case of english units
         unit_stripped = unit.lower().strip()
 
