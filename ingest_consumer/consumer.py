@@ -1,55 +1,78 @@
+from __future__ import annotations
 import os, json, time, logging
 import boto3
-from pydantic import ValidationError
-from dotenv import load_dotenv
-from validator import Envelope
-from normalizer import enrich
-from storage import connect, upsert_items
-from dlq import send_to_dlq
+from botocore.config import Config
+from prometheus_client import Counter, start_http_server
+from .validator import Envelope
+from .normalizer import normalize
+from .storage import connect, upsert_items
+from .dlq import send_to_dlq
 
-load_dotenv()
 log = logging.getLogger("consumer")
-logging.basicConfig(level=os.getenv("LOG_LEVEL","INFO"))
+logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 
-def sqs_client():
-    return boto3.client("sqs", endpoint_url=os.getenv("AWS_ENDPOINT_URL"))
+# --- Metrics ---
+MESSAGES_RECEIVED = Counter("messages_received_total", "Messages pulled from SQS")
+MESSAGES_PROCESSED = Counter("messages_processed_total", "Messages processed OK")
+MESSAGES_FAILED = Counter("messages_failed_total", "Messages failed")
+DB_UPSERTS = Counter("db_upserts_total", "Rows upserted to DB")
+
+def _sqs():
+    cfg = Config(retries={'max_attempts': 3, 'mode': 'standard'})
+    return boto3.client("sqs",
+                        endpoint_url=os.getenv("AWS_ENDPOINT_URL"),
+                        region_name=os.getenv("AWS_REGION","us-east-1"),
+                        config=cfg)
 
 def run_sqs():
     queue_url = os.getenv("SQS_QUEUE_URL")
-    batch = int(os.getenv("BATCH_SIZE","10"))
-    vis = int(os.getenv("VISIBILITY_TIMEOUT_SEC","30"))
+    if not queue_url:
+        raise RuntimeError("SQS_QUEUE_URL missing")
+
+    batch_size = int(os.getenv("BATCH_SIZE", "10"))
+    wait_time = int(os.getenv("WAIT_TIME_SECONDS", "10"))
+    visibility = int(os.getenv("VISIBILITY_TIMEOUT", "30"))
+
+    sqs = _sqs()
     pg = connect(os.getenv("PG_DSN"))
 
-    sqs = sqs_client()
     log.info("Polling SQS...")
     while True:
         resp = sqs.receive_message(
-            QueueUrl=queue_url, MaxNumberOfMessages=batch, WaitTimeSeconds=10,
-            VisibilityTimeout=vis
+            QueueUrl=queue_url,
+            MaxNumberOfMessages=batch_size,
+            WaitTimeSeconds=wait_time,
+            VisibilityTimeout=visibility
         )
-        msgs = resp.get("Messages", [])
-        if not msgs:
+
+        messages = resp.get("Messages", [])
+        if not messages:
             continue
 
-        for m in msgs:
-            body_text = m["Body"]
+        MESSAGES_RECEIVED.inc(len(messages))
+
+        for msg in messages:
+            receipt = msg["ReceiptHandle"]
+            body = msg["Body"]
             try:
-                data = json.loads(body_text)
-                data = enrich(data)
-                env = Envelope(**data).model_dump()
-                upsert_items(pg, env)
-                sqs.delete_message(QueueUrl=queue_url, ReceiptHandle=m["ReceiptHandle"])
-                log.info("Upsert OK | items=%d", len(env["items"]))
-            except (json.JSONDecodeError, ValidationError) as e:
-                send_to_dlq({"raw": body_text}, f"validation/decode error: {e}")
-                sqs.delete_message(QueueUrl=queue_url, ReceiptHandle=m["ReceiptHandle"])
-                log.warning("Sent to DLQ: %s", e)
+                env = Envelope.model_validate_json(body)
+                env = normalize(env)
+                payload = env.model_dump()
+                rows = upsert_items(pg, payload)
+                DB_UPSERTS.inc(rows)
+                MESSAGES_PROCESSED.inc()
+                sqs.delete_message(QueueUrl=queue_url, ReceiptHandle=receipt)
             except Exception as e:
-                log.exception("Processing error (will be retried): %s", e)
+                MESSAGES_FAILED.inc()
+                log.warning("Sent to DLQ: %s", e)
+                send_to_dlq(body, e, queue_name="extractor-results")
+                sqs.delete_message(QueueUrl=queue_url, ReceiptHandle=receipt)
+
+def main():
+    port = int(os.getenv("METRICS_PORT", "8000"))
+    start_http_server(port)
+    log.info("Metrics at http://localhost:%d/metrics", port)
+    run_sqs()
 
 if __name__ == "__main__":
-    provider = os.getenv("QUEUE_PROVIDER","SQS").upper()
-    if provider == "SQS":
-        run_sqs()
-    else:
-        raise SystemExit("Only SQS wired in this demo; Rabbit/Kafka stubs TBD")
+    main()
