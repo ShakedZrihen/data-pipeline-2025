@@ -4,8 +4,6 @@ import re
 import sys
 from datetime import datetime
 from urllib.parse import urljoin
-import gzip
-import xml.etree.ElementTree as ET
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -21,9 +19,9 @@ from botocore.config import Config
 # Allow "from utils import ..." when running from subpackages
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import (
-    convert_xml_to_json,
+    convert_xml_to_json,   # לא בשימוש כרגע, אפשר להסיר אם תרצי
     download_file_from_link,
-    extract_and_delete_gz,
+    extract_and_delete_gz, # לא בשימוש כרגע, אפשר להסיר אם תרצי
 )
 
 S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://localstack:4566")
@@ -147,55 +145,36 @@ def filter_by_category_and_store(links, category_value: str, expected_store: str
     cand.sort(key=lambda x: x[0], reverse=True)
     return [cand[0][1]] if cand else []
 
-# ---------- XML extraction (robust S3 paths) ----------
-
-def extract_ids_from_gz(gz_path):
-    """
-    Extract ChainId / StoreId from the XML content of the .gz file.
-    """
-    with gzip.open(gz_path, 'rb') as f:
-        tree = ET.parse(f)
-    root = tree.getroot()
-    chain_id = (root.findtext('ChainId') or 'unknown_chain').strip()
-    store_id = (root.findtext('StoreId') or 'unknown_store').strip()
-    sub_chain_id = (root.findtext('SubChainId') or '').strip()
-    return chain_id, store_id, sub_chain_id
+# ---------- S3 upload (filename-only parsing, no XML) ----------
 
 def upload_to_s3(local_path, branch_name, category_name):
     """
-    Prefer ChainId/StoreId from XML; fallback to filename; final fallback to branch_name.
+    Save as: providers/<chain>/<store>/<category>_<timestamp>.gz
+    where:
+      - <chain>, <store>, <timestamp> are parsed from the filename.
+      - <category> is 'pricesFull' / 'promoFull' (as passed in).
     """
     filename = os.path.basename(local_path)
-    chain_id = branch_id = timestamp = None
 
-    # 1) Prefer extracting IDs from the XML content
-    try:
-        c_id, s_id, _ = extract_ids_from_gz(local_path)
-        if c_id:
-            chain_id = c_id
-        if s_id:
-            branch_id = s_id
-    except Exception:
-        pass
+    chain_id = None
+    branch_id = None
+    timestamp = None
 
-    # 2) Fallback to filename regex (keeps your original behavior)
-    if not (chain_id and branch_id):
-        m = re.search(r"(\d{13})-(\d+)-(\d{12})", filename)
-        if m:
-            chain_id, branch_id, timestamp = m.group(1), m.group(2), m.group(3)
+    m = re.search(r"(\d{13})-(\d+)-(\d{12})", filename)
+    if m:
+        chain_id, branch_id, timestamp = m.group(1), m.group(2), m.group(3)
 
-    # 3) Final fallbacks
+    # Fallbacks (למקרה נדיר שאין התאמה בשם הקובץ)
     if not chain_id:
         chain_id = "unknown_chain"
     if not branch_id:
         branch_id = (branch_name or "default_branch").replace(" ", "_")
     if not timestamp:
-        # Try to parse any 12-digit timestamp in filename; else now()
         m_ts = re.search(r"(\d{12})", filename)
         timestamp = m_ts.group(1) if m_ts else datetime.now().strftime("%Y%m%d%H%M")
 
     s3_filename = f"{category_name}_{timestamp}.gz"
-    s3_key = f"providers/{chain_id}-{branch_id}/{s3_filename}"
+    s3_key = f"providers/{chain_id}/{branch_id}/{s3_filename}"
     s3.upload_file(local_path, S3_BUCKET, s3_key)
     print(f"Uploaded to S3: s3://{S3_BUCKET}/{s3_key}")
 
@@ -227,7 +206,6 @@ def crawl_category(
     if category_value:
         try:
             Select(driver.find_element("id", "cat_filter")).select_by_value(category_value)
-            # If page requires change event or apply button, add it here if needed.
             time.sleep(2)
         except Exception:
             pass
@@ -243,10 +221,8 @@ def crawl_category(
         all_links = get_download_links_from_page(driver, download_base_url)
 
         if use_latest_per_branch:
-            # No dropdown -> get newest file per branch
             selected_links = select_latest_per_branch(all_links, category_value)
         else:
-            # With dropdown -> restrict to the currently selected store (defensive)
             selected_links = filter_by_category_and_store(all_links, category_value, expected_store)
 
         if not selected_links:
@@ -262,9 +238,7 @@ def crawl_category(
                     total_failed += 1
             else:
                 total_failed += 1
-
-        # We already selected exactly what we need in one shot.
-        break
+        break  # we select exactly what we need in one shot
 
     return {
         "category": category_name,
@@ -313,10 +287,8 @@ def crawl(start_url, download_base_url, login_function=None, categories=None, ma
         if dropdown_present:
             # Branch-aware flow (e.g., Carrefour)
             for branch_value in branches:
-                # Default label if we can't read it
                 branch_name = "default_branch"
                 if branch_value and branch_select:
-                    # Select and give the page a moment to refresh
                     branch_select.select_by_value(branch_value)
                     try:
                         branch_name = branch_select.first_selected_option.text.strip()
