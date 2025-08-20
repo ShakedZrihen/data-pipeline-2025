@@ -10,7 +10,7 @@ def upload_file_to_s3():
     
     s3_client = boto3.client(
         's3',
-        endpoint_url='http://localhost:4566',
+        endpoint_url='https://b659bdb2de99.ngrok-free.app',
         aws_access_key_id='test',
         aws_secret_access_key='test',
         region_name='us-east-1'
@@ -18,7 +18,7 @@ def upload_file_to_s3():
     
     bucket_name = 'test-bucket'
     file_path = './ShakedZrihen.txt'
-    s3_key = 'ShakedZrihen.txt'
+    s3_key = 'ShakedZrihen2.txt'
     
     try:
         if not os.path.exists(file_path):
