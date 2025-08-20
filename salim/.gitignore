@@ -6,3 +6,5 @@ __pycache__/
 .cache/
 local_files
 origin_files
+origin_files.zip
+run_convert.py

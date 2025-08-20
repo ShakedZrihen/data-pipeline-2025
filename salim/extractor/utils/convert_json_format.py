@@ -1,5 +1,22 @@
 import json
 
+_COMPANY_MAP = {
+    "carrefour":   {"id": 1, "name": "carrefour"},
+    "hazi-hinam":  {"id": 2, "name": "hazi-hinam"},
+    "osherad":     {"id": 3, "name": "osherad"},
+    "ramilevy":    {"id": 4, "name": "ramilevy"},
+    "tivtaam":     {"id": 5, "name": "tivtaam"},
+    "yohananof":   {"id": 6, "name": "yohananof"},
+}
+
+def _detect_company_from_path(path: str):
+    """מחזיר dict עם {id, name} לפי הופעת המחרוזת במסלול/שם הקובץ; אחרת None."""
+    p = (path or "").lower()
+    for slug, meta in _COMPANY_MAP.items():
+        if slug in p:
+            return meta
+    return None
+
 def convert_json_to_target_prices_format(input_file_path, output_file_path):
     with open(input_file_path, "r", encoding="utf-8") as f:
         original_data = json.load(f)
@@ -33,12 +50,16 @@ def convert_json_to_target_prices_format(input_file_path, output_file_path):
         return
     items = root["Items"]["Item"]
 
+    company = _detect_company_from_path(input_file_path)
+
     transformed_data = {
         "Root": {
             "chain_id": root.get("ChainID") or root.get("ChainId"),
             "sub_chain_id": root.get("SubChainID") or root.get("SubChainId"),
             "store_id": root.get("StoreID") or root.get("StoreId"),
             "bikoret_no": root.get("BikoretNo"),
+            "company_id":   company["id"] if company else None,
+            "company_name": company["name"] if company else None,
             "items": [map_item(item) for item in items],
             "@Count": str(len(items))
         }
@@ -72,7 +93,7 @@ def convert_json_to_target_promos_format(input_file_path, output_file_path):
     sub_chain_id = pick(root.get("SubChainID"), root.get("SubChainId"))
     store_id     = pick(root.get("StoreID"),    root.get("StoreId"))
     bikoret_no   = root.get("BikoretNo")
-
+    company = _detect_company_from_path(input_file_path)
     promos_node = root.get("Promotions") or root.get("promotions") or {}
     promotions_list = to_list(promos_node.get("Promotion") or promos_node.get("promotion"))
 
@@ -137,6 +158,8 @@ def convert_json_to_target_promos_format(input_file_path, output_file_path):
             "sub_chain_id": sub_chain_id,
             "store_id":     store_id,
             "bikoret_no":   bikoret_no,
+            "company_id":   company["id"] if company else None,
+            "company_name": company["name"] if company else None,
             "promotions":   [map_promo(p) for p in promotions_list],
             "@count":       str(len(promotions_list))
         }
