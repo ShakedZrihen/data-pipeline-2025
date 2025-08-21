@@ -80,6 +80,8 @@ class DataNormalizer:
             itm = {}
             itm["price"] = float(item.get("ItemPrice") or -1)
             itm["product"] = item.get("ItemNm") or item.get("ItemName")
+            itm["product_code"] = item.get("ItemCode") or ""
+            itm["date"] = item.get("PriceUpdateDate") or ""
             itm["unit"] = self._normalize_units(item.get("UnitQty", ""))
             res.append(itm)
         return res

@@ -48,31 +48,12 @@ services:
     networks:
       - backend
 
-  # PostgreSQL Database
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: salim_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   super-compare:
     build: .
     container_name: super-compare
     depends_on:
       rabbitmq:
         condition: service_started
-      db:
-        condition: service_healthy
       localstack:
         condition: service_healthy
       mongodb:
@@ -102,6 +83,7 @@ services:
       MONGO_AUTH_DB: admin
 
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      POSTGRES_URI: ${POSTGRES_URI}
     networks:
       - backend
     tty: true

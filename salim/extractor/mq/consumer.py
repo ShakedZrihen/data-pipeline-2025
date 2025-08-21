@@ -1,9 +1,10 @@
 import json
 import os
+from typing import Any, Dict
 
 import pika
+import psycopg2
 
-from ..database.handler import MongoDBClient
 from ..enricher.patch import DataPatcher
 from ..normalizer.normalize import DataNormalizer
 from ..validator.validation import DataValidator
@@ -34,9 +35,39 @@ def callback(ch, method, properties, body):
     data = patcher.enrich()
 
     print("saving file in database...")
-    db = MongoDBClient("extracted_files")
-    db.insert_document("files", data)
-    print("inserted document.")
+    # throw exception if uri dosent exist, fail fast.
+    uri = os.environ["POSTGRES_URI"]
+    conn = psycopg2.connect(uri)
+    cur = conn.cursor()
+
+    query = """
+    INSERT INTO pricing (product_id, created_at, product_name, price, branch, chain_name)
+    VALUES (%s, %s, %s, %s, %s, %s)
+    ON CONFLICT (product_id) DO UPDATE
+    SET
+        created_at = EXCLUDED.created_at,
+        product_name = EXCLUDED.product_name,
+        price = EXCLUDED.price,
+        branch = EXCLUDED.branch,
+        chain_name = EXCLUDED.chain_name;
+    """
+    try:
+        items: list[Dict[str, Any]] = data.get("items")
+
+        for item in items:
+            sql_data = (
+                item["product_code"],
+                item["date"],
+                item["product"],
+                item["price"],
+                data["address"],
+                data["provider"],
+            )
+            cur.execute(query, sql_data)
+            conn.commit()
+            print("inserted item.")
+    except Exception as e:
+        print(f" error: {e}. not a PriceFull file, not saving into DB, continuing...")
 
 
 class RabbitMQConsumer:
