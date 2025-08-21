@@ -13,6 +13,11 @@ def _safe_json_loads(s: str):
         return json.loads(s)
     except Exception:
         return s
+from __future__ import annotations
+
+def send_to_dlq(*args, **kwargs):
+    """Stub for tests; tests monkeypatch this."""
+    pass
 
 def send_to_dlq(message_body, error: Exception, queue_name: str = "extractor-results"):
     url = os.getenv("SQS_DLQ_URL")

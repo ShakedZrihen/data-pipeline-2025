@@ -1,0 +1,1 @@
+﻿from ingest_consumer.normalizer import normalize, build_rows
