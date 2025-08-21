@@ -6,4 +6,4 @@ def test_enrich_basic():
                       {"product":"  חלב תנובה 3% ","price":5.9,"unit":"liter"})
     assert row["branch"] == "תל אביב - יפו"
     assert row["ts"].tzinfo is not None and row["ts"].tzinfo == timezone.utc
-    assert row["price"] == row["price"].quantize(row["price"])  # Decimal
+    assert row["price"] == row["price"].quantize(row["price"])

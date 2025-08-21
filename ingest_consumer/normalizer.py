@@ -11,6 +11,14 @@ _UNIT_WORDS_LITER = [
 
 _unit_liter_regex = re.compile("|".join(_UNIT_WORDS_LITER), flags=re.IGNORECASE)
 
+def enrich(rec: dict) -> dict:
+    unit = (rec.get("unit") or "").strip().lower()
+    if unit in {"ltr", "lt", "l"}: unit = "liter"
+    if not unit: unit = "unit"
+    rec["unit"] = unit
+    rec["product"] = " ".join(str(rec["product"]).split())
+    return rec
+
 def _infer_unit(product_name: str) -> Optional[str]:
     name = product_name or ""
     if _unit_liter_regex.search(name):
