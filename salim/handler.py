@@ -3,6 +3,12 @@ import xml.etree.ElementTree as ET
 from botocore.exceptions import ClientError
 from botocore.config import Config
 
+# ---- RabbitMQ (queue) ----
+try:
+    import pika
+except Exception:
+    pika = None
+
 # ---- Mongo (state) ----
 try:
     from pymongo import MongoClient, ASCENDING
@@ -12,20 +18,19 @@ except Exception:
     ASCENDING = None
     PyMongoError = Exception
 
-# AWS / S3 / SQS
+# ===== ENV: AWS / S3 =====
 S3_ENDPOINT = os.getenv('S3_ENDPOINT', 'http://localstack:4566')
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', 'test')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', 'test')
 AWS_REGION = os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
 S3_BUCKET = os.getenv('S3_BUCKET', 'test-bucket')
 
-QUEUE_BACKEND = os.getenv('QUEUE_BACKEND', 'sqs').lower()
-QUEUE_NAME = os.getenv('QUEUE_NAME', 'prices_events')
+# ===== ENV: Queue (RabbitMQ) =====
+QUEUE_BACKEND = os.getenv('QUEUE_BACKEND', 'rabbit').lower()  # <-- ברירת מחדל: rabbit
+RABBIT_URL = os.getenv('RABBIT_URL', 'amqp://guest:guest@rabbitmq:5672/%2f')
+RABBIT_QUEUE = os.getenv('RABBIT_QUEUE', 'results-queue')
 
-SQS_ENDPOINT = os.getenv('SQS_ENDPOINT', S3_ENDPOINT)
-SQS_QUEUE_URL = os.getenv('SQS_QUEUE_URL') 
-
-# I chose mongo
+# ===== ENV: State (Mongo) =====
 STATE_BACKEND = os.getenv('STATE_BACKEND', 'mongo').lower()
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://mongo:27017')
 MONGO_DB = os.getenv('MONGO_DB', 'prices')
@@ -40,17 +45,12 @@ aws_cfg = dict(
 )
 s3 = boto3.client("s3", **aws_cfg)
 
-sqs = boto3.client(
-    "sqs",
-    endpoint_url=SQS_ENDPOINT,
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=AWS_REGION,
-)
+# --- Rabbit globals ---
+_rabbit_conn = None
+_rabbit_channel = None
 
-_sqs_queue_url = None
+# --- Mongo global ---
 _mongo_col = None
-
 
 def ensure_bucket(bucket: str):
     try:
@@ -59,26 +59,22 @@ def ensure_bucket(bucket: str):
         s3.create_bucket(Bucket=bucket)
         print(f"[Init] Created S3 bucket: {bucket}")
 
-def ensure_sqs_queue():
-    global _sqs_queue_url, SQS_QUEUE_URL
-    if QUEUE_BACKEND != "sqs":
+def ensure_rabbit():
+    """Create RabbitMQ connection + queue (idempotent)."""
+    global _rabbit_conn, _rabbit_channel
+    if QUEUE_BACKEND != "rabbit":
         return None
-    if SQS_QUEUE_URL:
-        _sqs_queue_url = SQS_QUEUE_URL
-        return _sqs_queue_url
+    if pika is None:
+        raise RuntimeError("pika not installed — cannot use RabbitMQ")
+    _rabbit_conn = pika.BlockingConnection(pika.URLParameters(RABBIT_URL))
+    _rabbit_channel = _rabbit_conn.channel()
+    _rabbit_channel.queue_declare(queue=RABBIT_QUEUE, durable=True)
     try:
-        url = sqs.get_queue_url(QueueName=QUEUE_NAME)["QueueUrl"]
-    except ClientError:
-        url = sqs.create_queue(
-            QueueName=QUEUE_NAME,
-            Attributes={
-                "VisibilityTimeout": "30",
-                "MessageRetentionPeriod": "1209600"
-            },
-        )["QueueUrl"]
-        print(f"[Init] Created SQS queue: {QUEUE_NAME} -> {url}")
-    _sqs_queue_url = url
-    return _sqs_queue_url
+        _rabbit_channel.confirm_delivery()  # Publisher confirms (אם נתמך)
+    except Exception:
+        pass
+    print(f"[Init] RabbitMQ queue declared: {RABBIT_QUEUE}")
+    return _rabbit_channel
 
 def ensure_mongo():
     global _mongo_col
@@ -97,7 +93,7 @@ def ensure_mongo():
     print(f"[Init] Mongo ready: {MONGO_URI} db={MONGO_DB} col={MONGO_COL}")
     return _mongo_col
 
-# I wanted to make sure its a gz file because earlier i had a problem that the files in s3 were html files although they ended with "gz" but now it works
+# --- GZ download (ולידציה שזו אכן GZIP) ---
 def _download_gz(bucket: str, key: str) -> io.BytesIO:
     obj = s3.get_object(Bucket=bucket, Key=key)
     gz_bytes = obj["Body"].read()
@@ -151,7 +147,7 @@ def _save_json(bucket: str, src_key: str, doc: dict) -> str:
     s3.put_object(Bucket=bucket, Key=json_key, Body=body, ContentType='application/json')
     return json_key
 
-# PriceFull as the format and PromoFull a bit different, to save the range of each promotion
+# --- Parsers ---
 def parse_pricefull(xml_stream):
     provider, branch, items = None, None, []
     for event, elem in ET.iterparse(xml_stream, events=("end",)):
@@ -225,16 +221,27 @@ def parse_promofull(xml_stream):
             elem.clear()
     return provider, branch, promos
 
-
-
-def _emit_event(summary: dict):
-    payload = json.dumps(summary, ensure_ascii=False)
-    if QUEUE_BACKEND == "sqs":
-        if _sqs_queue_url is None:
-            raise RuntimeError("SQS queue URL not initialized")
-        sqs.send_message(QueueUrl=_sqs_queue_url, MessageBody=payload)
-    else:
+# --- Emit full JSON to RabbitMQ ---
+def _emit_event_full_json(doc: dict):
+    """
+    שולח את ה-JSON המלא (doc) לרביטMQ.
+    """
+    if QUEUE_BACKEND != "rabbit":
         print(f"[Queue] Skipped (QUEUE_BACKEND={QUEUE_BACKEND})")
+        return
+    if not _rabbit_channel:
+        raise RuntimeError("Rabbit channel not initialized")
+    payload = json.dumps(doc, ensure_ascii=False).encode("utf-8")
+    _rabbit_channel.basic_publish(
+        exchange="",
+        routing_key=RABBIT_QUEUE,
+        body=payload,
+        properties=pika.BasicProperties(
+            content_type="application/json",
+            delivery_mode=2,  # persistent
+        ),
+        mandatory=False,
+    )
 
 def _update_last_run(provider: str, branch: str, data_type: str, last_ts_iso: str):
     now_iso = datetime.datetime.now().replace(tzinfo=datetime.timezone.utc).isoformat().replace("+00:00", "Z")
@@ -248,7 +255,6 @@ def _update_last_run(provider: str, branch: str, data_type: str, last_ts_iso: st
         )
     else:
         print(f"[State] Skipped (STATE_BACKEND={STATE_BACKEND})")
-
 
 def process_s3_object_to_json(bucket: str, key: str):
     m = KEY_RE.match(key)
@@ -287,26 +293,13 @@ def lambda_handler(event, context=None):
                 continue
             json_key = _save_json(bucket, key, doc)
 
-            summary = {
-                "version": 1,
-                "source": "extractor",
-                "bucket": bucket,
-                "json_key": json_key,
-                "count": len(doc.get("items", [])),
-                "provider": doc.get("provider"),
-                "branch": doc.get("branch"),
-                "type": doc.get("type"),
-                "timestamp": doc.get("timestamp"),
-                "emitted_at": datetime.datetime.now().replace(
-                    tzinfo=datetime.timezone.utc
-                ).isoformat().replace("+00:00", "Z"),
-            }
-
+            # שליחת ה-JSON המלא לתור RabbitMQ
             try:
-                _emit_event(summary)
+                _emit_event_full_json(doc)
             except Exception as qe:
                 print(f"[Queue] Failed to emit event for {key}: {qe}")
 
+            # עדכון זמן ריצה אחרון במונגו
             try:
                 _update_last_run(
                     doc.get("provider") or "",
@@ -317,16 +310,14 @@ def lambda_handler(event, context=None):
             except Exception as se:
                 print(f"[State] Failed to update last_run for {key}: {se}")
 
-            print(f"Processed {key} -> s3://{bucket}/{json_key} ({summary['count']} records)")
-            outputs.append({"key": key, "ok": True, "json_key": json_key, "count": summary["count"]})
+            print(f"Processed {key} -> s3://{bucket}/{json_key} ({len(doc.get('items', []))} records)")
+            outputs.append({"key": key, "ok": True, "json_key": json_key, "count": len(doc.get("items", []))})
         except Exception as e:
             print(f"Error processing {key}: {e}")
             outputs.append({"key": key, "ok": False, "reason": str(e)})
     return {'statusCode': 200, 'body': json.dumps(outputs, ensure_ascii=False)}
 
-
 # main: poller mode
-
 if __name__ == "__main__":
     print("Lambda poller started. Scanning S3 every 10s …")
 
@@ -336,7 +327,7 @@ if __name__ == "__main__":
         print(f"[Init] Bucket ensure failed: {e}")
 
     try:
-        ensure_sqs_queue()
+        ensure_rabbit()
     except Exception as e:
         print(f"[Init] Queue ensure failed: {e}")
 

@@ -21,7 +21,7 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3,sqs,dynamodb,cloudwatch,logs
+      - SERVICES=s3 
       - DEBUG=1
       - LAMBDA_EXECUTOR=local
       - DEFAULT_REGION=us-east-1
@@ -34,18 +34,36 @@ services:
     ports:
       - "4444:4444"
 
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" 
+      - "15672:15672" 
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+
   api:
     build: .
     ports:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
+
       - S3_ENDPOINT=http://localstack:4566
       - S3_ACCESS_KEY=test
       - S3_SECRET_KEY=test
       - S3_REGION=us-east-1
       - S3_BUCKET=test-bucket
       - S3_FORCE_PATH_STYLE=true
+
       - VERIFY_SSL=false
       - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
     depends_on:
@@ -74,8 +92,10 @@ services:
       - .:/app
     depends_on:
       - localstack
-      - mongo 
+      - mongo
+      - rabbitmq
     environment:
+      # AWS / S3
       - S3_ENDPOINT=http://localstack:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
@@ -83,9 +103,11 @@ services:
       - S3_BUCKET=test-bucket
       - PYTHONUNBUFFERED=1
 
-      - QUEUE_BACKEND=sqs
-      - QUEUE_NAME=results-queue
+      - QUEUE_BACKEND=rabbit
+      - RABBIT_URL=amqp://guest:guest@rabbitmq:5672/%2f
+      - RABBIT_QUEUE=results-queue
 
+      # State (Mongo)
       - STATE_BACKEND=mongo
       - MONGO_URI=mongodb://mongo:27017
       - MONGO_DB=prices
@@ -93,6 +115,7 @@ services:
 
     ports:
       - "8080:8080"
+
 
   mongo:
     image: mongo:6
