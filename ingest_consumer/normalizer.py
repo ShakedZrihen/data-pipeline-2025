@@ -1,7 +1,8 @@
 from __future__ import annotations
 import re
-from typing import Optional
+from typing import Optional,List, Dict
 from .validator import Envelope, Item
+from ingest_consumer.normalizer import normalize, build_rows
 
 _UNIT_WORDS_LITER = [
     r"\b1(\.0)?\s*ליטר\b",
@@ -10,6 +11,36 @@ _UNIT_WORDS_LITER = [
 ]
 
 _unit_liter_regex = re.compile("|".join(_UNIT_WORDS_LITER), flags=re.IGNORECASE)
+
+
+def normalize(envelope: dict) -> dict:
+    """
+      provider, branch, type, timestamp (ISO string), items: [{product, price, unit?}, ...]
+    """
+    return envelope
+
+def build_rows(envelope: dict) -> List[Dict]:
+    """
+     prices.
+    """
+    env = normalize(envelope)
+    provider = env["provider"]
+    branch   = env["branch"]
+    typ      = env["type"]
+    ts       = env["timestamp"]
+
+    rows: List[Dict] = []
+    for item in env["items"]:
+        rows.append({
+            "provider": provider,
+            "branch":   branch,
+            "type":     typ,
+            "ts":       ts,
+            "product":  item["product"],
+            "price":    float(item["price"]),
+            "unit":     item.get("unit"),
+        })
+    return rows
 
 def enrich(rec: dict) -> dict:
     unit = (rec.get("unit") or "").strip().lower()
