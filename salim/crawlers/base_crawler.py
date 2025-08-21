@@ -19,10 +19,9 @@ from botocore.config import Config
 import requests
 import shutil
 
-# Allow "from utils import ..." when running from subpackages
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# ---------- ENV / S3 ----------
+# I guess it should be in an env file ?
 S3_ENDPOINT = os.getenv("S3_ENDPOINT", "http://localstack:4566")
 S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "test")
 S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "test")
@@ -30,7 +29,7 @@ S3_REGION = os.getenv("S3_REGION", "us-east-1")
 S3_BUCKET = os.getenv("S3_BUCKET", "test-bucket")
 S3_FORCE_PATH_STYLE = os.getenv("S3_FORCE_PATH_STYLE", "true").lower() == "true"
 
-# בדוקר/לוקאל: להתעלם מ-SSL כברירת מחדל. בסביבה אמיתית הגדירי VERIFY_SSL=true
+# SSL in docker-compose it is false i will try to fix
 VERIFY_SSL = os.getenv("VERIFY_SSL", "false").lower() == "true"
 
 s3 = boto3.client(
@@ -47,10 +46,9 @@ def ensure_bucket():
     try:
         s3.head_bucket(Bucket=S3_BUCKET)
     except Exception:
-        # us-east-1 לא צריך CreateBucketConfiguration
         s3.create_bucket(Bucket=S3_BUCKET)
 
-# ---------- Selenium ----------
+
 SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL", "http://selenium:4444/wd/hub")
 
 def init_chrome_options():
@@ -66,7 +64,7 @@ def make_driver():
     return webdriver.Remote(command_executor=SELENIUM_REMOTE_URL,
                             options=init_chrome_options())
 
-# ---------- Page helpers ----------
+
 def get_download_links_from_page(driver, download_base_url):
     WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.CSS_SELECTOR,
@@ -91,7 +89,7 @@ def get_next_page_button(driver, current_page):
     except NoSuchElementException:
         return None
 
-# ---------- File name parsing ----------
+
 FILE_RE = re.compile(
     r'(?P<cat>pricefull|promofull)\D*(?P<chain>\d{13})-(?P<store>\d+)-(?P<ts>\d{12})',
     re.IGNORECASE
@@ -102,15 +100,15 @@ def parse_link(u: str):
     if not m:
         return None
     return (
-        m.group('cat').lower(),   # 'pricefull' | 'promofull'
-        m.group('chain'),         # 13 digits
-        m.group('store'),         # store id
-        m.group('ts'),            # 12-digit timestamp
+        m.group('cat').lower(),
+        m.group('chain'), 
+        m.group('store'),
+        m.group('ts'),
     )
 
 def select_latest_per_branch(links, category_value: str):
     wanted = category_value.lower()
-    best_by_store = {}  # store_id -> (ts, url)
+    best_by_store = {} 
     for url in links:
         p = parse_link(url)
         if not p:
@@ -138,7 +136,6 @@ def filter_by_category_and_store(links, category_value: str, expected_store: str
     cand.sort(key=lambda x: x[0], reverse=True)
     return [cand[0][1]] if cand else []
 
-# ---------- GZIP Check ----------
 def is_gzip_file(path: str) -> bool:
     try:
         with open(path, "rb") as f:
@@ -146,19 +143,15 @@ def is_gzip_file(path: str) -> bool:
     except Exception:
         return False
 
-# ---------- Safe downloader (requests + Selenium cookies + Referer) ----------
+
 def safe_download(url: str, output_dir: str, driver=None, timeout=90) -> str | None:
     """
-    מוריד קובץ עם requests תוך שימוש בעוגיות מהסשן של Selenium.
-    מאמת SSL כש-VERIFY_SSL=True:
-      - אם מוגדר REQUESTS_CA_BUNDLE -> משתמשים בו
-      - אחרת verify=True (requests ישתמש ב-certifi כברירת מחדל)
-    מוודא חתימת GZIP וגם ניסיון פתיחה בפועל. אם HTML/שגיאה — מחזיר None.
+    ניסיתי עבור הssl אבל לא הצלחתי עדיין להוריד את הקבצים בלי להתעלם ממנו
     """
     os.makedirs(output_dir, exist_ok=True)
     session = requests.Session()
 
-    # הזרקת cookies מסלניום (לגישה לקישורי הורדה מוגנים)
+    # i guess i should change it when i will cancel the request and try to simulate click
     if driver is not None:
         for c in driver.get_cookies():
             try:
@@ -170,14 +163,13 @@ def safe_download(url: str, output_dir: str, driver=None, timeout=90) -> str | N
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
                       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Accept": "*/*",
-        # Referer עוזר לא ליפול לעמודי שגיאה/התחברות
         "Referer": getattr(driver, "current_url", None) or url,
-        # חשוב: לא לבקש דחיסת HTTP מהשרת (כדי ש-HTML דחוס לא ייראה כמו GZIP "אמיתי")
         "Accept-Encoding": "identity",
     }
 
     # אימות SSL:
-    # אם יש REQUESTS_CA_BUNDLE – נשתמש בו; אחרת verify=True (ברירת מחדל של requests=certifi)
+    #לנסות אחכ שיעבוד עם האימות בינתיים לא עובד שלי עם אלא רק בלי 
+    #לנסות אחכ לדמות לחיצה!
     ca_bundle = os.getenv("REQUESTS_CA_BUNDLE")
     verify_param = False  # מצב dev: בלי אימות אם VERIFY_SSL=false
     if os.getenv("VERIFY_SSL", "false").lower() == "true":
@@ -185,7 +177,6 @@ def safe_download(url: str, output_dir: str, driver=None, timeout=90) -> str | N
         if ca_bundle and os.path.isfile(ca_bundle):
             verify_param = ca_bundle
         else:
-            # ברירת המחדל הבטוחה והעדכנית של requests/certifi
             verify_param = certifi.where()
 
     try:
@@ -195,13 +186,10 @@ def safe_download(url: str, output_dir: str, driver=None, timeout=90) -> str | N
                 print(f"Download failed: {url} (status={r.status_code})")
                 return None
 
-            # אל תאפשר ל-requests לפתוח לנו gzip אוטומטית
             r.raw.decode_content = False
-
-            # בדיקת חתימת GZIP (2 הבייטים הראשונים)
             first2 = r.raw.read(2)
             if first2 != b"\x1f\x8b":
-                # כנראה HTML/שגיאה (או קובץ לא דחוס)
+                # i added this check because earlier it was downloaded as an html file, so i checked and found out that this is the prefix of a gz file
                 try:
                     sniff = (first2 or b'') + (r.raw.read(512) or b'')
                 except Exception:
@@ -209,13 +197,11 @@ def safe_download(url: str, output_dir: str, driver=None, timeout=90) -> str | N
                 print(f"Not GZIP, skipping. URL={url}, first bytes={sniff[:16]!r}")
                 return None
 
-            # שם קובץ
             filename = os.path.basename(url.split("?")[0]) or f"download_{int(time.time())}.gz"
             if not filename.lower().endswith(".gz"):
                 filename += ".gz"
             out_path = os.path.join(output_dir, filename)
 
-            # כתיבה לדיסק
             with open(out_path, "wb") as f:
                 f.write(first2)
                 shutil.copyfileobj(r.raw, f)
@@ -226,10 +212,9 @@ def safe_download(url: str, output_dir: str, driver=None, timeout=90) -> str | N
         print(f"Request error for {url}: {e}")
         return None
 
-    # ולידציה קשוחה: לנסות לפתוח כ-GZIP ולוודא שזה לא HTML דחוס
     try:
         with gzip.open(out_path, "rb") as gz:
-            chunk = gz.read(1024)  # קריאה קטנה
+            chunk = gz.read(1024)
         s = (chunk or b"").lstrip().lower()
         if s.startswith(b"<!") or s.startswith(b"<html") or s.startswith(b"<head") or s.startswith(b"<body"):
             print(f"Downloaded HTML (compressed) — skipping: {url}")
@@ -250,7 +235,6 @@ def safe_download(url: str, output_dir: str, driver=None, timeout=90) -> str | N
 
 
 
-# ---------- S3 upload ----------
 def upload_to_s3(local_path, branch_name, category_name):
     if not local_path or not is_gzip_file(local_path):
         print(f"Skip upload: not a valid GZIP -> {local_path}")
@@ -279,7 +263,6 @@ def upload_to_s3(local_path, branch_name, category_name):
     s3.upload_file(local_path, S3_BUCKET, s3_key)
     print(f"Uploaded to S3: s3://{S3_BUCKET}/{s3_key}")
 
-# ---------- Crawl helpers ----------
 def has_branch_dropdown(driver):
     try:
         driver.find_element(By.ID, "branch_filter")
@@ -333,7 +316,7 @@ def crawl_category(
             except Exception as e:
                 print(f"Download/Upload failed for {link}: {e}")
                 total_failed += 1
-        break  # בוחרים את מה שצריך במכה
+        break 
 
     return {
         "category": category_name,
@@ -349,7 +332,6 @@ def crawl(start_url, download_base_url, login_function=None, categories=None, ma
     try:
         driver.get(start_url)
 
-        # דוגמה: עמוד ביניים (רגולציה) שמפנה לדף ההורדות
         if "cpfta_prices_regulations" in start_url:
             WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[href]")))
             all_links = [a.get_attribute("href") for a in driver.find_elements(By.CSS_SELECTOR, "a[href]")]
@@ -380,7 +362,7 @@ def crawl(start_url, download_base_url, login_function=None, categories=None, ma
         all_results = []
 
         if dropdown_present:
-            # יש דרופדאון סניפים
+            # with dropdown- out of the supermarkets i chose this is relevant only to carrefour
             for branch_value in branches:
                 branch_name = "default_branch"
                 if branch_value and branch_select:
@@ -404,7 +386,7 @@ def crawl(start_url, download_base_url, login_function=None, categories=None, ma
                     )
                     all_results.append(result)
         else:
-            # בלי דרופדאון: קובץ הכי חדש לכל סניף בכל קטגוריה
+            # without dropdown- all the other supermarkets
             branch_name = "all_branches"
             for category in categories:
                 result = crawl_category(
@@ -422,3 +404,4 @@ def crawl(start_url, download_base_url, login_function=None, categories=None, ma
         return all_results
     finally:
         driver.quit()
+##########

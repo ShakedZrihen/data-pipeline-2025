@@ -21,12 +21,12 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3,sqs,lambda,dynamodb,cloudwatch,logs
+      - SERVICES=s3,sqs,dynamodb,cloudwatch,logs
       - DEBUG=1
       - LAMBDA_EXECUTOR=local
+      - DEFAULT_REGION=us-east-1
     volumes:
       - localstack-data:/var/lib/localstack
-
 
   selenium:
     image: seleniarm/standalone-chromium:latest
@@ -40,14 +40,12 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
-
       - S3_ENDPOINT=http://localstack:4566
       - S3_ACCESS_KEY=test
       - S3_SECRET_KEY=test
       - S3_REGION=us-east-1
       - S3_BUCKET=test-bucket
       - S3_FORCE_PATH_STYLE=true
-
       - VERIFY_SSL=false
       - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
     depends_on:
@@ -76,21 +74,30 @@ services:
       - .:/app
     depends_on:
       - localstack
+      - mongo 
     environment:
       - S3_ENDPOINT=http://localstack:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
       - S3_BUCKET=test-bucket
-      - LAMBDA_PORT=8080
       - PYTHONUNBUFFERED=1
 
-      - PUBLISH_BACKEND=sqs    
-      - SQS_QUEUE_NAME=results-queue
-      - DDB_TABLE_NAME=last_runs
+      - QUEUE_BACKEND=sqs
+      - QUEUE_NAME=results-queue
+
+      - STATE_BACKEND=mongo
+      - MONGO_URI=mongodb://mongo:27017
+      - MONGO_DB=prices
+      - MONGO_COL=last_run
 
     ports:
       - "8080:8080"
+
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
 
 volumes:
   postgres_data:
