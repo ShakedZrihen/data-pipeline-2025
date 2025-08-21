@@ -23,14 +23,9 @@ services:
     environment:
       - SERVICES=s3,sqs,lambda,dynamodb,cloudwatch,logs
       - DEBUG=1
-      # EITHER run Lambdas “locally” inside the LocalStack process:
       - LAMBDA_EXECUTOR=local
-      # (Optional) If you prefer Docker executor instead of local, also mount the docker socket:
-      # - LAMBDA_EXECUTOR=docker-reuse
     volumes:
       - localstack-data:/var/lib/localstack
-      # Only needed if using docker executor:
-      # - /var/run/docker.sock:/var/run/docker.sock
 
 
   selenium:
@@ -45,14 +40,15 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
-      # --- S3 (LocalStack) ---
+
       - S3_ENDPOINT=http://localstack:4566
       - S3_ACCESS_KEY=test
       - S3_SECRET_KEY=test
       - S3_REGION=us-east-1
       - S3_BUCKET=test-bucket
       - S3_FORCE_PATH_STYLE=true
-      # --- Selenium Remote URL for crawlers (optional override) ---
+
+      - VERIFY_SSL=false
       - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
     depends_on:
       db:
@@ -71,6 +67,30 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  lambda:
+    build: .
+    container_name: lambda
+    command: ["python", "-u", "handler.py"]
+    volumes:
+      - .:/app
+    depends_on:
+      - localstack
+    environment:
+      - S3_ENDPOINT=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - S3_BUCKET=test-bucket
+      - LAMBDA_PORT=8080
+      - PYTHONUNBUFFERED=1
+
+      - PUBLISH_BACKEND=sqs    
+      - SQS_QUEUE_NAME=results-queue
+      - DDB_TABLE_NAME=last_runs
+
+    ports:
+      - "8080:8080"
 
 volumes:
   postgres_data:
