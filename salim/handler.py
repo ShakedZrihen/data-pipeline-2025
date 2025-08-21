@@ -116,7 +116,7 @@ KEY_RE = re.compile(
 
 def _iso_from_ts(ts_str: str) -> str:
     if not ts_str:
-        return datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat().replace('+00:00', 'Z')
+        return datetime.datetime.now().replace(tzinfo=datetime.timezone.utc).isoformat().replace('+00:00', 'Z')
     fmt = '%Y%m%d%H%M' if len(ts_str) == 12 else '%Y%m%d%H%M%S'
     dt = datetime.datetime.strptime(ts_str, fmt).replace(tzinfo=datetime.timezone.utc)
     return dt.isoformat().replace('+00:00', 'Z')
@@ -237,7 +237,7 @@ def _emit_event(summary: dict):
         print(f"[Queue] Skipped (QUEUE_BACKEND={QUEUE_BACKEND})")
 
 def _update_last_run(provider: str, branch: str, data_type: str, last_ts_iso: str):
-    now_iso = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat().replace("+00:00", "Z")
+    now_iso = datetime.datetime.now().replace(tzinfo=datetime.timezone.utc).isoformat().replace("+00:00", "Z")
     if STATE_BACKEND == "mongo":
         if _mongo_col is None:
             raise RuntimeError("Mongo collection not initialized")
@@ -297,7 +297,7 @@ def lambda_handler(event, context=None):
                 "branch": doc.get("branch"),
                 "type": doc.get("type"),
                 "timestamp": doc.get("timestamp"),
-                "emitted_at": datetime.datetime.utcnow().replace(
+                "emitted_at": datetime.datetime.now().replace(
                     tzinfo=datetime.timezone.utc
                 ).isoformat().replace("+00:00", "Z"),
             }
