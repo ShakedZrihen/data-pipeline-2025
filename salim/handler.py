@@ -3,13 +3,13 @@ import xml.etree.ElementTree as ET
 from botocore.exceptions import ClientError
 from botocore.config import Config
 
-# ---- RabbitMQ (queue) ----
+
+# i saw people online says its better to wrap this import with "try" so the script wont harbu darbu if the import fails, and the code will still run
 try:
     import pika
 except Exception:
     pika = None
 
-# ---- Mongo (state) ----
 try:
     from pymongo import MongoClient, ASCENDING
     from pymongo.errors import PyMongoError
@@ -18,19 +18,16 @@ except Exception:
     ASCENDING = None
     PyMongoError = Exception
 
-# ===== ENV: AWS / S3 =====
 S3_ENDPOINT = os.getenv('S3_ENDPOINT', 'http://localstack:4566')
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', 'test')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', 'test')
 AWS_REGION = os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
 S3_BUCKET = os.getenv('S3_BUCKET', 'test-bucket')
 
-# ===== ENV: Queue (RabbitMQ) =====
 QUEUE_BACKEND = os.getenv('QUEUE_BACKEND', 'rabbit').lower()  # <-- ברירת מחדל: rabbit
 RABBIT_URL = os.getenv('RABBIT_URL', 'amqp://guest:guest@rabbitmq:5672/%2f')
 RABBIT_QUEUE = os.getenv('RABBIT_QUEUE', 'results-queue')
 
-# ===== ENV: State (Mongo) =====
 STATE_BACKEND = os.getenv('STATE_BACKEND', 'mongo').lower()
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://mongo:27017')
 MONGO_DB = os.getenv('MONGO_DB', 'prices')
@@ -45,11 +42,9 @@ aws_cfg = dict(
 )
 s3 = boto3.client("s3", **aws_cfg)
 
-# --- Rabbit globals ---
 _rabbit_conn = None
 _rabbit_channel = None
 
-# --- Mongo global ---
 _mongo_col = None
 
 def ensure_bucket(bucket: str):
@@ -60,7 +55,6 @@ def ensure_bucket(bucket: str):
         print(f"[Init] Created S3 bucket: {bucket}")
 
 def ensure_rabbit():
-    """Create RabbitMQ connection + queue (idempotent)."""
     global _rabbit_conn, _rabbit_channel
     if QUEUE_BACKEND != "rabbit":
         return None
@@ -70,7 +64,7 @@ def ensure_rabbit():
     _rabbit_channel = _rabbit_conn.channel()
     _rabbit_channel.queue_declare(queue=RABBIT_QUEUE, durable=True)
     try:
-        _rabbit_channel.confirm_delivery()  # Publisher confirms (אם נתמך)
+        _rabbit_channel.confirm_delivery()
     except Exception:
         pass
     print(f"[Init] RabbitMQ queue declared: {RABBIT_QUEUE}")
@@ -93,7 +87,7 @@ def ensure_mongo():
     print(f"[Init] Mongo ready: {MONGO_URI} db={MONGO_DB} col={MONGO_COL}")
     return _mongo_col
 
-# --- GZ download (ולידציה שזו אכן GZIP) ---
+# gz validation (because before that i got the html file instead of gz file)
 def _download_gz(bucket: str, key: str) -> io.BytesIO:
     obj = s3.get_object(Bucket=bucket, Key=key)
     gz_bytes = obj["Body"].read()
@@ -223,9 +217,6 @@ def parse_promofull(xml_stream):
 
 # --- Emit full JSON to RabbitMQ ---
 def _emit_event_full_json(doc: dict):
-    """
-    שולח את ה-JSON המלא (doc) לרביטMQ.
-    """
     if QUEUE_BACKEND != "rabbit":
         print(f"[Queue] Skipped (QUEUE_BACKEND={QUEUE_BACKEND})")
         return
@@ -238,7 +229,7 @@ def _emit_event_full_json(doc: dict):
         body=payload,
         properties=pika.BasicProperties(
             content_type="application/json",
-            delivery_mode=2,  # persistent
+            delivery_mode=2,
         ),
         mandatory=False,
     )

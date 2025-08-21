@@ -95,7 +95,7 @@ services:
       - mongo
       - rabbitmq
     environment:
-      # AWS / S3
+
       - S3_ENDPOINT=http://localstack:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
@@ -107,7 +107,6 @@ services:
       - RABBIT_URL=amqp://guest:guest@rabbitmq:5672/%2f
       - RABBIT_QUEUE=results-queue
 
-      # State (Mongo)
       - STATE_BACKEND=mongo
       - MONGO_URI=mongodb://mongo:27017
       - MONGO_DB=prices
