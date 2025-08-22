@@ -5,9 +5,9 @@ from botocore.exceptions import ClientError
 
 def upload_file_to_s3():
     """Upload ShakedZrihen.txt to S3 bucket using LocalStack"""
-    
+
     print("Uploading shaked.txt to S3 bucket...")
-    
+
     s3_client = boto3.client(
         's3',
         endpoint_url='https://b659bdb2de99.ngrok-free.app',
@@ -15,21 +15,21 @@ def upload_file_to_s3():
         aws_secret_access_key='test',
         region_name='us-east-1'
     )
-    
+
     bucket_name = 'test-bucket'
-    file_path = './ShakedZrihen.txt'
-    s3_key = 'ShakedZrihen2.txt'
-    
+    file_path = './Ori.txt'
+    s3_key = 'Ori.txt'
+
     try:
         if not os.path.exists(file_path):
             print(f"Error: File '{file_path}' not found!")
             sys.exit(1)
-        
+
         s3_client.upload_file(file_path, bucket_name, s3_key)
-        print(f"✅ {file_path} uploaded to s3://{bucket_name}/{s3_key}")        
+        print(f"✅ {file_path} uploaded to s3://{bucket_name}/{s3_key}")
         print("\nFiles in bucket:")
         response = s3_client.list_objects_v2(Bucket=bucket_name)
-        
+
         if 'Contents' in response:
             for obj in response['Contents']:
                 filename = obj['Key']
@@ -38,7 +38,7 @@ def upload_file_to_s3():
                 print(f"  - {filename} (Size: {size} bytes, Modified: {modified})")
         else:
             print("  No files found in bucket")
-            
+
     except ClientError as e:
         error_code = e.response['Error']['Code']
         if error_code == 'NoSuchBucket':
