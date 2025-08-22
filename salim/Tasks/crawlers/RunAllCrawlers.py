@@ -1,5 +1,5 @@
 
-from SuperSapirCrawler import SuperSapirCrawler 
+from SuperSapirCrawler import SuperSapirCrawler
 
 from ZolVeBegadolCrawler import ZolVeBegadolCrawler
 from YohannoffCrawler import YohananofCrawler
