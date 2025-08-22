@@ -17,8 +17,8 @@ from botocore.exceptions import ClientError
 from crawlers.utils.file_utils import extract_branch_and_timestamp
 
 class CrawlerBase(ABC):
-    def __init__(self, provider_url):
-        self.providers_base_url = provider_url
+    def __init__(self):
+        self.providers_base_url = None
 
     def init_chrome_options(self, extra_args=None, extra_prefs=None, user_agent=None):
         chrome_options = Options()
@@ -158,13 +158,17 @@ class CrawlerBase(ABC):
         return files_info
 
 
-    def run(self, provider_url):
+    def run(self, provider_url=None):
         """
         1. Get page HTML.
         2. Download all files and get their local paths.
         3. Upload each file to S3 under the correct branch folder.
         """
-        page_html = self.get_page_source(provider_url)
+        url = provider_url or getattr(self, "base_url", None) or getattr(self, "providers_base_url", None)
+        if not url:
+            raise ValueError("Provider URL not supplied and crawler has no base_url/providers_base_url")
+
+        page_html = self.get_page_source(url)
         provider_dir = self.download_files_from_html(page_html)
         files_info = self.get_files_info(provider_dir)
         for file in files_info:

@@ -3,31 +3,27 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from salim.crawlers.providers.hazi_hinam import HaziHinamCrawler
-from salim.crawlers.providers.yohananof import YohananofCrawler
-from salim.crawlers.providers.tiv_taam import TivTaamCrawler
-from salim.crawlers.providers.rami_levi import RamiLeviCrawler
-from salim.crawlers.providers.osherad import OsherAdCrawler
 from salim.crawlers.providers.carrefour import CarrefourCrawler
+from salim.crawlers.providers.cerberus import CerberusCrawler
+
+SUPERMARKETS = {
+    "yohananof": "yohananof",
+    "tiv_taam": "tivtaam",
+    "rami_levy": "ramilevi",
+    "osher_ad": "osherad",
+    "keshet_tamim": "keshet",
+}
 
 def run_all_crawlers():
-    crawlers = [
-        (HaziHinamCrawler, "https://shop.hazi-hinam.co.il/Prices"),
-        (YohananofCrawler, "https://url.publishedprices.co.il/file"),
-        (TivTaamCrawler, "https://url.publishedprices.co.il/login"),
-        (RamiLeviCrawler, "https://url.publishedprices.co.il/login"),
-        (OsherAdCrawler, "https://url.publishedprices.co.il/login"),
-        (CarrefourCrawler, "https://prices.carrefour.co.il/"),
-    ]
-
-    for CrawlerClass, url in crawlers:
-        try:
-            print(f"\nRunning crawler for {CrawlerClass.__name__} ({url})...")
-            crawler = CrawlerClass(url)
-            crawler.run(url)
-            print(f"Finished {CrawlerClass.__name__}\n")
-        except Exception as e:
-            print(f"Error running {CrawlerClass.__name__}: {e}")
+    carrefourCrawler = CarrefourCrawler()
+    print(f"\nRunning carrefour crawler...")
+    carrefourCrawler.run()
+    
+    print(f"\nRunning cerberus crawlers for...")
+    for market, uname in SUPERMARKETS.items():
+        print(f"=== Running crawler for {market} ({uname}) ===")
+        cerberusCrawler = CerberusCrawler(supermarket=market, username=uname)
+        cerberusCrawler.run()
 
 if __name__ == "__main__":
     run_all_crawlers()

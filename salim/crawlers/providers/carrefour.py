@@ -43,9 +43,9 @@ class CarrefourCrawler(CrawlerBase):
         )
         return chrome_options
 
-    def __init__(self, provider_url):
-        super().__init__(provider_url)
-        self.base_url = provider_url
+    def __init__(self):
+        super().__init__()
+        self.base_url = PROVIDER_URL
         self.collected_files = []
         
     def get_driver(self):
@@ -84,7 +84,7 @@ class CarrefourCrawler(CrawlerBase):
         driver = self.get_driver()
         driver.get(self.base_url)
         
-        selected_branch_values = ["0015", "1150", "3740", "4280", "1430","0183", "0123", "1112", "2230", "0006"]
+        selected_branch_values = ["0116", "0009", "0134", "1147", "0345","0329", "4420", "0752", "1171", "0142"]
 
         for category in ["pricefull", "promofull"]:
             try:
@@ -92,7 +92,6 @@ class CarrefourCrawler(CrawlerBase):
             except Exception as e:
                 continue
             for branch_value in selected_branch_values:
-                print(f"⬇️ Downloading category={category} branch={branch_value}")
                 try:
                     Select(driver.find_element(By.ID, "branch_filter")).select_by_value(branch_value)
                     time.sleep(5)
@@ -132,6 +131,9 @@ class CarrefourCrawler(CrawlerBase):
             json.dump(files_info, f, indent=4, ensure_ascii=False)
         return base_provider_dir
 
+    def run(self):
+        return super().run(self.base_url)
+    
 if __name__ == "__main__":
-    crawler = CarrefourCrawler(PROVIDER_URL)
-    crawler.run(PROVIDER_URL)
+    crawler = CarrefourCrawler()
+    crawler.run()
