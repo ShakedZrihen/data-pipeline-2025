@@ -58,7 +58,9 @@ def _shape_product_row(price_row: Dict[str, Any], promo_row: Optional[Dict[str, 
         "has_promotion": promo_row is not None,        # promotion exists
         "discount_rate": _parse_float((promo_row or {}).get("discount_rate"), 0.0),
         "price": _parse_float(price_row.get("qty_price"), 0.0),  # current price
-        "store_address": price_row.get("store_address")
+        "store_address": price_row.get("store_address"),
+        "store_city": price_row.get("store_city"),      # store city
+        "company_name": price_row.get("company_name")  # company name
     }
 
 def _fetch_active_promotion_for_item(item_code: str, chain_id: str, store_id: str) -> Optional[Dict[str, Any]]:
@@ -117,7 +119,7 @@ async def get_product_by_barcode(item_code: str):
     try:
         price_rows = (
             supabase.table("prices")
-            .select("item_code,item_name,qty_price,chain_id,store_id,store_address")
+            .select("item_code,item_name,qty_price,chain_id,company_name,store_id,store_city,store_address")
             .eq("item_code", item_code)
             .execute()
         ).data or []
@@ -149,7 +151,7 @@ async def get_product_by_name(q: str = Query(..., description="Substring to sear
     try:
         price_rows = (
             supabase.table("prices")
-            .select("item_code,item_name,qty_price,chain_id,store_id,store_address")
+            .select("item_code,item_name,qty_price,chain_id,company_name,store_id,store_city,store_address")
             .ilike("item_name", f"%{q}%")
             .execute()
         ).data or []
@@ -181,7 +183,7 @@ async def get_stores(chain_id: Optional[str] = Query(None, description="Chain to
     only stores belonging to that chain are returned.
     """
     try:
-        query = supabase.table("prices").select("store_id,chain_id,store_address")
+        query = supabase.table("prices").select("store_id,chain_id,store_address,store_city")
         if chain_id:
             query = query.eq("chain_id", chain_id)
         rows = query.execute().data or []
@@ -189,11 +191,16 @@ async def get_stores(chain_id: Optional[str] = Query(None, description="Chain to
         seen = set()
         deduped = []
         for r in rows:
-            key = (r.get("store_id"), r.get("chain_id"), r.get("store_address"))
+            key = (r.get("store_id"), r.get("chain_id"), r.get("store_address"), r.get("store_city"))
             if key not in seen:
                 seen.add(key)
                 deduped.append(
-                    {"store_id": key[0], "chain_id": key[1], "store_address": key[2]}
+                    {
+                        "store_id": key[0], 
+                        "chain_id": key[1], 
+                        "store_address": key[2],
+                        "store_city": key[3]
+                    }
                 )
 
         return {"stores": deduped}
