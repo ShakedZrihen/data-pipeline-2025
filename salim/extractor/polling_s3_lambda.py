@@ -9,10 +9,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-# from extractor.lambda_.handler import lambda_handler
-
-#@@@@@@@2 before docker @@@@@@@
-from salim.extractor.lambda_.handler import lambda_handler
+from extractor.lambda_.handler import lambda_handler
 
 PROCESSED_KEYS_FILE = ".processed_keys.json"
 POLL_INTERVAL_SECONDS = 20
