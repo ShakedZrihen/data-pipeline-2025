@@ -10,4 +10,6 @@ origin_files.zip
 run_convert.py
 main.py
 converted_files
+sqs_preview.py
+sqs_outbox.jsonl
 .processed_keys.json

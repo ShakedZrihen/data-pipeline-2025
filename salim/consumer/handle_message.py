@@ -218,32 +218,22 @@ def normalize_promotions(body: dict) -> List[Dict[str, Any]]:
             "company_name": to_str(root.get("company_name")),
         }
 
+        # Process promotion_items into a clean array
         items = promo.get("promotion_items", []) or []
+        promotion_items = []
+        for item in items:
+            promotion_items.append({
+                "item_code": to_str(item.get("ItemCode")),
+                "item_type": to_str(item.get("ItemType")), 
+                "is_gift_item": to_int(item.get("IsGiftItem"), None),
+                "gift_item_price": to_float(item.get("GiftItemPrice"), 0.0)
+            })
 
-        # No promotion_items -> one row with item fields = None
-        if not items:
-            rows.append(
-                {
-                    **base_row,
-                    "item_code": None,
-                    "item_type": None,
-                    "is_gift_item": None,
-                    "gift_item_price": None,
-                }
-            )
-            continue
-
-        # One row per promotion_item
-        for it in items:
-            rows.append(
-                {
-                    **base_row,
-                    "item_code": to_str(it.get("ItemCode")),
-                    "item_type": to_str(it.get("ItemType")),
-                    "is_gift_item": to_int(it.get("IsGiftItem"), None),
-                    "gift_item_price": to_float(it.get("GiftItemPrice"), 0.0),
-                }
-            )
+        # Add promotion_items as JSONB array to base_row
+        base_row["promotion_items"] = promotion_items
+        
+        # Add single row per promotion (not per item)
+        rows.append(base_row)
 
     return rows
 

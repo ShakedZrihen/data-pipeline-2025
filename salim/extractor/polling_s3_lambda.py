@@ -4,15 +4,15 @@ import json
 import boto3
 import time
 HERE = os.path.abspath(os.path.dirname(__file__))                 # .../salim/extractor
-PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))    # .../data-pipeline-2025
+PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))   
 
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from extractor.lambda_.handler import lambda_handler
+# from extractor.lambda_.handler import lambda_handler
 
 #@@@@@@@2 before docker @@@@@@@
-# from salim.extractor.lambda_.handler import lambda_handler
+from salim.extractor.lambda_.handler import lambda_handler
 
 PROCESSED_KEYS_FILE = ".processed_keys.json"
 POLL_INTERVAL_SECONDS = 20
@@ -21,6 +21,9 @@ os.environ.setdefault('S3_ENDPOINT', 'http://localhost:4566')
 os.environ.setdefault('SQS_ENDPOINT', 'http://localhost:4566')
 os.environ.setdefault('SQS_QUEUE_URL', 'http://localhost:4566/000000000000/my-queue')
 os.environ.setdefault('S3_BUCKET', 'test-bucket')
+
+# from utils.sqs_preview import enable_sqs_preview_log
+# enable_sqs_preview_log()
 
 """
 ## polling_s3_lambda.py - Lambda Polling Runner
@@ -44,11 +47,9 @@ def load_processed_keys():
             return set(json.load(f))
     return set()
 
-
 def save_processed_keys(keys):
     with open(PROCESSED_KEYS_FILE, 'w') as f:
         json.dump(list(keys), f)
-
 
 def poll_s3_and_trigger_lambda():
     bucket = os.environ['S3_BUCKET']
@@ -157,7 +158,7 @@ def poll_s3_and_trigger_lambda_limited(prices_limit=2, promos_limit=0):
                         }
                     ]
                 }
-
+                
                 print(f"\n🎯 Simulating lambda trigger for: {key}")
                 lambda_handler(event)
 

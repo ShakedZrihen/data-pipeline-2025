@@ -2,24 +2,24 @@ import os, json, boto3, tempfile
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from botocore.exceptions import ClientError
 
-from utils.file_utils import extract_and_delete_gz, convert_xml_to_json
-from utils.convert_json_format import (
-    convert_json_to_target_prices_format,
-    convert_json_to_target_promos_format,)
-from utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chunks
-
-#@@@@@@@@@@@ before docker @@@@@@@@@2
-# from ..utils.file_utils import extract_and_delete_gz, convert_xml_to_json
-# from ..utils.convert_json_format import (
+# from utils.file_utils import extract_and_delete_gz, convert_xml_to_json
+# from utils.convert_json_format import (
 #     convert_json_to_target_prices_format,
 #     convert_json_to_target_promos_format,)
-# from ..utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chunks
+# from utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chunks
+
+#@@@@@@@@@@@ before docker @@@@@@@@@2
+from ..utils.file_utils import extract_and_delete_gz, convert_xml_to_json
+from ..utils.convert_json_format import (
+    convert_json_to_target_prices_format,
+    convert_json_to_target_promos_format,)
+from ..utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chunks
 
 TMP_DIR = os.getenv("TMP_DIR", tempfile.gettempdir())
 os.makedirs(TMP_DIR, exist_ok=True)
 
 BASE_DIR = os.path.dirname(__file__)
-lookup_path = os.path.join(BASE_DIR, "utils", "stores_lookup.json")
+lookup_path = os.path.abspath(os.path.join(BASE_DIR, "..", "utils", "stores_lookup.json"))
 
 def _to_tmp_path(object_key: str) -> str:
     return os.path.join(TMP_DIR, os.path.basename(object_key))
@@ -27,6 +27,9 @@ def _to_tmp_path(object_key: str) -> str:
 def lambda_handler(event, context=None):
     """AWS Lambda handler for S3 events"""
     print(f"Received event: {json.dumps(event, indent=2)}")
+        
+    stores_lookup_path = os.path.abspath(os.getenv("STORES_LOOKUP_JSON", lookup_path))
+    print(f"[DBG] using STORES_LOOKUP_JSON={stores_lookup_path} exists={os.path.exists(stores_lookup_path)}")
     
     s3_client = boto3.client(
     's3',
@@ -38,8 +41,9 @@ def lambda_handler(event, context=None):
     try:
         if 'Records' not in event:
             return {'statusCode': 200, 'body': json.dumps('No records')}
-    
+
         if 'Records' in event:
+            key = event["Records"][0]["s3"]["object"]["key"]
             for record in event['Records']:
                 bucket_name = record['s3']['bucket']['name']
                 object_key = record['s3']['object']['key']
@@ -79,10 +83,15 @@ def lambda_handler(event, context=None):
                 base_no_ext = os.path.splitext(os.path.basename(json_intermediate_path))[0]
                 target_json_path = os.path.join(TMP_DIR, f"{base_no_ext}_converted.json")
 
+                # lookup_path = os.getenv("STORES_LOOKUP_JSON", os.path.join(PROJECT_ROOT, "stores_lookup.json"))
+                # lookup_path = os.getenv("STORES_LOOKUP_JSON", lookup_path)
+                # print(f"[DBG] using STORES_LOOKUP_JSON={lookup_path} exists={os.path.exists(lookup_path)}")
+                
+
                 if is_prices:
-                    convert_json_to_target_prices_format(json_intermediate_path, target_json_path, stores_lookup_path=lookup_path)
+                    convert_json_to_target_prices_format(json_intermediate_path, target_json_path, stores_lookup_path=stores_lookup_path, source_key=object_key)
                 elif is_promos:
-                    convert_json_to_target_promos_format(json_intermediate_path, target_json_path, stores_lookup_path=lookup_path)
+                    convert_json_to_target_promos_format(json_intermediate_path, target_json_path, stores_lookup_path=stores_lookup_path, source_key=object_key)
                 else:
                     print("Unknown JSON structure (no Items/Promotions). Skipping.")
                     continue
