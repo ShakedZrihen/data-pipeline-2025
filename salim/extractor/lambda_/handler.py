@@ -2,18 +2,18 @@ import os, json, boto3, tempfile
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from botocore.exceptions import ClientError
 
-from utils.file_utils import extract_and_delete_gz, convert_xml_to_json
-from utils.convert_json_format import (
-    convert_json_to_target_prices_format,
-    convert_json_to_target_promos_format,)
-from utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chunks
-
-#@@@@@@@@@@@ before docker @@@@@@@@@2
-# from ..utils.file_utils import extract_and_delete_gz, convert_xml_to_json
-# from ..utils.convert_json_format import (
+# from utils.file_utils import extract_and_delete_gz, convert_xml_to_json
+# from utils.convert_json_format import (
 #     convert_json_to_target_prices_format,
 #     convert_json_to_target_promos_format,)
-# from ..utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chunks
+# from utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chunks
+
+#@@@@@@@@@@@ before docker @@@@@@@@@2
+from ..utils.file_utils import extract_and_delete_gz, convert_xml_to_json
+from ..utils.convert_json_format import (
+    convert_json_to_target_prices_format,
+    convert_json_to_target_promos_format,)
+from ..utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chunks
 
 TMP_DIR = os.getenv("TMP_DIR", tempfile.gettempdir())
 os.makedirs(TMP_DIR, exist_ok=True)
