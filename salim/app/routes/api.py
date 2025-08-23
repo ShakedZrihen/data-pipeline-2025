@@ -58,7 +58,9 @@ def _shape_product_row(price_row: Dict[str, Any], promo_row: Optional[Dict[str, 
         "has_promotion": promo_row is not None,        # promotion exists
         "discount_rate": _parse_float((promo_row or {}).get("discount_rate"), 0.0),
         "price": _parse_float(price_row.get("qty_price"), 0.0),  # current price
-        "store_address": price_row.get("store_address")
+        "store_address": price_row.get("store_address"),
+        "store_city": price_row.get("store_city"),      # store city
+        "company_name": price_row.get("company_name") # company name
     }
 
 def _fetch_active_promotion_for_item(item_code: str, chain_id: str, store_id: str) -> Optional[Dict[str, Any]]:
