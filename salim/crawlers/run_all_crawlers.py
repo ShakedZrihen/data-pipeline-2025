@@ -1,18 +1,10 @@
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from salim.crawlers.providers.carrefour import CarrefourCrawler
-from salim.crawlers.providers.cerberus import CerberusCrawler
-
-SUPERMARKETS = {
-    "yohananof": "yohananof",
-    "tiv_taam": "tivtaam",
-    "rami_levy": "ramilevi",
-    "osher_ad": "osherad",
-    "keshet_tamim": "keshet",
-}
+from crawlers.providers.carrefour import CarrefourCrawler
+from crawlers.providers.cerberus import CerberusCrawler, SUPERMARKETS
 
 def run_all_crawlers():
     carrefourCrawler = CarrefourCrawler()

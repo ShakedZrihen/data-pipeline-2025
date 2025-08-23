@@ -8,3 +8,5 @@ local_files
 origin_files
 origin_files.zip
 run_convert.py
+main.py
+converted_files

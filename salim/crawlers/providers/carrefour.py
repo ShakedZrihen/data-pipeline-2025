@@ -84,7 +84,7 @@ class CarrefourCrawler(CrawlerBase):
         driver = self.get_driver()
         driver.get(self.base_url)
         
-        selected_branch_values = ["0116", "0009", "0134", "1147", "0345","0329", "4420", "0752", "1171", "0142"]
+        selected_branch_values = ["0116", "0009", "1295", "1147", "0063","0329", "4420", "0752", "1171", "1139"]
 
         for category in ["pricefull", "promofull"]:
             try:

@@ -25,18 +25,18 @@ BASE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lo
 
 SUPERMARKETS = {
     "yohananof": "yohananof",
-    "tiv_taam": "tivtaam",
-    "rami_levy": "ramilevi",
-    "osher_ad": "osherad",
-    "keshet_tamim": "keshet",
+    "tivtaam": "tivtaam",
+    "ramilevi": "ramilevi",
+    "osherad": "osherad",
+    "keshet": "keshet",
 }
 
 BRANCH_WHITELIST = {
     "yohananof": ["032", "035", "028", "027", "029", "025", "005", "015", "021", "019"],
-    "tiv_taam":  ["089","019","091","083","084","014","020","079","087","085"],
-    "rami_levy": ["013","016","017","043","045","050","055","056","703","059"],
-    "osher_ad": ["010","011","020","022","024","025","013", "014","017","018"],
-    "keshet_tamim":  ["005","013","017","019","020","022","024","102","104","105"],
+    "tivtaam":  ["089","019","091","083","084","014","020","079","087","085"],
+    "ramilevi": ["013","016","017","043","045","050","055","056","703","059"],
+    "osherad": ["009", "010","011","013","014","020","022","024","025","031"],
+    "keshet":  ["005","013","017","019","020","022","024","102","104","105"],
 }
 
 def extract_branch_code(file_name: str):

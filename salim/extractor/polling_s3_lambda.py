@@ -11,21 +11,6 @@ if PROJECT_ROOT not in sys.path:
 
 from salim.extractor.lambda_.handler import lambda_handler
 
-# MAYA
-# from .lambda_.handler import lambda_handler
-
-# BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-# sys.path.insert(0, BASE)                 
-# sys.path.insert(0, os.path.dirname(__file__))
-# HERE = os.path.abspath(os.path.dirname(__file__))                 # .../salim/extractor
-# PROJECT_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))    # .../data-pipeline-2025
-
-# if HERE not in sys.path:
-#     sys.path.insert(0, HERE)              
-    
-# if PROJECT_ROOT not in sys.path:
-#     sys.path.insert(0, PROJECT_ROOT)
-    
 PROCESSED_KEYS_FILE = ".processed_keys.json"
 POLL_INTERVAL_SECONDS = 20
 
