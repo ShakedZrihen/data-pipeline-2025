@@ -71,7 +71,8 @@ class CrawlerBase(ABC):
     def upload_file_to_s3(self, file_path, file_type, provider_name="unknown"):        
         s3_client = boto3.client(
             's3',
-            endpoint_url='http://localhost:4566',
+            # endpoint_url='http://localhost:4566',
+            endpoint_url='http://s3-simulator:4566',
             aws_access_key_id='test',
             aws_secret_access_key='test',
             region_name='us-east-1'
@@ -117,7 +118,8 @@ class CrawlerBase(ABC):
     def get_files_from_s3(self):
         s3_client = boto3.client(
             's3',
-            endpoint_url='http://localhost:4566',
+            # endpoint_url='http://localhost:4566',
+            endpoint_url='http://s3-simulator:4566',
             aws_access_key_id='test',
             aws_secret_access_key='test',
             region_name='us-east-1'
@@ -193,4 +195,3 @@ class CrawlerBase(ABC):
         - Download the files to a local directory
         """
         pass
-
