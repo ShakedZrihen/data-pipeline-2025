@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   # LocalStack S3 Simulator
   localstack:
@@ -15,6 +13,11 @@ services:
       - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "awslocal", "s3", "ls"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   # FastAPI Application
   app:
@@ -27,7 +30,7 @@ services:
       - docker.env
     depends_on:
       localstack:
-        condition: service_started
+        condition: service_healthy
     networks:
       - app-network
 
@@ -40,7 +43,7 @@ services:
       - docker.env
     depends_on:
       localstack:
-        condition: service_started
+        condition: service_healthy
     networks:
       - app-network
     restart: unless-stopped
@@ -54,7 +57,7 @@ services:
       - docker.env
     depends_on:
       localstack:
-        condition: service_started
+        condition: service_healthy
     networks:
       - app-network
     restart: unless-stopped
@@ -68,12 +71,16 @@ services:
       - docker.env
     depends_on:
       localstack:
-        condition: service_started
+        condition: service_healthy
     networks:
       - app-network
-    # Run crawlers on schedule or manually
-    profiles:
-      - crawlers
+    restart: unless-stopped
+    command: >
+      sh -lc "python -m crawlers.main || true;
+      while true; do
+        echo '[crawlers] idle tick'; sleep ${CRAWLER_INTERVAL_SECONDS:-900};
+        python -m crawlers.main || true;
+      done"
 
 networks:
   app-network:
