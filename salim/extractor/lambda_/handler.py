@@ -18,6 +18,9 @@ from utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chun
 TMP_DIR = os.getenv("TMP_DIR", tempfile.gettempdir())
 os.makedirs(TMP_DIR, exist_ok=True)
 
+BASE_DIR = os.path.dirname(__file__)
+lookup_path = os.path.join(BASE_DIR, "utils", "stores_lookup.json")
+
 def _to_tmp_path(object_key: str) -> str:
     return os.path.join(TMP_DIR, os.path.basename(object_key))
 
@@ -77,9 +80,9 @@ def lambda_handler(event, context=None):
                 target_json_path = os.path.join(TMP_DIR, f"{base_no_ext}_converted.json")
 
                 if is_prices:
-                    convert_json_to_target_prices_format(json_intermediate_path, target_json_path)
+                    convert_json_to_target_prices_format(json_intermediate_path, target_json_path, stores_lookup_path=lookup_path)
                 elif is_promos:
-                    convert_json_to_target_promos_format(json_intermediate_path, target_json_path)
+                    convert_json_to_target_promos_format(json_intermediate_path, target_json_path, stores_lookup_path=lookup_path)
                 else:
                     print("Unknown JSON structure (no Items/Promotions). Skipping.")
                     continue
