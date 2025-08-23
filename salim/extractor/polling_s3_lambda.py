@@ -193,5 +193,5 @@ def poll_s3_and_trigger_lambda_limited(prices_limit=2, promos_limit=0):
 
 
 if __name__ == "__main__":
-    # poll_s3_and_trigger_lambda()
-    poll_s3_and_trigger_lambda_limited(prices_limit=2, promos_limit=2)
+    poll_s3_and_trigger_lambda()
+    # poll_s3_and_trigger_lambda_limited(prices_limit=2, promos_limit=2)
