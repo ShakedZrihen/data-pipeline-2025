@@ -8,8 +8,8 @@ from salim.consumer.handle_message import handle_message
 
 def process_message(msg):
     success = handle_message(msg)
-    # if success:
-    #     delete_message(msg["ReceiptHandle"])
+    if success:
+        delete_message(msg["ReceiptHandle"])
 
 def main():
     while True:
