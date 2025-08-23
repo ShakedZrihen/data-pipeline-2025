@@ -19,9 +19,6 @@ os.environ.setdefault('SQS_ENDPOINT', 'http://localhost:4566')
 os.environ.setdefault('SQS_QUEUE_URL', 'http://localhost:4566/000000000000/my-queue')
 os.environ.setdefault('S3_BUCKET', 'test-bucket')
 
-# from utils.sqs_preview import enable_sqs_preview_log
-# enable_sqs_preview_log()
-
 """
 ## polling_s3_lambda.py - Lambda Polling Runner
 
