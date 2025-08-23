@@ -1,48 +1,83 @@
 version: "3.9"
 
 services:
-  # PostgreSQL Database
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: salim_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # LocalStack S3 Simulator
   localstack:
     container_name: s3-simulator
     image: gresau/localstack-persist:4
     ports:
       - "4566:4566"   # API endpoint
-    environment:
-      - SERVICES=s3,sqs
-      - DEBUG=1
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
-      - AWS_DEFAULT_REGION=us-east-1
-      - PERSISTENCE=1
-      - S3_SKIP_SIGNATURE_VALIDATION=1
+    env_file:
+      - docker.env
     volumes:
       - "localstack-data:/persisted-data"
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
     networks:
-      - s3-network
+      - app-network
+
+  # FastAPI Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - docker.env
+    depends_on:
+      localstack:
+        condition: service_started
+    networks:
+      - app-network
+
+  # SQS Consumer
+  consumer:
+    build:
+      context: .
+      dockerfile: consumer/Dockerfile
+    env_file:
+      - docker.env
+    depends_on:
+      localstack:
+        condition: service_started
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Lambda Extractor (S3 Event Processor)
+  lambda-extractor:
+    build:
+      context: .
+      dockerfile: extractor/lambda_/Dockerfile
+    env_file:
+      - docker.env
+    depends_on:
+      localstack:
+        condition: service_started
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Web Crawlers
+  crawlers:
+    build:
+      context: .
+      dockerfile: crawlers/Dockerfile
+    env_file:
+      - docker.env
+    depends_on:
+      localstack:
+        condition: service_started
+    networks:
+      - app-network
+    # Run crawlers on schedule or manually
+    profiles:
+      - crawlers
 
 networks:
-  s3-network:
+  app-network:
     driver: bridge
 
 volumes:
-  postgres_data:
   localstack-data:

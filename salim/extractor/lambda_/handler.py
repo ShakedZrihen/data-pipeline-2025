@@ -2,11 +2,18 @@ import os, json, boto3, tempfile
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from botocore.exceptions import ClientError
 
-from ..utils.file_utils import extract_and_delete_gz, convert_xml_to_json
-from ..utils.convert_json_format import (
+from utils.file_utils import extract_and_delete_gz, convert_xml_to_json
+from utils.convert_json_format import (
     convert_json_to_target_prices_format,
     convert_json_to_target_promos_format,)
-from ..utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chunks
+from utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chunks
+
+#@@@@@@@@@@@ before docker @@@@@@@@@2
+# from ..utils.file_utils import extract_and_delete_gz, convert_xml_to_json
+# from ..utils.convert_json_format import (
+#     convert_json_to_target_prices_format,
+#     convert_json_to_target_promos_format,)
+# from ..utils.send_json_to_sqs import send_promotions_in_chunks, send_items_in_chunks
 
 TMP_DIR = os.getenv("TMP_DIR", tempfile.gettempdir())
 os.makedirs(TMP_DIR, exist_ok=True)
@@ -38,7 +45,7 @@ def lambda_handler(event, context=None):
                 object_key = record['s3']['object']['key']
                 event_name = record['eventName']
                 
-                print(f"🎯 S3 Event Triggered!")
+                print(f" S3 Event Triggered!")
                 print(f"   Event: {event_name}")
                 print(f"   Bucket: {bucket_name}")
                 print(f"   File: {object_key}")
@@ -256,9 +263,9 @@ class LambdaHTTPHandler(BaseHTTPRequestHandler):
                     try:
                         s3_client.download_file(bucket_name, s3_key, local_path)
                         downloaded_count += 1
-                        print(f"📥 Downloaded: {s3_key} -> {local_path}")
+                        print(f" Downloaded: {s3_key} -> {local_path}")
                     except Exception as e:
-                        print(f"❌ Failed to download {s3_key}: {e}")
+                        print(f" Failed to download {s3_key}: {e}")
             
             response_data = {
                 'message': f'Successfully downloaded {downloaded_count} files',
@@ -283,7 +290,7 @@ class LambdaHTTPHandler(BaseHTTPRequestHandler):
 def main():
     """Start HTTP server to receive Lambda events and polling loop"""
     port = int(os.getenv('LAMBDA_PORT', 8080))
-    print(f"🚀 Lambda function server starting on port {port}...")
+    print(f" Lambda function server starting on port {port}...")
     
     server = HTTPServer(('0.0.0.0', port), LambdaHTTPHandler)
     
