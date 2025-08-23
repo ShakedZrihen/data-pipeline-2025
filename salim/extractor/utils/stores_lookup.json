@@ -1,254 +1,254 @@
 { 
   "carrefour": {
     "0116": {
-      "address": "פינסקר 69",
-      "city": "תל אביב"
+      "address": "Pinsker 69",
+      "city": "Tel Aviv"
     },
     "0009": {
-      "address": "זרחין 12",
-      "city": "רעננה"
+      "address": "Zarchin 12",
+      "city": "Ra'anana"
     },
     "1295": {
-      "address": "בני אפרים 209",
-      "city": "תל אביב"
+      "address": "Bnei Ephraim 209",
+      "city": "Tel Aviv"
     },
     "1147": {
-      "address": "ז'בוטינסקי 65",
-      "city": "ראשון לציון"
+      "address": "Jabotinsky 65",
+      "city": "Rishon Lezion"
     },
     "0063": {
-      "address": "חלמונית 29",
-      "city": "ראשון לציון"
+      "address": "Chalmonit 29",
+      "city": "Rishon Lezion"
     },
     "0329": {
-      "address": "אילת 36",
-      "city": "חולון"
+      "address": "Eilat 36",
+      "city": "Holon"
     },
     "4420": {
-      "address": "הרצל 75",
-      "city": "רמת גן"
+      "address": "Herzl 75",
+      "city": "Ramat Gan"
     },
     "0752": {
-      "address": "האורנים 16",
-      "city": "רמת גן"
+      "address": "HaOranim 16",
+      "city": "Ramat Gan"
     },
     "1171": {
-      "address": "הרצל 28",
-      "city": "פתח תקווה"
+      "address": "Herzl 28",
+      "city": "Petah Tikva"
     },
     "1139": {
-      "address": "יעקב כהן 2",
-      "city": "כפר סבא"
+      "address": "Yaakov Cohen 2",
+      "city": "Kfar Saba"
     }
   },
   "yohananof": {
     "032": {
-      "address": "בן צבי",
-      "city": "תל אביב"
+      "address": "Ben Tzvi",
+      "city": "Tel Aviv"
     },
     "035": {
-      "address": "נחלת יצחק",
-      "city": "תל אביב"
+      "address": "Nachalat Yitzhak",
+      "city": "Tel Aviv"
     },
     "028": {
-      "address": "רמת אליהו",
-      "city": "ראשון לציון"
+      "address": "Ramat Eliyahu",
+      "city": "Rishon Lezion"
     },
     "027": {
-      "address": "יגאל אלון 57",
-      "city": "יד אליהו"
+      "address": "Yigal Alon 57",
+      "city": "Yad Eliyahu"
     },
     "029": {
-      "address": "בת ים",
-      "city": "בת ים"
+      "address": "Bat Yam",
+      "city": "Bat Yam"
     },
     "025": {
-      "address": "נס ציונה",
-      "city": "נס ציונה"
+      "address": "Ness Ziona",
+      "city": "Ness Ziona"
     },
     "005": {
-      "address": "זבוטינסקי 27",
-      "city": "אשדוד"
+      "address": "Jabotinsky 27",
+      "city": "Ashdod"
     },
     "015": {
-      "address": "רחוב הפלדה 1",
-      "city": "אור יהודה"
+      "address": "HaPlada 1",
+      "city": "Or Yehuda"
     },
     "021": {
-      "address": "סגולה",
-      "city": "פתח תקווה"
+      "address": "Segula",
+      "city": "Petah Tikva"
     },
     "019": {
-      "address": "אור יהודה",
-      "city": "אור יהודה"
+      "address": "Or Yehuda",
+      "city": "Or Yehuda"
     }
   },
   "tivtaam": {
     "089": {
-      "address": "קינג גורג 8",
-      "city": "תל אביב"
+      "address": "King George 8",
+      "city": "Tel Aviv"
     },
     "019": {
-      "address": "דבורה הנביאה 122",
-      "city": "תל אביב"
+      "address": "Devorah HaNeviah 122",
+      "city": "Tel Aviv"
     },
     "091": {
-      "address": "המסגר 37",
-      "city": "תל אביב"
+      "address": "HaMasger 37",
+      "city": "Tel Aviv"
     },
     "083": {
-      "address": "פנחס רוזן 67",
-      "city": "תל אביב"
+      "address": "Pinchas Rosen 67",
+      "city": "Tel Aviv"
     },
     "084": {
-      "address": "אינשטיין 10",
-      "city": "תל אביב"
+      "address": "Einstein 10",
+      "city": "Tel Aviv"
     },
     "014": {
-      "address": "המכבים 62",
-      "city": "ראשון לציון"
+      "address": "HaMaccabim 62",
+      "city": "Rishon Lezion"
     },
     "020": {
-      "address": "הרוקמים 26",
-      "city": "חולון"
+      "address": "HaRokmim 26",
+      "city": "Holon"
     },
     "079": {
-      "address": "שדרות לוי אשכול 30",
-      "city": "חולון"
+      "address": "Levi Eshkol Blvd 30",
+      "city": "Holon"
     },
     "087": {
-      "address": "רוטישילד 57",
-      "city": "פתח תקווה"
+      "address": "Rothschild 57",
+      "city": "Petah Tikva"
     },
     "085": {
-      "address": "הדובדבן 7",
-      "city": "קריית אונו"
+      "address": "HaDuvdevan 7",
+      "city": "Kiryat Ono"
     }
   },
   "ramilevi": {
     "013": {
-      "address": "בית הדפוס 13",
-      "city": "גבעת שאול"
+      "address": "Beit HaDfus 13",
+      "city": "Givat Shaul"
     },
     "017": {
-      "address": "הזית 10",
-      "city": "ראש העין"
+      "address": "HaZayit 10",
+      "city": "Rosh HaAyin"
     },
     "043": {
-      "address": "משה דיין",
-      "city": "ראשון לציון"
+      "address": "Moshe Dayan",
+      "city": "Rishon Lezion"
     },
     "045": {
-      "address": "העמל 20",
-      "city": "בת ים"
+      "address": "HaAmal 20",
+      "city": "Bat Yam"
     },
     "050": {
-      "address": "תמנע 6",
-      "city": "חולון"
+      "address": "Timna 6",
+      "city": "Holon"
     },
     "055": {
-      "address": "דבורה הנביאה 127",
-      "city": "תל אביב"
+      "address": "Devorah HaNeviah 127",
+      "city": "Tel Aviv"
     },
     "016": {
-      "address": "מבצע קדש 68",
-      "city": "רמת גן"
+      "address": "Mivtza Kadesh 68",
+      "city": "Ramat Gan"
     },
     "056": {
-      "address": "צהל 99",
-      "city": "אשקלון"
+      "address": "Tzahal 99",
+      "city": "Ashkelon"
     },
     "703": {
-      "address": "דב יוסף",
-      "city": "פתח תקווה"
+      "address": "Dov Yosef",
+      "city": "Petah Tikva"
     },
     "059": {
-      "address": "הרצל 91",
-      "city": "רמלה"
+      "address": "Herzl 91",
+      "city": "Ramla"
     }
   },
   "keshet": {
     "005": {
-      "address": "תל אביב 11",
-      "city": "תל אביב"
+      "address": "Tel Aviv 11",
+      "city": "Tel Aviv"
     },
     "013": {
-      "address": "ברשבסקי 33",
-      "city": "ראשון לציון"
+      "address": "Bereshevsky 33",
+      "city": "Rishon Lezion"
     },
     "017": {
-      "address": "מרכז קניות בילו",
-      "city": "גבעת ברנר"
+      "address": "Bilu Shopping Center",
+      "city": "Givat Brenner"
     },
     "019": {
-      "address": "דרך השרון 12",
-      "city": "כפר סבא"
+      "address": "Derech HaSharon 12",
+      "city": "Kfar Saba"
     },
     "020": {
-      "address": "הרב פינטו מסעוד אשר 19",
-      "city": "פתח תקווה"
+      "address": "Rav Pinto Massoud Asher 19",
+      "city": "Petah Tikva"
     },
     "022": {
-      "address": "היהלומים 4",
-      "city": "אשדוד"
+      "address": "HaYahalomim 4",
+      "city": "Ashdod"
     },
     "024": {
-      "address": "לח\"י 4",
-      "city": "ראשון לציון"
+      "address": "Lehi 4",
+      "city": "Rishon Lezion"
     },
     "102": {
-      "address": "המייסדים 3",
-      "city": "קריית אונו"
+      "address": "HaMeyasdim 3",
+      "city": "Kiryat Ono"
     },
     "104": {
-      "address": "ביאליק 39",
-      "city": "רמת גן"
+      "address": "Bialik 39",
+      "city": "Ramat Gan"
     },
     "105": {
-      "address": "דם המכבים 38",
-      "city": "מודיעין"
+      "address": "Dam HaMaccabim 38",
+      "city": "Modiin"
     }
   },
   "osherad": {
     "009": {
-      "address": "בעלי המלאכה 4",
-      "city": "אשדוד"
+      "address": "Baalei Melacha 4",
+      "city": "Ashdod"
     },
     "010": {
-      "address": "בן ציון גליס 30",
-      "city": "פתח תקווה"
+      "address": "Ben Zion Galis 30",
+      "city": "Petah Tikva"
     },
     "011": {
-      "address": "הקישון 11",
-      "city": "בני ברק"
+      "address": "HaKishon 11",
+      "city": "Bnei Brak"
     },
     "013": {
-      "address": "ברשבסקי 33",
-      "city": "ראשון לציון"
+      "address": "Bereshevsky 33",
+      "city": "Rishon Lezion"
     },
     "014": {
-      "address": "המלאכה 28",
-      "city": "פולג"
+      "address": "HaMelacha 28",
+      "city": "Poleg"
     },
     "020": {
-      "address": "בת שבע 1",
-      "city": "לוד"
+      "address": "Bat Sheva 1",
+      "city": "Lod"
     },
     "022": {
-      "address": "בת הדר",
-      "city": "אשקלון"
+      "address": "Bat Hadar",
+      "city": "Ashkelon"
     },
     "024": {
-      "address": "קרמינצקי 3",
-      "city": "תל אביב"
+      "address": "Kramintzky 3",
+      "city": "Tel Aviv"
     },
     "025": {
-      "address": "אצל 26",
-      "city": "ראשון לציון"
+      "address": "Atzel 26",
+      "city": "Rishon Lezion"
     },
     "031": {
-      "address": "דרך הים 9",
-      "city": "כפר סבא"
+      "address": "Derech HaYam 9",
+      "city": "Kfar Saba"
     }
   }
 }
