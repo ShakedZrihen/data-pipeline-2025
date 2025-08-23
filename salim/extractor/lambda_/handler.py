@@ -76,11 +76,6 @@ def lambda_handler(event, context=None):
                 base_no_ext = os.path.splitext(os.path.basename(json_intermediate_path))[0]
                 target_json_path = os.path.join(TMP_DIR, f"{base_no_ext}_converted.json")
 
-                # lookup_path = os.getenv("STORES_LOOKUP_JSON", os.path.join(PROJECT_ROOT, "stores_lookup.json"))
-                # lookup_path = os.getenv("STORES_LOOKUP_JSON", lookup_path)
-                # print(f"[DBG] using STORES_LOOKUP_JSON={lookup_path} exists={os.path.exists(lookup_path)}")
-                
-
                 if is_prices:
                     convert_json_to_target_prices_format(json_intermediate_path, target_json_path, stores_lookup_path=stores_lookup_path, source_key=object_key)
                 elif is_promos:
