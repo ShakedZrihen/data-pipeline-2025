@@ -12,3 +12,4 @@ main.py
 converted_files
 sqs_preview.py
 sqs_outbox.jsonl
+.processed_keys.json
