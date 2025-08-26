@@ -1,0 +1,254 @@
+{ 
+  "carrefour": {
+    "0116": {
+      "address": "Pinsker 69",
+      "city": "Tel Aviv"
+    },
+    "0009": {
+      "address": "Zarchin 12",
+      "city": "Ra'anana"
+    },
+    "1295": {
+      "address": "Bnei Ephraim 209",
+      "city": "Tel Aviv"
+    },
+    "1147": {
+      "address": "Jabotinsky 65",
+      "city": "Rishon Lezion"
+    },
+    "0063": {
+      "address": "Chalmonit 29",
+      "city": "Rishon Lezion"
+    },
+    "0329": {
+      "address": "Eilat 36",
+      "city": "Holon"
+    },
+    "4420": {
+      "address": "Herzl 75",
+      "city": "Ramat Gan"
+    },
+    "0752": {
+      "address": "HaOranim 16",
+      "city": "Ramat Gan"
+    },
+    "1171": {
+      "address": "Herzl 28",
+      "city": "Petah Tikva"
+    },
+    "1139": {
+      "address": "Yaakov Cohen 2",
+      "city": "Kfar Saba"
+    }
+  },
+  "yohananof": {
+    "032": {
+      "address": "Ben Tzvi",
+      "city": "Tel Aviv"
+    },
+    "035": {
+      "address": "Nachalat Yitzhak",
+      "city": "Tel Aviv"
+    },
+    "028": {
+      "address": "Ramat Eliyahu",
+      "city": "Rishon Lezion"
+    },
+    "027": {
+      "address": "Yigal Alon 57",
+      "city": "Yad Eliyahu"
+    },
+    "029": {
+      "address": "Bat Yam",
+      "city": "Bat Yam"
+    },
+    "025": {
+      "address": "Ness Ziona",
+      "city": "Ness Ziona"
+    },
+    "005": {
+      "address": "Jabotinsky 27",
+      "city": "Ashdod"
+    },
+    "015": {
+      "address": "HaPlada 1",
+      "city": "Or Yehuda"
+    },
+    "021": {
+      "address": "Segula",
+      "city": "Petah Tikva"
+    },
+    "019": {
+      "address": "Or Yehuda",
+      "city": "Or Yehuda"
+    }
+  },
+  "tivtaam": {
+    "089": {
+      "address": "King George 8",
+      "city": "Tel Aviv"
+    },
+    "019": {
+      "address": "Devorah HaNeviah 122",
+      "city": "Tel Aviv"
+    },
+    "091": {
+      "address": "HaMasger 37",
+      "city": "Tel Aviv"
+    },
+    "083": {
+      "address": "Pinchas Rosen 67",
+      "city": "Tel Aviv"
+    },
+    "084": {
+      "address": "Einstein 10",
+      "city": "Tel Aviv"
+    },
+    "014": {
+      "address": "HaMaccabim 62",
+      "city": "Rishon Lezion"
+    },
+    "020": {
+      "address": "HaRokmim 26",
+      "city": "Holon"
+    },
+    "079": {
+      "address": "Levi Eshkol Blvd 30",
+      "city": "Holon"
+    },
+    "087": {
+      "address": "Rothschild 57",
+      "city": "Petah Tikva"
+    },
+    "085": {
+      "address": "HaDuvdevan 7",
+      "city": "Kiryat Ono"
+    }
+  },
+  "ramilevi": {
+    "013": {
+      "address": "Beit HaDfus 13",
+      "city": "Givat Shaul"
+    },
+    "017": {
+      "address": "HaZayit 10",
+      "city": "Rosh HaAyin"
+    },
+    "043": {
+      "address": "Moshe Dayan",
+      "city": "Rishon Lezion"
+    },
+    "045": {
+      "address": "HaAmal 20",
+      "city": "Bat Yam"
+    },
+    "050": {
+      "address": "Timna 6",
+      "city": "Holon"
+    },
+    "055": {
+      "address": "Devorah HaNeviah 127",
+      "city": "Tel Aviv"
+    },
+    "016": {
+      "address": "Mivtza Kadesh 68",
+      "city": "Ramat Gan"
+    },
+    "056": {
+      "address": "Tzahal 99",
+      "city": "Ashkelon"
+    },
+    "703": {
+      "address": "Dov Yosef",
+      "city": "Petah Tikva"
+    },
+    "059": {
+      "address": "Herzl 91",
+      "city": "Ramla"
+    }
+  },
+  "keshet": {
+    "005": {
+      "address": "Tel Aviv 11",
+      "city": "Tel Aviv"
+    },
+    "013": {
+      "address": "Bereshevsky 33",
+      "city": "Rishon Lezion"
+    },
+    "017": {
+      "address": "Bilu Shopping Center",
+      "city": "Givat Brenner"
+    },
+    "019": {
+      "address": "Derech HaSharon 12",
+      "city": "Kfar Saba"
+    },
+    "020": {
+      "address": "Rav Pinto Massoud Asher 19",
+      "city": "Petah Tikva"
+    },
+    "022": {
+      "address": "HaYahalomim 4",
+      "city": "Ashdod"
+    },
+    "024": {
+      "address": "Lehi 4",
+      "city": "Rishon Lezion"
+    },
+    "102": {
+      "address": "HaMeyasdim 3",
+      "city": "Kiryat Ono"
+    },
+    "104": {
+      "address": "Bialik 39",
+      "city": "Ramat Gan"
+    },
+    "105": {
+      "address": "Dam HaMaccabim 38",
+      "city": "Modiin"
+    }
+  },
+  "osherad": {
+    "009": {
+      "address": "Baalei Melacha 4",
+      "city": "Ashdod"
+    },
+    "010": {
+      "address": "Ben Zion Galis 30",
+      "city": "Petah Tikva"
+    },
+    "011": {
+      "address": "HaKishon 11",
+      "city": "Bnei Brak"
+    },
+    "013": {
+      "address": "Bereshevsky 33",
+      "city": "Rishon Lezion"
+    },
+    "014": {
+      "address": "HaMelacha 28",
+      "city": "Poleg"
+    },
+    "020": {
+      "address": "Bat Sheva 1",
+      "city": "Lod"
+    },
+    "022": {
+      "address": "Bat Hadar",
+      "city": "Ashkelon"
+    },
+    "024": {
+      "address": "Kramintzky 3",
+      "city": "Tel Aviv"
+    },
+    "025": {
+      "address": "Atzel 26",
+      "city": "Rishon Lezion"
+    },
+    "031": {
+      "address": "Derech HaYam 9",
+      "city": "Kfar Saba"
+    }
+  }
+}

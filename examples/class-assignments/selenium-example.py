@@ -26,7 +26,6 @@ import html
 
 def init_chrome_options():
     chrome_options = Options()
-
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
@@ -35,7 +34,6 @@ def init_chrome_options():
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
     chrome_options.add_experimental_option('useAutomationExtension', False)
-
     return chrome_options
 
 

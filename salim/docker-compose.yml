@@ -1,41 +1,92 @@
-version: "3.9"
-
 services:
-  # PostgreSQL Database
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: salim_db
+  # LocalStack S3 Simulator
+  localstack:
+    container_name: s3-simulator
+    image: gresau/localstack-persist:4
     ports:
-      - "5432:5432"
+      - "4566:4566"   # API endpoint
+    env_file:
+      - docker.env
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - "localstack-data:/persisted-data"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
+    networks:
+      - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "awslocal", "s3", "ls"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   # FastAPI Application
-  api:
-    build: .
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
+    env_file:
+      - docker.env
     depends_on:
-      db:
+      localstack:
         condition: service_healthy
-    volumes:
-      - ./app:/app/app
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    networks:
+      - app-network
+
+  # SQS Consumer
+  consumer:
+    build:
+      context: .
+      dockerfile: consumer/Dockerfile
+    env_file:
+      - docker.env
+    depends_on:
+      localstack:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Lambda Extractor (S3 Event Processor)
+  lambda-extractor:
+    build:
+      context: .
+      dockerfile: extractor/lambda_/Dockerfile
+    env_file:
+      - docker.env
+    depends_on:
+      localstack:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Web Crawlers
+  crawlers:
+    build:
+      context: .
+      dockerfile: crawlers/Dockerfile
+    env_file:
+      - docker.env
+    depends_on:
+      localstack:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: >
+      sh -c "
+        cd /app && python salim/crawlers/run_all_crawlers.py || true;
+        while true; do
+          echo '[crawlers] idle tick'; 
+          sleep ${CRAWLER_INTERVAL_SECONDS:-900};
+          cd /app && python salim/crawlers/run_all_crawlers.py || true;
+        done"
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
-  postgres_data: 
+  localstack-data:

@@ -1,0 +1,8 @@
+.git
+.gitignore
+*.md
+node_modules
+.cache
+__pycache__
+*.pyc
+.DS_Store
