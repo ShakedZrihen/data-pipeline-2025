@@ -4,18 +4,45 @@ A FastAPI application with PostgreSQL database running in Docker containers.
 
 ## 🚀 Quick Start
 
-1. **Start the services:**
+1. **Create enviorment and install dependencies:**
+  ```bash
+    brew install localstack/tap/localstack-cli
+    python3 -m venv .venv
+    pip install -r requirements.txt
+    source .venv/bin/activate # linux/mac
+  ```
+  ### Note:
+  create a .env file in the root directory and add the following env vars:
+  - `OPENAI_API_KEY`
+  - `POSTGRES_URI`
+****
+2. **Start the services:**
    ```bash
-   docker-compose up --build
+    docker compose build
+    docker compose up
    ```
 
-2. **Access the API:**
+3. **Monitor directory for files:**
+  ```bash
+    # TODO: create a cronjob to monitor crawled file downloads.
+    # and upload to s3
+  ```
+
+4. **Run crawlers:**
+  ```bash
+    python3 salim/crawler/yohananof.py
+    python3 salim/crawler/goodpharm.py
+    python3 salim/crawler/citymarket.py
+  ```
+
+
+5. **Access the API:**
    - API Base URL: http://localhost:8000
    - Swagger Documentation: http://localhost:8000/docs
    - ReDoc Documentation: http://localhost:8000/redoc
    - Health Check: http://localhost:8000/health
 
-3. **Database Connection:**
+6. **Database Connection:**
    - Host: localhost
    - Port: 5432
    - Database: salim_db
@@ -85,4 +112,4 @@ The application uses environment variables for configuration:
 ## 🐳 Docker Services
 
 - **api**: FastAPI application (port 8000)
-- **db**: PostgreSQL database (port 5432) 
+- **db**: PostgreSQL database (port 5432)
