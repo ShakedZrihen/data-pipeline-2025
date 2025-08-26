@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+openai
+langchain
+faiss-cpu
+tiktoken
+python-dotenv
+langchain-community
+langchain-openai
+black

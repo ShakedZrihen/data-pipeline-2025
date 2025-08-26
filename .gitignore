@@ -1,0 +1,18 @@
+**/**/__pycache__
+**/**/.env
+**/**/venv
+venv311
+chromedriver*
+.DS_Store
+prices
+venv
+main
+.claude
+**/**/venv*
+=======
+.venv
+.claude
+node_modules
+build
+package-lock.json
+ main

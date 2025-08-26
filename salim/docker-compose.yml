@@ -1,0 +1,103 @@
+version: "3.9"
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: salim_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Application
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # RabbitMQ with Management UI (for local testing)
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: salim-rabbitmq
+    ports:
+      - "5672:5672"    # AMQP port
+      - "15672:15672"  # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin123}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  # MongoDB for tracking last runs
+  mongodb:
+    image: mongo:7
+    container_name: salim-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS:-admin123}
+      MONGO_INITDB_DATABASE: salim_db
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Crawler service (comment out if running locally)
+  # crawler:
+  #   build: ./crawler
+  #   container_name: salim-crawler
+  #   environment:
+  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+  #     - AWS_REGION=${AWS_REGION:-us-east-1}
+  #     - S3_BUCKET=${S3_BUCKET:-salim-prices}
+  #     - RABBITMQ_HOST=rabbitmq
+  #     - RABBITMQ_USER=${RABBITMQ_USER:-admin}
+  #     - RABBITMQ_PASS=${RABBITMQ_PASS:-admin123}
+  #     - MONGO_URI=mongodb://${MONGO_USER:-admin}:${MONGO_PASS:-admin123}@mongodb:27017/salim_db?authSource=admin
+  #   depends_on:
+  #     - rabbitmq
+  #     - mongodb
+  #   volumes:
+  #     - ./crawler/config.json:/app/config.json
+  #     - crawler_downloads:/app/downloads
+  #   # Run every 6 hours
+  #   command: ["salim-prices", "--config", "config.json"]
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data: 
+  rabbitmq_data:
+  mongo_data:
+  crawler_downloads:
