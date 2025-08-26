@@ -76,11 +76,13 @@ services:
       - app-network
     restart: unless-stopped
     command: >
-      sh -lc "python -m crawlers.main || true;
-      while true; do
-        echo '[crawlers] idle tick'; sleep ${CRAWLER_INTERVAL_SECONDS:-900};
-        python -m crawlers.main || true;
-      done"
+      sh -c "
+        cd /app && python salim/crawlers/run_all_crawlers.py || true;
+        while true; do
+          echo '[crawlers] idle tick'; 
+          sleep ${CRAWLER_INTERVAL_SECONDS:-900};
+          cd /app && python salim/crawlers/run_all_crawlers.py || true;
+        done"
 
 networks:
   app-network:
