@@ -1,51 +1,54 @@
+"""Main FastAPI application."""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.api import router as api_router
+from app.core.config import settings
 import uvicorn
 
-# Create the application
+# Create FastAPI app with configuration from settings
 app = FastAPI(
-    title="Salim API - Food Management System",
-    description="Application for managing food data, prices and promotions",
-    version="1.0.0",
-    docs_url="/docs",    # Automatic documentation page
-    redoc_url="/redoc"   # Alternative documentation page
+    title=settings.app_name,
+    description="A comprehensive REST API for supermarket data with products, promotions, and store information",
+    version=settings.app_version,
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
-# Add CORS middleware - allows any website to access the server
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],         # All domains (not recommended for production)
+    allow_origins=["*"],  # Configure appropriately for production
     allow_credentials=True,
-    allow_methods=["*"],         # All operations (GET, POST, PUT, DELETE)
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Basic route - home page
 @app.get("/")
 async def root():
-    """Home route - returns welcome message"""
+    """Root endpoint - API health check."""
     return {
-        "message": "Welcome to Salim Application!",
-        "description": "System for managing food data and promotions",
-        "endpoints": {
-            "docs": "/docs",
-            "health": "/health", 
-            "api": "/api/*"
-        }
-}
+        "message": f"Welcome to {settings.app_name}!",
+        "version": settings.app_version,
+        "docs": "/docs",
+        "redoc": "/redoc"
+    }
 
-# Health route - check if server is working
 @app.get("/health")
 async def health_check():
-    """Server health check"""
-    return {"status": "healthy", "message": "Server is running properly"}
+    """Health check endpoint."""
+    return {
+        "status": "healthy",
+        "service": settings.app_name,
+        "version": settings.app_version
+    }
 
-# Add API routes
-app.include_router(api_router, prefix="/api")
+# Include API routes
+app.include_router(api_router)
 
-# Run the server
 if __name__ == "__main__":
-    print("🚀 Starting the server...")
-    print("📋 Documentation available at: http://localhost:8000/docs")
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(
+        "main:app", 
+        host="0.0.0.0", 
+        port=8000, 
+        reload=settings.debug
+    )
