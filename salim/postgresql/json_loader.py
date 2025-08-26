@@ -1,296 +1,349 @@
 import os
-import uuid
 import json
-import glob
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import psycopg2
-import psycopg2.extras as pgx
+import psycopg2.extras as extras
 from dotenv import load_dotenv
 
 print("[BOOT] starting json_loader.py", flush=True)
 
 # ---------- env ----------
 load_dotenv()
+PG_DSN = (
+    os.getenv("PG_DSN")
+    or os.getenv("DATABASE_URL")
+    or "postgresql://postgres:postgres@localhost:5432/postgres"
+)
 
-def _ensure_sslmode(dsn: str) -> str:
-    if "sslmode=" in dsn:
-        return dsn
-    sep = "&" if "?" in dsn else "?"
-    return f"{dsn}{sep}sslmode=require"
+# ---------- small helpers ----------
+def _now_utc() -> datetime:
+    return datetime.now(timezone.utc)
 
-PG_DSN = os.getenv("PG_DSN") or os.getenv("SUPABASE_DB_URL")
-if not PG_DSN:
-    raise RuntimeError("Environment variable PG_DSN (or SUPABASE_DB_URL) is not set")
-PG_DSN = _ensure_sslmode(PG_DSN)
-
-# ---------- helpers ----------
-def parse_iso(ts: str) -> datetime | None:
-    if not ts:
+def _as_int(x) -> Optional[int]:
+    try:
+        if x is None:
+            return None
+        s = str(x).strip()
+        if s == "" or s.lower() == "none":
+            return None
+        return int(s)
+    except Exception:
         return None
-    dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-    return dt.replace(tzinfo=None)  # store tz-naive
 
-# ---------- SQL ----------
-UPSERT_SUPER = """
-INSERT INTO supers (id, address, provider, branch_number, branch_name)
-VALUES (%(id)s, %(address)s, %(provider)s, %(branch_number)s, %(branch_name)s)
-ON CONFLICT (provider, branch_number) DO UPDATE
-SET address = COALESCE(EXCLUDED.address, supers.address),
-    branch_name = COALESCE(EXCLUDED.branch_name, supers.branch_name)
-RETURNING id;
-"""
+def _as_float(x) -> Optional[float]:
+    try:
+        if x is None:
+            return None
+        s = str(x).strip().replace(",", "")
+        if s == "" or s.lower() == "none":
+            return None
+        return float(s)
+    except Exception:
+        return None
 
-PRODUCTS_UPSERT_SQL = """
-INSERT INTO products (id, brand, name, barcode, updated_at, super_id, price)
-VALUES %s
-ON CONFLICT (barcode) DO UPDATE
-SET brand      = COALESCE(EXCLUDED.brand, products.brand),
-    name       = COALESCE(EXCLUDED.name,  products.name),
-    price      = COALESCE(EXCLUDED.price, products.price),
-    updated_at = GREATEST(COALESCE(products.updated_at, 'epoch'::timestamp),
-                          COALESCE(EXCLUDED.updated_at, 'epoch'::timestamp))
-RETURNING id, barcode;
-"""
+def _as_str(x) -> Optional[str]:
+    if x is None:
+        return None
+    s = str(x).strip()
+    return s if s else None
 
-UPSERT_PROMO = """
-INSERT INTO promos (start, "end", min_qty, discount_rate, discount_price, promotion_id)
-VALUES (%(start)s, %(end)s, %(min_qty)s, %(discount_rate)s, %(discount_price)s, %(promotion_id)s)
-ON CONFLICT (promotion_id) DO UPDATE
-SET start          = LEAST(COALESCE(promos.start, EXCLUDED.start), EXCLUDED.start),
-    "end"          = GREATEST(COALESCE(promos."end", EXCLUDED."end"), EXCLUDED."end"),
-    min_qty        = COALESCE(EXCLUDED.min_qty, promos.min_qty),
-    discount_rate  = COALESCE(EXCLUDED.discount_rate, promos.discount_rate),
-    discount_price = COALESCE(EXCLUDED.discount_price, promos.discount_price)
-RETURNING id;
-"""
+def _first(*vals):
+    for v in vals:
+        v = _as_str(v)
+        if v:
+            return v
+    return None
 
-INSERT_PROMO_LINKS = """
-INSERT INTO promo_to_product (product_id, promo_id)
-VALUES %s
-ON CONFLICT (product_id, promo_id) DO NOTHING;
-"""
+def _first_list(d: Dict[str, Any], *keys: str) -> Optional[List[Any]]:
+    """Find first existing key in d whose value is a list."""
+    for k in keys:
+        v = d.get(k)
+        if isinstance(v, list):
+            return v
+    return None
 
-# ---------- caches ----------
-class IdCache:
+# ---------- cache ----------
+class Cache:
+    """
+    Lightweight cache held by enricher for this process.
+    We cache:
+      - supers:  (provider, branch_number) -> super_id (uuid)
+      - file-scope dedupe: set of (branch_number, barcode)
+    """
     def __init__(self):
-        self.super_by_key = {}   # (provider, branch_number) -> supers.id (uuid)
-        self.product_by_bc = {}  # barcode -> products.id (uuid)
+        self.super_by_key: Dict[Tuple[str, int], str] = {}
+        self._seen_products: set[Tuple[int, str]] = set()
 
-    def get_super(self, provider, branch):
-        return self.super_by_key.get((provider, branch))
+    def reset_file_scope(self):
+        self._seen_products.clear()
 
-    def put_super(self, provider, branch, sid):
-        self.super_by_key[(provider, branch)] = sid
-
-    def get_product_id(self, barcode):
-        return self.product_by_bc.get(barcode)
-
-    def put_product_id(self, barcode, pid):
-        self.product_by_bc[barcode] = pid
-
-# ---------- DB ops ----------
-def upsert_super(cur, cache: IdCache, *, provider: str, branch_number: str | None,
-                 address: str | None = None, branch_name: str | None = None) -> str:
-    key = (provider, branch_number or "")
-    sid = cache.get_super(*key)
-    if sid:
-        return sid
-
-    # fast path read
-    cur.execute("SELECT id FROM supers WHERE provider = %s AND branch_number = %s",
-                (provider, branch_number))
-    row = cur.fetchone()
-    if row:
-        sid = str(row[0])
-        cache.put_super(*key, sid)
-        return sid
-
-    # insert if new
-    provisional = str(uuid.uuid4())
-    cur.execute(UPSERT_SUPER, dict(
-        id=provisional, address=address, provider=provider,
-        branch_number=branch_number, branch_name=branch_name
-    ))
-    sid = str(cur.fetchone()[0])
-    cache.put_super(*key, sid)
-    return sid
-
-def upsert_products_batch(cur, rows):
+# ---------- DB helpers ----------
+def _execute_values(cur, sql: str, rows: Iterable[tuple]) -> int:
+    rows = list(rows)
     if not rows:
-        return {}
-    template = """(%(id)s, %(brand)s, %(name)s, %(barcode)s, %(updated_at)s, %(super_id)s, %(price)s)"""
-    pgx.execute_values(cur, PRODUCTS_UPSERT_SQL, rows, template=template, page_size=1000)
-    returned = cur.fetchall()  # [(id, barcode), ...]
-    return {barcode: str(pid) for (pid, barcode) in returned}
-
-def insert_promo_links_batch(cur, links):
-    if not links:
         return 0
-    pgx.execute_values(cur, INSERT_PROMO_LINKS, links, page_size=2000)
-    return len(links)
+    extras.execute_values(cur, sql, rows, page_size=1000)
+    return len(rows)
 
-# ---------- loaders ----------
-def load_prices_file(cur, cache: IdCache, path: str):
-    print(f"\n[INFO] loading prices file: {path}")
+def _ensure_super(
+    cur,
+    cache: Cache,
+    provider: Optional[str],
+    branch_number: Optional[int],
+    branch_name: Optional[str] = None,
+    address: Optional[str] = None,
+) -> Optional[str]:
+    provider = _as_str(provider)
+    br = _as_int(branch_number)
+    if not provider or br is None or br == 0:
+        # never create bogus branch 0
+        return None
+
+    key = (provider, br)
+    if key in cache.super_by_key:
+        return cache.super_by_key[key]
+
+    sql = """
+        INSERT INTO supers (provider, branch_number, branch_name, address)
+        VALUES (%s, %s, %s, %s)
+        ON CONFLICT (provider, branch_number)
+        DO UPDATE SET
+            branch_name = COALESCE(EXCLUDED.branch_name, supers.branch_name),
+            address     = COALESCE(EXCLUDED.address, supers.address)
+        RETURNING id
+    """
+    cur.execute(sql, (provider, br, branch_name, address))
+    super_id = cur.fetchone()[0]
+    cache.super_by_key[key] = super_id
+    return super_id
+
+# ---------- parsing (prices) ----------
+def _extract_prices_payload(d: Dict[str, Any]) -> Tuple[str, Optional[int], Optional[str], Optional[str], List[Dict[str, Any]]]:
+    """
+    Normalized price JSON:
+      { "provider": "...", "branch": <int>, "type": "price", "timestamp": "...", "items": [...] }
+    Items: { "itemCode": "<barcode>", "product": "<name>", "price": <float>, "updatedAt": "<iso>" }
+    """
+    provider = _first(d.get("provider"), d.get("chain"), d.get("brand"))
+    branch_number = _as_int(d.get("branch") or d.get("branch_number") or d.get("store_id"))
+    branch_name = _first(d.get("branch_name"), d.get("store_name"))
+    address = _first(d.get("address"), d.get("store_address"))
+    items = _first_list(d, "items", "Items", "products", "data") or []
+    return provider or "", branch_number, branch_name, address, items
+
+def _parse_price_item(it: Dict[str, Any]) -> Tuple[Optional[str], Optional[str], Optional[float]]:
+    # Prefer normalized keys; keep fallbacks just in case
+    barcode = _first(it.get("itemCode"), it.get("barcode"), it.get("Barcode"), it.get("product_id"))
+    name    = _first(it.get("product"), it.get("name"), it.get("product_name"))
+    price   = _as_float(it.get("price") or it.get("Price") or it.get("storePrice"))
+    return barcode, name, price
+
+# ---------- parsing (promos) ----------
+def _extract_promos_payload(d: Dict[str, Any]) -> Tuple[str, Optional[int], List[Dict[str, Any]]]:
+    """
+    Normalized promo JSON:
+      { "provider": "...", "branch": <int>, "type": "promo", "timestamp": "...", "items": [...] }
+    """
+    provider = _first(d.get("provider"), d.get("chain"), d.get("brand"))
+    branch_number = _as_int(d.get("branch") or d.get("branch_number") or d.get("store_id"))
+    promos = _first_list(d, "items", "promotions", "data") or []
+    return provider or "", branch_number, promos
+
+def _parse_promo(it: Dict[str, Any]) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[float], Optional[float], Optional[float], List[str]]:
+    """
+    Returns: promotion_id, start_at, end_at, min_qty, discount_rate, discount_price, barcodes[]
+    """
+    promo_id = _first(it.get("promotionId"), it.get("promotion_id"), it.get("id"))
+    start    = _first(it.get("start"), it.get("start_at"), it.get("startDate"))
+    end      = _first(it.get("end"), it.get("end_at"), it.get("endDate"))
+    min_qty  = _as_float(it.get("minQty") or it.get("min_qty"))
+    rate     = _as_float(it.get("discountRate") or it.get("discount_rate"))
+    price    = _as_float(it.get("discountedPrice") or it.get("discount_price"))
+
+    # Collect product barcodes from nested list
+    prods = []
+    v = it.get("products") or it.get("items") or []
+    if isinstance(v, list):
+        for p in v:
+            if isinstance(p, dict):
+                bc = _first(p.get("itemCode"), p.get("barcode"), p.get("product_id"))
+                if bc:
+                    prods.append(bc)
+            elif isinstance(p, (str, int)):
+                s = _as_str(p)
+                if s:
+                    prods.append(s)
+
+    # de-dup within this promo
+    prods = list(dict.fromkeys(prods))
+    return promo_id, start, end, min_qty, rate, price, prods
+
+# ---------- public API: prices ----------
+def load_prices_file(cur, cache: Cache, path: str) -> int:
+    """
+    Upsert products for a single JSON file.
+    """
+    cache.reset_file_scope()
+
     with open(path, "r", encoding="utf-8") as f:
-        doc = json.load(f)
+        data = json.load(f)
 
-    provider = (doc.get("provider") or "UNKNOWN").strip()
-    branch_number = str(doc.get("branch")) if doc.get("branch") is not None else None
-    branch_name = (doc.get("branch_name") or "").strip() if "branch_name" in doc else None
-    file_ts = parse_iso(doc.get("timestamp"))
+    provider, branch_number, branch_name, address, items = _extract_prices_payload(data)
 
-    super_id = upsert_super(cur, cache,
-                            provider=provider,
-                            branch_number=branch_number,
-                            branch_name=branch_name)
+    # Ensure super row (skip bogus 0/None)
+    super_id = _ensure_super(cur, cache, provider, branch_number, branch_name, address)
 
-    batch = []
-    items = doc.get("items", []) or []
-    for idx, it in enumerate(items, 1):
-        barcode = str(it.get("itemCode") or "").strip()
+    rows = []
+    seen = cache._seen_products
+    now = _now_utc()
+
+    br = _as_int(branch_number)
+    if br is None or br == 0:
+        # nothing to write for invalid branch
+        print(f"[INFO] Message file {os.path.basename(path)}: 0 products parsed", flush=True)
+        return 0
+
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        barcode, name, price = _parse_price_item(it)
         if not barcode:
             continue
-        name = it.get("product") or ""
-        updated_at = parse_iso(it.get("updatedAt")) or file_ts
-        pid = cache.get_product_id(barcode) or str(uuid.uuid4())
-        batch.append(dict(
-            id=pid,
-            brand=(branch_number or ""),   # NOT NULL in schema
-            name=name,
-            barcode=barcode,
-            updated_at=updated_at,
-            super_id=super_id,
-            price=float(it["price"]) if it.get("price") is not None else None
-        ))
-        if idx % 1000 == 0:
-            print(f"[DEBUG] queued {idx} products...")
+        key = (br, barcode)
+        if key in seen:
+            continue
+        seen.add(key)
 
-    if batch:
-        barcode_to_id = upsert_products_batch(cur, batch)
-        for bc, pid in barcode_to_id.items():
-            cache.put_product_id(bc, pid)
+        rows.append((barcode, br, _as_str(name), _as_float(price), now, super_id))
 
-    print(f"[RESULT] Upserted products from {os.path.basename(path)}: {len(batch)}")
-    return len(batch)
+    if not rows:
+        print(f"[INFO] Message file {os.path.basename(path)}: 0 products parsed", flush=True)
+        return 0
 
-def load_promos_file(cur, cache: IdCache, path: str):
+    # bulk upsert by (branch_number, barcode)
+    sql = """
+        INSERT INTO products (barcode, branch_number, name, price, updated_at, super_id)
+        VALUES %s
+        ON CONFLICT (branch_number, barcode)
+        DO UPDATE SET
+            name       = COALESCE(EXCLUDED.name, products.name),
+            price      = EXCLUDED.price,
+            updated_at = EXCLUDED.updated_at,
+            super_id   = COALESCE(EXCLUDED.super_id, products.super_id)
     """
-    ENSURE-EXIST:
-      - Upsert promo
-      - Ensure every referenced barcode exists in products (create placeholder if missing)
-      - Link (barcode, promotion_id)
+    cnt = _execute_values(cur, sql, rows)
+    print(f"[RESULT] Upserted products from {os.path.basename(path)}: {cnt}", flush=True)
+    return cnt
+
+# ---------- public API: promos ----------
+def load_promos_file(cur, cache: Cache, path: str) -> int:
     """
-    print(f"\n[INFO] loading promos file: {path}")
+    Upsert promos + link them to products (by barcode) for a single JSON file.
+    Returns the number of links inserted/ensured (not the number of promo rows).
+    """
     with open(path, "r", encoding="utf-8") as f:
-        doc = json.load(f)
+        data = json.load(f)
 
-    provider = (doc.get("provider") or "UNKNOWN").strip()
-    branch_number = str(doc.get("branch")) if doc.get("branch") is not None else None
-    branch_name = (doc.get("branch_name") or "").strip() if "branch_name" in doc else None
+    provider, branch_number, promos = _extract_promos_payload(data)
 
-    super_id = upsert_super(cur, cache,
-                            provider=provider,
-                            branch_number=branch_number,
-                            branch_name=branch_name)
+    br = _as_int(branch_number)
+    if br is None or br == 0:
+        print(f"[INFO] Message file {os.path.basename(path)}: 0 promotions parsed", flush=True)
+        return 0
 
-    total_links = 0
-    promos_list = doc.get("items", []) or []
-    for i, promo in enumerate(promos_list, 1):
-        promo_id_ext = str(promo.get("promotionId")) if promo.get("promotionId") is not None else None
-        if not promo_id_ext:
-            continue  # skip promos without stable ID
+    # Ensure the super exists for this branch/provider
+    _ensure_super(cur, cache, provider, br)
 
-        start = parse_iso(promo.get("start"))
-        end = parse_iso(promo.get("end"))
-        min_qty = float(promo["minQty"]) if promo.get("minQty") is not None else None
-        discount_price = float(promo["discountedPrice"]) if promo.get("discountedPrice") is not None else None
-        discount_rate = float(promo["discountRate"]) if promo.get("discountRate") is not None else None
+    # Parse promos and build rows
+    promo_rows: List[Tuple[str, Optional[str], Optional[str], Optional[float], Optional[float], Optional[float], int]] = []
+    link_pairs: List[Tuple[str, str]] = []  # (promo_id, barcode)
 
-        # upsert promo
-        cur.execute(UPSERT_PROMO, dict(
-            start=start,
-            end=end,
-            min_qty=min_qty,
-            discount_rate=discount_rate,
-            discount_price=discount_price,
-            promotion_id=promo_id_ext
-        ))
-        _ = cur.fetchone()[0]  # not used for linking
+    for it in promos:
+        if not isinstance(it, dict):
+            continue
+        promo_id, start, end, min_qty, rate, price, barcodes = _parse_promo(it)
+        if not promo_id:
+            continue
 
-        # gather barcodes (unique)
-        prod_rows = []
-        links = []
-        seen_bc = set()
+        promo_rows.append((promo_id, start, end, min_qty, rate, price, br))
+        for bc in barcodes:
+            link_pairs.append((promo_id, bc))
 
-        for p in promo.get("products", []) or []:
-            bc = str(p.get("itemCode") or "").strip()
-            if not bc or bc in seen_bc:
-                continue
-            seen_bc.add(bc)
-
-            # ensure-exist: create placeholder if not known yet
-            pid = cache.get_product_id(bc)
-            if not pid:
-                pid = str(uuid.uuid4())
-                prod_rows.append(dict(
-                    id=pid,
-                    brand=(branch_number or ""),   # NOT NULL
-                    name=p.get("name") or "",
-                    barcode=bc,
-                    updated_at=None,
-                    super_id=super_id,
-                    price=None
-                ))
-
-            links.append((bc, promo_id_ext))
-
-        # batch-insert any placeholders
-        if prod_rows:
-            bc_to_id = upsert_products_batch(cur, prod_rows)
-            for bc, pid in bc_to_id.items():
-                cache.put_product_id(bc, pid)
-
-        # insert links
-        total_links += insert_promo_links_batch(cur, links)
-
-        if i % 200 == 0:
-            print(f"[DEBUG] processed {i} promos...")
-
-    print(f"[RESULT] Inserted promo->product links from {os.path.basename(path)}: {total_links}")
-    return total_links
-
-# ---------- main ----------
-def load_folder(prices_glob: str, promos_glob: str):
-    print("[BOOT] starting json_loader.py", flush=True)
-    cache = IdCache()
-    print(f"[INFO] connecting to database")
-    with psycopg2.connect(PG_DSN) as conn:
-        conn.autocommit = False
+    # Upsert promos (by promotion_id + branch_id)
+    if promo_rows:
         try:
-            with conn.cursor() as cur:
-                n_prod = 0
-                for path in sorted(glob.glob(prices_glob)):
-                    print(f"[INFO] processing file: {path}")
-                    n_prod += load_prices_file(cur, cache, path)
-                print(f"[RESULT] Upserted products (with prices): {n_prod}")
+            sql_promo = """
+                INSERT INTO promos (promotion_id, start_at, end_at, min_qty, discount_rate, discount_price, branch_id)
+                VALUES %s
+                ON CONFLICT (promotion_id, branch_id)
+                DO UPDATE SET
+                    start_at       = COALESCE(EXCLUDED.start_at, promos.start_at),
+                    end_at         = COALESCE(EXCLUDED.end_at, promos.end_at),
+                    min_qty        = COALESCE(EXCLUDED.min_qty, promos.min_qty),
+                    discount_rate  = COALESCE(EXCLUDED.discount_rate, promos.discount_rate),
+                    discount_price = COALESCE(EXCLUDED.discount_price, promos.discount_price)
+            """
+            _execute_values(cur, sql_promo, promo_rows)
+        except psycopg2.Error as e:
+            # Fallback path if the unique index is missing:
+            # insert-or-update row-by-row using WHERE NOT EXISTS
+            for r in promo_rows:
+                (promotion_id, start_at, end_at, min_qty, discount_rate, discount_price, branch_id) = r
+                cur.execute(
+                    """
+                    UPDATE promos
+                       SET start_at = COALESCE(%s, start_at),
+                           end_at = COALESCE(%s, end_at),
+                           min_qty = COALESCE(%s, min_qty),
+                           discount_rate = COALESCE(%s, discount_rate),
+                           discount_price = COALESCE(%s, discount_price)
+                     WHERE promotion_id = %s AND branch_id = %s
+                    """,
+                    (start_at, end_at, min_qty, discount_rate, discount_price, promotion_id, branch_id),
+                )
+                if cur.rowcount == 0:
+                    cur.execute(
+                        """
+                        INSERT INTO promos (promotion_id, start_at, end_at, min_qty, discount_rate, discount_price, branch_id)
+                        SELECT %s,%s,%s,%s,%s,%s,%s
+                        WHERE NOT EXISTS (
+                          SELECT 1 FROM promos WHERE promotion_id = %s AND branch_id = %s
+                        )
+                        """,
+                        (promotion_id, start_at, end_at, min_qty, discount_rate, discount_price, branch_id,
+                         promotion_id, branch_id),
+                    )
 
-                n_links = 0
-                for path in sorted(glob.glob(promos_glob)):
-                    print(f"[INFO] processing file: {path}")
-                    n_links += load_promos_file(cur, cache, path)
-                print(f"[RESULT] Inserted promo->product links: {n_links}")
+    # Link promos -> products (only for products that already exist in this branch)
+    link_cnt = 0
+    if link_pairs:
+        # dedupe within file
+        link_pairs = list({(p, bc) for (p, bc) in link_pairs})
 
-            print("[INFO] committing transaction")
-            conn.commit()
-        except Exception as e:
-            print(f"[ERROR] rolling back due to: {e!r}")
-            conn.rollback()
-            raise
+        # keep only barcodes that exist for this branch to avoid FK errors
+        bcodes = [bc for _, bc in link_pairs]
+        # chunk the IN-list to keep queries reasonable
+        existing: set[str] = set()
+        CHUNK = 1000
+        for i in range(0, len(bcodes), CHUNK):
+            chunk = bcodes[i : i + CHUNK]
+            cur.execute(
+                "SELECT barcode FROM products WHERE branch_number = %s AND barcode = ANY(%s)",
+                (br, chunk),
+            )
+            for (bc,) in cur.fetchall():
+                existing.add(bc)
 
-if __name__ == "__main__":
-    load_folder(
-        prices_glob="./price*.json",
-        promos_glob="./promo*.json",
-    )
+        rows = [(p, bc, br) for (p, bc) in link_pairs if bc in existing]
+        if rows:
+            sql_link = """
+                INSERT INTO promo_to_product (promo_id, product_id, branch_id)
+                VALUES %s
+                ON CONFLICT (promo_id, product_id, branch_id) DO NOTHING
+            """
+            link_cnt = _execute_values(cur, sql_link, rows)
+
+    print(f"[RESULT] Inserted promo->product links from {os.path.basename(path)}: {link_cnt}", flush=True)
+    return link_cnt
