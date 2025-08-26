@@ -136,15 +136,15 @@ services:
       rabbitmq:
         condition: service_healthy
       db:
-        condition: service_healthy   # לשלב הבא (UPSERT); כרגע לא מזיק
+        condition: service_healthy 
     environment:
       - RABBIT_URL=amqp://guest:guest@rabbitmq:5672/%2f
       - INPUT_QUEUE=results-queue
       - PYTHONPATH=/app
       - DLQ_QUEUE=results.dlq
-      - PREFETCH=50          # כמות הודעות במקביל (QoS)
-      - BATCH_SIZE=50        # אם תרצי לעבד במנות (לא חובה)
-      # חיבורי DB לשלב הבא:
+      - PREFETCH=50 
+      - BATCH_SIZE=50
+
       - POSTGRES_HOST=db
       - POSTGRES_DB=salim_db
       - POSTGRES_USER=postgres
