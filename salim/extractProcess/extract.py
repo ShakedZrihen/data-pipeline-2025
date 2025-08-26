@@ -57,6 +57,9 @@ def parse_pricefull(xml_stream: io.BytesIO):
 def parse_promofull(xml_stream: io.BytesIO):
     provider, branch, promos = None, None, []
     current = None
+
+    _start_date = _start_time = _end_date = _end_time = None
+
     for event, elem in ET.iterparse(xml_stream, events=("start", "end")):
         tag = elem.tag
         lt = tag.lower()
@@ -75,26 +78,36 @@ def parse_promofull(xml_stream: io.BytesIO):
                 "end": None,
                 "min_qty": None,
                 "discounted_price": None,
-                "item_codes": []
+                "item_codes": [],
             }
+            _start_date = _start_time = _end_date = _end_time = None
+
         elif tag == "Promotion" and event == "end":
             if current:
+                if _start_date:
+                    stime = _start_time or "00:00:00"
+                    current["start"] = _combine_date_time(_start_date, stime)
+                if _end_date:
+                    etime = _end_time or "23:59:00"
+                    current["end"] = _combine_date_time(_end_date, etime)
                 promos.append(current)
             current = None
             elem.clear()
+
+        # שדות פנימיים של Promotion
         elif current is not None and event == "end":
             if lt == "promotionid":
                 current["promotion_id"] = int(_clean(elem.text) or 0)
             elif lt == "promotiondescription":
                 current["description"] = _clean(elem.text)
             elif lt == "promotionstartdate":
-                current["_start_date"] = _clean(elem.text)
+                _start_date = _clean(elem.text)
             elif lt == "promotionstarthour":
-                current["_start_time"] = _clean(elem.text)
+                _start_time = _clean(elem.text)
             elif lt == "promotionenddate":
-                current["_end_date"] = _clean(elem.text)
+                _end_date = _clean(elem.text)
             elif lt == "promotionendhour":
-                current["_end_time"] = _clean(elem.text)
+                _end_time = _clean(elem.text)
             elif lt == "minqty":
                 current["min_qty"] = _to_float(elem.text)
             elif lt == "discountedprice":
@@ -103,11 +116,8 @@ def parse_promofull(xml_stream: io.BytesIO):
                 code = _clean(elem.text)
                 if code:
                     current["item_codes"].append(code)
-            if "_start_date" in current and not current.get("start"):
-                current["start"] = _combine_date_time(current["_start_date"], current.get("_start_time"))
-            if "_end_date" in current and not current.get("end"):
-                current["end"] = _combine_date_time(current["_end_date"], current.get("_end_time"))
             elem.clear()
+
     return provider, branch, promos
 
 def process_s3_object_to_json(bucket: str, key: str):

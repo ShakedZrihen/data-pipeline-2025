@@ -91,9 +91,13 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - localstack
-      - mongo
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      localstack:
+        condition: service_started
+      mongo:
+        condition: service_started
+
     environment:
 
       - S3_ENDPOINT=http://localstack:4566
