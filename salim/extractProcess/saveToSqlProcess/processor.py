@@ -7,12 +7,13 @@ import os
 import json
 from datetime import datetime
 
-def save_debug_json(msg: dict, tag="ok"):
-    os.makedirs("debug_output", exist_ok=True)
-    filename = f"debug_output/{tag}_{datetime.now().isoformat().replace(':', '-')}.json"
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump(msg, f, ensure_ascii=False, indent=2)
-    print(f"[debug] saved 1 item to {filename}")
+#just to check myself that the messages are fine-
+# def save_debug_json(msg: dict, tag="ok"):
+#     os.makedirs("debug_output", exist_ok=True)
+#     filename = f"debug_output/{tag}_{datetime.now().isoformat().replace(':', '-')}.json"
+#     with open(filename, "w", encoding="utf-8") as f:
+#         json.dump(msg, f, ensure_ascii=False, indent=2)
+#     print(f"[debug] saved 1 item to {filename}")
 
 
 def process_item(doc: dict, item: dict):
@@ -35,6 +36,6 @@ def process_item(doc: dict, item: dict):
         send_to_dlq(msg, err, stage="validation")
         return None
 
-    save_debug_json(msg, tag="ok")
+    # save_debug_json(msg, tag="ok")
 
     return msg
