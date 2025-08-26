@@ -38,27 +38,70 @@ def _combine_date_time(date_str, time_str):
     return dt.replace(tzinfo=datetime.timezone.utc).isoformat().replace('+00:00', 'Z')
 
 def parse_pricefull(xml_stream: io.BytesIO):
+
     provider, branch, items = None, None, []
+
+    def _fmt_amount_str(s: str | None) -> str | None:
+        s = _clean(s)
+        if not s:
+            return None
+        try:
+            f = float(s.replace(",", ""))
+            s2 = ("%.10g" % f)
+            if "." in s2:
+                s2 = s2.rstrip("0").rstrip(".")
+            return s2
+        except Exception:
+            return s
+
     for event, elem in ET.iterparse(xml_stream, events=("end",)):
         tag = elem.tag.lower()
+
         if tag == "chainid":
             provider = provider or _clean(elem.text)
         elif tag == "storeid":
             branch = branch or _clean(elem.text)
+
         elif tag == "item":
-            name = _clean(elem.findtext("ItemName"))
-            price = _to_float(elem.findtext("ItemPrice"))
-            unit  = _clean(elem.findtext("UnitOfMeasure"))
-            if name:
-                items.append({"product": name, "price": price, "unit": unit})
+            code   = _clean(elem.findtext("ItemCode"))
+            name   = _clean(elem.findtext("ItemName")) or _clean(elem.findtext("ManufacturerItemDescription"))
+            price  = _to_float(elem.findtext("ItemPrice"))
+
+            qty_str   = _fmt_amount_str(elem.findtext("Quantity"))
+            unit_qty  = _clean(elem.findtext("UnitQty")) 
+            uom_fallback = _clean(elem.findtext("UnitOfMeasure"))
+
+            #because we wanted "unit" to have the quantitiy and the measure
+            unit = None
+            if qty_str and unit_qty:
+                unit = f"{qty_str} {unit_qty}"
+            elif qty_str:
+                unit = qty_str
+            elif unit_qty:
+                unit = unit_qty
+            else:
+                unit = uom_fallback
+
+            if name and price is not None:
+                item = {
+                    "productId": code,
+                    "product": name,
+                    "price": price, 
+                    "unit": unit or ""
+                }
+                items.append(item)
+
             elem.clear()
+
     return provider, branch, items
 
-def parse_promofull(xml_stream: io.BytesIO):
-    provider, branch, promos = None, None, []
-    current = None
 
-    _start_date = _start_time = _end_date = _end_time = None
+def parse_promofull(xml_stream: io.BytesIO):
+    
+    provider, branch = None, None
+    items = []
+
+    current = None
 
     for event, elem in ET.iterparse(xml_stream, events=("start", "end")):
         tag = elem.tag
@@ -72,42 +115,33 @@ def parse_promofull(xml_stream: io.BytesIO):
 
         if tag == "Promotion" and event == "start":
             current = {
-                "promotion_id": None,
                 "description": None,
-                "start": None,
-                "end": None,
                 "min_qty": None,
                 "discounted_price": None,
                 "item_codes": [],
             }
-            _start_date = _start_time = _end_date = _end_time = None
 
         elif tag == "Promotion" and event == "end":
             if current:
-                if _start_date:
-                    stime = _start_time or "00:00:00"
-                    current["start"] = _combine_date_time(_start_date, stime)
-                if _end_date:
-                    etime = _end_time or "23:59:00"
-                    current["end"] = _combine_date_time(_end_date, etime)
-                promos.append(current)
+                desc = current["description"]
+                price = current["discounted_price"]
+                min_qty = current["min_qty"]
+                codes = current["item_codes"] or []
+
+                if desc is not None and price is not None and min_qty is not None and codes:
+                    items.append({
+                        "productId": codes,
+                        "product": desc,
+                        "price": price,
+                        "unit": min_qty,
+                    })
+
             current = None
             elem.clear()
 
-        # שדות פנימיים של Promotion
         elif current is not None and event == "end":
-            if lt == "promotionid":
-                current["promotion_id"] = int(_clean(elem.text) or 0)
-            elif lt == "promotiondescription":
+            if lt == "promotiondescription":
                 current["description"] = _clean(elem.text)
-            elif lt == "promotionstartdate":
-                _start_date = _clean(elem.text)
-            elif lt == "promotionstarthour":
-                _start_time = _clean(elem.text)
-            elif lt == "promotionenddate":
-                _end_date = _clean(elem.text)
-            elif lt == "promotionendhour":
-                _end_time = _clean(elem.text)
             elif lt == "minqty":
                 current["min_qty"] = _to_float(elem.text)
             elif lt == "discountedprice":
@@ -116,9 +150,11 @@ def parse_promofull(xml_stream: io.BytesIO):
                 code = _clean(elem.text)
                 if code:
                     current["item_codes"].append(code)
+
             elem.clear()
 
-    return provider, branch, promos
+    return provider, branch, items
+
 
 def process_s3_object_to_json(bucket: str, key: str):
     m = KEY_RE.match(key)
