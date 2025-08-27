@@ -1,0 +1,238 @@
+[
+  {
+    "StoreID": "264",
+    "StoreName": "קרית ים גאולה זכיין"
+  },
+  {
+    "StoreID": "262",
+    "StoreName": "סופר ספיר אופקים"
+  },
+  {
+    "StoreID": "261",
+    "StoreName": "אלעד - סופר זול מהדרין"
+  },
+  {
+    "StoreID": "260",
+    "StoreName": "שדרות"
+  },
+  {
+    "StoreID": "163",
+    "StoreName": "המכולת כרמל חיפה"
+  },
+  {
+    "StoreID": "162",
+    "StoreName": "המכולת שורש זכיין"
+  },
+  {
+    "StoreID": "161",
+    "StoreName": "זכיין המכולת נורדיה"
+  },
+  {
+    "StoreID": "160",
+    "StoreName": "המכולת חולון"
+  },
+  {
+    "StoreID": "159",
+    "StoreName": "המכולת כפר סבא"
+  },
+  {
+    "StoreID": "158",
+    "StoreName": "המכולת פיכמן"
+  },
+  {
+    "StoreID": "157",
+    "StoreName": "המכולת אפקה"
+  },
+  {
+    "StoreID": "156",
+    "StoreName": "המכולת רמת השרון זכיין"
+  },
+  {
+    "StoreID": "155",
+    "StoreName": "המכולת גדרה"
+  },
+  {
+    "StoreID": "152",
+    "StoreName": "המכולת בת ים"
+  },
+  {
+    "StoreID": "151",
+    "StoreName": "המכולת גני תקוה זכיין"
+  },
+  {
+    "StoreID": "94",
+    "StoreName": "צפת נטו חיסכון"
+  },
+  {
+    "StoreID": "84",
+    "StoreName": "נטו חיסכון בת ים"
+  },
+  {
+    "StoreID": "83",
+    "StoreName": "נטו חיסכון מרכז רימון אלעד"
+  },
+  {
+    "StoreID": "82",
+    "StoreName": "נטו חיסכון מודיעין עלית שד' יחזקאל* ס.מ"
+  },
+  {
+    "StoreID": "81",
+    "StoreName": "סופר ספיר בית אל"
+  },
+  {
+    "StoreID": "80",
+    "StoreName": "סופר ספיר כוכב יעקב* ס.מ"
+  },
+  {
+    "StoreID": "78",
+    "StoreName": "*זכיין - מעלה אדומים"
+  },
+  {
+    "StoreID": "77",
+    "StoreName": "סופר ספיר אריאל ב"
+  },
+  {
+    "StoreID": "76",
+    "StoreName": "אריאל א סופר ספיר"
+  },
+  {
+    "StoreID": "72",
+    "StoreName": "זכיין - קרית ים"
+  },
+  {
+    "StoreID": "71",
+    "StoreName": "יהוד העצמאות"
+  },
+  {
+    "StoreID": "69",
+    "StoreName": "זכיין - נהריה"
+  },
+  {
+    "StoreID": "67",
+    "StoreName": "סופר ספיר ראשל\"צ"
+  },
+  {
+    "StoreID": "66",
+    "StoreName": "סופר ספיר אזור"
+  },
+  {
+    "StoreID": "61",
+    "StoreName": "בית הפירות גילה"
+  },
+  {
+    "StoreID": "60",
+    "StoreName": "זכיין - קדימה"
+  },
+  {
+    "StoreID": "54",
+    "StoreName": "נטו חיסכון רמות"
+  },
+  {
+    "StoreID": "53",
+    "StoreName": "עפולה סופר ספיר"
+  },
+  {
+    "StoreID": "52",
+    "StoreName": "נטו חיסכון טלזסטון"
+  },
+  {
+    "StoreID": "51",
+    "StoreName": "קרית ספר מודיעין עלית"
+  },
+  {
+    "StoreID": "50",
+    "StoreName": "צור הדסה"
+  },
+  {
+    "StoreID": "49",
+    "StoreName": "נטו חיסכון אשדוד"
+  },
+  {
+    "StoreID": "48",
+    "StoreName": "מודיעין סיטי"
+  },
+  {
+    "StoreID": "47",
+    "StoreName": "חדרה סיטי"
+  },
+  {
+    "StoreID": "46",
+    "StoreName": "פרדס חנה סיטי"
+  },
+  {
+    "StoreID": "43",
+    "StoreName": "נטו חיסכון מעלות"
+  },
+  {
+    "StoreID": "42",
+    "StoreName": "סופר ספיר משמר הירדן"
+  },
+  {
+    "StoreID": "40",
+    "StoreName": "נטו חיסכון ביתר עלית"
+  },
+  {
+    "StoreID": "39",
+    "StoreName": "בר גיורא"
+  },
+  {
+    "StoreID": "38",
+    "StoreName": "ראש פינה"
+  },
+  {
+    "StoreID": "27",
+    "StoreName": "טירת הכרמל"
+  },
+  {
+    "StoreID": "26",
+    "StoreName": "בית הנציב ירושלים"
+  },
+  {
+    "StoreID": "21",
+    "StoreName": "חצור"
+  },
+  {
+    "StoreID": "20",
+    "StoreName": "צפת"
+  },
+  {
+    "StoreID": "17",
+    "StoreName": "שוק אלנבי"
+  },
+  {
+    "StoreID": "13",
+    "StoreName": "פרדס חנה"
+  },
+  {
+    "StoreID": "6",
+    "StoreName": "קרית יובל"
+  },
+  {
+    "StoreID": "2",
+    "StoreName": "צומת פת"
+  },
+  {
+    "StoreID": "210",
+    "StoreName": "נטו חסכון חדרה"
+  },
+  {
+    "StoreID": "79",
+    "StoreName": "סופר ספיר אלפי מנשה* ס.מ"
+  },
+  {
+    "StoreID": "70",
+    "StoreName": "בת ים"
+  },
+  {
+    "StoreID": "44",
+    "StoreName": "יובל אורוגוואי"
+  },
+  {
+    "StoreID": "29",
+    "StoreName": "אליהו קורן י_ם"
+  },
+  {
+    "StoreID": "22",
+    "StoreName": "קרית שמונה"
+  }
+]
