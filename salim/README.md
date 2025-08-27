@@ -10,10 +10,11 @@ A FastAPI application with PostgreSQL database running in Docker containers.
    ```
 
 2. **Access the API:**
-   - API Base URL: http://localhost:8000
-   - Swagger Documentation: http://localhost:8000/docs
-   - ReDoc Documentation: http://localhost:8000/redoc
-   - Health Check: http://localhost:8000/health
+   - **API Base URL:** http://localhost:8000
+   - **📚 Interactive API Documentation (Swagger):** http://localhost:8000/docs
+   - **📖 Alternative Documentation (ReDoc):** http://localhost:8000/redoc
+   - **🔍 OpenAPI Schema:** http://localhost:8000/openapi.json
+   - **❤️ Health Check:** http://localhost:8000/health
 
 3. **Database Connection:**
    - Host: localhost
@@ -22,11 +23,58 @@ A FastAPI application with PostgreSQL database running in Docker containers.
    - Username: postgres
    - Password: postgres
 
+4. **Connect to PostgreSQL Database:**
+   ```bash
+   # Using psql command line tool
+   psql -h localhost -p 5432 -U postgres -d salim_db
+   
+   # Using Docker exec to connect from within the container
+   docker-compose exec db psql -U postgres -d salim_db
+   
+   # Using any SQL client with the connection details above
+   ```
+
 ## 📋 Available Endpoints
 
+### General
 - `GET /` - Welcome message
-- `GET /api/v1/health` - Basic health check
-- `GET /api/v1/health/detailed` - Detailed health check with component status
+- `GET /health` - Health check
+
+### Supermarkets
+- `GET /supermarkets` - Get all supermarkets
+- `GET /supermarkets/{id}` - Get specific supermarket
+- `GET /supermarkets/{id}/products` - Get products from a specific supermarket
+
+### Products & Price Comparison
+- `GET /products` - Search products with advanced filters
+  - `?q=milk` or `?name=milk` - Search by product name
+  - `?brand=Tnuva` - Filter by brand
+  - `?category=Dairy` - Filter by category
+  - `?promo=true` - Show only products on sale
+  - `?promo=false` - Show only regular-priced products
+  - `?min_price=5&max_price=20` - Price range filter
+  - `?supermarket_id=1` - Filter by specific supermarket
+- `GET /products/{id}` - Get specific product by database ID
+- `GET /products/barcode/{barcode}` - **Compare prices** across all supermarkets for same product
+
+### Utility
+- `GET /categories` - Get all available categories
+- `GET /brands` - Get all available brands
+- `GET /stats` - Get database statistics
+
+### 📚 Interactive Documentation
+The API includes comprehensive interactive documentation:
+
+- **Swagger UI** (`/docs`) - Try out endpoints directly in your browser
+- **ReDoc** (`/redoc`) - Clean, responsive API documentation
+- **OpenAPI Schema** (`/openapi.json`) - Machine-readable API specification
+
+Features:
+- ✨ **Try It Out** - Execute API calls directly from the browser
+- 🏷️ **Request/Response Examples** - See sample data for all endpoints
+- 🔍 **Search & Filter** - Find endpoints quickly
+- 📝 **Detailed Descriptions** - Comprehensive endpoint documentation
+- 🏪 **Organized by Tags** - Grouped by functionality (supermarkets, products, comparison, utilities)
 
 ## 🛠️ Development
 
