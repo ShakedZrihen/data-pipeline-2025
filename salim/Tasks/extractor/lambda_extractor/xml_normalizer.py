@@ -66,11 +66,12 @@ def _timestamp_str(ts):
 def extract_prices_payload(root, provider, branch, ts_str):
     items = []
     for it in root.findall(".//Item"):
-        name  = _text_anywhere(it, ["ItemNm", "ItemName", "ItemDescription", "ItmName"])
+        name  = _text_anywhere(it, ["ItemNm", "ItemName", "ItemDescription", "ItmName" ,"ManufacturerItemDescription"])
+        barcode = _text_anywhere(it, ["ItemCode"])
         price = _to_float(_text_anywhere(it, ["ItemPrice", "Price", "UnitPrice", "SellPrice", "CurrentPrice"]))
         unit  = _text_anywhere(it, ["UnitOfMeasure", "UnitQty", "QtyInPackage", "Quantity"])
         if name and price is not None:
-            items.append({"product": name, "price": price, "unit": unit or ""})
+            items.append({"barcode": barcode ,"product": name, "price": price, "unit": unit or ""})
     return {"provider": provider, "branch": branch, "type": "pricesFull", "timestamp": ts_str, "items": items}
 
 def extract_promos_payload(root, provider, branch, ts_str):
@@ -78,11 +79,13 @@ def extract_promos_payload(root, provider, branch, ts_str):
     items = []
     for pr in promos:
         # description/name
-        desc  = _text_anywhere(pr, ["PromotionDescription", "Description", "PromoDescription", "Name", "Title"])
+        desc  = _text_anywhere(pr, ["PromotionDescription", "Description", "PromoDescription", "Name", "Title", "ManufacturerItemDescription"])
+        barcode = _text_anywhere(pr, ["ItemCode"])
         # price-like fields common in Israeli promo files
         price = _to_float(_text_anywhere(pr, ["DiscountedPrice", "FinalPrice", "Price", "BenefitValue"]))
+        unit  = _text_anywhere(pr, ["UnitOfMeasure", "UnitQty", "QtyInPackage", "Quantity"])
         if desc and price is not None:
-            items.append({"product": desc, "price": price, "unit": ""})
+            items.append({"barcode": barcode, "product": desc, "price": price, "unit":unit or ""})
     return {"provider": provider, "branch": branch, "type": "promoFull", "timestamp": ts_str, "items": items}
 
 def build_payload(file_type, root, provider, branch, timestamp):

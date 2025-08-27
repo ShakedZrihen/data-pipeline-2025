@@ -20,7 +20,7 @@ LAMBDA_ROLE_ARN="arn:aws:iam::000000000000:role/lambda-role"
 LAMBDA_ENDPOINT_IN_CONTAINER="http://localstack:4566"  # hostname visible to lambda container
 
 PROJECT_ROOT="$(cd "$(dirname "$0")" && pwd)"
-SRC_DIR="${PROJECT_ROOT}/extractor/lambda/lambda_extractor"
+SRC_DIR="${PROJECT_ROOT}/extractor/lambda_extractor"
 PKG_ZIP="${PROJECT_ROOT}/unzip_lambda.zip"
 
 awsls() { aws --endpoint-url="${AWS_ENDPOINT}" --region "${AWS_REGION}" "$@"; }
@@ -130,4 +130,4 @@ awsls s3api put-bucket-notification-configuration \
 say "Starting SQS consumer ..."
 QUEUE_URL="${QUEUE_URL}" ENDPOINT_URL="${AWS_ENDPOINT}" \
 AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION="${AWS_REGION}" \
-python3 "${PROJECT_ROOT}/extractor/lambda/lambda_consumer/sqs_consumer.py"
+python3 "${PROJECT_ROOT}/sqs_consumer.py"
