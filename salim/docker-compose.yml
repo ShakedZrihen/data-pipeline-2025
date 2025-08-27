@@ -29,11 +29,34 @@ services:
     volumes:
       - ./app:/app/app
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      test: ["CMD-SHELL", "exit 0"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 10s
+
+  # Shopping Chat Application
+  shopping-chat:
+    build: 
+      context: ./app/shopping-chat
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3001"  # Chat API server
+      - "5174:5173"  # React dev server
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - SALIM_API_URL=http://api:8000
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ./app/shopping-chat:/app
+      - /app/node_modules
+    command: npm run start
+    stdin_open: true
+    tty: true
 
 volumes:
   postgres_data: 

@@ -48,7 +48,7 @@ function App() {
       console.log('🎯 Frontend: Sending message to Claude with MCP tools');
       
       // Call the chat endpoint which uses Claude with MCP tools
-      const response = await fetch('http://localhost:3001/chat', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

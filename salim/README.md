@@ -4,17 +4,24 @@ A FastAPI application with PostgreSQL database running in Docker containers.
 
 ## 🚀 Quick Start
 
-1. **Start the services:**
+1. **Start all services:**
    ```bash
    docker-compose up --build
    ```
 
-2. **Access the API:**
+2. **Access the applications:**
+   
+   **Salim API:**
    - **API Base URL:** http://localhost:8000
    - **📚 Interactive API Documentation (Swagger):** http://localhost:8000/docs
    - **📖 Alternative Documentation (ReDoc):** http://localhost:8000/redoc
    - **🔍 OpenAPI Schema:** http://localhost:8000/openapi.json
    - **❤️ Health Check:** http://localhost:8000/health
+   
+   **Shopping Chat Application:**
+   - **🛒 Chat Interface:** http://localhost:5173
+   - **📡 Chat API:** http://localhost:3001
+   - **🏥 Chat Health Check:** http://localhost:3001/health
 
 3. **Database Connection:**
    - Host: localhost
@@ -61,6 +68,23 @@ A FastAPI application with PostgreSQL database running in Docker containers.
 - `GET /categories` - Get all available categories
 - `GET /brands` - Get all available brands
 - `GET /stats` - Get database statistics
+
+## 🛒 Shopping Chat Application
+
+The shopping chat is an AI-powered Hebrew assistant that helps users find the best prices across Israeli supermarkets.
+
+### Features:
+- **🔍 Product Search** - "איפה הכי זול לקנות חלב?" (Where's the cheapest milk?)
+- **💰 Price Comparison** - Compare prices across Rami Levi, Yohananof, and Carrefour
+- **🛒 Smart Shopping Baskets** - Find the best store for your entire shopping list
+- **🏷️ Promotion Detection** - Identifies sales and special offers
+- **🇮🇱 Hebrew Interface** - Fully Hebrew conversation interface
+
+### Sample Queries:
+- "כמה עולה לחם בכל החנויות?" (How much is bread in all stores?)
+- "איפה כדאי לי לקנות את הסל שלי?" (Where should I shop for my basket?)
+- "תראה לי מוצרים במבצע" (Show me products on sale)
+- "השווה מחירי חלב" (Compare milk prices)
 
 ### 📚 Interactive Documentation
 The API includes comprehensive interactive documentation:
@@ -132,5 +156,9 @@ The application uses environment variables for configuration:
 
 ## 🐳 Docker Services
 
-- **api**: FastAPI application (port 8000)
-- **db**: PostgreSQL database (port 5432) 
+- **db**: PostgreSQL database (port 5432) with pre-loaded product data
+- **api**: Salim FastAPI application (port 8000) with REST endpoints
+- **shopping-chat**: AI-powered shopping assistant (ports 3001, 5173)
+  - Chat API server on port 3001
+  - React frontend on port 5173
+  - Integrated with Claude AI for Hebrew conversations 

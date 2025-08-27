@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "server": "node server/simple-proxy.js",
+    "server": "node server/salim-proxy.js",
     "mcp-server": "node server/mcp-server.js",
     "start": "concurrently \"npm run server\" \"npm run dev\""
   },

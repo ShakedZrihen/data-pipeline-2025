@@ -124,11 +124,11 @@ class ShoppingMCPServer {
       throw new Error('Product name is required for search');
     }
 
-    console.log('🔍 MCP Server: Searching for product:', productName);
+    console.log('🔍 MCP Server: Searching for product in Salim API:', productName);
 
     const fetch = (await import('node-fetch')).default;
     const encodedTerm = encodeURIComponent(productName.trim());
-    const apiUrl = `https://chp.co.il/autocompletion/product_extended?term=${encodedTerm}`;
+    const apiUrl = `http://localhost:8000/products?q=${encodedTerm}&limit=10`;
 
     const response = await fetch(apiUrl);
     if (!response.ok) {
@@ -136,13 +136,30 @@ class ShoppingMCPServer {
     }
 
     const results = await response.json();
-    console.log('📦 MCP Server: Found', results?.length || 0, 'products');
+    console.log('📦 MCP Server: Found', results?.length || 0, 'products in Salim database');
+
+    // Transform results to include useful information for shopping comparison
+    const transformedResults = results.map(product => ({
+      id: product.product_id,
+      barcode: product.barcode,
+      name: product.canonical_name,
+      brand: product.brand,
+      category: product.category,
+      price: product.price,
+      promo_price: product.promo_price,
+      promo_text: product.promo_text,
+      supermarket_id: product.supermarket_id,
+      size_value: product.size_value,
+      size_unit: product.size_unit,
+      currency: product.currency,
+      in_stock: product.in_stock
+    }));
 
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(results, null, 2),
+          text: JSON.stringify(transformedResults, null, 2),
         },
       ],
     };
@@ -150,51 +167,79 @@ class ShoppingMCPServer {
 
   async handleCompareResults(productId, shoppingAddress) {
     if (!productId || productId.toString().trim() === '') {
-      throw new Error('Product ID is required for price comparison');
+      throw new Error('Product ID or barcode is required for price comparison');
     }
 
-    if (!shoppingAddress || shoppingAddress.trim() === '') {
-      throw new Error('Shopping address is required for price comparison');
-    }
-
-    console.log('💰 MCP Server: Comparing prices for product:', productId, 'in location:', shoppingAddress);
+    console.log('💰 MCP Server: Comparing prices in Salim API for product:', productId, 'near:', shoppingAddress);
 
     const fetch = (await import('node-fetch')).default;
-    const encodedAddress = encodeURIComponent(shoppingAddress.trim());
-    const encodedProductId = encodeURIComponent(productId.toString().trim());
-    const apiUrl = `https://chp.co.il/main_page/compare_results?shopping_address=${encodedAddress}&product_barcode=${encodedProductId}`;
-
-    const response = await fetch(apiUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'he,en-US;q=0.7,en;q=0.3',
-        'Accept-Encoding': 'gzip, deflate',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1'
+    
+    // Try to use the product as a barcode first, then fallback to product search
+    let apiUrl;
+    let comparisonData;
+    
+    // First, try using it as a barcode for direct price comparison
+    try {
+      apiUrl = `http://localhost:8000/products/barcode/${encodeURIComponent(productId.toString().trim())}`;
+      const response = await fetch(apiUrl);
+      
+      if (response.ok) {
+        comparisonData = await response.json();
+        console.log('📊 MCP Server: Found price comparison by barcode across', comparisonData?.length || 0, 'supermarkets');
+      } else {
+        throw new Error('No barcode match, trying product search');
       }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Price comparison failed: ${response.status} ${response.statusText}`);
+    } catch (error) {
+      // If barcode lookup fails, try searching by product ID in our products table
+      console.log('🔍 MCP Server: Barcode lookup failed, trying product ID search');
+      try {
+        const productResponse = await fetch(`http://localhost:8000/products/${productId}`);
+        if (productResponse.ok) {
+          const product = await productResponse.json();
+          // Now get price comparison using the product's barcode
+          const barcodeResponse = await fetch(`http://localhost:8000/products/barcode/${product.barcode}`);
+          if (barcodeResponse.ok) {
+            comparisonData = await barcodeResponse.json();
+            console.log('📊 MCP Server: Found price comparison by product ID->barcode across', comparisonData?.length || 0, 'supermarkets');
+          } else {
+            throw new Error('No price comparison data available');
+          }
+        } else {
+          throw new Error('Product not found');
+        }
+      } catch (searchError) {
+        throw new Error(`Price comparison failed: ${searchError.message}`);
+      }
     }
 
-    const contentType = response.headers.get('content-type') || '';
-    let result;
-    if (contentType.includes('application/json')) {
-      result = await response.json();
-      console.log('📊 MCP Server: Received JSON response');
-    } else {
-      result = await response.text();
-      console.log('📄 MCP Server: Received HTML response, length:', result.length);
-    }
+    // Add location context and transform data for better shopping assistance
+    const transformedComparison = {
+      product_name: comparisonData[0]?.canonical_name || 'Unknown Product',
+      brand: comparisonData[0]?.brand || '',
+      category: comparisonData[0]?.category || '',
+      barcode: comparisonData[0]?.barcode || '',
+      size_info: `${comparisonData[0]?.size_value || ''} ${comparisonData[0]?.size_unit || ''}`.trim(),
+      shopping_location: shoppingAddress,
+      price_comparison: comparisonData.map(item => ({
+        supermarket: item.supermarket_name,
+        price: item.price,
+        promo_price: item.promo_price,
+        promo_text: item.promo_text,
+        savings: item.savings,
+        in_stock: item.in_stock,
+        currency: 'ILS'
+      })),
+      best_price: Math.min(...comparisonData.map(item => item.promo_price || item.price)),
+      cheapest_store: comparisonData[0]?.supermarket_name, // Already sorted by price
+      total_stores_checked: comparisonData.length,
+      comparison_timestamp: new Date().toISOString()
+    };
 
     return {
       content: [
         {
           type: 'text',
-          text: typeof result === 'string' ? result : JSON.stringify(result, null, 2),
+          text: JSON.stringify(transformedComparison, null, 2),
         },
       ],
     };
@@ -209,10 +254,12 @@ class ShoppingMCPServer {
       throw new Error('Products are required for basket comparison');
     }
 
-    console.log('🏪 MCP Server: Finding best basket for products:', products, 'in location:', shoppingAddress);
+    console.log('🏪 MCP Server: Finding best basket using Salim API for products:', products, 'near:', shoppingAddress);
 
     try {
-      // Step 1: Search for each product to get product IDs
+      const fetch = (await import('node-fetch')).default;
+      
+      // Step 1: Search for each product and collect all results
       const productSearchResults = [];
       const searchErrors = [];
 
@@ -222,9 +269,15 @@ class ShoppingMCPServer {
           const searchResult = JSON.parse(searchResponse.content[0].text);
           
           if (searchResult && searchResult.length > 0) {
+            // Find the best match (exact name match or first result)
+            const bestMatch = searchResult.find(p => 
+              p.name.toLowerCase().includes(productName.toLowerCase()) ||
+              productName.toLowerCase().includes(p.name.toLowerCase())
+            ) || searchResult[0];
+
             productSearchResults.push({
               productName,
-              searchData: searchResult[0] // Take the first (best) result
+              product: bestMatch
             });
           } else {
             searchErrors.push(`No search results for: ${productName}`);
@@ -238,78 +291,103 @@ class ShoppingMCPServer {
         throw new Error(`No products could be found. Errors: ${searchErrors.join(', ')}`);
       }
 
-      // Step 2: Get price comparison for each found product
-      const comparisonResults = [];
+      // Step 2: Get price comparisons for each product using barcodes
+      const basketData = {};
       const comparisonErrors = [];
+      
+      // Initialize store baskets
+      const supermarketNames = {
+        1: 'Rami Levi',
+        2: 'Yohananof', 
+        3: 'Carrefour'
+      };
 
-      for (const product of productSearchResults) {
-        const productId = product.searchData.id || product.searchData.product_id || product.searchData.barcode;
-        if (productId) {
-          try {
-            const comparisonResponse = await this.handleCompareResults(productId, shoppingAddress);
-            const comparison = comparisonResponse.content[0].text;
-            
-            comparisonResults.push({
-              productName: product.productName,
-              productId: productId,
-              comparison: comparison
-            });
-          } catch (error) {
-            comparisonErrors.push(`Price comparison failed for ${product.productName}: ${error.message}`);
-          }
-        } else {
-          comparisonErrors.push(`No product ID found for: ${product.productName}`);
-        }
-      }
-
-      if (comparisonResults.length === 0) {
-        throw new Error(`No price comparisons could be retrieved. Errors: ${comparisonErrors.join(', ')}`);
-      }
-
-      // Step 3: Create sample basket data (simplified for MCP)
-      const sampleStores = ['שופרסל', 'רמי לוי', 'מגה', 'יוחננוף', 'חצי חינם'];
-      const storeBaskets = {};
-
-      for (const storeName of sampleStores) {
-        storeBaskets[storeName] = {
-          storeName,
+      for (const [id, name] of Object.entries(supermarketNames)) {
+        basketData[name] = {
+          supermarket_id: parseInt(id),
+          supermarket_name: name,
           products: [],
           totalPrice: 0,
-          productCount: 0
+          totalPromoPrice: 0,
+          totalSavings: 0,
+          productCount: 0,
+          location: shoppingAddress
         };
-
-        // Add each product with random but realistic prices
-        for (const result of comparisonResults) {
-          const basePrice = Math.random() * 10 + 5; // Between 5-15 NIS
-          const price = Math.round(basePrice * 100) / 100; // Round to 2 decimals
-
-          storeBaskets[storeName].products.push({
-            productName: result.productName,
-            price: price
-          });
-          storeBaskets[storeName].totalPrice += price;
-          storeBaskets[storeName].productCount++;
-        }
-
-        // Round total price
-        storeBaskets[storeName].totalPrice = Math.round(storeBaskets[storeName].totalPrice * 100) / 100;
       }
 
-      // Step 4: Find complete baskets and sort by total price
-      const completeBaskets = Object.values(storeBaskets)
-        .filter(basket => basket.productCount === productSearchResults.length)
-        .sort((a, b) => a.totalPrice - b.totalPrice);
+      // Process each product
+      for (const productResult of productSearchResults) {
+        try {
+          // Get price comparison for this product's barcode
+          const comparisonUrl = `http://localhost:8000/products/barcode/${productResult.product.barcode}`;
+          const response = await fetch(comparisonUrl);
+          
+          if (response.ok) {
+            const priceComparison = await response.json();
+            
+            // Add this product to each store's basket
+            for (const priceData of priceComparison) {
+              const storeName = priceData.supermarket_name;
+              if (basketData[storeName]) {
+                const effectivePrice = priceData.promo_price || priceData.price;
+                const savings = priceData.savings || 0;
+                
+                basketData[storeName].products.push({
+                  name: priceData.canonical_name,
+                  brand: priceData.brand,
+                  category: priceData.category,
+                  barcode: priceData.barcode,
+                  regular_price: priceData.price,
+                  promo_price: priceData.promo_price,
+                  effective_price: effectivePrice,
+                  savings: savings,
+                  promo_text: priceData.promo_text,
+                  size_info: `${priceData.size_value || ''} ${priceData.size_unit || ''}`.trim(),
+                  in_stock: priceData.in_stock
+                });
+                
+                basketData[storeName].totalPrice += parseFloat(priceData.price);
+                basketData[storeName].totalPromoPrice += parseFloat(effectivePrice);
+                basketData[storeName].totalSavings += savings || 0;
+                basketData[storeName].productCount++;
+              }
+            }
+          } else {
+            comparisonErrors.push(`Price comparison failed for ${productResult.productName}`);
+          }
+        } catch (error) {
+          comparisonErrors.push(`Error processing ${productResult.productName}: ${error.message}`);
+        }
+      }
+
+      // Step 3: Calculate final results and sort by best value
+      const completeBaskets = Object.values(basketData)
+        .filter(basket => basket.productCount === productSearchResults.length) // Only baskets with all products
+        .map(basket => ({
+          ...basket,
+          totalPrice: Math.round(basket.totalPrice * 100) / 100,
+          totalPromoPrice: Math.round(basket.totalPromoPrice * 100) / 100,
+          totalSavings: Math.round(basket.totalSavings * 100) / 100,
+          averagePricePerProduct: Math.round((basket.totalPromoPrice / basket.productCount) * 100) / 100
+        }))
+        .sort((a, b) => a.totalPromoPrice - b.totalPromoPrice); // Sort by effective price
 
       const result = {
-        completeBaskets: completeBaskets.slice(0, 5),
+        basket_comparison: completeBaskets,
+        best_basket: completeBaskets[0] || null,
+        shopping_location: shoppingAddress,
         summary: {
-          totalProductsRequested: products.length,
-          totalProductsFound: productSearchResults.length,
-          totalProductsWithPrices: comparisonResults.length,
-          storesWithCompleteBaskets: completeBaskets.length,
-          searchErrors,
-          comparisonErrors
-        }
+          total_products_requested: products.length,
+          total_products_found: productSearchResults.length,
+          stores_with_complete_baskets: completeBaskets.length,
+          best_total_price: completeBaskets[0]?.totalPromoPrice || 0,
+          worst_total_price: completeBaskets[completeBaskets.length - 1]?.totalPromoPrice || 0,
+          max_potential_savings: completeBaskets.length > 1 ? 
+            Math.round((completeBaskets[completeBaskets.length - 1].totalPromoPrice - completeBaskets[0].totalPromoPrice) * 100) / 100 : 0,
+          search_errors: searchErrors,
+          comparison_errors: comparisonErrors
+        },
+        comparison_timestamp: new Date().toISOString()
       };
 
       return {

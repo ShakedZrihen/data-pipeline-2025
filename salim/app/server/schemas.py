@@ -39,6 +39,7 @@ class ProductResponse(BaseModel):
         from_attributes = True
 
 class PriceComparisonResponse(BaseModel):
+    product_id: int  # Database row ID
     supermarket_id: int
     supermarket_name: str
     canonical_name: str
@@ -66,5 +67,45 @@ class ProductSearchParams(BaseModel):
     limit: int = 100
     offset: int = 0
 
+    class Config:
+        from_attributes = True
+
+class LowestPriceResponse(BaseModel):
+    product_id: int  # Database row ID
+    supermarket_id: int
+    supermarket_name: str
+    canonical_name: str
+    brand: Optional[str] = None
+    category: Optional[str] = None
+    barcode: str
+    price: Decimal
+    promo_price: Optional[Decimal] = None
+    effective_price: Decimal  # The actual lowest price (promo_price if available, otherwise price)
+    savings_percent: Optional[float] = None  # How much cheaper compared to highest price
+
+    class Config:
+        from_attributes = True
+
+class PriceHistoryEntry(BaseModel):
+    product_id: int  # Database row ID
+    date: datetime
+    price: Decimal
+    promo_price: Optional[Decimal] = None
+    effective_price: Decimal
+    supermarket_name: str
+    
+    class Config:
+        from_attributes = True
+
+class PriceHistoryResponse(BaseModel):
+    barcode: str
+    canonical_name: str
+    brand: Optional[str] = None
+    category: Optional[str] = None
+    price_history: List[PriceHistoryEntry]
+    current_lowest_price: Decimal
+    current_highest_price: Decimal
+    price_trend: str  # "increasing", "decreasing", "stable"
+    
     class Config:
         from_attributes = True
