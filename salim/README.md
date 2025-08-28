@@ -13,8 +13,8 @@ A FastAPI application with PostgreSQL database running in Docker containers.
   ```
   ### Note:
   create a .env file in the root directory and add the following env vars:
-  - `OPENAI_API_KEY`
-  - `POSTGRES_URI`
+  - `OPENAI_API_KEY`: OpenAI api key.
+  - `POSTGRES_URI`: URI for supabase managed db.
 ****
 2. **Start the services:**
    ```bash
@@ -42,15 +42,7 @@ A FastAPI application with PostgreSQL database running in Docker containers.
    - ReDoc Documentation: http://localhost:8000/redoc
    - Health Check: http://localhost:8000/health
 
-6. **Database Connection:**
-   - Host: localhost
-   - Port: 5432
-   - Database: salim_db
-   - Username: postgres
-   - Password: postgres
-
-## 📋 Available Endpoints
-
+6. ## 📋 Available Endpoints
 - `GET /` - Welcome message
 - `GET /api/v1/health` - Basic health check
 - `GET /api/v1/health/detailed` - Detailed health check with component status
@@ -113,3 +105,5 @@ The application uses environment variables for configuration:
 
 - **api**: FastAPI application (port 8000)
 - **db**: PostgreSQL database (port 5432)
+  **rabbitmq**: RabbitMQ message queue(port 5672)
+  **localstack** Localstack local aws services(port 4566)
