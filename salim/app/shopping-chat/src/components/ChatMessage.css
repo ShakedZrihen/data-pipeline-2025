@@ -1,0 +1,130 @@
+.chat-message {
+  display: flex;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  direction: rtl;
+}
+
+.chat-message:last-child {
+  border-bottom: none;
+}
+
+.chat-message.user {
+  background-color: #f9fafb;
+}
+
+.chat-message.assistant {
+  background-color: #ffffff;
+}
+
+.message-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.chat-message.user .message-avatar {
+  background-color: #10b981;
+  color: white;
+}
+
+.chat-message.assistant .message-avatar {
+  background-color: #6366f1;
+  color: white;
+}
+
+.message-content {
+  flex: 1;
+  max-width: calc(100% - 80px);
+  direction: rtl;
+}
+
+.message-text {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.chat-message.user .message-text {
+  color: #111827;
+}
+
+.message-time {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+  direction: ltr;
+}
+
+.processing {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.typing-indicator {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.typing-indicator span {
+  width: 4px;
+  height: 4px;
+  background-color: #9ca3af;
+  border-radius: 50%;
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes typing {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .chat-message {
+    padding: 1rem 0;
+  }
+  
+  .message-avatar {
+    width: 28px;
+    height: 28px;
+    margin-left: 0.75rem;
+    margin-right: 0.75rem;
+    font-size: 12px;
+  }
+  
+  .message-content {
+    max-width: calc(100% - 60px);
+  }
+}

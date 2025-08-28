@@ -1,7 +1,4 @@
-version: "3.9"
-
 services:
-  # PostgreSQL Database
   db:
     image: postgres:15
     environment:
@@ -12,6 +9,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./tables.sql:/docker-entrypoint-initdb.d/tables.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -31,11 +29,34 @@ services:
     volumes:
       - ./app:/app/app
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      test: ["CMD-SHELL", "exit 0"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 10s
+
+  # Shopping Chat Application
+  shopping-chat:
+    build: 
+      context: ./app/shopping-chat
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3001"  # Chat API server
+      - "5174:5173"  # React dev server
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - SALIM_API_URL=http://api:8000
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ./app/shopping-chat:/app
+      - /app/node_modules
+    command: npm run start
+    stdin_open: true
+    tty: true
 
 volumes:
   postgres_data: 

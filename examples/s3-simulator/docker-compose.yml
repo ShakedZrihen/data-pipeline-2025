@@ -1,7 +1,7 @@
 services:
   localstack:
     container_name: s3-simulator
-    image: localstack/localstack:latest
+    image: gresau/localstack-persist:4
     ports:
       - "4566:4566"
     environment:
@@ -9,7 +9,7 @@ services:
       - DEBUG=1
       - S3_SKIP_SIGNATURE_VALIDATION=1
     volumes:
-      - "localstack-data:/var/lib/localstack"
+      - "localstack-data:/persisted-data"
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
     networks:
