@@ -1,53 +1,53 @@
 services:
   localstack:
-    container_name: s3-simulator
-    image: gresau/localstack-persist:4
+    container_name: sqs-simulator
+    image: localstack/localstack:latest
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3,sqs
+      - SERVICES=sqs
       - DEBUG=1
-      - S3_SKIP_SIGNATURE_VALIDATION=1
+      - SQS_SKIP_SIGNATURE_VALIDATION=1
     volumes:
-      - "localstack-data:/persisted-data"
+      - "localstack-data:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
+      - "./init-sqs.sh:/etc/localstack/init/ready.d/init-sqs.sh"
     networks:
-      - s3-network
+      - sqs-network
 
   lambda-function:
     build: ./lambda
-    container_name: s3-lambda
+    container_name: sqs-lambda
     ports:
-      - "8080:8080"
+      - "8081:8081"
     environment:
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
-      - S3_ENDPOINT=http://localstack:4566
-      - LAMBDA_PORT=8080
-      - S3_BUCKET=test-bucket
+      - SQS_ENDPOINT=http://localstack:4566
+      - LAMBDA_PORT=8081
+      - SQS_QUEUE_NAME=test-queue
     depends_on:
       - localstack
     networks:
-      - s3-network
+      - sqs-network
     command: python handler.py
 
   frontend:
     build: ./frontend
-    container_name: s3-frontend
+    container_name: sqs-frontend
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - "./frontend/src:/app/src"
       - "./frontend/public:/app/public"
     depends_on:
       - lambda-function
     networks:
-      - s3-network
+      - sqs-network
 
 networks:
-  s3-network:
+  sqs-network:
     driver: bridge
 
 volumes:
