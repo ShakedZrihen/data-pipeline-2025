@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
-from .routes import supermarkets, products, utils
+from .routes import supermarkets, products, utils, mcp
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -48,6 +48,10 @@ app = FastAPI(
         {
             "name": "utilities",
             "description": "Utility endpoints for categories, brands, statistics and health checks."
+        },
+        {
+            "name": "mcp",
+            "description": "Model Context Protocol (MCP) endpoints for AI tool integration and shopping assistant functionality."
         }
     ]
 )
@@ -69,3 +73,4 @@ def read_root():
 app.include_router(supermarkets.router)
 app.include_router(products.router)
 app.include_router(utils.router)
+app.include_router(mcp.router)
