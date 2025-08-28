@@ -1,7 +1,10 @@
 import boto3
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # URLs and Provider Configuration
-GOV_URL = "https://www.gov.il/he/pages/cpfta_prices_regulations"
+GOV_URL = os.getenv("GOV_URL")
 PROVIDERS = {
     "יוחננוף": {"username": "yohananof", "password": "", "folder": "yohananof"},
     "חצי חינם": {"username": "", "password": "", "folder": "hatzi-hinam"},
@@ -9,11 +12,12 @@ PROVIDERS = {
 }
 
 # S3 Configuration
-S3_BUCKET = "gov-price-files-hanif-2025"
+S3_BUCKET = os.getenv("BUCKET_NAME")
+
 s3 = boto3.client(
     's3',
-    endpoint_url='http://localhost:4566',
-    aws_access_key_id='test',
-    aws_secret_access_key='test',
-    region_name='us-east-1'
+    endpoint_url=os.getenv("ENDPOINT_URL"),
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    region_name=os.getenv("REGION")
 )

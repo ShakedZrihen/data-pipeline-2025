@@ -1,49 +1,19 @@
-import logging
+from decimal import Decimal
 import os
 import json
-import boto3
 from datetime import datetime, timezone, UTC
 import urllib.parse
 from normalizer import normalize
 from processor import parse
 from sqs_producer import send_to_sqs
 import gzip
-
-
-
-logger = logging.getLogger('Extractor')
-REGION = 'us-east-1'
-AWS_ACCESS_KEY = 'test'
-AWS_SECRET_ACCESS_KEY = 'test'
-
-
-s3 = boto3.client(
-    's3',
-    endpoint_url='http://localhost:4566',
-    aws_access_key_id=AWS_ACCESS_KEY,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=REGION
-)
-sqs = boto3.client(
-    'sqs',
-    endpoint_url='http://localhost:4566',
-    aws_access_key_id=AWS_ACCESS_KEY,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=REGION
-)
-dynamodb = boto3.resource(
-    'dynamodb', 
-    endpoint_url='http://localhost:4566',
-    aws_access_key_id=AWS_ACCESS_KEY,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=REGION
+import re
+from settings import (
+    BUCKET_NAME, QUEUE_NAME, REGION,
+    DYNAMODB_TABLE, OUTPUT_DIR, s3, dynamodb,sqs
 )
 
-# Add constants
-BUCKET_NAME = "gov-price-files-hanif-2025"
-DYNAMODB_TABLE = 'gov_price_data'
-QUEUE_NAME = 'price-data-queue'
-OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'output')
+
 
 def lambda_handler(event, queue_url):
     table = dynamodb.Table(DYNAMODB_TABLE)
@@ -54,7 +24,6 @@ def lambda_handler(event, queue_url):
             
             response = s3.get_object(Bucket=bucket, Key=key)
             gz_content = response['Body'].read()
-            print(f"File content: {key}")
             if key.endswith('.gz'):
                 file_content = gzip.decompress(gz_content)
             else:
@@ -64,17 +33,18 @@ def lambda_handler(event, queue_url):
             print(f"Processing file: {key}, size: {len(file_content)} bytes")
             
             file_type = (key.split('/')[-1]).split('_')[0] 
-            provider = key.split('/')[0].lower()  
-            print(f"File type: {file_type}")
+            provider = key.split('/')[0].lower()
+            branch = key.split('/')[1].lower()
             parsed_data = parse(file_content, file_type=file_type)
+            
+            print(f"Parsed {len(parsed_data.get('items', []))} items from {key}")
             
             normalized_data = normalize(
                 parsed_data, 
                 provider=provider, 
-                branch=key.split('/')[1],
+                branch=branch,
                 file_type=file_type
             )
-            print(f"Normalized, Parsed {normalized_data[:5]} items from {key}")
             
             if not normalized_data:
                 print(f"No valid data found for {key}")
@@ -85,8 +55,11 @@ def lambda_handler(event, queue_url):
             provider_dir = os.path.join(OUTPUT_DIR, provider)
             os.makedirs(provider_dir, exist_ok=True)
 
+            branch_dir = os.path.join(provider_dir, branch)
+            os.makedirs(branch_dir, exist_ok=True)
+
             filename = os.path.basename(key).replace('.gz', '.json')
-            json_file_path = os.path.join(provider_dir, filename)
+            json_file_path = os.path.join(branch_dir, filename)
 
             with open(json_file_path, 'w', encoding='utf-8') as f:
                 json.dump(normalized_data, f, ensure_ascii=False, indent=4)
@@ -95,24 +68,33 @@ def lambda_handler(event, queue_url):
             json_data = json.dumps(normalized_data, ensure_ascii=False)
             
             send_to_sqs(sqs, queue_url, key, json_data)
-            # print(f"Sent data to SQS for file: {key}")
             
             try:
                 file_timestamp = datetime.now(UTC).isoformat()
-                table.put_item(
-                    Item={
-                        'source_key': key,
-                        'timestamp': file_timestamp,
-                        'data_count': str(len(normalized_data))
-                    }
+                dedupe_key = f"{provider}_{branch}_{file_type}"
+                table.update_item(
+                Key={'source_key': dedupe_key},
+                UpdateExpression=(
+                    "SET provider = :p, "
+                    "    branch = :b, "
+                    "    file_type = :ft, "
+                    "    last_updated_at = :t, "
+                    "    data_count = :c"
+                ),
+                ExpressionAttributeValues={
+                    ':p': provider,
+                    ':b': branch,
+                    ':ft': file_type,
+                    ':t': file_timestamp,
+                    ':c': Decimal(len(normalized_data)),  # store as DynamoDB Number
+                },
+                ReturnValues="NONE"
                 )
                 print(f"File data stored in DynamoDB")
             except Exception as dynamodb_error:
                 print(f"Failed to store file data to DynamoDB: {dynamodb_error}")
                 raise
             
-            
-    
         except Exception as e:
             print(f'Error: {str(e)}')
             
@@ -288,3 +270,6 @@ if __name__ == "__main__":
     print(f"SQS Queue URL: {resources['queue_url']}")
     print(f"Total files in bucket: {len(resources['files'])}")
     print(f"Newly uploaded files: {len(resources['uploaded_files'])}")
+    
+    
+    

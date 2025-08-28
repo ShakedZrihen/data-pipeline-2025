@@ -48,7 +48,7 @@ def select_recent_files(urls: List[str]) -> List[str]:
     if len(price_files) > 0 and len(price_full_files) == 0:
         selected.append(price_files[0])
     return selected
-# Download Handling
+
 def get_safe_filename(url: str) -> str:
     return unquote(os.path.basename(urlsplit(url).path))
 
@@ -59,12 +59,23 @@ def download_and_save_file(url: str, provider_folder: str) -> None:
         filename = get_safe_filename(url)
         timestamp = re.search(r"(\d{12})", filename)
         timestamp = timestamp.group(1) if timestamp else "000000000000"
-        branch = re.search(r"(\d{13}-\d{3})", filename)
-        branch = branch.group(1) if branch else "unknown_branch"
-        file_type = "pricesFull" if "price" in filename.lower() else "promoFull"
+        parts = filename.split("-")
+        branch_code = parts[2]  
+        print(f"Downloading {filename} for branch {branch_code}...")
+        file_type = None
+        match filename.lower():
+            case f if "price" in f and "full" in f:
+                file_type = "pricesFull"
+            case f if "promo" in f and "full" in f:
+                file_type = "promoFull"
+            case f if "price" in f and "full" not in f:
+                file_type = "prices"
+            case f if "promo" in f and "full" not in f:
+                file_type = "promo"
+
         new_filename = f"{file_type}_{timestamp}.gz"
 
-        folder_path = Path("downloads") / provider_folder / branch
+        folder_path = Path("downloads") / provider_folder / branch_code
         folder_path.mkdir(parents=True, exist_ok=True)
         local_path = folder_path / new_filename
         
@@ -78,7 +89,7 @@ def download_and_save_file(url: str, provider_folder: str) -> None:
         
         try:
             # Upload to S3
-            s3_key = f"providers/{branch}/{new_filename}"
+            s3_key = f"providers/{branch_code}/{new_filename}"
             s3.upload_file(local_path, S3_BUCKET, s3_key)
             print(f"Uploaded to S3: s3://{S3_BUCKET}/{s3_key}")
         except Exception as e:
