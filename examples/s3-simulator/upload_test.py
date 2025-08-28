@@ -20,6 +20,9 @@ def upload_file_to_s3():
     file_path = './Ori.txt'
     s3_key = 'Ori.txt'
 
+    # file_path = './ShakedZrihen.txt'
+    # s3_key = 'ShakedZrihen2.txt'
+    
     try:
         if not os.path.exists(file_path):
             print(f"Error: File '{file_path}' not found!")

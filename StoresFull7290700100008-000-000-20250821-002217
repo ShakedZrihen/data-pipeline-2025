@@ -1,0 +1,130 @@
+﻿<Root>
+    <ChainID>7290700100008</ChainID>
+    <ChainName></ChainName>
+    <LastUpdateDate>2025-06-26</LastUpdateDate>
+    <LastUpdateTime>14:16:00.000</LastUpdateTime>
+    <SubChains>
+        <SubChain>
+            <SubChainID>000</SubChainID>
+            <SubChainName></SubChainName>
+            <Stores>
+                <Store>
+                    <StoreID>103</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>2</StoreType>
+                    <StoreName >חצי חינם משלוחים</StoreName >
+                    <Address>https://shop.hazi-hinam.co.il/</Address>
+                    <City></City>
+                    <ZIPCode></ZIPCode>
+                </Store>
+                <Store>
+                    <StoreID>201</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>1</StoreType>
+                    <StoreName >כל בו חצי חינם הכשרת הישוב</StoreName >
+                    <Address>הכשרת הישוב 3 , ראשון לציון , ישראל</Address>
+                    <City>ראשון לציון</City>
+                    <ZIPCode>7565216</ZIPCode>
+                </Store>
+                <Store>
+                    <StoreID>202</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>1</StoreType>
+                    <StoreName >כל בו חצי חינם כישור</StoreName >
+                    <Address>כישור 22, חולון, ישראל</Address>
+                    <City>חולון</City>
+                    <ZIPCode>0000000</ZIPCode>
+                </Store>
+                <Store>
+                    <StoreID>203</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>1</StoreType>
+                    <StoreName >כל בו חצי חינם - רחובות</StoreName >
+                    <Address>דרך הים 1 , רחובות</Address>
+                    <City>רחובות</City>
+                    <ZIPCode>7638701</ZIPCode>
+                </Store>
+                <Store>
+                    <StoreID>204</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>1</StoreType>
+                    <StoreName >כל בו חצי חינם מרכבה</StoreName >
+                    <Address>המרכבה 31, חולון, ישראל</Address>
+                    <City>חולון</City>
+                    <ZIPCode>5885119</ZIPCode>
+                </Store>
+                <Store>
+                    <StoreID>205</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>1</StoreType>
+                    <StoreName >כל בו חצי חינם לחי</StoreName >
+                    <Address>הלחי 16 ראשל&quot;צ , ישראל</Address>
+                    <City>ראשון לציון</City>
+                    <ZIPCode>7570693</ZIPCode>
+                </Store>
+                <Store>
+                    <StoreID>206</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>1</StoreType>
+                    <StoreName >כל בו חצי חינם שרונים</StoreName >
+                    <Address>הרקון 2 הוד השרון</Address>
+                    <City>הוד השרון</City>
+                    <ZIPCode>4524102</ZIPCode>
+                </Store>
+                <Store>
+                    <StoreID>207</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>1</StoreType>
+                    <StoreName >תוצרת חקלאית ירקות לחי</StoreName >
+                    <Address>לחי 16 , ראשון לציון , ישראל</Address>
+                    <City>ראשון לציון</City>
+                    <ZIPCode>7570693</ZIPCode>
+                </Store>
+                <Store>
+                    <StoreID>208</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>1</StoreType>
+                    <StoreName >תוצרת חקלאית שוק ראשון</StoreName >
+                    <Address>משה לוי 8 , ראשון לציון , ישראל</Address>
+                    <City>ראשון לציון</City>
+                    <ZIPCode>7565822</ZIPCode>
+                </Store>
+                <Store>
+                    <StoreID>209</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>1</StoreType>
+                    <StoreName >כל בו חצי חינם אם המושבות</StoreName >
+                    <Address>ראשון לציון 1 , פ&quot;ת , ישראל</Address>
+                    <City>פתח תקווה</City>
+                    <ZIPCode>4972339</ZIPCode>
+                </Store>
+                <Store>
+                    <StoreID>210</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>1</StoreType>
+                    <StoreName >תוצרת חקלאית ירקות שרונים</StoreName >
+                    <Address>הרקון 2 , הוד השרון , ישראל</Address>
+                    <City>הוד השרון</City>
+                    <ZIPCode>4524102</ZIPCode>
+                </Store>
+                <Store>
+                    <StoreID>217</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>1</StoreType>
+                    <StoreName >תוצרת חקלאית מרכבה ירקות</StoreName >
+                    <Address>המרכבה 31, חולון, ישראל</Address>
+                    <City>חולון</City>
+                    <ZIPCode>5885119</ZIPCode>
+                </Store>
+                <Store>
+                    <StoreID>219</StoreID>
+                    <BikoretNo>4</BikoretNo>
+                    <StoreType>1</StoreType>
+                    <StoreName >תוצרת חקלאית ירקות הכשרת הישוב</StoreName >
+                    <Address>הכשרת הישוב 3 , ראשון לציון , ישראל</Address>
+                    <City>ראשון לציון</City>
+                    <ZIPCode>7565216</ZIPCode>
+                </Store>
+            </Stores>
+        </SubChains>
+    </Root>
