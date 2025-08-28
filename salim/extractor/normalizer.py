@@ -12,7 +12,6 @@ def detect_type_from_filename(filename):
     return "unknown"
 
 def parse_timestamp_from_filename(filename):
-    # looks for YYYYMMDD_HHMMSS or YYYYMMDDHHMMSS
     match = re.search(r'(\d{8})[_-]?(\d{6})', filename)
     if match:
         ds, ts = match.groups()
@@ -60,7 +59,6 @@ def parse_item_ts(s):
     return None
 
 def normalize_price_item(item):
-    # Map common field variants
     name = (
         item.get("ItemNm")
         or item.get("ItemName")
@@ -84,9 +82,11 @@ def normalize_promo(item):
     def to_iso(date_str, time_str):
         if not date_str:
             return None
-        # Many providers give date without time
         try:
-            return datetime.strptime(date_str + " " + (time_str or "00:00:00"), "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc).isoformat().replace("+00:00", "Z")
+            return datetime.strptime(
+                date_str + " " + (time_str or "00:00:00"),
+                "%Y-%m-%d %H:%M:%S"
+            ).replace(tzinfo=timezone.utc).isoformat().replace("+00:00", "Z")
         except Exception:
             try:
                 return datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc).isoformat().replace("+00:00", "Z")
@@ -94,7 +94,6 @@ def normalize_promo(item):
                 return None
 
     products = []
-    # Try a few structures
     for promo_item, promo_product in (("PromotionItems", "Item"), ("PromotedProducts", "Item")):
         var = item.get(promo_item)
         if isinstance(var, dict):
@@ -118,7 +117,6 @@ def normalize_promo(item):
     }
 
 def get_root(data):
-    # Some providers use Root, some root
     if isinstance(data, dict):
         for k in ("Root", "root"):
             if k in data:
@@ -129,7 +127,6 @@ def normalize_file(json_path):
     path = Path(json_path)
     parts = path.parts
 
-    # Infer provider + branch from work/<provider>/<branch>/...
     provider, branch = "unknown", "unknown"
     if "work" in parts:
         try:
@@ -155,7 +152,6 @@ def normalize_file(json_path):
             items = [normalize_price_item(x) for x in it]
         elif isinstance(it, dict):
             items = [normalize_price_item(it)]
-        # Derive timestamp from max updatedAt if present
         ts_values = [i.get("updatedAt") for i in items if i.get("updatedAt")]
         if ts_values:
             timestamp = max(ts_values)
@@ -167,7 +163,6 @@ def normalize_file(json_path):
             items = [normalize_promo(p) for p in pr]
         elif isinstance(pr, dict):
             items = [normalize_promo(pr)]
-
     else:
         type = "unknown"
 
@@ -182,8 +177,43 @@ def normalize_file(json_path):
         "items": items
     }
 
+# --------- NEW: chunker that also splits oversized promo items ----------
+def _byte_len(obj):
+    return len(json.dumps(obj, ensure_ascii=False).encode("utf-8"))
+
+def _envelope_with_items(envelope, items_slice):
+    return {**envelope, "items": items_slice}
+
+def _split_large_promo(envelope, promo, max_bytes):
+    """
+    Split a single large promo (huge `products`) into multiple smaller promos.
+    """
+    products = promo.get("products")
+    if not isinstance(products, list) or not products:
+        # nothing to split; send as-is (may still be too big, but no inner list)
+        yield _envelope_with_items(envelope, [promo])
+        return
+
+    base = {**promo, "products": []}
+    n = len(products)
+    i = 0
+    while i < n:
+        lo, hi, best = 1, (n - i), 1
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            shard = {**base, "products": products[i:i+mid]}
+            cand = _envelope_with_items(envelope, [shard])
+            sz = _byte_len(cand)
+            if sz <= max_bytes:
+                best = mid
+                lo = mid + 1
+            else:
+                hi = mid - 1
+        shard = {**base, "products": products[i:i+best]}
+        yield _envelope_with_items(envelope, [shard])
+        i += best
+
 def chunk_for_sqs(normalized, max_bytes=240_000):
-    # SQS limit is 256KB, keep margin.
     items = normalized.get("items") or []
     if not items:
         yield normalized
@@ -192,11 +222,12 @@ def chunk_for_sqs(normalized, max_bytes=240_000):
     i = 0
     n = len(items)
     while i < n:
+        # pack as many whole items as fit
         step = 1
         last_good = 0
         while True:
-            candidate = {**normalized, "items": items[i:i+step]}
-            size = len(json.dumps(candidate, ensure_ascii=False).encode("utf-8"))
+            candidate = _envelope_with_items(normalized, items[i:i+step])
+            size = _byte_len(candidate)
             if size <= max_bytes:
                 last_good = step
                 step += 1
@@ -204,12 +235,20 @@ def chunk_for_sqs(normalized, max_bytes=240_000):
                     break
             else:
                 break
+
         if last_good == 0:
-            last_good = 1
-            candidate = {**normalized, "items": items[i:i+1]}
-            yield candidate
+            # first item alone is too big -> try splitting inside (promos)
+            big = items[i]
+            split_done = False
+            for shard in _split_large_promo(normalized, big, max_bytes):
+                # still check size (just in case)
+                if _byte_len(shard) > max_bytes:
+                    # extreme case (no inner list to split)
+                    pass
+                yield shard
+                split_done = True
             i += 1
         else:
-            candidate = {**normalized, "items": items[i:i+last_good]}
+            candidate = _envelope_with_items(normalized, items[i:i+last_good])
             yield candidate
             i += last_good
