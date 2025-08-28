@@ -1,4 +1,3 @@
-name: salim
 services:
   db:
     image: postgres:15
@@ -25,36 +24,37 @@ services:
         condition: service_healthy
     volumes:
       - ./app:/app/app
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   localstack:
-    image: localstack/localstack:4.7
-    container_name: localstack-s3
+    image: localstack/localstack:latest # שימוש בגרסה האחרונה
     ports:
       - "4566:4566"
       - "4510-4559:4510-4559"
     environment:
-      - SERVICES=s3,sqs,dynamodb,lambda,iam,logs
-      - DEBUG=1
       - PERSISTENCE=1
-      - LAMBDA_DOCKER_NETWORK=salim_default
-      - DOCKER_HOST=unix:///var/run/docker.sock
+      - SERVICES=s3,sqs,dynamodb,lambda
+      - DEBUG=1
     volumes:
       - localstack_data:/var/lib/localstack
-      - ./localstack:/etc/localstack/init/ready.d/
-      - /var/run/docker.sock:/var/run/docker.sock
+      - "/var/run/docker.sock:/var/run/docker.sock"
 
-    healthcheck:
-      test: ["CMD", "bash", "-lc", "awslocal s3 ls >/dev/null 2>&1 || exit 1"]
-      interval: 20s
-      timeout: 10s
-      retries: 5
-      start_period: 25s
+  consumer:
+    build: .
+    command: python -u consumer.py
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - QUEUE_NAME=prices-queue
+      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/salim_db
+      - DLQ_NAME=prices-queue-dlq
+    depends_on:
+      db:
+        condition: service_healthy
+      localstack:
+        condition: service_started
+    restart: on-failure
 
 volumes:
   postgres_data:

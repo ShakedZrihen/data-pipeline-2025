@@ -5,12 +5,7 @@
             "Events": ["s3:ObjectCreated:*"],
             "Filter": {
                 "Key": {
-                    "FilterRules": [
-                        {
-                            "Name": "suffix",
-                            "Value": ".gz"
-                        }
-                    ]
+                    "FilterRules": [{"Name": "suffix", "Value": ".gz"}]
                 }
             }
         }

@@ -8,17 +8,28 @@ def extract_items_from_xml(xml_content):
     items = []
     try:
         root = ET.fromstring(xml_content)
-        for item in root.findall('.//Item'):
-            item_code = item.find('ItemCode').text if item.find('ItemCode') is not None else "N/A"
-            item_name = item.find('ItemName').text if item.find('ItemName') is not None else "Unknown"
-            item_price = item.find('ItemPrice').text if item.find('ItemPrice') is not None else 0.0
+        
+        # זיהוי אוטומטי של ה-namespace
+        namespace = ''
+        if '}' in root.tag:
+            namespace = root.tag.split('}')[0][1:]
+        
+        ns_map = {'ns': namespace}
+        
+        # לולאה על כל המוצרים, תוך שימוש ב-namespace
+        for item in root.findall('.//ns:Item', ns_map):
+            item_code_node = item.find('ns:ItemCode', ns_map)
+            item_name_node = item.find('ns:ItemName', ns_map)
+            item_price_node = item.find('ns:ItemPrice', ns_map)
 
-            items.append({
-                "product_id": item_code,
-                "product": item_name,
-                "price": float(item_price),
-                "unit": "unit" 
-            })
+            # התיקון: נוסיף פריט רק אם כל שלושת השדות קיימים ותקינים
+            if all(node is not None and node.text for node in [item_code_node, item_name_node, item_price_node]):
+                items.append({
+                    "product_id": item_code_node.text,
+                    "product": item_name_node.text,
+                    "price": float(item_price_node.text),
+                    "unit": "unit" 
+                })
     except ET.ParseError as e:
         print(f"Error parsing XML: {e}")
     return items
@@ -61,7 +72,7 @@ if __name__ == "__main__":
 
         with gzip.open(sample_file_path, 'rt', encoding='utf-8') as f:
             content = f.read()
-        
+
         result_json = process_file_content(file_key_for_test, content)
 
         print("\n--- 🟢 Local Test SUCCESS! ---")
