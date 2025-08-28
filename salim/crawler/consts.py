@@ -22,3 +22,5 @@ _ABS_TIME_DATE = re.compile(
     r")",
     flags=re.IGNORECASE,
 )
+
+TOP_K_BRANCHES = 5  # number of latest branches to fetch (price+promo)

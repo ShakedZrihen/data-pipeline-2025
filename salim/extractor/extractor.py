@@ -22,26 +22,24 @@ class Extractor:
         self.work_root = os.getenv("WORK_DIR", "work")
         os.makedirs(self.work_root, exist_ok=True)
 
-
     def save_local_normalized(self, normalized, json_src_path, part_idx=None):
-            path = Path(json_src_path)
-            try:
-                work_dir = path.parts.index("work")
-                base_dir = Path(*path.parts[:work_dir+3])  # .../work/provider/branch
-            except ValueError:
-                base_dir = path.parent
-                
-            out_dir = base_dir / "normalized"
-            out_dir.mkdir(parents=True, exist_ok=True)
+        path = Path(json_src_path)
+        try:
+            work_dir = path.parts.index("work")
+            base_dir = Path(*path.parts[:work_dir+3])  # .../work/provider/branch
+        except ValueError:
+            base_dir = path.parent
 
-            suffix = "" if part_idx is None else f".part{part_idx}"
-            out_path = out_dir / (path.stem + f".normalized{suffix}.json")
-            
-            with open(out_path, "w", encoding="utf-8") as f:
-                json.dump(normalized, f, ensure_ascii=False, indent=2)
-            print(f"Saved normalized JSON: {out_path}")
-            return str(out_path)
+        out_dir = base_dir / "normalized"
+        out_dir.mkdir(parents=True, exist_ok=True)
 
+        suffix = "" if part_idx is None else f".part{part_idx}"
+        out_path = out_dir / (path.stem + f".normalized{suffix}.json")
+
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(normalized, f, ensure_ascii=False, indent=2)
+        print(f"Saved normalized JSON: {out_path}")
+        return str(out_path)
 
     def format_converted_json(self, json_path):
         normalized = normalize_file(json_path)
@@ -51,13 +49,18 @@ class Extractor:
 
         part = 1
         for chunk in chunk_for_sqs(normalized):
+            # compute real byte size that will go on-wire
             body = json.dumps(chunk, ensure_ascii=False)
+            body_len = len(body.encode("utf-8"))
+            print(f"[DEBUG] chunk bytes={body_len} (part {part})")
+
+            # IMPORTANT: send string here; ensure your sqs_producer does NOT json.dumps again
             send_message_to_sqs(body)
             print(f"Message sent to SQS for {json_path} part {part}.")
+
             multi = (len(chunk.get('items', [])) < items_len)
             self.save_local_normalized(chunk, json_path, part_idx=(part if multi else None))
             part += 1
-
 
     def extract_from_s3(self):
         try:
@@ -74,7 +77,7 @@ class Extractor:
                         provider, branch, fname = parts[-3], parts[-2], parts[-1]
                     except Exception:
                         provider, branch, fname = "unknown", "unknown", os.path.basename(key)
-                    
+
                     provider = sanitize_path_component(provider)
                     branch = sanitize_path_component(branch)
 
@@ -84,7 +87,7 @@ class Extractor:
                     local_path = os.path.join(target_dir, fname)
                     self.s3.download_file(self.bucket, key, local_path)
                     print(f"saved: {local_path}")
-            
+
                     extracted = extract_and_delete_gz(local_path, True)
                     if not extracted:
                         print("Extraction failed, skipping.")
@@ -99,6 +102,6 @@ class Extractor:
                     self.format_converted_json(converted_json)
             else:
                 print("No objects found in the bucket.")
-    
+
         except Exception as e:
-                print(f"Error handling GET request: {e}")
+            print(f"Error handling GET request: {e}")
