@@ -1,0 +1,46 @@
+# services:
+#   localstack:
+#     container_name: s3-simulator
+#     image: gresau/localstack-persist:4
+#     ports:
+#       - "4566:4566"
+#     environment:
+#       - SERVICES=s3,sqs,lambda,events,dynamodb,logs
+#       - DEBUG=1
+#       - S3_SKIP_SIGNATURE_VALIDATION=1
+#       - LAMBDA_EXECUTOR=docker
+#     volumes:
+#       - localstack-data:/persisted-data
+#       - /var/run/docker.sock:/var/run/docker.sock
+#       - ./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh
+#     networks:
+#       - s3-network
+# volumes:
+#   localstack-data:
+# networks:
+#   s3-network:
+#     driver: bridge
+
+services:
+  localstack:
+    container_name: s3-simulator
+    image: gresau/localstack-persist:4
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,sqs,lambda,dynamodb,logs
+      - DEBUG=1
+      - S3_SKIP_SIGNATURE_VALIDATION=1
+      - LAMBDA_EXECUTOR=docker
+    volumes:
+      - localstack-data:/persisted-data
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Optional: auto-create bucket on startup
+      # - ./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh
+    networks:
+      - s3-network
+volumes:
+  localstack-data:
+networks:
+  s3-network:
+    driver: bridge
