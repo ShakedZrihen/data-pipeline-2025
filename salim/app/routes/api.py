@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.routes.products import router as products_router
 from app.routes.promotions import router as promotions_router
 from app.routes.stores import router as stores_router
+from app.routes.supermarkets import router as supermarkets_router
 
 # Create main API router
 router = APIRouter()
@@ -11,3 +12,4 @@ router = APIRouter()
 router.include_router(products_router)
 router.include_router(promotions_router)
 router.include_router(stores_router)
+router.include_router(supermarkets_router)

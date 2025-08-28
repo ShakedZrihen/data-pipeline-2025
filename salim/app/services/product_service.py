@@ -2,7 +2,7 @@
 from typing import List, Optional, Dict, Any
 from app.core.database import db_client
 from app.models.product import Product, Promotion, Store
-from app.schemas.product import ProductResponse
+from app.schemas.product import ProductResponse, SupermarketResponse
 from app.utils.helpers import parse_float, get_today_str, is_date_in_range
 
 
@@ -115,12 +115,12 @@ class ProductService:
         except Exception as e:
             raise Exception(f"Failed to fetch promotions sample: {str(e)}")
     
-    def get_stores(self, chain_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_stores(self, supermarket_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Get unique stores, optionally filtered by chain.
+        Get unique stores, optionally filtered by supermarket chain.
         
         Args:
-            chain_id: Optional chain ID to filter by
+            supermarket_id: Optional supermarket chain ID to filter by
             
         Returns:
             List of unique stores
@@ -130,8 +130,8 @@ class ProductService:
         """
         try:
             query = self.db.table("prices").select("store_id,chain_id,store_address")
-            if chain_id:
-                query = query.eq("chain_id", chain_id)
+            if supermarket_id:
+                query = query.eq("chain_id", supermarket_id)
             
             rows = query.execute().data or []
             
@@ -152,6 +152,128 @@ class ProductService:
             
         except Exception as e:
             raise Exception(f"Failed to fetch stores: {str(e)}")
+    
+    def get_products_by_supermarket(self, chain_id: str) -> List[ProductResponse]:
+        """
+        Get all products from a specific supermarket chain.
+        
+        Args:
+            chain_id: Supermarket chain identifier
+            
+        Returns:
+            List of product responses with promotion info
+            
+        Raises:
+            Exception: If database query fails
+        """
+        try:
+            # Fetch all products for the chain
+            price_data = (
+                self.db.table("prices")
+                .select("item_code,item_name,qty_price,chain_id,company_name,store_id,store_city,store_address")
+                .eq("chain_id", chain_id)
+                .execute()
+            ).data or []
+            
+            if not price_data:
+                return []
+            
+            # Build response with promotion info
+            results = []
+            for row in price_data:
+                promotion = self._get_active_promotion_for_item(
+                    item_code=row["item_code"],
+                    chain_id=row["chain_id"],
+                    store_id=row["store_id"]
+                )
+                
+                product_response = self._build_product_response(row, promotion)
+                results.append(product_response)
+            
+            return results
+            
+        except Exception as e:
+            raise Exception(f"Failed to fetch products for supermarket: {str(e)}")
+    
+    def search_products_by_supermarket_and_name(self, chain_id: str, search_query: str) -> List[ProductResponse]:
+        """
+        Search products by name within a specific supermarket chain.
+        
+        Args:
+            chain_id: Supermarket chain identifier
+            search_query: Search query string
+            
+        Returns:
+            List of matching product responses with promotion info
+            
+        Raises:
+            Exception: If database query fails
+        """
+        try:
+            # Search products within specific chain
+            price_data = (
+                self.db.table("prices")
+                .select("item_code,item_name,qty_price,chain_id,company_name,store_id,store_city,store_address")
+                .eq("chain_id", chain_id)
+                .ilike("item_name", f"%{search_query}%")
+                .execute()
+            ).data or []
+            
+            if not price_data:
+                return []
+            
+            # Build response with promotion info
+            results = []
+            for row in price_data:
+                promotion = self._get_active_promotion_for_item(
+                    item_code=row["item_code"],
+                    chain_id=row["chain_id"],
+                    store_id=row["store_id"]
+                )
+                
+                product_response = self._build_product_response(row, promotion)
+                results.append(product_response)
+            
+            return results
+            
+        except Exception as e:
+            raise Exception(f"Failed to search products in supermarket: {str(e)}")
+    
+    def get_all_supermarkets(self) -> List[SupermarketResponse]:
+        """
+        Get all available supermarket chains.
+        
+        Returns:
+            List of unique supermarket chains with metadata
+            
+        Raises:
+            Exception: If database query fails
+        """
+        try:
+            # Get unique chains with company names
+            chains_data = (
+                self.db.table("prices")
+                .select("chain_id,company_name")
+                .execute()
+            ).data or []
+            
+            # Deduplicate by chain_id
+            seen_chains = set()
+            unique_chains = []
+            for row in chains_data:
+                chain_id = row.get("chain_id")
+                if chain_id and chain_id not in seen_chains:
+                    seen_chains.add(chain_id)
+                    unique_chains.append(SupermarketResponse(
+                        supermarket_id=chain_id,
+                        chain_id=chain_id,
+                        company_name=row.get("company_name")
+                    ))
+            
+            return unique_chains
+            
+        except Exception as e:
+            raise Exception(f"Failed to fetch supermarkets: {str(e)}")
     
     def _get_active_promotion_for_item(self, item_code: str, chain_id: str, store_id: str) -> Optional[Dict[str, Any]]:
         """

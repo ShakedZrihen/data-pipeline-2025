@@ -11,18 +11,18 @@ router = APIRouter(prefix="/api/v1/stores", tags=["stores"])
     "/",
     response_model=StoreListResponse,
     status_code=status.HTTP_200_OK,
-    summary="Get stores",
-    description="Returns unique stores from the database. Optionally filter by chain ID.",
+    summary="Get stores/branches",
+    description="Returns unique store branches from the database. Optionally filter by supermarket chain ID.",
     responses={
         500: {"model": ErrorResponse, "description": "Internal server error"}
     }
 )
 async def get_stores(
-    chain_id: Optional[str] = Query(None, description="Optional chain ID to filter stores by")
+    supermarket_id: Optional[str] = Query(None, description="Optional supermarket chain ID to filter stores by")
 ):
-    """Get stores, optionally filtered by chain."""
+    """Get store branches, optionally filtered by supermarket chain."""
     try:
-        stores_data = product_service.get_stores(chain_id)
+        stores_data = product_service.get_stores(supermarket_id)
         
         return StoreListResponse(stores=stores_data, total=len(stores_data))
         

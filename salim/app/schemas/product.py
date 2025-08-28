@@ -7,12 +7,12 @@ class ProductResponse(BaseModel):
     """Response model for product information."""
     item_code: str = Field(..., description="Product barcode")
     item_name: str = Field(..., description="Product name")
-    store_id: str = Field(..., description="Store identifier")
-    chain_id: str = Field(..., description="Chain identifier")
+    store_id: str = Field(..., description="Store branch identifier")
+    chain_id: str = Field(..., description="Supermarket chain identifier")
     has_promotion: bool = Field(..., description="Whether product has active promotion")
     discount_rate: float = Field(..., description="Discount rate (0.0 if no promotion)")
     price: float = Field(..., description="Current product price")
-    store_address: Optional[str] = Field(None, description="Store address")
+    store_address: Optional[str] = Field(None, description="Store branch address")
 
     class Config:
         json_schema_extra = {
@@ -91,10 +91,10 @@ class PromotionListResponse(BaseModel):
 
 
 class StoreResponse(BaseModel):
-    """Response model for store information."""
-    store_id: str = Field(..., description="Store identifier")
-    chain_id: str = Field(..., description="Chain identifier")
-    store_address: Optional[str] = Field(None, description="Store address")
+    """Response model for store branch information."""
+    store_id: str = Field(..., description="Store branch identifier")
+    chain_id: str = Field(..., description="Supermarket chain identifier")
+    store_address: Optional[str] = Field(None, description="Store branch address")
 
     class Config:
         json_schema_extra = {
@@ -110,6 +110,28 @@ class StoreListResponse(BaseModel):
     """Response model for list of stores."""
     stores: List[StoreResponse]
     total: int = Field(..., description="Total number of stores found")
+
+
+class SupermarketResponse(BaseModel):
+    """Response model for supermarket chain information."""
+    supermarket_id: str = Field(..., description="Supermarket chain identifier")
+    chain_id: str = Field(..., description="Chain identifier (same as supermarket_id)")
+    company_name: Optional[str] = Field(None, description="Company/chain name")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "supermarket_id": "7290027600007",
+                "chain_id": "7290027600007",
+                "company_name": "רשת סופר פארם"
+            }
+        }
+
+
+class SupermarketListResponse(BaseModel):
+    """Response model for list of supermarkets."""
+    supermarkets: List[SupermarketResponse]
+    total: int = Field(..., description="Total number of supermarkets found")
 
 
 class ErrorResponse(BaseModel):
