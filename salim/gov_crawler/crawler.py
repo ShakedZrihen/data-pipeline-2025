@@ -167,7 +167,6 @@ class Crawler:
 
         price_row_id = data["price"].get("id")
         promo_row_id = data["promo"].get("id")
-
         if not price_row_id or not promo_row_id:
             print("Missing row IDs for price/promo; skipping downloads.")
             return None
@@ -180,7 +179,6 @@ class Crawler:
             print("Opening More info")
             price_more_info = sel_price_row.find_element(By.CSS_SELECTOR, more_info_selector)
             promo_more_info = sel_promo_row.find_element(By.CSS_SELECTOR, more_info_selector)
-
             if promo_more_info:
                 promo_more_info.click()
             if price_more_info:
@@ -196,8 +194,6 @@ class Crawler:
 
         provider_name = superMarket.get("name", "default")
         branch = data.get("branch", "default")
-        download_dir = os.path.join("supermarkets", provider_name, branch)
-        os.makedirs(download_dir, exist_ok=True)
 
         if self._req_sess is None:
             self._req_sess = self.driver_manager.session_from_driver()
@@ -221,52 +217,50 @@ class Crawler:
             if not raw:
                 continue
 
-            # Build the absolute link
-            if match:
-                raw_link = urljoin(self.driver.current_url, f"/Download/{raw.lstrip('/')}")
-            else:
-                raw_link = urljoin(self.driver.current_url, raw)
+            # Build absolute link
+            raw_link = urljoin(self.driver.current_url, f"/Download/{raw.lstrip('/')}") if match \
+                    else urljoin(self.driver.current_url, raw)
             print(f"Download Link: {raw_link}")
 
-            parsed = urlparse(raw_link)
-            base_name = os.path.basename(parsed.path)
-            ext = os.path.splitext(base_name)[1] or ""
-
-            lower = base_name.lower()
-            if lower.startswith("price"):
+            # Decide filename prefix/timestamp from the server filename
+            base_name = os.path.basename(urlparse(raw_link).path).lower()
+            if base_name.startswith("price"):
                 prefix, ts = "price", price_ts
-            elif lower.startswith("promo"):
+            elif base_name.startswith("promo"):
                 prefix, ts = "promo", promo_ts
             else:
                 prefix, ts = "file", price_ts
-
-            filename = f"{prefix}_{ts}{ext}"
+            filename = f"{prefix}_{ts}{os.path.splitext(base_name)[1] or ''}"
 
             print(f"Downloading {filename}…")
-            outPath = self.file_manager.download_file_from_link(
+            out_path = self.file_manager.download_to_branch(
                 raw_link,
-                download_dir,
+                superMarket=provider_name,
+                branch=branch,
                 filename=filename,
                 session=self._req_sess,
-                verify_cert=False
+                verify_cert=False,  # set True if the site cert is valid
             )
 
-            if not outPath and match and "/" not in raw:
+            # Fallback pattern if needed
+            if not out_path and match and "/" not in raw:
                 alt_link = urljoin(self.driver.current_url, f"/file/d/{raw}")
                 print(f"Retrying via {alt_link} …")
-                outPath = self.file_manager.download_file_from_link(
+                out_path = self.file_manager.download_to_branch(
                     alt_link,
-                    download_dir,
+                    superMarket=provider_name,
+                    branch=branch,
                     filename=filename,
                     session=self._req_sess,
-                    verify_cert=False
+                    verify_cert=False,
                 )
 
-            if not outPath:
+            if not out_path:
                 print(f"{filename} not available, skipping.")
                 continue
-            if outPath:
-                s3_key = f"{provider_name}/{branch or 'default'}/{filename}".replace("\\", "/")
-                self.s3.upload_file_from_path(outPath, s3_key)
+
+            # Upload to S3
+            s3_key = f"{provider_name}/{branch or 'default'}/{filename}".replace("\\", "/")
+            self.s3.upload_file_from_path(out_path, s3_key)
 
 
