@@ -17,6 +17,31 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-net
+
+  # LocalStack (S3 simulator)
+  localstack:
+    container_name: s3-simulator
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566" # edge port
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - S3_SKIP_SIGNATURE_VALIDATION=1
+      - PERSISTENCE=1
+    volumes:
+      - localstack-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./gov_crawler/scripts/init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - app-net
 
   # FastAPI Application
   api:
@@ -24,18 +49,35 @@ services:
     ports:
       - "8000:8000"
     environment:
+      # DB
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
+
+      # S3/LocalStack
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=us-east-1
+      - S3_ENDPOINT_URL=http://localstack:4566
+      - S3_BUCKET=supermarkets
     depends_on:
       db:
+        condition: service_healthy
+      localstack:
         condition: service_healthy
     volumes:
       - ./app:/app/app
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/api/v1/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
 
 volumes:
-  postgres_data: 
+  postgres_data:
+  localstack-data:
