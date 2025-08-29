@@ -1,4 +1,3 @@
-# crawler.py (top of file)
 import json, os, re, time
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -15,6 +14,7 @@ from managers.file_manager import FileManager
 from managers.s3_manager import S3Manager
 from utils.date import parse_date
 from utils.enums import ENUMS
+from utils.branch_utils import branch_id
 
 
 
@@ -51,6 +51,7 @@ class Crawler:
                     soup = BeautifulSoup(self.driver.page_source, "html.parser")
 
                 data = self.extract_data(soup, superMarket)
+
                 self.save_file(data, superMarket)
             except Exception as e:
                 print(f"Error crawling {superMarket['name']}: {e}")
@@ -192,8 +193,11 @@ class Crawler:
         price_ts = price_dt.strftime("%Y%m%d_%H%M%S")
         promo_ts = promo_dt.strftime("%Y%m%d_%H%M%S")
 
-        provider_name = superMarket.get("name", "default")
+        superMarket_name = superMarket.get("name", "default")
         branch = data.get("branch", "default")
+        
+        branch_fs = branch if branch.isdigit() else branch_id(branch)
+
 
         if self._req_sess is None:
             self._req_sess = self.driver_manager.session_from_driver()
@@ -231,15 +235,18 @@ class Crawler:
             else:
                 prefix, ts = "file", price_ts
             filename = f"{prefix}_{ts}{os.path.splitext(base_name)[1] or ''}"
-
+            print("!"*100)
             print(f"Downloading {filename}…")
+            print(f"Download Link: {raw_link}")
+            print(f"Branch: {branch}")
+            print(f"branch_fs: {branch_fs}")
+            print(f"Session: {self._req_sess}")
             out_path = self.file_manager.download_to_branch(
                 raw_link,
-                superMarket=provider_name,
-                branch=branch,
+                superMarket=superMarket_name,
+                branch=branch_fs,
                 filename=filename,
                 session=self._req_sess,
-                verify_cert=False,  # set True if the site cert is valid
             )
 
             # Fallback pattern if needed
@@ -248,11 +255,10 @@ class Crawler:
                 print(f"Retrying via {alt_link} …")
                 out_path = self.file_manager.download_to_branch(
                     alt_link,
-                    superMarket=provider_name,
-                    branch=branch,
+                    superMarket=superMarket_name,
+                    branch=branch_fs,
                     filename=filename,
                     session=self._req_sess,
-                    verify_cert=False,
                 )
 
             if not out_path:
@@ -260,7 +266,7 @@ class Crawler:
                 continue
 
             # Upload to S3
-            s3_key = f"{provider_name}/{branch or 'default'}/{filename}".replace("\\", "/")
+            s3_key = f"{superMarket_name}/{branch or 'default'}/{filename}".replace("\\", "/")
             self.s3.upload_file_from_path(out_path, s3_key)
 
 

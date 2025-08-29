@@ -24,7 +24,7 @@ class S3Manager:
             return False
         try:
             self.s3_client.upload_file(str(p), self.bucket_name, s3_key)
-            print(f"✅ {p} uploaded to s3://{self.bucket_name}/{s3_key}")
+            print(f"{p} uploaded to s3://{self.bucket_name}/{s3_key}")
             return True
         except ClientError as e:
             print(f"Error uploading to S3: {e}")
@@ -38,7 +38,7 @@ class S3Manager:
         try:
             response = self.s3_client.list_objects_v2(Bucket=self.bucket_name)
             if 'Contents' not in response:
-                print("✅ Bucket is already empty")
+                print("Bucket is already empty")
                 return True
 
             objects_to_delete = [{'Key': obj['Key']} for obj in response['Contents']]
@@ -48,11 +48,11 @@ class S3Manager:
                     Delete={'Objects': objects_to_delete}
                 )
                 deleted_count = len(delete_response.get('Deleted', []))
-                print(f"✅ Successfully deleted {deleted_count} files from s3://{self.bucket_name}")
+                print(f"Successfully deleted {deleted_count} files from s3://{self.bucket_name}")
                 for deleted in delete_response.get('Deleted', []):
                     print(f"  - Deleted: {deleted['Key']}")
                 if 'Errors' in delete_response:
-                    print("❌ Some files failed to delete:")
+                    print("Some files failed to delete:")
                     for error in delete_response['Errors']:
                         print(f"  - {error['Key']}: {error['Message']}")
             return True
