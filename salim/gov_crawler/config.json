@@ -1,0 +1,20 @@
+{
+  "superMarkets": [
+    {
+      "name": "Yohananof",
+      "url": "https://url.publishedprices.co.il/login",
+      "username": "yohananof",
+      "password": "none",
+      "sign-in-button": ".row button",
+      "table-body-selector": "#fileList tbody",
+      "table-row": "tr",
+      "date-selector": "td time",
+      "name-selector": "td a",
+      "branch-selector": "none",
+      "more-info-selector": "td a.is",
+      "download-button": "tr.details a.btn-primary",
+      "file-price-name": "PriceFull",
+      "file-promo-name": "PromoFull"
+    }
+  ]
+}
