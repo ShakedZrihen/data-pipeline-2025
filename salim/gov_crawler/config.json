@@ -15,6 +15,22 @@
       "download-button": "tr.details a.btn-primary",
       "file-price-name": "PriceFull",
       "file-promo-name": "PromoFull"
+    },
+    {
+      "name": "carrefour",
+      "url": "https://prices.carrefour.co.il/",
+      "username": "none",
+      "password": "none",
+      "sign-in-button": "none",
+      "table-body-selector": ".filesDiv",
+      "table-row": ".fileDiv",
+      "date-selector": "span.modified",
+      "name-selector": ".fileName",
+      "more-info-selector": "none",
+      "branch-selector": "none",
+      "download-button": "a.downloadBtn",
+      "file-price-name": "Price",
+      "file-promo-name": "Promo"
     }
   ]
 }
