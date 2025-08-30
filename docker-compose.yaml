@@ -48,6 +48,16 @@ services:
     networks:
       - backend
 
+  api:
+    build: ./salim/api
+    container_name: api
+    ports:
+      - "8081:8000"
+    environment:
+      POSTGRES_URI: ${POSTGRES_URI}
+    networks:
+      - backend
+
   super-compare:
     build: .
     container_name: super-compare
