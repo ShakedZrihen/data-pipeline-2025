@@ -21,7 +21,7 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3 
+      - SERVICES=s3
       - DEBUG=1
       - LAMBDA_EXECUTOR=local
       - DEFAULT_REGION=us-east-1
@@ -33,22 +33,24 @@ services:
     shm_size: 2g
     ports:
       - "4444:4444"
-
+    volumes:
+      - ./shared_downloads:/downloads
 
   rabbitmq:
     image: rabbitmq:3.12-management
     container_name: rabbitmq
     ports:
-      - "5672:5672" 
-      - "15672:15672" 
+      - "5672:5672"
+      - "15672:15672"
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_DEFAULT_USER=app
+      - RABBITMQ_DEFAULT_PASS=app
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 20s
       timeout: 10s
       retries: 5
+
 
   api:
     build: .
@@ -56,16 +58,19 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
-
       - S3_ENDPOINT=http://localstack:4566
       - S3_ACCESS_KEY=test
       - S3_SECRET_KEY=test
       - S3_REGION=us-east-1
       - S3_BUCKET=test-bucket
       - S3_FORCE_PATH_STYLE=true
-
+      - DOWNLOAD_DIR=/downloads
       - VERIFY_SSL=false
       - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
+    volumes:
+      - .:/app
+      - ./shared_downloads:/downloads
+      
     depends_on:
       db:
         condition: service_healthy
@@ -73,12 +78,10 @@ services:
         condition: service_started
       selenium:
         condition: service_started
-    volumes:
-      - .:/app
     command: >
       python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/api/v1/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -97,34 +100,27 @@ services:
         condition: service_started
       mongo:
         condition: service_started
-
     environment:
-
       - S3_ENDPOINT=http://localstack:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
       - S3_BUCKET=test-bucket
       - PYTHONUNBUFFERED=1
-
-      - QUEUE_BACKEND=rabbit
-      - RABBIT_URL=amqp://guest:guest@rabbitmq:5672/%2f
-      - RABBIT_QUEUE=results-queue
-
       - STATE_BACKEND=mongo
       - MONGO_URI=mongodb://mongo:27017
       - MONGO_DB=prices
       - MONGO_COL=last_run
-
+      - QUEUE_BACKEND=rabbit
+      - RABBIT_URL=amqp://app:app@rabbitmq:5672/%2f
+      - RABBIT_QUEUE=results-queue
     ports:
       - "8080:8080"
-
 
   mongo:
     image: mongo:6
     ports:
       - "27017:27017"
-
 
   save-to-sql:
     build: .
@@ -136,21 +132,19 @@ services:
       rabbitmq:
         condition: service_healthy
       db:
-        condition: service_healthy 
+        condition: service_healthy
     environment:
-      - RABBIT_URL=amqp://guest:guest@rabbitmq:5672/%2f
       - INPUT_QUEUE=results-queue
       - PYTHONPATH=/app
       - DLQ_QUEUE=results.dlq
-      - PREFETCH=50 
+      - PREFETCH=50
       - BATCH_SIZE=50
-
       - POSTGRES_HOST=db
       - POSTGRES_DB=salim_db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - RABBIT_URL=amqp://app:app@rabbitmq:5672/%2f
     restart: unless-stopped
-
 
 volumes:
   postgres_data:

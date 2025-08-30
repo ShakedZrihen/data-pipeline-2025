@@ -45,3 +45,6 @@ def emit_event_full_json(doc: dict):
         ),
         mandatory=False,
     )
+
+
+    

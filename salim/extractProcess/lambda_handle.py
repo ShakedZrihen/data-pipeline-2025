@@ -34,7 +34,7 @@ def lambda_handler(event, context=None):
             except Exception as se:
                 print(f"[State] Failed to update last_run for {key}: {se}")
 
-            print(f"Processed {key} -> s3://{bucket}/{json_key} ({len(doc.get('items', []))} records)")
+            print(f"Processed {key}")
             outputs.append({"key": key, "ok": True, "json_key": json_key, "count": len(doc.get("items", []))})
         except Exception as e:
             print(f"Error processing {key}: {e}")

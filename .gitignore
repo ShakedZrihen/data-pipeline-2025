@@ -10,3 +10,6 @@ venv
 node_modules
 build
 package-lock.json
+
+salim/shared_downloads/*
+!salim/shared_downloads/.gitkeep
