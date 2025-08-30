@@ -17,7 +17,7 @@ def lambda_handler(event, context=None):
             if not doc:
                 outputs.append({"key": key, "ok": False, "reason": "invalid format"})
                 continue
-            json_key = save_json(bucket, key, doc)
+            #json_key = save_json(bucket, key, doc)
 
             try:
                 emit_event_full_json(doc)
@@ -35,7 +35,7 @@ def lambda_handler(event, context=None):
                 print(f"[State] Failed to update last_run for {key}: {se}")
 
             print(f"Processed {key}")
-            outputs.append({"key": key, "ok": True, "json_key": json_key, "count": len(doc.get("items", []))})
+            #outputs.append({"key": key, "ok": True, "json_key": json_key, "count": len(doc.get("items", []))})
         except Exception as e:
             print(f"Error processing {key}: {e}")
             outputs.append({"key": key, "ok": False, "reason": str(e)})
