@@ -1,0 +1,27 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    TZ=Asia/Jerusalem
+
+# Chromium for headless Chrome + system deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium ca-certificates fonts-liberation tzdata curl \
+ && rm -rf /var/lib/apt/lists/*
+
+# Let Selenium know where Chromium is
+ENV CHROME_BIN=/usr/bin/chromium \
+    USE_CHROMIUM=1
+
+WORKDIR /app
+
+# install deps
+COPY gov_crawler/requirements.txt gov_crawler/requirements.txt
+RUN pip install --no-cache-dir -r gov_crawler/requirements.txt
+
+# app code
+COPY gov_crawler/ gov_crawler/
+
+# run the loop
+WORKDIR /app/gov_crawler
+CMD ["python", "-u", "run.py"]
