@@ -1,12 +1,11 @@
-import time
-import platform
-import requests
+import time, platform, requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.os_manager import ChromeType
+from urllib.parse import urlparse
 
 class DriverManager:
     def __init__(self):
@@ -20,10 +19,9 @@ class DriverManager:
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--lang=en-US")
-        chrome_options.add_experimental_option(
-            "prefs",
-            {"intl.accept_languages": "en,en_US"}
-        )
+        chrome_options.add_experimental_option("prefs", {"intl.accept_languages": "en,en_US"})
+        chrome_options.add_argument("--log-level=3")
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
         return chrome_options
 
     def get_chromedriver_path(self):
@@ -59,25 +57,46 @@ class DriverManager:
         print(f"Navigating to {url}")
         self.driver.get(url)
         time.sleep(2)
-        soup = BeautifulSoup(self.driver.page_source, "html.parser")
-        return soup
+        return BeautifulSoup(self.driver.page_source, "html.parser")
 
-    def session_from_driver(self):
+    def build_session(self) -> requests.Session:
+        """יוצר requests.Session עם UA ו-headers בסיסיים, ומסנכרן קוקיז התחלתיים מהדפדפן."""
         if not self.driver:
             self.get_chromedriver()
-        session = requests.Session()
+        s = requests.Session()
         try:
-            ua = self.driver.execute_script("return navigator.userAgent")
-            if ua:
-                session.headers["User-Agent"] = ua
+            ua = self.driver.execute_script("return navigator.userAgent;")
         except Exception:
-            pass
-        session.headers.setdefault("Referer", self.driver.current_url)
+            ua = "Mozilla/5.0"
+        s.headers.update({
+            "User-Agent": ua,
+            "Accept": "*/*",
+            "Accept-Language": "he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7",
+        })
+        self.sync_cookies(s)  
+        return s
+
+    def sync_cookies(self, session: requests.Session, url: str | None = None):
+        """ממזג קוקיז מהדפדפן לתוך הסשן. אם ניתן URL, נסנן לקוקיז שרלוונטיים לדומיין הזה."""
+        host = urlparse(url).hostname.lower() if url else None
+        cookies = []
         try:
             cookies = self.driver.execute_cdp_cmd("Network.getAllCookies", {}).get("cookies", [])
-            for c in cookies:
-                session.cookies.set(c["name"], c["value"], domain=c.get("domain"), path=c.get("path", "/"))
         except Exception:
-            for c in self.driver.get_cookies():
-                session.cookies.set(c["name"], c["value"], domain=c.get("domain"), path=c.get("path", "/"))
-        return session
+            pass
+        if not cookies:
+            try:
+                cookies = self.driver.get_cookies()
+            except Exception:
+                cookies = []
+
+        for c in cookies:
+            dom = (c.get("domain") or "").lstrip(".").lower()
+            if host and dom and not (host == dom or host.endswith("." + dom)):
+                continue
+            session.cookies.set(
+                c.get("name"),
+                c.get("value", ""),
+                domain=dom or None,
+                path=c.get("path", "/"),
+            )

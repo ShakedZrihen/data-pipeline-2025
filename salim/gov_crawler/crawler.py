@@ -53,6 +53,7 @@ class Crawler:
                 data = self.extract_data(soup, superMarket)
 
                 self.save_file(data, superMarket)
+                time.sleep(10)
             except Exception as e:
                 print(f"Error crawling {superMarket['name']}: {e}")
 
@@ -200,9 +201,13 @@ class Crawler:
 
 
         if self._req_sess is None:
-            self._req_sess = self.driver_manager.session_from_driver()
+            self._req_sess = self.driver_manager.build_session()
 
-        # Gather download buttons (in-row or in the details row just after)
+        #  refresh cookies
+        self.driver_manager.sync_cookies(self._req_sess, url=self.driver.current_url)
+
+
+        # Gather download buttons 
         download_buttons = []
         for row_el in (sel_price_row, sel_promo_row):
             btns = row_el.find_elements(By.CSS_SELECTOR, superMarket["download-button"])
@@ -241,12 +246,16 @@ class Crawler:
             print(f"Branch: {branch}")
             print(f"branch_fs: {branch_fs}")
             print(f"Session: {self._req_sess}")
+            print(f"self.driver.current_url: {self.driver.current_url}")
+
             out_path = self.file_manager.download_to_branch(
                 raw_link,
                 superMarket=superMarket_name,
                 branch=branch_fs,
                 filename=filename,
                 session=self._req_sess,
+                verify_cert=False if "publishedprices.co.il" in raw_link else True,            # because of SSL
+                referer=self.driver.current_url,     
             )
 
             # Fallback pattern if needed
@@ -259,6 +268,8 @@ class Crawler:
                     branch=branch_fs,
                     filename=filename,
                     session=self._req_sess,
+                    verify_cert=False if "publishedprices.co.il" in alt_link else True, # because of SSL
+                    referer=self.driver.current_url,
                 )
 
             if not out_path:

@@ -3,6 +3,6 @@ beautifulsoup4
 selenium
 lxml
 boto3
-webdriver-manager 
+webdriver-manager
 tzdata
 certifi
