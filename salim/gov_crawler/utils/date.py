@@ -1,10 +1,11 @@
 from __future__ import annotations
+import os
 import re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 # All parsed datetimes will be timezone-aware in Israel time.
-JERUSALEM = ZoneInfo("Asia/Jerusalem")
+JERUSALEM = ZoneInfo(os.getenv("TZ", "Asia/Jerusalem"))
 
 # Relative expressions like:
 # "3 minutes ago", "about 2 weeks ago", "an hour ago", "A day ago", etc.

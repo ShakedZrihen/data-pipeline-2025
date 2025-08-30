@@ -1,4 +1,4 @@
-import time, platform, requests
+import time, platform, requests , os
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -22,14 +22,21 @@ class DriverManager:
         chrome_options.add_experimental_option("prefs", {"intl.accept_languages": "en,en_US"})
         chrome_options.add_argument("--log-level=3")
         chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
+
+        bin_path = os.getenv("CHROME_BIN")
+        if bin_path:
+            chrome_options.binary_location = bin_path
+
         return chrome_options
 
     def get_chromedriver_path(self):
+        use_chromium = os.getenv("USE_CHROMIUM", "0") == "1"
         try:
-            if platform.system() == "Darwin" and platform.machine() == "arm64":
-                print("Detected macOS ARM64, using specific chromedriver...")
+            if use_chromium:
+                print("Using Chromium (USE_CHROMIUM=1).")
                 driver_path = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
             else:
+                print("Using Google Chrome (default).")
                 driver_path = ChromeDriverManager().install()
             print(f"Chrome driver path: {driver_path}")
             return driver_path

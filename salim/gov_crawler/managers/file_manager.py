@@ -2,10 +2,9 @@ import os, certifi, requests, urllib3
 from pathlib import Path
 from urllib.parse import urlparse
 from requests.exceptions import SSLError
-from utils.enums import ENUMS
 
 class FileManager:
-    def __init__(self, local_root: str = ENUMS.LOCAL_DATA_DIR.value):
+    def __init__(self, local_root: str = os.getenv("LOCAL_DATA_DIR", "data")):
         self.base_dir = Path(__file__).resolve().parent.parent  
         self.root = self.base_dir / local_root
         self.root.mkdir(parents=True, exist_ok=True)

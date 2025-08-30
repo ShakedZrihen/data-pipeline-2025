@@ -3,19 +3,30 @@ import os
 import sys
 from botocore.exceptions import ClientError
 from pathlib import Path, PurePosixPath
-from utils.enums import ENUMS
 
 class S3Manager:
-    def __init__(self, bucket_name=ENUMS.BUCKET_NAME.value, endpoint_url=ENUMS.S3_ENDPOINT_URL.value,
-                 aws_access_key_id=ENUMS.AWS_ACCESS_KEY_ID.value, aws_secret_access_key=ENUMS.AWS_SECRET_ACCESS_KEY.value, region_name=ENUMS.AWS_REGION.value):
-        self.bucket_name = bucket_name
+    def __init__(
+            self,
+            bucket_name: str | None = None,
+            endpoint_url: str | None = None,
+            aws_access_key_id: str | None = None,
+            aws_secret_access_key: str | None = None,
+            region_name: str | None = None,
+        ):
+        self.bucket_name = bucket_name or os.getenv("S3_BUCKET")
+        self.endpoint_url = endpoint_url or os.getenv("S3_ENDPOINT_URL")
+        self.aws_access_key_id = aws_access_key_id or os.getenv("AWS_ACCESS_KEY_ID")
+        self.aws_secret_access_key = aws_secret_access_key or os.getenv("AWS_SECRET_ACCESS_KEY")
+        self.region_name = region_name or os.getenv("AWS_REGION")
+
         self.s3_client = boto3.client(
-            's3',
-            endpoint_url=endpoint_url,
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            region_name=region_name
+            "s3",
+            endpoint_url=self.endpoint_url,
+            aws_access_key_id=self.aws_access_key_id,
+            aws_secret_access_key=self.aws_secret_access_key,
+            region_name=self.region_name,
         )
+
     def upload_file_from_path(self, local_path: str, s3_key: str):
         s3_key = str(PurePosixPath(s3_key)) 
         p = Path(local_path)
@@ -70,5 +81,11 @@ class S3Manager:
             return False
 
 if __name__ == "__main__":
-    s3 = S3Manager()
+    s3 = S3Manager(
+        bucket_name=os.getenv("S3_BUCKET"),
+        endpoint_url=os.getenv("S3_ENDPOINT_URL"),
+        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        region_name=os.getenv("AWS_REGION"),
+    )
     s3.clear_bucket()

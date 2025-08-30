@@ -74,6 +74,31 @@ services:
     networks:
       - app-net
 
+  crawler:
+    build:
+      context: .
+      dockerfile: gov_crawler/Dockerfile.crawler
+    environment:
+      CRAWL_EVERY_MINUTES: "60"
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      S3_ENDPOINT_URL: http://localstack:4566
+      S3_BUCKET: supermarkets
+      USE_CHROMIUM: "1"
+      CHROME_BIN: /usr/bin/chromium
+      TZ: Asia/Jerusalem
+      LOCAL_DATA_DIR: "supermarkets"
+      CONFIG_KEY: "supermarkets"
+
+    depends_on:
+      db:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    networks:
+      - app-net
+
 networks:
   app-net:
     driver: bridge

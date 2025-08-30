@@ -8,12 +8,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 
-# local packages
 from managers.driver_manager import DriverManager
 from managers.file_manager import FileManager
 from managers.s3_manager import S3Manager
 from utils.date import parse_date
-from utils.enums import ENUMS
 from utils.branch_utils import branch_id
 
 
@@ -32,7 +30,7 @@ class Crawler:
 
     def run(self):
         """Fetch and process data from the target source."""
-        for superMarket in self.config[ENUMS.CONFIG_KEY.value]:
+        for superMarket in self.config[os.getenv("CONFIG_KEY", "superMarkets")]:
             print(f"Crawling superMarket: {superMarket['name']}")
             try:
                 soup = self.driver_manager.get_html_parser(superMarket["url"])
@@ -277,7 +275,7 @@ class Crawler:
                 continue
 
             # Upload to S3
-            s3_key = f"{superMarket_name}/{branch or 'default'}/{filename}".replace("\\", "/")
+            s3_key = f"{superMarket_name}/{branch_fs}/{filename}".replace("\\", "/")
             self.s3.upload_file_from_path(out_path, s3_key)
 
 
