@@ -1,17 +1,18 @@
 
 import zipfile
 from selenium.webdriver.common.by import By
-from Base import *  # adjust import if needed
+from Base import CrawlerBase
+from upload_to_s3 import upload_file_to_s3
 import requests
 import os
 import re
 from datetime import datetime
 import io, gzip, zipfile
+from typing import Optional
 
 class SuperSapirCrawler(CrawlerBase):
 
-
-    def to_gz_bytes(raw: bytes) -> bytes:
+    def to_gz_bytes(self,raw: bytes) -> bytes:
         """Return real .gz bytes from raw download:
         - pass-through if already gzip
         - if ZIP: pick first *.xml (or *.gz) entry; if xml → gzip it; if gz → pass-through
@@ -42,7 +43,6 @@ class SuperSapirCrawler(CrawlerBase):
             gz.write(raw)
         return out.getvalue()
 
-
     def download_file(self, file_entry):
         # Request actual file URL
         print(f"Requesting file from JSON API: {file_entry['url']}")
@@ -50,8 +50,6 @@ class SuperSapirCrawler(CrawlerBase):
         response.raise_for_status()
         json_data = response.json()
         real_url = json_data[0]["SPath"]
-
-        
 
         # Inline path construction logic here
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -63,15 +61,30 @@ class SuperSapirCrawler(CrawlerBase):
         print(f"Downloading actual file from: {real_url}")
         with requests.get(real_url, stream=True) as r:
             r.raise_for_status()
-            with open(local_path, "wb") as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    f.write(chunk)
-        print(f"Downloaded to: {local_path}")
+            raw_bytes = r.content  # get the raw response bytes
+
+        # 🔑 Normalize → always real .gz
+        gz_bytes = self.to_gz_bytes(raw_bytes)
+
+        # Save to disk (optional, for debugging)
+        with open(local_path, "wb") as f:
+            f.write(gz_bytes)
+
+        print(f"Saved normalized gzip to: {local_path}")
         upload_file_to_s3(self.provider_name, file_entry["branch"], local_path)
 
     def extract_file_links(self):
-        rows = self.driver.find_elements(By.XPATH, "//tr[starts-with(@id, 'tr')]")
-        found = {"pricesFull": None, "promoFull": None}
+
+        # rows = self.driver.find_elements(By.XPATH, "//tr[starts-with(@id, 'tr')]")
+        if self.driver is not None:
+            rows = self.driver.find_elements(By.XPATH, "//tr[starts-with(@id, 'tr')]")
+        else:
+            rows = []
+        # found = {"pricesFull": None, "promoFull": None}
+        found: dict[str, Optional[dict[str, str]]] = {
+            "pricesFull": None,
+            "promoFull": None,
+        }
 
         for row in rows:
             cols = row.find_elements(By.TAG_NAME, "td")
@@ -103,4 +116,3 @@ class SuperSapirCrawler(CrawlerBase):
                 break
 
         return [v for v in found.values() if v]
-

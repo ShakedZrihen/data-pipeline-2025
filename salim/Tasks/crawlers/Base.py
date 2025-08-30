@@ -3,8 +3,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from upload_to_s3 import upload_file_to_s3
-from datetime import datetime
 import time
 
 class CrawlerBase(ABC):
@@ -23,20 +21,30 @@ class CrawlerBase(ABC):
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option("useAutomationExtension", False)
-        
+
         service = Service(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
 
     def run(self):
         self.init_driver()
         try:
+            if self.driver is None:
+                print("Driver initialization failed, exiting.")
+                return
             self.driver.get(self.base_url)
             time.sleep(2)
             file_entries = self.extract_file_links()
+            if not file_entries:
+                print("No file entries found, exiting.")
+                return
             for entry in file_entries:
                 self.download_file(entry)
         finally:
-            self.driver.quit()
+            if self.driver is not None:
+                self.driver.quit()
+            else:
+                print("Driver was not initialized, skipping quit.")
+
 
 
     @abstractmethod

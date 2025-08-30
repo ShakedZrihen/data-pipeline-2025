@@ -1,7 +1,8 @@
 
 
 from selenium.webdriver.common.by import By
-from Base import *  # Adjust path as needed
+from Base import CrawlerBase
+from upload_to_s3 import upload_file_to_s3
 import requests
 import os
 import re
@@ -10,7 +11,7 @@ import io, gzip, zipfile
 
 class ZolVeBegadolCrawler(CrawlerBase):
 
-    def to_gz_bytes(raw: bytes) -> bytes:
+    def to_gz_bytes(self,raw: bytes) -> bytes:
         """Return real .gz bytes from raw download:
         - pass-through if already gzip
         - if ZIP: pick first *.xml (or *.gz) entry; if xml → gzip it; if gz → pass-through
@@ -59,12 +60,18 @@ class ZolVeBegadolCrawler(CrawlerBase):
         print(f"Downloading actual file from: {real_url}")
         with requests.get(real_url, stream=True) as r:
             r.raise_for_status()
-            with open(local_path, "wb") as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    f.write(chunk)
+            raw_bytes = r.content  # get the raw response bytes
 
-        print(f"Downloaded to: {local_path}")
+        # 🔑 Normalize → always real .gz
+        gz_bytes = self.to_gz_bytes(raw_bytes)
+
+        # Save to disk (optional, for debugging)
+        with open(local_path, "wb") as f:
+            f.write(gz_bytes)
+
+        print(f"Saved normalized gzip to: {local_path}")
         upload_file_to_s3(self.provider_name, file_entry["branch"], local_path)
+
 
     def extract_file_links(self):
         rows = self.driver.find_elements(By.XPATH, "//tr[starts-with(@id, 'tr')]")
@@ -101,4 +108,3 @@ class ZolVeBegadolCrawler(CrawlerBase):
                 break
 
         return [v for v in found.values() if v]
-
