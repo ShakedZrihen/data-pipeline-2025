@@ -32,7 +32,7 @@ services:
     volumes:
       - localstack-data:/var/lib/localstack
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./gov_crawler/scripts/init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh
+      - ./gov_crawler/scripts/init-s3.sh:/etc/localstack/init/ready.d/00-init-s3.sh
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
       interval: 5s

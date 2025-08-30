@@ -67,7 +67,6 @@ class DriverManager:
         return BeautifulSoup(self.driver.page_source, "html.parser")
 
     def build_session(self) -> requests.Session:
-        """יוצר requests.Session עם UA ו-headers בסיסיים, ומסנכרן קוקיז התחלתיים מהדפדפן."""
         if not self.driver:
             self.get_chromedriver()
         s = requests.Session()
@@ -84,7 +83,6 @@ class DriverManager:
         return s
 
     def sync_cookies(self, session: requests.Session, url: str | None = None):
-        """ממזג קוקיז מהדפדפן לתוך הסשן. אם ניתן URL, נסנן לקוקיז שרלוונטיים לדומיין הזה."""
         host = urlparse(url).hostname.lower() if url else None
         cookies = []
         try:

@@ -39,66 +39,97 @@ class Crawler:
                 if superMarket.get("username") and superMarket["username"] != "none":
                     username_input = self.driver.find_element(By.NAME, "username")
                     username_input.send_keys(superMarket["username"])
-                    if superMarket.get("password") and superMarket["password"] != "none":
-                        password_input = self.driver.find_element(By.NAME, "password")
-                        password_input.send_keys(superMarket["password"])
-
+                
                     button = self.driver.find_element("id", "login-button")
                     button.click()
                     time.sleep(2)
                     soup = BeautifulSoup(self.driver.page_source, "html.parser")
 
-                data = self.extract_data(soup, superMarket)
+                branch_payloads = self.extract_data_multi(soup, superMarket, max_branches=5)
+                if not branch_payloads:
+                    print(f"No complete (price+promo) branches for {superMarket['name']}")
+                    continue
 
-                self.save_file(data, superMarket)
-                time.sleep(10)
+                # Init session once per supermarket page
+                if self._req_sess is None:
+                    self._req_sess = self.driver_manager.build_session()
+                self.driver_manager.sync_cookies(self._req_sess, url=self.driver.current_url)
+
+                for bp in branch_payloads:
+                    self.save_files_for_branch(bp, superMarket)
+                    time.sleep(2)  
+                time.sleep(8) 
             except Exception as e:
                 print(f"Error crawling {superMarket['name']}: {e}")
 
-    def extract_data(self, soup, superMarket):
-        """
-        Extract the latest price row and the latest promo row for the SAME branch.
-        """
+    def extract_data_multi(self, soup, superMarket, max_branches):
         if not soup:
-            return {"price": None, "promo": None, "branch": None}
+            return []
 
         table_body = soup.select_one(superMarket["table-body-selector"])
         if not table_body:
-            return {"price": None, "promo": None, "branch": None}
-
-        price_tr = None
-        promo_tr = None
-        branch = None
+            return []
 
         rows = table_body.select(superMarket["table-row"])
 
-        # Find latest price row
+        latest_price_by_branch = {}  # branch -> (row, dt)
+        latest_promo_by_branch = {}  # branch -> (row, dt)
+
         for row in rows:
             name_el = row.select_one(superMarket["name-selector"])
             if not name_el:
                 continue
-            col_text = name_el.get_text(strip=True)
-            if col_text.startswith(superMarket["file-price-name"]):
-                price_tr = self.return_latest_row(row, price_tr, superMarket)
+            fname = name_el.get_text(strip=True)
 
-        # infer branch from selected price row
-        if price_tr:
-            branch = self.get_branch(price_tr, superMarket)
+            # Price rows
+            if fname.startswith(superMarket["file-price-name"]):
+                branch, dt = self._row_branch_and_dt(row, superMarket)
+                if not branch or not dt:
+                    continue
+                cur = latest_price_by_branch.get(branch)
+                if (cur is None) or (dt > cur[1]):
+                    latest_price_by_branch[branch] = (row, dt)
 
-        # Find latest promo row for same branch (if known)
-        for row in rows:
-            name_el = row.select_one(superMarket["name-selector"])
-            if not name_el:
-                continue
-            col_text = name_el.get_text(strip=True)
-            if col_text.startswith(superMarket["file-promo-name"]):
-                if branch:
-                    row_branch = self.get_branch(row, superMarket)
-                    if row_branch != branch:
-                        continue
-                promo_tr = self.return_latest_row(row, promo_tr, superMarket)
+            # Promo rows
+            elif fname.startswith(superMarket["file-promo-name"]):
+                branch, dt = self._row_branch_and_dt(row, superMarket)
+                if not branch or not dt:
+                    continue
+                cur = latest_promo_by_branch.get(branch)
+                if (cur is None) or (dt > cur[1]):
+                    latest_promo_by_branch[branch] = (row, dt)
 
-        return {"price": price_tr, "promo": promo_tr, "branch": branch}
+        # Branches that have both
+        candidate_branches = set(latest_price_by_branch.keys()) & set(latest_promo_by_branch.keys())
+        if not candidate_branches:
+            return []
+
+        # Rank by recency (max of price_dt/promo_dt)
+        ranked = []
+        for b in candidate_branches:
+            p_row, p_dt = latest_price_by_branch[b]
+            r_row, r_dt = latest_promo_by_branch[b]
+            recency_key = max(p_dt, r_dt)
+            ranked.append((recency_key, b, p_row, p_dt, r_row, r_dt))
+
+        ranked.sort(key=lambda x: x[0], reverse=True)
+
+        result = []
+        for _, b, p_row, p_dt, r_row, r_dt in ranked[:max_branches]:
+            result.append({
+                "branch": b,
+                "price": p_row,
+                "price_dt": p_dt,
+                "promo": r_row,
+                "promo_dt": r_dt
+            })
+        return result
+
+    def _row_branch_and_dt(self, row, superMarket):
+        branch = self.get_branch(row, superMarket)
+        dt_el = row.select_one(superMarket["date-selector"])
+        dt = parse_date(dt_el.text.strip()) if dt_el else None
+        return branch, dt
 
     def get_branch(self, row, superMarket):
         sel = superMarket.get("branch-selector")
@@ -129,83 +160,55 @@ class Crawler:
 
         return None
 
-    def return_latest_row(self, row, latest_row, superMarket):
-        def get_date_el(el):
-            return el.select_one(superMarket["date-selector"]) if el else None
 
-        if not row:
-            return latest_row
-        row_el = get_date_el(row)
-        if not row_el:
-            return latest_row
+    def save_files_for_branch(self, bp, superMarket):
+        """
+        bp = {"branch": ..., "price": <tr>, "promo": <tr>, "price_dt": dt, "promo_dt": dt}
+        """
+        price_row = bp["price"]
+        promo_row = bp["promo"]
+        branch = bp["branch"]
 
-        if not latest_row:
-            return row
-        latest_el = get_date_el(latest_row)
-        if not latest_el:
-            return row
+        if not price_row or not promo_row:
+            print(f"Skipping branch {branch}: missing price/promo row")
+            return
 
-        row_text = row_el.text.strip()
-        latest_text = latest_el.text.strip()
-
-        row_dt = parse_date(row_text)
-        latest_dt = parse_date(latest_text)
-
-        if not row_dt and not latest_dt:
-            return latest_row
-        if not row_dt:
-            return latest_row
-        if not latest_dt:
-            return row
-
-        return row if row_dt > latest_dt else latest_row
-
-    def save_file(self, data, superMarket):
-        if not data or not data.get("promo") or not data.get("price"):
-            print(f"No data found for superMarket {superMarket['name']}")
-            return None
-
-        price_row_id = data["price"].get("id")
-        promo_row_id = data["promo"].get("id")
+        # Resolve Selenium elements by ID
+        price_row_id = price_row.get("id")
+        promo_row_id = promo_row.get("id")
         if not price_row_id or not promo_row_id:
-            print("Missing row IDs for price/promo; skipping downloads.")
-            return None
+            print(f"Branch {branch}: Missing row IDs; skipping")
+            return
 
         sel_price_row = self.driver.find_element(By.ID, price_row_id)
         sel_promo_row = self.driver.find_element(By.ID, promo_row_id)
 
         more_info_selector = superMarket.get("more-info-selector")
         if more_info_selector and more_info_selector != "none":
-            print("Opening More info")
-            price_more_info = sel_price_row.find_element(By.CSS_SELECTOR, more_info_selector)
-            promo_more_info = sel_promo_row.find_element(By.CSS_SELECTOR, more_info_selector)
-            if promo_more_info:
-                promo_more_info.click()
-            if price_more_info:
-                price_more_info.click()
+            print(f"[{superMarket['name']}] Opening details for branch {branch}")
+            try:
+                sel_promo_row.find_element(By.CSS_SELECTOR, more_info_selector).click()
+            except Exception:
+                pass
+            try:
+                sel_price_row.find_element(By.CSS_SELECTOR, more_info_selector).click()
+            except Exception:
+                pass
             WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, superMarket["download-button"]))
             )
 
-        price_dt = parse_date(data["price"].select_one(superMarket["date-selector"]).text.strip())
-        promo_dt = parse_date(data["promo"].select_one(superMarket["date-selector"]).text.strip())
-        price_ts = price_dt.strftime("%Y%m%d_%H%M%S")
-        promo_ts = promo_dt.strftime("%Y%m%d_%H%M%S")
+        # Timestamps per branch (already parsed)
+        price_ts = bp["price_dt"].strftime("%Y%m%d_%H%M%S")
+        promo_ts = bp["promo_dt"].strftime("%Y%m%d_%H%M%S")
 
         superMarket_name = superMarket.get("name", "default")
-        branch = data.get("branch", "default")
-        
         branch_fs = branch if branch.isdigit() else branch_id(branch)
 
-
-        if self._req_sess is None:
-            self._req_sess = self.driver_manager.build_session()
-
-        #  refresh cookies
+        # Re-sync cookies just in case
         self.driver_manager.sync_cookies(self._req_sess, url=self.driver.current_url)
 
-
-        # Gather download buttons 
+        # Collect download buttons (price + promo)
         download_buttons = []
         for row_el in (sel_price_row, sel_promo_row):
             btns = row_el.find_elements(By.CSS_SELECTOR, superMarket["download-button"])
@@ -217,34 +220,33 @@ class Crawler:
                     btns = []
             download_buttons.extend(btns)
 
+        # Download both files, name by type + per-branch timestamp
         for btn in download_buttons:
             onclick = btn.get_attribute("onclick") or ""
-            match = re.search(r"Download\('([^']+)'\)", onclick)
-            raw = match.group(1) if match else (btn.get_attribute("href") or "")
+            m = re.search(r"Download\('([^']+)'\)", onclick)
+            raw = m.group(1) if m else (btn.get_attribute("href") or "")
             if not raw:
                 continue
 
-            # Build absolute link
-            raw_link = urljoin(self.driver.current_url, f"/Download/{raw.lstrip('/')}") if match \
+            raw_link = urljoin(self.driver.current_url, f"/Download/{raw.lstrip('/')}") if m \
                     else urljoin(self.driver.current_url, raw)
-            print(f"Download Link: {raw_link}")
+            base_lower = os.path.basename(urlparse(raw_link).path).lower()
+            ext = os.path.splitext(base_lower)[1] or ""
 
-            # Decide filename prefix/timestamp from the server filename
-            base_name = os.path.basename(urlparse(raw_link).path).lower()
-            if base_name.startswith("price"):
+            if base_lower.startswith("price"):
                 prefix, ts = "price", price_ts
-            elif base_name.startswith("promo"):
+            elif base_lower.startswith("promo"):
                 prefix, ts = "promo", promo_ts
             else:
+                # default to price_ts so both files stay aligned, but mark as "file"
                 prefix, ts = "file", price_ts
-            filename = f"{prefix}_{ts}{os.path.splitext(base_name)[1] or ''}"
+
+            filename = f"{prefix}_{ts}{ext}"
+
             print("!"*100)
             print(f"Downloading {filename}…")
             print(f"Download Link: {raw_link}")
-            print(f"Branch: {branch}")
-            print(f"branch_fs: {branch_fs}")
-            print(f"Session: {self._req_sess}")
-            print(f"self.driver.current_url: {self.driver.current_url}")
+            print(f"Branch: {branch}  -> branch_fs: {branch_fs}")
 
             out_path = self.file_manager.download_to_branch(
                 raw_link,
@@ -252,12 +254,11 @@ class Crawler:
                 branch=branch_fs,
                 filename=filename,
                 session=self._req_sess,
-                verify_cert=False if "publishedprices.co.il" in raw_link else True,            # because of SSL
-                referer=self.driver.current_url,     
+                verify_cert=False if "publishedprices.co.il" in raw_link else True,
+                referer=self.driver.current_url,
             )
 
-            # Fallback pattern if needed
-            if not out_path and match and "/" not in raw:
+            if not out_path and m and "/" not in raw:
                 alt_link = urljoin(self.driver.current_url, f"/file/d/{raw}")
                 print(f"Retrying via {alt_link} …")
                 out_path = self.file_manager.download_to_branch(
@@ -266,7 +267,7 @@ class Crawler:
                     branch=branch_fs,
                     filename=filename,
                     session=self._req_sess,
-                    verify_cert=False if "publishedprices.co.il" in alt_link else True, # because of SSL
+                    verify_cert=False if "publishedprices.co.il" in alt_link else True,
                     referer=self.driver.current_url,
                 )
 
@@ -274,8 +275,6 @@ class Crawler:
                 print(f"{filename} not available, skipping.")
                 continue
 
-            # Upload to S3
+            # Upload to S3 (one upload per file; still only the latest per branch)
             s3_key = f"{superMarket_name}/{branch_fs}/{filename}".replace("\\", "/")
             self.s3.upload_file_from_path(out_path, s3_key)
-
-
