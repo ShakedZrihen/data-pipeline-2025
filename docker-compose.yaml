@@ -8,6 +8,11 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 10
     networks:
       - backend
 
@@ -45,6 +50,20 @@ services:
       retries: 60
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - backend
+
+  crawler:
+    build: ./salim/crawler
+    container_name: crawler
+    shm_size: "2gb"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    environment:
+      LIMIT: 2
     networks:
       - backend
 

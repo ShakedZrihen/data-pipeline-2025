@@ -67,8 +67,8 @@ class Crawler:
 
         self.s3_client = boto3.client(
             "s3",
-            # we use localhost because we are using awslocal
-            endpoint_url="http://localhost:4566",
+            # we use localstack because we are using awslocal
+            endpoint_url="http://localstack:4566",
             aws_access_key_id="test",
             aws_secret_access_key="test",
             region_name="us-east-1",
