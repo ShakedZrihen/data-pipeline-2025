@@ -10,3 +10,4 @@ pika
 jsonschema==4.22.0
 python-dateutil==2.9.0.post0
 openai>=1.40.0
+psycopg[binary]>=3.1

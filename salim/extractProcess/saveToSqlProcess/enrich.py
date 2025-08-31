@@ -1,3 +1,4 @@
+# extractProcess/saveToSqlProcess/enrich.py
 from typing import Dict, Any, List
 from openai import OpenAI
 import os, json
@@ -22,12 +23,14 @@ def enrich_brand_itemtype(
 ) -> Dict[str, Any]:
     # אפשרות לכבות העשרה ע"י משתנה סביבה
     if os.getenv("AI_ENRICH_DISABLED") == "1":
+        print("[enrich] AI_ENRICH_DISABLED=1 → fallback")
         item["brand"] = item.get("manu_name") or "לא ידוע"
         item["itemType"] = "לא ידוע"
         return item
 
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
+        print("[enrich] Missing OPENAI_API_KEY → fallback")
         item["brand"] = item.get("manu_name") or "לא ידוע"
         item["itemType"] = "לא ידוע"
         return item
@@ -43,36 +46,34 @@ def enrich_brand_itemtype(
     }
 
     try:
-        resp = client.responses.create(
+        # קריאה דרך Chat Completions עם אכיפת JSON
+        resp = client.chat.completions.create(
             model=model,
-            input=[
+            messages=[
                 {"role": "system", "content": "Return strict JSON only."},
-                {"role": "user", "content": [
-                    {"type": "text", "text": PROMPT},
-                    {"type": "input_text", "text": json.dumps(payload, ensure_ascii=False)}
-                ]}
+                {"role": "user", "content": f"{PROMPT}\n\n{json.dumps(payload, ensure_ascii=False)}"}
             ],
             response_format={"type": "json_object"},
-            max_output_tokens=300,
+            max_tokens=300,
+            temperature=0.2,
+            # timeout כללי לקריאה (שניות) – מונע תקיעות
+            timeout=30,
         )
 
-        out_txt = getattr(resp, "output_text", None)
-        if out_txt is None:
-            out_txt = ""
-            for c in getattr(resp, "output", []) or []:
-                for p in getattr(c, "content", []) or []:
-                    if getattr(p, "type", "") == "output_text":
-                        out_txt += p.text or ""
-
+        out_txt = resp.choices[0].message.content or ""
+        # אמור להיות JSON טהור לפי response_format
         data = json.loads(out_txt) if out_txt else {}
         brand = data.get("brand")
         item_type = data.get("itemType")
 
         item["brand"] = brand.strip() if isinstance(brand, str) and brand.strip() else (item.get("manu_name") or "לא ידוע")
         item["itemType"] = item_type.strip() if isinstance(item_type, str) and item_type.strip() else "לא ידוע"
+
+        print(f"[enrich] Success → brand='{item['brand']}', itemType='{item['itemType']}'")
         return item
 
-    except Exception:
+    except Exception as e:
+        print(f"[enrich] OpenAI call failed: {type(e).__name__}: {e} → fallback")
         item["brand"] = item.get("manu_name") or "לא ידוע"
         item["itemType"] = "לא ידוע"
         return item
