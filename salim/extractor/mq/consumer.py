@@ -30,9 +30,15 @@ def callback(ch, method, properties, body):
     print("Received message in RabbitMQ, validating and normalizing data...")
     # If the validator fails, the DLQ will recieve the raw message.
     data = DataNormalizer(data, timestamp=timestamp).normalize()
+    print("finished data normalization.")
     DataValidator(data).validate_data()
-    patcher = DataPatcher(data)
-    data = patcher.enrich()
+    print("finished data validation.")
+    try:
+        patcher = DataPatcher(data)
+        data = patcher.enrich()
+        print("finished data patching.")
+    except Exception as e:
+        print(f"enrichment failed with: {e}, ignoring enrichment...")
 
     print("saving file in database...")
     # throw exception if uri dosent exist, fail fast.
@@ -42,14 +48,7 @@ def callback(ch, method, properties, body):
 
     query = """
     INSERT INTO pricing (product_id, created_at, product_name, price, branch, chain_name)
-    VALUES (%s, %s, %s, %s, %s, %s)
-    ON CONFLICT (product_id) DO UPDATE
-    SET
-        created_at = EXCLUDED.created_at,
-        product_name = EXCLUDED.product_name,
-        price = EXCLUDED.price,
-        branch = EXCLUDED.branch,
-        chain_name = EXCLUDED.chain_name;
+    VALUES (%s, %s, %s, %s, %s, %s);
     """
     try:
         items: list[Dict[str, Any]] = data.get("items")

@@ -31,8 +31,15 @@ class GoodPharmCrawler(Crawler):
         branches_price = self.get_all_branches(table_rows)
         branches_prom = branches_price.copy()
 
+        limit = int(os.getenv("LIMIT", 3))
+        limit_cnt = 0
+
         for row in table_rows:
-            if len(branches_price) <= 0 and len(branches_prom) <= 0:
+            if (
+                len(branches_price) <= 0
+                and len(branches_prom) <= 0
+                or limit_cnt >= limit
+            ):
                 break
 
             (branch, _) = self.get_branch(row)
@@ -53,6 +60,7 @@ class GoodPharmCrawler(Crawler):
                     else:
                         branches_prom.pop(branch, None)
                 case CrawlerType.PRICING:
+                    limit_cnt += 1
                     price_type, _ = self.download_file(row)
                     branches_price.pop(branch, None)
                 case CrawlerType.PROMOTION:
@@ -82,11 +90,6 @@ class GoodPharmCrawler(Crawler):
         self.upload_s3(to_save, path)
         return t, date
 
-    # def format_filename_to_folder(self, fname: str, price_type: str) -> str:
-    #     price_filename = fname.split("-")[0] + "-" + fname.split("-")[-1]
-    #     branch = fname.split("-")[-2]
-    #     return os.path.join(self.store, price_type, branch, price_filename)
-
     @staticmethod
     def get_row_data(row: WebElement) -> tuple[str, str, CrawlerType]:
         td_list = row.find_elements(by=By.TAG_NAME, value="td")
@@ -99,10 +102,6 @@ class GoodPharmCrawler(Crawler):
             prefix = ""
         else:
             prefix = prefix.group()
-
-        # pricing_type = (
-        #     CrawlerType.PRICING if p_type == "מחירים" else CrawlerType.PROMOTION
-        # )
 
         pricing_type = (
             CrawlerType.PRICING if prefix == "PriceFull" else CrawlerType.PROMOTION

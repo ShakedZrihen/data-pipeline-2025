@@ -4,9 +4,8 @@ import urllib.parse
 
 import boto3
 import utils
-from mq.producer import RabbitMQProducer
-
 from extractor import FileExtractor
+from mq.producer import RabbitMQProducer
 
 
 def handler(event, context):

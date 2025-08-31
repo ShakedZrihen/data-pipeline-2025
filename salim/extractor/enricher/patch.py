@@ -16,16 +16,20 @@ class StoreItemPromotion(BaseModel):
 
 class DataPatcher:
     def __init__(self, data: Dict[str, Any]):
+        print("initializing data patcher")
         self.data = data
         self.chains_path = {
             "7290058197699": "/super-compare/salim/extractor/enricher/goodpharm_branches.json",
             "7290803800003": "/super-compare/salim/extractor/enricher/yohananof_branches.json",
+            "7290058266241": "/super-compare/salim/extractor/enricher/citymarket_branches.json",
             "7290000000003": "/super-compare/salim/extractor/enricher/citymarket_branches.json",
         }
         self.chains_name = {
             "7290058197699": "goodpharm",
             "7290803800003": "yohananof",
+            "7290058266241": "citymarket",
             "7290000000003": "citymarket",
+            "000": "unknown",
         }
         self.openai_client = OpenAI()
 
@@ -88,15 +92,18 @@ class DataPatcher:
         )
 
     def enrich(self):
-        provider = self.data.get("provider", None)
-        branch = self.data.get("branch", None)
+        provider = self.data.get("provider", "000")
+        branch = self.data.get("branch", "unknown")
         t = self.data.get("type", "price")
 
+        print(f"provider {provider} and branch: {branch}")
         # Soft error handling, if we dont find the provider we don't enrich.
         if not provider or not branch:
+            print("didnt find provider or branch.")
             return
 
         self.data["provider"] = self.chains_name[provider]
+        print(f"getting chain with provider {provider} and branch: {branch}")
         chain_path = self._get_chain(provider)
         if not chain_path:
             return
@@ -104,9 +111,11 @@ class DataPatcher:
         chain_data = self._get_chain_file_content(chain_path)
 
         stores: list[Dict[str, Any]] = chain_data.get("Stores", [])
+        print(f"getting store info with {len(stores)} stores")
         enriched_addr = self._get_store_info(stores, branch)
 
         self.data["address"] = enriched_addr
+        print(f"enriched address: {enriched_addr}")
         if t != "price":
             items: Dict[str, Any] = self.data.get("items", [])
             for idx, item in enumerate(items):
@@ -121,5 +130,5 @@ class DataPatcher:
                 product = item.get("product", "")
                 enriched_item = self._enrich_prom(product)
                 self.data["promotions"][idx] = enriched_item
-
+        print("finished data enrichment.")
         return self.data
