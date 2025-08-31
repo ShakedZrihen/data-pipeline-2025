@@ -1,41 +1,92 @@
-from extractProcess.extract import _clean
+# extractProcess/ai_enricher_simple.py
+from typing import Dict, Any, List
+from openai import OpenAI
+import os, json
 
-def enrich_common(msg: dict) -> dict:
+PROMPT = (
+    'אתה מקבל פריט בודד שנמכר בסופרמרקט בישראל.\n'
+    'השדות המסופקים: type, product, unit, ManufacturerName, ManufacturerItemDescription.\n'
+    'קבע שני שדות בלבד:\n\n'
+    '- brand: שקול גם את ManufacturerName וגם את ManufacturerItemDescription ובחר את שם המותג המדויק ביותר. '
+    'אם לא ניתן לקבוע — החזר בדיוק "לא ידוע".\n'
+    '- itemType: קטגוריה קצרה בעברית (לדוגמה: "פירות", "ירקות", "משקאות", "חטיפים", "מוצרי חלב", '
+    '"מאפיה", "בשר ודגים", "קפואים", "ניקיון", "טואלטיקה", "בעלי חיים", "תינוקות", "מזון כללי"). '
+    'אם לא ברור — החזר "לא ידוע".\n\n'
+    'החזר אך ורק את אובייקט ה-JSON הבא, ללא שום טקסט נוסף (ללא הסברים, ללא כותרות, ללא סימני קוד), ובדיוק במבנה זה:\n'
+    '{"brand":"...","itemType":"..."}'
+)
 
-    for k in ("provider","branch","type","product","unit","currency"):
-        if k in msg and isinstance(msg[k], str):
-            msg[k] = " ".join(msg[k].split()).strip()
+def enrich_brand_itemtype(
+    envelope: Dict[str, Any],
+    item: Dict[str, Any],
+    model: str = "gpt-4o-mini"
+) -> Dict[str, Any]:
+    """
+    מקבל פריט יחיד + envelope, שולח ל-LLM ומחזיר את אותו item עם brand ו-itemType שנוספו.
+    אם אין מפתח API או יש שגיאה – מחזיר פולבאק פשוט.
+    """
+    # אפשרות לכבות העשרה ע"י משתנה סביבה
+    if os.getenv("AI_ENRICH_DISABLED") == "1":
+        item["brand"] = item.get("manu_name") or "לא ידוע"
+        item["itemType"] = "לא ידוע"
+        return item
 
-    if not msg.get("currency"): # i want to consider to delete it because its always this default
-        msg["currency"] = "ILS"
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        item["brand"] = item.get("manu_name") or "לא ידוע"
+        item["itemType"] = "לא ידוע"
+        return item
 
-    if msg.get("branch") and msg["branch"].isdigit() and len(msg["branch"]) < 3:
-        msg["branch"] = msg["branch"].zfill(3)
+    client = OpenAI(api_key=api_key)
 
-    if "productId" in msg and msg["productId"] is not None:
-        msg["productId"] = str(msg["productId"]).strip()
+    payload = {
+        "type": (envelope.get("type") or "").strip(),
+        "product": item.get("product") or "",
+        "unit": item.get("unit") or "",
+        "ManufacturerName": item.get("manu_name") or "",
+        "ManufacturerItemDescription": item.get("manu_desc") or "",
+    }
 
-    return msg
-
-def enrich_prices(msg: dict) -> dict:
-    if not msg.get("unit"):
-        msg["unit"] = "unit"
-    return msg
-
-def enrich_promo(msg: dict) -> dict:
     try:
-        if msg.get("unit") is None:
-            msg["unit"] = 1
-        elif float(msg["unit"]) <= 0:
-            msg["unit"] = 1
-    except Exception:
-        msg["unit"] = 1
-    return msg
+        resp = client.responses.create(
+            model=model,
+            input=[
+                {"role": "system", "content": "Return strict JSON only."},
+                {"role": "user", "content": [
+                    {"type": "text", "text": PROMPT},
+                    {"type": "input_text", "text": json.dumps(payload, ensure_ascii=False)}
+                ]}
+            ],
+            response_format={"type": "json_object"},
+            max_output_tokens=300,
+        )
 
-def enrich_message(msg: dict) -> dict:
-    msg = enrich_common(msg)
-    if msg.get("type") == "pricesFull":
-        return enrich_prices(msg)
-    if msg.get("type") == "promoFull":
-        return enrich_promo(msg)
-    return msg
+        out_txt = getattr(resp, "output_text", None)
+        if out_txt is None:
+            out_txt = ""
+            for c in getattr(resp, "output", []) or []:
+                for p in getattr(c, "content", []) or []:
+                    if getattr(p, "type", "") == "output_text":
+                        out_txt += p.text or ""
+
+        data = json.loads(out_txt) if out_txt else {}
+        brand = data.get("brand")
+        item_type = data.get("itemType")
+
+        item["brand"] = brand.strip() if isinstance(brand, str) and brand.strip() else (item.get("manu_name") or "לא ידוע")
+        item["itemType"] = item_type.strip() if isinstance(item_type, str) and item_type.strip() else "לא ידוע"
+        return item
+
+    except Exception:
+        # פולבאק בטוח
+        item["brand"] = item.get("manu_name") or "לא ידוע"
+        item["itemType"] = "לא ידוע"
+        return item
+
+
+def enrich_brand_itemtype_for_items(
+    envelope: Dict[str, Any],
+    items: List[Dict[str, Any]],
+    model: str = "gpt-4o-mini"
+) -> List[Dict[str, Any]]:
+    return [enrich_brand_itemtype(envelope, dict(it), model=model) for it in items]

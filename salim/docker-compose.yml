@@ -150,6 +150,8 @@ services:
       - POSTGRES_PASSWORD=postgres
       - RABBIT_URL=amqp://app:app@rabbitmq:5672/%2f
     restart: unless-stopped
+    env_file:
+      - .env
 
 volumes:
   postgres_data:
