@@ -86,8 +86,9 @@ services:
     networks: [app-net]
 
   poller:
-    build: .
-    command: ["python", "-u", "extractor/extractor.py"]
+    build:
+      context: .
+      dockerfile: extractor/Dockerfile.extractor
     environment:
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test

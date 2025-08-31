@@ -1,0 +1,5 @@
+lxml
+boto3
+pandas
+requests
+python-dotenv

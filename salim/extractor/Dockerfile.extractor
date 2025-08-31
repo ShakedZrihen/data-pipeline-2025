@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+
+WORKDIR /app
+
+# install deps
+COPY extractor/requirements.txt extractor/requirements.txt
+RUN pip install --no-cache-dir -r extractor/requirements.txt
+
+# app code
+COPY extractor/ extractor/
+
+# run the loop
+WORKDIR /app/extractor
+CMD ["python", "-u", "extractor.py"]
