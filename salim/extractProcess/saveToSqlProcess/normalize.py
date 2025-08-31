@@ -1,4 +1,3 @@
-# extractProcess/saveToSqlProcess/normalize.py
 from extractProcess.saveToSqlProcess.utils import to_iso8601_utc, str_or_none, num_or_none
 from extractProcess.extract import _clean
 
@@ -17,7 +16,6 @@ def normalize_price_item(env: dict, item: dict) -> dict:
         "product":   _clean(item.get("product")),
         "price":     num_or_none(item.get("price")),
         "unit":      _clean(item.get("unit")),
-        # שדות ההעשרה (אינם חובה בסכמה; additionalProperties=True):
         "brand":     _clean(item.get("brand")),
         "itemType":  _clean(item.get("itemType")),
     }
@@ -29,7 +27,7 @@ def normalize_promo_item(env: dict, item: dict) -> dict:
         "productId": str_or_none(item.get("productId")),
         "product":   _clean(item.get("product")),
         "price":     num_or_none(item.get("price")),
-        "unit":      num_or_none(item.get("unit")),  # promoFull דורש מספרי (MinQty)
+        "unit":      num_or_none(item.get("unit")),
         "brand":     _clean(item.get("brand")),
         "itemType":  _clean(item.get("itemType")),
     }

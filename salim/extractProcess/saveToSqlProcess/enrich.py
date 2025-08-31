@@ -1,4 +1,3 @@
-# extractProcess/ai_enricher_simple.py
 from typing import Dict, Any, List
 from openai import OpenAI
 import os, json
@@ -21,10 +20,6 @@ def enrich_brand_itemtype(
     item: Dict[str, Any],
     model: str = "gpt-4o-mini"
 ) -> Dict[str, Any]:
-    """
-    מקבל פריט יחיד + envelope, שולח ל-LLM ומחזיר את אותו item עם brand ו-itemType שנוספו.
-    אם אין מפתח API או יש שגיאה – מחזיר פולבאק פשוט.
-    """
     # אפשרות לכבות העשרה ע"י משתנה סביבה
     if os.getenv("AI_ENRICH_DISABLED") == "1":
         item["brand"] = item.get("manu_name") or "לא ידוע"
@@ -78,7 +73,6 @@ def enrich_brand_itemtype(
         return item
 
     except Exception:
-        # פולבאק בטוח
         item["brand"] = item.get("manu_name") or "לא ידוע"
         item["itemType"] = "לא ידוע"
         return item

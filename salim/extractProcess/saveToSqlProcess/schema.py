@@ -1,4 +1,3 @@
-# extractProcess/saveToSqlProcess/schema.py
 JSON_SCHEMA = {
     "type": "object",
     "properties": {

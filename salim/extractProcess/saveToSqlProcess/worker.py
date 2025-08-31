@@ -1,6 +1,4 @@
 import os, json, pika, sys, traceback
-
-# ייבוא השכבות שבנית
 from extractProcess.saveToSqlProcess.processor import process_item
 from extractProcess.saveToSqlProcess.dlq import send_to_dlq
 
