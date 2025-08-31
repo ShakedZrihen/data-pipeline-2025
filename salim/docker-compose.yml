@@ -5,8 +5,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: salim_db
-    ports:
-      - "5432:5432"
+    ports: ["5432:5432"]
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./tables.sql:/docker-entrypoint-initdb.d/tables.sql
@@ -15,55 +14,46 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - app-net
+    networks: [app-net]
 
-  # LocalStack (S3 simulator)
   localstack:
-    container_name: s3-simulator
+    container_name: localstack
     image: localstack/localstack:latest
     ports:
-      - "4566:4566" # edge port
+      - "4566:4566"
     environment:
-      - SERVICES=s3
+      - SERVICES=s3,sqs
       - DEBUG=1
-      - S3_SKIP_SIGNATURE_VALIDATION=1
       - PERSISTENCE=1
     volumes:
       - localstack-data:/var/lib/localstack
       - /var/run/docker.sock:/var/run/docker.sock
       - ./gov_crawler/scripts/init-s3.sh:/etc/localstack/init/ready.d/00-init-s3.sh
+      - ./extractor/scripts/init-sqs.sh:/etc/localstack/init/ready.d/01-init-sqs.sh
     entrypoint: >
       sh -c "chmod +x /etc/localstack/init/ready.d/00-init-s3.sh;
+             chmod +x /etc/localstack/init/ready.d/01-init-sqs.sh;
              exec docker-entrypoint.sh localstack"
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
       interval: 5s
       timeout: 3s
       retries: 20
-    networks:
-      - app-net
+    networks: [app-net]
 
-  # FastAPI Application
   api:
     build: .
-    ports:
-      - "8000:8000"
+    ports: ["8000:8000"]
     environment:
-      # DB
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
-
-      # S3/LocalStack
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_REGION=us-east-1
       - S3_ENDPOINT_URL=http://localstack:4566
       - S3_BUCKET=supermarkets
     depends_on:
-      db:
-        condition: service_healthy
-      localstack:
-        condition: service_healthy
+      db: { condition: service_healthy }
+      localstack: { condition: service_healthy }
     volumes:
       - ./app:/app/app
     healthcheck:
@@ -72,8 +62,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    networks:
-      - app-net
+    networks: [app-net]
 
   crawler:
     build:
@@ -91,10 +80,26 @@ services:
       TZ: Asia/Jerusalem
       LOCAL_DATA_DIR: "supermarkets"
       CONFIG_KEY: "supermarkets"
-
     depends_on:
-      db:
-        condition: service_healthy
+      db: { condition: service_healthy }
+      localstack: { condition: service_healthy }
+    networks: [app-net]
+
+  poller:
+    build: .
+    command: ["python", "-u", "extractor/extractor.py"]
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=us-east-1
+      - S3_ENDPOINT_URL=http://localstack:4566
+      - S3_BUCKET=supermarkets
+      - SQS_QUEUE_URL=http://localstack:4566/000000000000/sqs-queue
+      - POLL_SECONDS=15
+      - STATE_PATH=/.seen_keys.json
+    volumes:
+      - ./extractor:/app/extractor
+    depends_on:
       localstack:
         condition: service_healthy
     networks:
