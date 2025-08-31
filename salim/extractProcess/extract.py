@@ -64,7 +64,10 @@ def parse_pricefull(xml_stream: io.BytesIO):
 
         elif tag == "item":
             code   = _clean(elem.findtext("ItemCode"))
-            name   = _clean(elem.findtext("ItemName")) or _clean(elem.findtext("ManufacturerItemDescription"))
+            name   = _clean(elem.findtext("ItemName"))
+            manu_name = _clean(elem.findtext("ManufacturerName"))
+            manu_desc = _clean(elem.findtext("ManufacturerItemDescription"))
+
             price  = _to_float(elem.findtext("ItemPrice"))
 
             qty_str   = _fmt_amount_str(elem.findtext("Quantity"))
@@ -87,7 +90,9 @@ def parse_pricefull(xml_stream: io.BytesIO):
                     "productId": code,
                     "product": name,
                     "price": price, 
-                    "unit": unit or ""
+                    "unit": unit or "",
+                    "manu_name": manu_name,
+                    "manu_desc": manu_desc
                 }
                 items.append(item)
 

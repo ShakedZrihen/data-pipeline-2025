@@ -86,6 +86,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    env_file:
+      - .env
+
 
   lambda:
     build: .
@@ -116,6 +119,8 @@ services:
       - RABBIT_QUEUE=results-queue
     ports:
       - "8080:8080"
+    env_file:
+      - .env
 
   mongo:
     image: mongo:6
