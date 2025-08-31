@@ -9,6 +9,7 @@ if str(ROOT) not in sys.path:
 
 from salim.Tasks.db_handler import DB
 from salim.Tasks.extractor.lambda_extractor import config
+from Enricher import Enricher
 
 from typing import Dict, Any, List
 import boto3
@@ -90,8 +91,20 @@ class SqsS3Consumer:
             return
 
         # 2) Extract fields from JSON
+        e = Enricher()
         provider = str(payload.get("provider") or "").strip()
         branch_code = str(payload.get("branch") or "").strip()
+        e_dict = e.enrich(provider, branch_code)
+        print(f"[INFO] Enrichment result: {e_dict}")
+        if e_dict is not None:
+            branch_name = str(e_dict.get("StoreName") or "").strip()
+            city = str(e_dict.get("City") or "").strip()
+            address = str(e_dict.get("Address") or "").strip()
+            print(f"[INFO] Enriched branch data: name={branch_name}, city={city}, address={address}")
+        else:
+            branch_name = ""
+            city = ""
+            address = ""
         file_type = str(payload.get("type") or "").strip()
         ts_str = str(payload.get("timestamp") or "").strip()
         items = payload.get("items") or []
@@ -106,8 +119,8 @@ class SqsS3Consumer:
             return
 
         effective_at = self.db.parse_feed_timestamp(ts_str)
-        supermarket_id = self.db.ensure_supermarket(provider)
-        branch_id = self.db.ensure_branch(supermarket_id, branch_code)
+        supermarket_id = self.db.ensure_supermarket(provider, ts_str)
+        branch_id = self.db.ensure_branch(supermarket_id, branch_code,branch_name, city, address, ts_str)
 
         inserted = 0
         skipped = 0

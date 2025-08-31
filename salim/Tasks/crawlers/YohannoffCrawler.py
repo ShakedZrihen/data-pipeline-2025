@@ -53,7 +53,7 @@ class YohananofCrawler(CrawlerBase):
         self.driver.get(self.login_url)
         self.driver.find_element(By.ID, "username").send_keys(self.username)
         self.driver.find_element(By.ID, "login-button").click()
-        WebDriverWait(self.driver, 20).until(
+        WebDriverWait(self.driver, 30).until(
             EC.invisibility_of_element_located((By.XPATH, "//div[text()='Processing...']"))
         )
         WebDriverWait(self.driver, 10).until(

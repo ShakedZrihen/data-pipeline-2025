@@ -18,7 +18,6 @@ class DB:
         if not self.database_url:
             raise RuntimeError("Missing DATABASE_URL in environment")
 
-    # ---------- low-level helpers ----------
 
     def _get_conn(self):
         # Supabase requires SSL
@@ -37,36 +36,52 @@ class DB:
         finally:
             conn.close()
 
-    # ---------- upserts / inserts ----------
 
-    def ensure_supermarket(self, name: str) -> int:
+    def ensure_supermarket(self, name: str, created_at: str) -> int:
+        if isinstance(created_at, str):
+            dt = self.parse_feed_timestamp(created_at)
+
         row = self._exec_one(
             """
-            INSERT INTO supermarkets(name)
-            VALUES (%s)
-            ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
+            INSERT INTO supermarkets (name, created_at)
+            VALUES (%s, %s)
+            ON CONFLICT (name) DO UPDATE
+              SET created_at = EXCLUDED.created_at
             RETURNING id;
             """,
-            (name,),
+            (name, dt),
         )
         if not row:
             raise RuntimeError(f"ensure_supermarket failed for name={name!r}")
         return int(row[0])
 
-    def ensure_branch(self, supermarket_id: int, branch_code: str, branch_name: Optional[str] = None) -> int:
+
+    def ensure_branch(self, supermarket_id: int, branch_code: str,
+                    branch_name: str, city: str, address: str, created_at: str) -> int:
         row = self._exec_one(
             """
-            INSERT INTO branches (supermarket_id, branch_code, branch_name)
-            VALUES (%s, %s, %s)
+            INSERT INTO branches (supermarket_id, branch_code, branch_name, city, address, created_at)
+            VALUES (%s, %s, %s, NULLIF(%s, ''), NULLIF(%s, ''), %s)
             ON CONFLICT (supermarket_id, branch_code)
-            DO UPDATE SET branch_name = COALESCE(EXCLUDED.branch_name, branches.branch_name)
+            DO UPDATE SET
+                branch_name = COALESCE(EXCLUDED.branch_name, branches.branch_name),
+                city        = CASE
+                                WHEN EXCLUDED.city IS NOT NULL AND EXCLUDED.city <> '' THEN EXCLUDED.city
+                                ELSE branches.city
+                            END,
+                address     = CASE
+                                WHEN EXCLUDED.address IS NOT NULL AND EXCLUDED.address <> '' THEN EXCLUDED.address
+                                ELSE branches.address
+                            END
             RETURNING id;
             """,
-            (supermarket_id, branch_code, branch_name),
+            (supermarket_id, branch_code, branch_name, city, address, created_at),
         )
         if not row:
             raise RuntimeError(f"ensure_branch failed for name={branch_name!r}")
         return int(row[0])
+
+
 
     def upsert_provider_product(
         self,

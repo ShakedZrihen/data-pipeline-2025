@@ -1,142 +1,212 @@
 [
   {
     "StoreID": "42",
-    "StoreName": "קליינמן"
+    "StoreName": "קליינמן",
+    "City": "ירושלים",
+    "Address": "קליינמן 4"
   },
   {
     "StoreID": "41",
-    "StoreName": "ארץ חפץ"
+    "StoreName": "ארץ חפץ",
+    "City": "ירושלים",
+    "Address": "ארץ חפץ 106"
   },
   {
     "StoreID": "40",
-    "StoreName": "יפו 212"
+    "StoreName": "יפו 212",
+    "City": "יפו",
+    "Address": "יפו 212"
   },
   {
     "StoreID": "39",
-    "StoreName": "הרב אויירבך בית שמש"
+    "StoreName": "הרב אויירבך בית שמש",
+    "City": "בית שמש",
+    "Address": "הרב אויירבך 62"
   },
   {
     "StoreID": "38",
-    "StoreName": "עוזיאל 111"
+    "StoreName": "עוזיאל 111",
+    "City": "ירושלים",
+    "Address": "עוזיאל 111"
   },
   {
     "StoreID": "37",
-    "StoreName": "הפלמח 38"
+    "StoreName": "הפלמח 38",
+    "City": "ירושלים",
+    "Address": "הפלמח 38"
   },
   {
     "StoreID": "36",
-    "StoreName": "אוהלי יוסף"
+    "StoreName": "אוהלי יוסף",
+    "City": "ירושלים",
+    "Address": "אוהלי יוסף 3"
   },
   {
     "StoreID": "35",
-    "StoreName": "כל זול בר אילן"
+    "StoreName": "כל זול בר אילן",
+    "City": "ירושלים",
+    "Address": "בר אילן 5"
   },
   {
     "StoreID": "31",
-    "StoreName": "מעלה אדומים העירית II"
+    "StoreName": "מעלה אדומים העירית II",
+    "City": "מעלה אדומים",
+    "Address": "העירית 1"
   },
   {
     "StoreID": "30",
-    "StoreName": "נביאים"
+    "StoreName": "נביאים",
+    "City": "נביאים",
+    "Address": ""
   },
   {
     "StoreID": "28",
-    "StoreName": "מושב יתד"
+    "StoreName": "מושב יתד",
+    "City": "מושב יתד",
+    "Address": "אבשלום אזור תעשיה 0"
   },
   {
     "StoreID": "27",
-    "StoreName": "ניות- הרצוג"
+    "StoreName": "ניות- הרצוג",
+    "City": "ירושלים",
+    "Address": "הרצוג 61"
   },
   {
     "StoreID": "26",
-    "StoreName": "פסח חברוני"
+    "StoreName": "פסח חברוני",
+    "City": "ירושלים",
+    "Address": "פסח חברוני 117"
   },
   {
     "StoreID": "25",
-    "StoreName": "מבשרת ציון"
+    "StoreName": "מבשרת ציון",
+    "City": "מבשרת ציון",
+    "Address": "החושן 3"
   },
   {
     "StoreID": "24",
-    "StoreName": "רמות ב'"
+    "StoreName": "רמות ב'",
+    "City": "ירושלים",
+    "Address": "צונדק 109"
   },
   {
     "StoreID": "23",
-    "StoreName": "רמות לואי ליפסקי"
+    "StoreName": "רמות לואי ליפסקי",
+    "City": "ירושלים",
+    "Address": "לואי ליפסקי 39"
   },
   {
     "StoreID": "21",
-    "StoreName": "אשקלון סיטי"
+    "StoreName": "אשקלון סיטי",
+    "City": "אשקלון",
+    "Address": "בן גוריון 21"
   },
   {
     "StoreID": "20",
-    "StoreName": "כפר עזר"
+    "StoreName": "כפר עזר",
+    "City": "כפר עזר",
+    "Address": "מרכז מסחרי השחף 20"
   },
   {
     "StoreID": "19",
-    "StoreName": "אשדוד"
+    "StoreName": "אשדוד",
+    "City": "אשדוד",
+    "Address": "הרי גולן 12"
   },
   {
     "StoreID": "18",
-    "StoreName": "אשקלון עתיקות"
+    "StoreName": "אשקלון עתיקות",
+    "City": "אשקלון",
+    "Address": "יהודה הלוי 38"
   },
   {
     "StoreID": "16",
-    "StoreName": "מחנה יהודה"
+    "StoreName": "מחנה יהודה",
+    "City": "ירושלים",
+    "Address": ""
   },
   {
     "StoreID": "15",
-    "StoreName": "קרית יובל"
+    "StoreName": "קרית יובל",
+    "City": "ירושלים",
+    "Address": "אורגוואי 31"
   },
   {
     "StoreID": "13",
-    "StoreName": "הר נוף"
+    "StoreName": "הר נוף",
+    "City": "ירושלים",
+    "Address": "שאולזון 57"
   },
   {
     "StoreID": "12",
-    "StoreName": "הפסגה 16"
+    "StoreName": "הפסגה 16",
+    "City": "ירושלים",
+    "Address": "הפסגה 16"
   },
   {
     "StoreID": "11",
-    "StoreName": "פסגת זאב הגדול"
+    "StoreName": "פסגת זאב הגדול",
+    "City": "ירושלים",
+    "Address": "אלוף יקותיאל אדם 2"
   },
   {
     "StoreID": "9",
-    "StoreName": "מעלה אדומים האבן"
+    "StoreName": "מעלה אדומים האבן",
+    "City": "מעלה אדומים",
+    "Address": "האבן 15 אזור 07"
   },
   {
     "StoreID": "8",
-    "StoreName": "בית וגן חכמי"
+    "StoreName": "בית וגן חכמי",
+    "City": "ירושלים",
+    "Address": "יוסף חכמי 30"
   },
   {
     "StoreID": "7",
-    "StoreName": "הרב קוק"
+    "StoreName": "הרב קוק",
+    "City": "ירושלים",
+    "Address": "הרב קוק 8"
   },
   {
     "StoreID": "6",
-    "StoreName": "הפסגה 39 החדש"
+    "StoreName": "הפסגה 39 החדש",
+    "City": "ירושלים",
+    "Address": "הפסגה 39 "
   },
   {
     "StoreID": "4",
-    "StoreName": "מאה שערים"
+    "StoreName": "מאה שערים",
+    "City": "ירושלים",
+    "Address": "מאה שערים 21"
   },
   {
     "StoreID": "3",
-    "StoreName": "רמות עליית נוער"
+    "StoreName": "רמות עליית נוער",
+    "City": "ירושלים",
+    "Address": "עליית הנוער 5"
   },
   {
     "StoreID": "32",
-    "StoreName": "הבקעה"
+    "StoreName": "הבקעה",
+    "City": "יפית",
+    "Address": "מפגש הבקעה"
   },
   {
     "StoreID": "33",
-    "StoreName": "בית שמש"
+    "StoreName": "בית שמש",
+    "City": "בית שמש",
+    "Address": "בן איש חי 31"
   },
   {
     "StoreID": "89",
-    "StoreName": "פסגת זאב"
+    "StoreName": "פסגת זאב",
+    "City": "ירושלים",
+    "Address": "חיל האוויר 15"
   },
   {
     "StoreID": "14",
-    "StoreName": "פ.זאב מרידור - שלנו"
+    "StoreName": "פ.זאב מרידור - שלנו",
+    "City": "ירושלים",
+    "Address": "אליהו מרידור 2 "
   }
 ]
