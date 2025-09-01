@@ -1,23 +1,25 @@
-import os
-import json
-import boto3
-from botocore.config import Config
+import os, json, logging
 
-def _sqs_client():
-    endpoint = os.getenv("AWS_ENDPOINT_URL")
-    region = os.getenv("AWS_REGION", "us-east-1")
-    cfg = Config(retries={'max_attempts': 3, 'mode': 'standard'})
-    return boto3.client("sqs", region_name=region, endpoint_url=endpoint, config=cfg)
+try:
+    import boto3
+except Exception:
+    boto3 = None
 
 def send_message(payload: dict):
-    rabbit_url = os.getenv("RABBITMQ_URL")
-    if rabbit_url:
-        return _send_rabbit(payload, rabbit_url)
-    queue_url = os.environ["OUTPUT_QUEUE_URL"]
-    sqs = _sqs_client()
-    body = json.dumps(payload, ensure_ascii=False)
-    resp = sqs.send_message(QueueUrl=queue_url, MessageBody=body)
-    return {"transport": "sqs", "message_id": resp.get("MessageId")}
+    queue_url = os.environ.get("OUTPUT_QUEUE_URL")
+    if not queue_url:
+        logging.info("[producer] OUTPUT_QUEUE_URL not set -> local mode (skip SQS send).")
+        return
+
+    if boto3 is None:
+        logging.warning("[producer] boto3 not available; cannot send to SQS.")
+        return
+
+    region = os.environ.get("AWS_REGION", "eu-west-1")
+    sqs = boto3.client("sqs", region_name=region)
+    sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(payload, ensure_ascii=False))
+    logging.info("[producer] sent to SQS: %s", queue_url)
+
 
 def _send_rabbit(payload: dict, url: str):
     import pika

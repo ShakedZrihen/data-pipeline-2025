@@ -7,8 +7,8 @@ from normalizer import parse_key
 from producer import send_message
 from db import upsert_last_run
 import tempfile
-log = setup_logging()
 
+log = setup_logging()
 def _s3_client():
     endpoint = os.getenv("AWS_ENDPOINT_URL")
     region = os.getenv("AWS_REGION", "us-east-1")
@@ -28,6 +28,7 @@ def lambda_handler(event, context=None):
 
     for rec in records:
         try:
+            send_message(payload)
             bucket = rec["s3"]["bucket"]["name"]
             key = rec["s3"]["object"]["key"]
             if not key.endswith(".gz"):
@@ -75,3 +76,51 @@ if __name__ == "__main__":
     import sys
     path = sys.argv[1] if len(sys.argv) > 1 else "sample_event.json"
     main(path)
+# === Local simulator run (no AWS) ===
+import os, json, tempfile
+from pathlib import Path
+from config import S3_SIMULATOR_ROOT
+
+
+def process_local_file(file_path: str):
+    """
+    מעבד קובץ .gz לוקאלי שנמצא תחת:
+      <S3_SIMULATOR_ROOT>/providers/<provider>/<branch>/<filename>.gz
+    מייצר payload JSON, שומר ל-outbox, שולח ל-producer, ומסמן בבסיס נתונים/קובץ state.
+    """
+    p = Path(file_path).resolve()
+    root = Path(S3_SIMULATOR_ROOT).resolve() / "providers"
+    rel = p.relative_to(root)
+    key = f"providers/{str(rel).replace(os.sep, '/')}"
+
+    provider, branch, type_, iso_ts = parse_key(key)
+
+    with open(p, "rb") as f:
+        raw = f.read()
+
+    buf = decompress_gz_to_bytes(raw)
+    fmt, rows = parse_content(buf)
+    items = normalize_rows(rows)
+
+    payload = {
+        "provider": provider,
+        "branch": branch,
+        "type": type_,
+        "timestamp": iso_ts,
+        "items": items,
+    }
+
+    OUTBOX = Path(__file__).parent / "outbox"
+    OUTBOX.mkdir(parents=True, exist_ok=True)
+    safe_ts = iso_ts.replace(":", "").replace("-", "").replace("T", "_").replace("Z", "")
+    out_name = f"{provider}_{branch}_{type_}_{safe_ts}.json"
+    out_path = OUTBOX / out_name
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+    log.info(f"[local] saved: {out_path}")
+
+    send_message(payload)
+
+    upsert_last_run(provider, branch, type_, iso_ts)
+
+    return payload
