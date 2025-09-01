@@ -1,3 +1,4 @@
+
 # message_producer.py (updated, backward‑compatible)
 # -*- coding: utf-8 -*-
 from __future__ import annotations
@@ -83,6 +84,11 @@ class MessageProducer:
 
     def send(self, message: Dict[str, Any]):
         body = json.dumps(message, ensure_ascii=False)
+        # DEBUG: log full message body before SQS publish
+        try:
+            logger.info("SQS message body (pre-send): %s", body)
+        except Exception as _e:
+            logger.warning("Failed to log message body: %s", _e)
 
         # Optional safety – never breaks existing flows because default is False
         if self.skip_if_empty and self._looks_empty(message, body):
@@ -178,4 +184,41 @@ class MessageProducer:
         except Exception:
             pass
 
-
+    def send_chunk(self, envelope: dict, items: list):
+        """
+        Send one chunk: envelope + items list, handling SQS FIFO niceties if configured.
+        """
+        payload = dict(envelope)
+        payload["items"] = items
+        body = json.dumps(payload, ensure_ascii=False)
+        # DEBUG: log full chunk body before SQS publish
+        try:
+            logger.info("SQS chunk body (pre-send): %s", body)
+        except Exception as _e:
+            logger.warning("Failed to log chunk body: %s", _e)
+        if self.transport == "sqs":
+            params = {
+                "QueueUrl": self.sqs_queue_url,
+                "MessageBody": body,
+            }
+            attrs = {}
+            for k in ("provider","branch","type","timestamp","group_id","chunk_seq"):
+                v = payload.get(k)
+                if v is not None:
+                    attrs[k] = {"DataType": "String", "StringValue": str(v)}
+            if attrs:
+                params["MessageAttributes"] = attrs
+            if self._is_fifo:
+                gid = self.fifo_group_id or self._derive_group_id(payload) or "default"
+                params["MessageGroupId"] = gid
+                if self.enable_fifo_autodedup:
+                    params["MessageDeduplicationId"] = hashlib.sha256(body.encode("utf-8")).hexdigest()
+            self._send_sqs_with_retries(params)
+        else:
+            self._rabbit_channel.basic_publish(
+                exchange=self.rabbitmq_exchange,
+                routing_key=self.rabbitmq_routing_key,
+                body=body.encode("utf-8"),
+                properties=None,
+                mandatory=False,
+            )

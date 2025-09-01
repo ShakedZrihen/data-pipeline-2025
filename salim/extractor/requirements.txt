@@ -31,3 +31,4 @@ urllib3==2.5.0
 webdriver-manager==4.0.2
 websocket-client==1.8.0
 wsproto==1.2.0
+psycopg[binary]==3.2.1

@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<OrderXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Envelope>
+    <ChainId>7290172900007</ChainId>
+    <SubChainId>000</SubChainId>
+    <StoreId>299</StoreId>
+    <BikoretNo>0</BikoretNo>
+    <Header>
+      <Details>
+        <Line>
+          <PriceUpdateDate>2025-08-26</PriceUpdateDate>
+          <ItemCode>8017331054215</ItemCode>
+          <ItemName>ביוריפייר משחת שיניים להלבנה</ItemName>
+          <ManufacturerName>זר הייטק</ManufacturerName>
+          <ManufactureCountry>איטליה</ManufactureCountry>
+          <ManufacturerItemDescription>PRO WHITE משחת שיניים להלבנה</ManufacturerItemDescription>
+          <UnitQty>מיליליטר</UnitQty>
+          <Quantity>0.00</Quantity>
+          <UnitOfMeasure>100 מ"ל</UnitOfMeasure>
+          <blsWeighted>0</blsWeighted>
+          <QtyInPackage>1.00</QtyInPackage>
+          <ItemPrice>17.90</ItemPrice>
+          <UnitOfMeasurePrice>0.00</UnitOfMeasurePrice>
+          <AllowDiscount>1</AllowDiscount>
+          <ItemStatus>0</ItemStatus>
+        </Line>
+      </Details>
+    </Header>
+  </Envelope>
+</OrderXml>
