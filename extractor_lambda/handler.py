@@ -5,7 +5,6 @@ import traceback
 import logging
 from pathlib import Path
 import gzip, zipfile, io
-
 import boto3
 from botocore.config import Config
 
@@ -49,7 +48,6 @@ def _candidates_from_payload(raw: bytes):
                 for info in z.infolist():
                     name_l = info.filename.lower()
                     data = z.read(info)
-                    # ZIP יכול להכיל gz פנימי
                     if name_l.endswith(".gz"):
                         try:
                             data = gzip.decompress(data)
@@ -59,7 +57,6 @@ def _candidates_from_payload(raw: bytes):
                     if name_l.endswith(".xml"):
                         out.append(data)
         except Exception:
-            # אם משהו נכשל ב-zip, לפחות נחזיר את המקור לנסיונות אחרים
             out.append(raw)
     else:
         out.append(raw)
@@ -71,12 +68,11 @@ def _normalize_xml_encoding(data: bytes) -> bytes | str:
     אחרת נחזיר את הבייטים כפי שהם.
     """
     head = data[:6]
-    # BOMs נפוצים או NUL-Bytes
     if head.startswith(b"\xff\xfe") or head.startswith(b"\xfe\xff") or b"\x00" in head:
         try:
             return data.decode("utf-16", errors="replace")
         except Exception:
-            return data  # ננסה כמו שהוא
+            return data
     # UTF-8 BOM
     if head.startswith(b"\xef\xbb\xbf"):
         return data[3:]
@@ -266,10 +262,11 @@ def lambda_handler(event, context=None):
                 json.dump(payload, f, ensure_ascii=False, indent=2)
             log.info(f"Saved local JSON to {out_path}")
 
-            # queue (optional)
+            # queue
             if _queue_enabled():
                 try:
-                    send_message(payload)
+                    send_message(payload, outbox_path=str(out_path))
+
                 except Exception as qe:
                     log.warning(f"Queue send failed (skipping): {qe}")
 
@@ -298,7 +295,7 @@ def process_local_file(file_path: str):
     p = Path(file_path).resolve()
     root = Path(S3_SIMULATOR_ROOT).resolve() / "providers"
     rel = p.relative_to(root)
-    key = f"providers/{str(rel).replace(os.sep, '/')}"  # S3-like key
+    key = f"providers/{str(rel).replace(os.sep, '/')}"
 
     provider, branch, type_, iso_ts = parse_key(key)
 
@@ -326,10 +323,11 @@ def process_local_file(file_path: str):
         json.dump(payload, f, ensure_ascii=False, indent=2)
     log.info(f"[local] saved: {out_path}")
 
-    # Queue (optional)
+    # Queue
     if _queue_enabled():
         try:
-            send_message(payload)
+            send_message(payload, outbox_path=str(out_path))
+
         except Exception as qe:
             log.warning(f"[local] queue send failed (skipping): {qe}")
 
@@ -340,3 +338,52 @@ def process_local_file(file_path: str):
         log.warning(f"[local] DB upsert failed (continuing): {de}")
 
     return payload
+
+
+log = logging.getLogger()
+log.setLevel(logging.INFO)
+
+def _print_preview(items, max_items=5):
+    for it in items[:max_items]:
+        log.info("  - %s | price=%s | unit=%s",
+                 it.get("product"), it.get("price"), it.get("unit"))
+    if len(items) > max_items:
+        log.info("  ... and %d more", len(items) - max_items)
+
+def handler(event, context=None):
+    """
+    SQS trigger: עובר על Records, קורא את ה-body (JSON),
+    ואם זו 'מעטפה' גדולה עם outbox_path — קורא משם את הקובץ המלא ומדפיס דוגמית.
+    """
+    records = event.get("Records", [])
+    for rec in records:
+        body = rec.get("body", "{}")
+        try:
+            msg = json.loads(body)
+        except Exception:
+            log.warning("Non-JSON body: %s", body[:200])
+            continue
+
+        provider = msg.get("provider")
+        branch   = msg.get("branch")
+        type_    = msg.get("type")
+        ts       = msg.get("timestamp")
+        total    = msg.get("items_total")
+        outbox   = msg.get("outbox_path")
+        items    = msg.get("items_sample") or msg.get("items") or []
+
+        log.info("SQS message: provider=%s branch=%s type=%s ts=%s total=%s",
+                 provider, branch, type_, ts, total if total is not None else len(items))
+
+        if not items and outbox and os.path.exists(outbox):
+            try:
+                with open(outbox, "r", encoding="utf-8") as f:
+                    full = json.load(f)
+                items = full.get("items", [])
+                log.info("Loaded full JSON from outbox_path (%s), items=%d", outbox, len(items))
+            except Exception as e:
+                log.warning("Failed reading outbox_path: %s", e)
+
+        _print_preview(items)
+
+    return {"ok": True, "processed": len(records)}

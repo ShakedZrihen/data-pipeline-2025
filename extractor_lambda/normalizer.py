@@ -1,4 +1,3 @@
-# normalizer.py
 import re
 from datetime import datetime, timezone
 
@@ -14,22 +13,17 @@ def _ts_to_iso(ts: str) -> str:
 
 def parse_key(key: str):
     """
-    תומך בשני דגמים:
     A) providers/<prov>/<branch>/(pricesFull|promoFull)_<YYYYMMDDHH[MM]>.gz
-    B) providers/<prov>/<branch>/(Price|Promo)(Full)?<chain>-<branch>-<YYYYMMDDHH[MM]>.gz
-       למשל: providers/Keshet/103/PriceFull7290785400000-103-202509010630.gz
-    מחזיר: (provider, branch, kind, iso_ts), כאשר kind הוא 'pricesFull'/'promoFull'
+    B) providers/<prov>/<branch>/(Price|Promo)(Full)?<chain>-<branch>-<YYYYMMDDHH[MM]>.gz'
     """
     k = key.replace("\\", "/")
 
-    # דגם A — S3-ready
     m = re.match(r"^providers/([^/]+)/([^/]+)/(?:prices?full|promofull)_(\d{10,12})\.gz$", k, flags=re.I)
     if m:
         provider, branch, ts = m.groups()
         kind = "pricesFull" if "price" in k.lower() else "promoFull"
         return provider, branch, kind, _ts_to_iso(ts)
 
-    # דגם B — שם מקורי מהפורטל
     m = re.match(
         r"^providers/([^/]+)/([^/]+)/(price|promo)(?:full)?[A-Za-z0-9._-]*-[A-Za-z0-9._-]*-(\d{10,12})\.gz$",
         k, flags=re.I
