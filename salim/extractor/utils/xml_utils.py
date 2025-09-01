@@ -3,7 +3,6 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-# TODO: need to correct all of this ! . 
 
 def _strip_ns(tag: str) -> str:
     # remove XML namespace like {urn:...}Tag -> Tag

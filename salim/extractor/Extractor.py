@@ -1,17 +1,18 @@
 import os, io, time, json, gzip
 import boto3
-from datetime import datetime
+from datetime import datetime , timezone
+from db_state import LastRunStore
 from sqs_producer import SQSProducer
 from utils.xml_utils import parse_xml_items, iso_from_filename
+from typing import Optional, List
 
 class Extractor:
     def __init__(self):
         self.bucket     = os.getenv("S3_BUCKET", "supermarkets")
-        self.endpoint   = os.getenv("S3_ENDPOINT_URL", "http://localstack:4566")
+        self.endpoint   = os.getenv("LOCALSTACK_ENDPOINT", "http://localstack:4566")
         self.region     = os.getenv("AWS_REGION", "us-east-1")
         self.poll_sec   = int(os.getenv("POLL_SECONDS", "10"))
         self.state_path = os.getenv("STATE_PATH", "./.seen_keys.json")
-
         self.s3 = boto3.client(
             "s3",
             endpoint_url=self.endpoint,
@@ -21,8 +22,8 @@ class Extractor:
         )
 
         self.producer = SQSProducer(os.getenv("SQS_QUEUE_URL"))
-
         self.seen = self._load_seen()
+        self.state = LastRunStore(table_name=os.getenv("DDB_TABLE"), region=self.region, endpoint_url=self.endpoint)
         print(f"Extractor ready. Bucket={self.bucket}, seen={len(self.seen)} keys")
 
 
@@ -32,8 +33,10 @@ class Extractor:
             try:
                 keys = self._list_gz_keys()
                 new_keys = [k for k in keys if k not in self.seen]
-                if new_keys:
-                    print(f"Found {len(new_keys)} new files")
+                if not new_keys:
+                    print("No new files found")
+                    continue
+                print(f"Found {len(new_keys)} new files")
                 for key in new_keys:
                     self._handle_key(key)
                 time.sleep(self.poll_sec)
@@ -48,6 +51,15 @@ class Extractor:
             print("Skip (no data)")
             return
         self.producer.send(data)
+        print(f"Sent {data['item_count']} items from {key} to SQS")
+        self.state.update(
+            data["provider"],
+            data["branch"],
+            data["type"],
+            data["timestamp"],
+            data["source_key"],
+        )
+        print("State updated in DynamoDB for this supermarket" , data["provider"], data["branch"])
         self.seen.add(key)
         self._save_seen()
 
@@ -58,6 +70,7 @@ class Extractor:
         """
         # 1) download + streaming decompress to XML text
         try:
+            print(f"Downloading and decompressing {key} ...")
             obj = self.s3.get_object(Bucket=self.bucket, Key=key)
             # Stream directly from the HTTP body to gzip without reading all bytes first
             with gzip.GzipFile(fileobj=obj["Body"]) as gz:
@@ -116,15 +129,13 @@ class Extractor:
             "items": items,
         }
 
-        # preview a couple of items (avoid printing huge payloads)
-        preview_n = min(2, len(items))
-        print(f"Built JSON with {len(items)} items. First {preview_n}:", items[:preview_n])
 
         return data
 
     def _list_gz_keys(self):
         keys = []
         token = None
+        print("Listing .gz files in bucket ...")
         while True:
             params = {"Bucket": self.bucket}
             if token:

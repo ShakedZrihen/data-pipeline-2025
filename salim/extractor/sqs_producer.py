@@ -1,6 +1,6 @@
 import os, json, boto3
 
-SQS_LIMIT_BYTES = 250_000
+SQS_LIMIT_BYTES = 225_000
 
 class SQSProducer:
     def __init__(self, queue_url: str | None):
@@ -8,7 +8,7 @@ class SQSProducer:
         if not self.queue_url:
             raise ValueError("SQS_QUEUE_URL env var is missing")
 
-        endpoint = os.environ.get("SQS_ENDPOINT_URL")
+        endpoint = os.environ.get("LOCALSTACK_ENDPOINT")
         region = os.environ.get("AWS_REGION", "us-east-1")
 
         kwargs = {"region_name": region}
@@ -27,6 +27,7 @@ class SQSProducer:
 
     def send_json(self, payload: dict):
         """Send payload to SQS; chunk on items if the message is too large."""
+        print("Preparing SQS message ")
         body = json.dumps(payload, ensure_ascii=False)
         if len(body.encode("utf-8")) <= SQS_LIMIT_BYTES:
             return self._send_body(body)
@@ -60,5 +61,6 @@ class SQSProducer:
             self._send_body(json.dumps(msg, ensure_ascii=False))
 
     def _send_body(self, body: str):
+        print(f"Sending SQS message ({len(body.encode('utf-8'))} bytes) , {self.queue_url}")
         resp = self.sqs.send_message(QueueUrl=self.queue_url, MessageBody=body)
         print("SQS MessageId:", resp.get("MessageId"))
