@@ -13,6 +13,101 @@ from selenium.webdriver.support import expected_conditions as EC
 import shutil
 # === S3 simulator target ===
 S3_SIMULATOR_ROOT = r"C:\Users\Daniella Elbaz\Desktop\שנה ג סמסטר קיץ\סדנת פייתון\data-pipeline-2025\examples\s3-simulator\providers"
+# ===== gov.il crawler (PDF/XLS/XLSX) =====
+import requests, re
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlsplit, unquote
+
+GOVIL_URL = "https://www.gov.il/he/pages/cpfta_prices_regulations"
+FILE_EXTS = (".pdf", ".xls", ".xlsx")
+
+def _safe_name(u: str) -> str:
+    name = os.path.basename(unquote(urlsplit(u).path))
+    name = re.sub(r'[<>:"/\\|?*]+', "_", name).strip()
+    return name or "downloaded_file"
+
+def _download_stream(u: str, out_dir: str):
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, _safe_name(u))
+    headers = {"User-Agent": "Mozilla/5.0"}
+    with requests.get(u, headers=headers, stream=True, timeout=60) as r:
+        r.raise_for_status()
+        with open(out_path, "wb") as f:
+            for chunk in r.iter_content(8192):
+                if chunk: f.write(chunk)
+    print(f"[gov.il] Saved: {out_path}")
+
+def crawl_govil():
+    # 1) ננסה סטטי
+    try:
+        html = requests.get(GOVIL_URL, headers={"User-Agent": "Mozilla/5.0"}, timeout=30).text
+    except Exception as e:
+        print(f"[gov.il] HTTP error: {e}")
+        html = ""
+
+    def collect_from_html(html_text: str, base: str):
+        soup = BeautifulSoup(html_text, "lxml")
+        urls = set()
+        for a in soup.select("a[href]"):
+            href = (a.get("href") or "").strip()
+            if not href: 
+                continue
+            full = urljoin(base, href)
+            if full.lower().endswith(FILE_EXTS):
+                urls.add(full)
+        # regex fallback
+        for m in re.finditer(r'(https?://[^\s"\'<>]+?\.(?:pdf|xls|xlsx))', html_text, re.IGNORECASE):
+            urls.add(m.group(1))
+        return sorted(urls)
+
+    links = collect_from_html(html, GOVIL_URL) if html else []
+    if not links:
+        # 2) fallback ל-Selenium כדי לחשוף "הצג עוד" וכו'
+        try:
+            # נשתמש באותו כרום עם אפשרויות דיפולט (אין הורדות דרך הכרום—נוריד עם requests)
+            chromedriver_path = get_chromedriver_path()
+            service = Service(chromedriver_path)
+            driver = webdriver.Chrome(service=service, options=Options())
+            driver.get(GOVIL_URL)
+            WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+            time.sleep(1.0)
+
+            # לחץ על טקסטים שיכולים לפתוח עוד תוכן
+            texts = ["הצג עוד","טען עוד","פתח","הרחב","רשימות מחירים","מסמכים",
+                     "load more","show more","expand","documents","files","all"]
+            for t in texts:
+                for el in driver.find_elements(By.XPATH, f"//*[contains(normalize-space(.), '{t}')]"):
+                    try:
+                        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
+                        el.click(); time.sleep(0.3)
+                    except Exception:
+                        pass
+
+            # גלילה
+            last_h = 0
+            for _ in range(6):
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);"); time.sleep(0.7)
+                h = driver.execute_script("return document.body.scrollHeight;")
+                if h == last_h: break
+                last_h = h
+
+            html2 = driver.page_source
+            links = collect_from_html(html2, driver.current_url)
+        finally:
+            try: driver.quit()
+            except: pass
+
+    if not links:
+        print("[gov.il] No downloadable files found.")
+        return
+
+    # הורדה לתיקייה מקומית לפי תאריך
+    out_dir = os.path.join(os.path.dirname(__file__), "downloads", "gov_il", datetime.now().strftime("%Y-%m-%d"))
+    for u in links:
+        try:
+            _download_stream(u, out_dir)
+        except Exception as e:
+            print(f"[gov.il] Download failed for {u}: {e}")
 
 def init_chrome_options(supermarket: str) -> Options:
     chrome_options = Options()
@@ -129,7 +224,6 @@ def crawler(username: str):
 
                 final_path = os.path.join(final_dir, filename)
                 try:
-                    # ידרוס אם הקובץ כבר קיים ביעד (Windows-friendly)
                     os.replace(full_path, final_path)
                 except Exception:
                     shutil.move(full_path, final_path)
@@ -147,7 +241,6 @@ def crawler(username: str):
             except Exception as e:
                 print(f"{filename}: {e}")
 
-        # ניקוי temp
         temp_dir = os.path.join(base_dir, 'providers', username, 'temp')
         if os.path.exists(temp_dir):
             try:
@@ -160,6 +253,7 @@ def crawler(username: str):
         print("Chrome driver closed.")
 
 if __name__ == "__main__":
+    crawl_govil()
     crawler("yohananof")
     time.sleep(1)
     crawler("Keshet")
