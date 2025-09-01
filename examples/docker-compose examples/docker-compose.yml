@@ -1,0 +1,132 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+    networks:
+      - pipeline-network
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - pipeline-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=pricedb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - pipeline-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  s3-producer:
+    build:
+      context: ./s3-producer
+      dockerfile: Dockerfile
+    container_name: s3-producer
+    depends_on:
+      - localstack
+    environment:
+      - S3_BUCKET=price-data
+      - SOURCE_FILE=/data/prices.json
+      - UPLOAD_INTERVAL=60
+    volumes:
+      - type: bind
+        source: /Users/shakedzrihen/dev/data-pipelines-2025/examples/simple-crawler/prices/84 - 0084/PriceFull7290055700007-0084-202508060510.json
+        target: /data/prices.json
+        read_only: true
+    networks:
+      - pipeline-network
+    restart: unless-stopped
+  s3-to-rabbitmq:
+    build:
+      context: ./s3-to-rabbitmq
+      dockerfile: Dockerfile
+    container_name: s3-to-rabbitmq
+    depends_on:
+      - localstack
+      - rabbitmq
+    environment:
+      - S3_BUCKET=price-data
+      - RABBITMQ_QUEUE=price-items
+      - CHECK_INTERVAL=30
+    networks:
+      - pipeline-network
+    restart: unless-stopped
+
+  rabbitmq-to-postgres:
+    build:
+      context: ./rabbitmq-to-postgres
+      dockerfile: Dockerfile
+    container_name: rabbitmq-to-postgres
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      - RABBITMQ_QUEUE=price-items
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=pricedb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - pipeline-network
+    restart: unless-stopped
+
+  fastapi-server:
+    build:
+      context: ./fastapi-server
+      dockerfile: Dockerfile
+    container_name: fastapi-server
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=pricedb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - pipeline-network
+    restart: unless-stopped
+
+volumes:
+  localstack_data:
+  rabbitmq_data:
+  postgres_data:
+
+networks:
+  pipeline-network:
+    driver: bridge
