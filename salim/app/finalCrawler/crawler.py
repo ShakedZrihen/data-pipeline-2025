@@ -38,7 +38,6 @@ def _download_stream(u: str, out_dir: str):
     print(f"[gov.il] Saved: {out_path}")
 
 def crawl_govil():
-    # 1) ננסה סטטי
     try:
         html = requests.get(GOVIL_URL, headers={"User-Agent": "Mozilla/5.0"}, timeout=30).text
     except Exception as e:
@@ -55,16 +54,13 @@ def crawl_govil():
             full = urljoin(base, href)
             if full.lower().endswith(FILE_EXTS):
                 urls.add(full)
-        # regex fallback
         for m in re.finditer(r'(https?://[^\s"\'<>]+?\.(?:pdf|xls|xlsx))', html_text, re.IGNORECASE):
             urls.add(m.group(1))
         return sorted(urls)
 
     links = collect_from_html(html, GOVIL_URL) if html else []
     if not links:
-        # 2) fallback ל-Selenium כדי לחשוף "הצג עוד" וכו'
         try:
-            # נשתמש באותו כרום עם אפשרויות דיפולט (אין הורדות דרך הכרום—נוריד עם requests)
             chromedriver_path = get_chromedriver_path()
             service = Service(chromedriver_path)
             driver = webdriver.Chrome(service=service, options=Options())
@@ -72,7 +68,6 @@ def crawl_govil():
             WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
             time.sleep(1.0)
 
-            # לחץ על טקסטים שיכולים לפתוח עוד תוכן
             texts = ["הצג עוד","טען עוד","פתח","הרחב","רשימות מחירים","מסמכים",
                      "load more","show more","expand","documents","files","all"]
             for t in texts:
@@ -83,7 +78,6 @@ def crawl_govil():
                     except Exception:
                         pass
 
-            # גלילה
             last_h = 0
             for _ in range(6):
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);"); time.sleep(0.7)
