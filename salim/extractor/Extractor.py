@@ -51,7 +51,6 @@ class Extractor:
         self.seen.add(key)
         self._save_seen()
 
-    # FIXME:  need to implement XML parsing for .gz files
     def _build_payload_from_gz(self, key: str):
         """
         Download + decompress a .gz XML, parse items, and build a normalized payload.
@@ -63,13 +62,12 @@ class Extractor:
             # Stream directly from the HTTP body to gzip without reading all bytes first
             with gzip.GzipFile(fileobj=obj["Body"]) as gz:
                 xml_bytes = gz.read()
-            text = xml_bytes.decode("utf-8", errors="ignore")
+            items = parse_xml_items(xml_bytes)
         except Exception as e:
             print(f"Failed to read/decompress {key}: {e}")
             return None
 
         # 2) parse XML into normalized items
-        items = parse_xml_items(text)
         if not items:
             print(f"No items parsed from XML: {key}")
             return None

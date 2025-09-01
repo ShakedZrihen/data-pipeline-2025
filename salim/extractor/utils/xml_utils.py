@@ -84,7 +84,7 @@ def _normalize_unit(unit_of_measure: Optional[str], is_weighted: Optional[bool])
 
 
 
-def parse_xml_items(xml_text: str) -> List[Dict[str, Any]]:
+def parse_xml_items(xml_text: bytes | str) -> List[Dict[str, Any]]:
     """
     Parse your price XML into a list of normalized item dicts.
     Output fields (JSON-safe):
@@ -154,11 +154,15 @@ def iso_from_filename(fname: str) -> str:
     Convert price_YYYYMMDD_HHMMSS.gz → ISO time (Z).
     If not found → now (UTC) in ISO Z.
     """
-    m = re.search(r"(\d{8}_\d{6})", fname)
+    m = re.search(r"(\d{8}_\d{6}|\d{12})", fname)
     if not m:
         return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    s = m.group(1)
     try:
-        dt = datetime.strptime(m.group(1), "%Y%m%d_%H%M%S").replace(tzinfo=timezone.utc)
-        return dt.isoformat().replace("+00:00", "Z")
+        if "_" in s:
+            dt = datetime.strptime(s, "%Y%m%d_%H%M%S")
+        else:
+            dt = datetime.strptime(s, "%Y%m%d%H%M")
+        return dt.replace(tzinfo=timezone.utc).isoformat().replace("+00:00", "Z")
     except Exception:
         return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
