@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Path, Query
 
 from ..database import conn
 from .supermarket import to_json
@@ -67,5 +67,21 @@ async def get_products(
     cur.execute(query, params)
     products = cur.fetchall()
     # Convert rows to a list of dictionaries
+    records = to_json(cur, products)
+    return records
+
+
+@router.get("/barcode/{barcode}")
+def get_product_by_barcode(
+    barcode: str = Path(..., description="The barcode of the product"),
+):
+    query = """
+    SELECT *
+    FROM pricing
+    WHERE product_id = %s;
+    """
+    params = (barcode,)
+    cur.execute(query, params)
+    products = cur.fetchall()
     records = to_json(cur, products)
     return records
