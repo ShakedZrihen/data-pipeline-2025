@@ -1,392 +1,160 @@
-# -*- coding: utf-8 -*-
-"""
-Single-file crawler:
-1) Downloads all PDF/XLS/XLSX from https://www.gov.il/he/pages/cpfta_prices_regulations
-2) Crawls 3 providers (including yohananof) on publishedprices, downloads latest PriceFull/PromoFull .gz,
-   saves original filenames AND an S3-ready copy:
-      ./providers/<provider>/<branch>/pricesFull_YYYYMMDDHH[MM].gz
-      ./providers/<provider>/<branch>/promoFull_YYYYMMDDHH[MM].gz
-
-Run:  python crawler.py
-Deps: pip install requests beautifulsoup4 lxml selenium webdriver-manager
-"""
-
-import os, re, sys, time, logging, shutil
-from datetime import datetime
-from urllib.parse import urljoin, urlsplit, unquote
-from collections import deque
-import requests
-from bs4 import BeautifulSoup
-
-# ---- Selenium ----
+import os
+import time
+import platform
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
+from datetime import datetime
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
+import shutil
 
-# ================== CONFIG ==================
-HEADLESS = False
-TIMEOUT_SEC = 25
+def init_chrome_options(supermarket: str) -> Options:
+    chrome_options = Options()
 
-BASE_GOVIL_URL = "https://www.gov.il/he/pages/cpfta_prices_regulations"
-DOWNLOAD_ROOT = os.path.join(os.path.dirname(__file__), "downloads", "gov_il")
-FILE_EXTS = (".pdf", ".xls", ".xlsx")
+    # --- עדכני את הנתיב לבסיס הפרויקט אצלך ---
+    base_dir = r'C:\Users\Daniella Elbaz\Desktop\שנה ג סמסטר קיץ\סדנת פייתון\data-pipeline-2025\salim\app\finalCrawler'
+    download_dir = os.path.join(base_dir, 'providers', supermarket, 'temp')
+    os.makedirs(download_dir, exist_ok=True)
 
-PROVIDERS = ["yohananof", "Keshet", "RamiLevi"]
-PUBLISHEDPRICES_LOGIN = "https://url.publishedprices.co.il/login"
+    prefs = {
+        "download.default_directory": download_dir,
+        "download.prompt_for_download": False,
+        "download.directory_upgrade": True,
+        "safebrowsing.enabled": True
+    }
 
-LOGLEVEL = logging.INFO
-logging.basicConfig(level=LOGLEVEL, format="%(asctime)s | %(levelname)s | %(message)s", datefmt="%H:%M:%S")
+    chrome_options.add_experimental_option("prefs", prefs)
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--disable-dev-shm-usage")
 
-# ================== UTILS ==================
-def ensure_dir(path: str): os.makedirs(path, exist_ok=True)
+    return chrome_options
 
-def today_folder(root: str) -> str:
-    d = datetime.now().strftime("%Y-%m-%d")
-    out = os.path.join(root, d); ensure_dir(out); return out
-
-def safe_filename_from_url(url: str) -> str:
-    name = os.path.basename(unquote(urlsplit(url).path))
-    name = re.sub(r'[<>:"/\\|?*]+', "_", name).strip()
-    return name or "downloaded_file"
-
-def request_html(url: str) -> str:
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-    for i in range(3):
-        try:
-            r = requests.get(url, headers=headers, timeout=20)
-            r.encoding = r.encoding or "utf-8"
-            r.raise_for_status()
-            return r.text
-        except Exception as e:
-            logging.warning(f"HTTP attempt {i+1} failed: {e}"); time.sleep(1.0)
-    return ""
-
-def download_stream(url: str, out_dir: str) -> str:
-    ensure_dir(out_dir)
-    name = safe_filename_from_url(url)
-    out_path = os.path.join(out_dir, name)
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-    with requests.get(url, headers=headers, stream=True, timeout=60) as r:
-        r.raise_for_status()
-        with open(out_path, "wb") as f:
-            for chunk in r.iter_content(8192):
-                if chunk: f.write(chunk)
-    logging.info(f"⬇️ Saved: {out_path}")
-    return out_path
-
-def parse_ts_from_str(s: str):
-    # prefer 12 digits (YYYYMMDDHHMM), else 10 digits (YYYYMMDDHH)
-    m12 = re.search(r'(\d{12})', s)
-    if m12:
-        try: return datetime.strptime(m12.group(1), "%Y%m%d%H%M"), m12.group(1)
-        except: pass
-    m10 = re.search(r'(\d{10})', s)
-    if m10:
-        try: return datetime.strptime(m10.group(1), "%Y%m%d%H"), m10.group(1)
-        except: pass
-    return None, None
-
-# ================== GOV.IL CRAWL ==================
-def extract_links_static(html: str, base_url: str) -> list[str]:
-    soup = BeautifulSoup(html, "lxml"); links = []
-
-    for a in soup.select("a[href]"):
-        href = a.get("href", "").strip(); 
-        if not href: continue
-        full = urljoin(base_url, href)
-        if full.lower().endswith(FILE_EXTS): links.append(full)
-
-    for el in soup.select("[data-url], [data-href]"):
-        href = (el.get("data-url") or el.get("data-href") or "").strip()
-        if href:
-            full = urljoin(base_url, href)
-            if full.lower().endswith(FILE_EXTS): links.append(full)
-
-    for m in re.finditer(r'href=["\']([^"\']+?\.(?:pdf|xls|xlsx))["\']', html, flags=re.IGNORECASE):
-        full = urljoin(base_url, m.group(1)); links.append(full)
-
-    uniq, seen = [], set()
-    for u in links:
-        if u not in seen: seen.add(u); uniq.append(u)
-    return uniq
-
-def build_driver(download_dir: str = None) -> webdriver.Chrome:
-    opts = Options()
-    if HEADLESS: opts.add_argument("--headless=new")
-    opts.add_argument("--disable-gpu"); opts.add_argument("--no-sandbox")
-    opts.add_argument("--window-size=1920,1080"); opts.add_argument("--disable-dev-shm-usage")
-    opts.add_experimental_option("excludeSwitches", ["enable-logging"])
-    if download_dir:
-        ensure_dir(download_dir)
-        prefs = {
-            "download.default_directory": download_dir,
-            "download.prompt_for_download": False,
-            "download.directory_upgrade": True,
-            "safebrowsing.enabled": True
-        }
-        opts.add_experimental_option("prefs", prefs)
-    path = ChromeDriverManager().install()
-    logging.info(f"Chrome driver: {path}")
-    return webdriver.Chrome(service=Service(path), options=opts)
-
-def click_expanders_and_scroll(driver: webdriver.Chrome):
-    texts_he = ["הצג עוד","טען עוד","פתח","הרחב","הצגת כל","כל הרשימות","רשימות מחירים","מחירונים","מסמכים","פרטים נוספים"]
-    texts_en = ["load more","show more","expand","documents","files","all"]
-    for t in texts_he+texts_en:
-        for el in driver.find_elements(By.XPATH, f"//*[contains(normalize-space(.), '{t}')]"):
-            try: driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el); el.click(); time.sleep(0.3)
-            except: pass
-    for sel in ["[aria-expanded='false']","[role='button']",".accordion,.gov-accordion,.expand,.collapse,.more,.load-more,.btn,.button","details summary"]:
-        for el in driver.find_elements(By.CSS_SELECTOR, sel):
-            try:
-                if el.get_attribute("aria-expanded") in (None,"false"):
-                    driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el); el.click(); time.sleep(0.2)
-            except: pass
-    last_h = 0
-    for _ in range(6):
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);"); time.sleep(0.7)
-        h = driver.execute_script("return document.body.scrollHeight;")
-        if h == last_h: break
-        last_h = h
-
-def selenium_collect_links(url: str) -> list[str]:
-    driver = build_driver()
+def get_chromedriver_path() -> str:
     try:
+        if platform.system() == "Darwin" and platform.machine() == "arm64":
+            print("Detected macOS ARM64, using specific chromedriver...")
+            from webdriver_manager.core.os_manager import ChromeType
+            driver_path = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+        else:
+            driver_path = ChromeDriverManager().install()
+
+        print(f"Chrome driver path: {driver_path}")
+        return driver_path
+    except Exception as e:
+        print(f"Error with webdriver-manager: {e}")
+        print("Falling back to system chromedriver...")
+        return "chromedriver"
+
+def crawler(username: str):
+    # --- עדכני את הנתיב לבסיס הפרויקט אצלך ---
+    base_dir = r'C:\Users\Daniella Elbaz\Desktop\שנה ג סמסטר קיץ\סדנת פייתון\data-pipeline-2025\salim\app\finalCrawler'
+    chrome_options = init_chrome_options(username)
+    download_dir = os.path.join(base_dir, 'providers', username, 'temp')
+
+    url = "https://url.publishedprices.co.il/login"  # הכתובת של פורטל הקבצים
+
+    try:
+        chromedriver_path = get_chromedriver_path()
+        service = Service(chromedriver_path)
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+    except Exception as e:
+        print(f"Failed to initialize Chrome driver: {e}")
+        driver = webdriver.Chrome(options=chrome_options)
+
+    try:
+        print(f"Opening {url}")
         driver.get(url)
-        WebDriverWait(driver, TIMEOUT_SEC).until(EC.presence_of_element_located((By.TAG_NAME,"body")))
-        time.sleep(1.0)
-        click_expanders_and_scroll(driver)
-        urls = set()
-        for a in driver.find_elements(By.XPATH, "//a[@href]"):
-            href = a.get_attribute("href") or ""
-            if href.lower().endswith(FILE_EXTS): urls.add(href)
-        html = driver.page_source
-        for m in re.finditer(r'(https?://[^\s"\'<>]+?\.(?:pdf|xls|xlsx))', html, flags=re.IGNORECASE):
-            urls.add(m.group(1))
-        return sorted(urls)
-    finally:
-        driver.quit()
-def crawl_govil():
-    out_dir = today_folder(DOWNLOAD_ROOT)
-    seen = set()
-    q = deque([(BASE_GOVIL_URL, 0)])
-    found_any = False
+        time.sleep(2)
 
-    def is_file_url(u: str) -> bool:
-        return u.lower().endswith(FILE_EXTS)
+        # התחברות: שם משתמש = שם הסופר, סיסמה ריקה (כמו בדוגמה שלך)
+        driver.find_element(By.NAME, "username").send_keys(username)
+        driver.find_element(By.NAME, "password").send_keys("")
+        driver.find_element(By.NAME, "password").send_keys(Keys.RETURN)
+        time.sleep(3)
 
-    def want_child(base_url: str, href: str) -> str | None:
-        """החלטה אם להיכנס לדף משנה; מחזיר URL מוחלט אם כן."""
-        if not href or href.startswith("#"):
-            return None
-        full = urljoin(base_url, href)
-        # אם זה קובץ — נוריד בלי להעמיק
-        if is_file_url(full):
-            return full  # נשתמש בזה כהורדה ישירה (לא כ"דף")
-        # נרד לדפי משנה גם אם הם מחוץ ל-gov.il, כל עוד זה עומק קטן
-        return full
+        # המתנה לטעינת טבלת הקבצים
+        WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "tbody.context.allow-dropdown-overflow tr"))
+        )
 
-    while q:
-        url, depth = q.popleft()
-        if (url, depth) in seen or depth > 2:
-            continue
-        seen.add((url, depth))
+        rows = driver.find_elements(By.CSS_SELECTOR, "tbody.context.allow-dropdown-overflow tr")
 
-        logging.info(f"[gov.il] Visiting (depth {depth}): {url}")
-        html = request_html(url)
-        if not html:
-            continue
-
-        # קבצים ישירים מהדף הנוכחי (סטטי)
-        links = extract_links_static(html, url)
-
-        # אם זה הדף הראשון ולא מצאנו — לנסות Selenium כדי לפתוח "הצג עוד"/אקורדיון
-        if not links and depth == 0:
-            logging.info("[gov.il] No links in static HTML, switching to Selenium …")
+        file_map = []
+        for row in rows:
             try:
-                links = selenium_collect_links(url)
-            except Exception as e:
-                logging.error(f"[gov.il] Selenium failed: {e}")
-
-        if links:
-            found_any = True
-            logging.info(f"[gov.il] Found {len(links)} file(s) @ depth {depth}.")
-            for u in links:
-                try:
-                    download_stream(u, out_dir)
-                except Exception as e:
-                    logging.error(f"[gov.il] Download failed for {u}: {e}")
-
-        # הוספת דפי משנה/קבצים מהקישורים בדף:
-        soup = BeautifulSoup(html, "lxml")
-        for a in soup.select("a[href]"):
-            href = a.get("href", "").strip()
-            child = want_child(url, href)
-            if not child:
-                continue
-            # אם זה קובץ — נוריד כאן ולא נוסיף ל-q
-            if is_file_url(child):
-                try:
-                    download_stream(child, out_dir)
-                    found_any = True
-                except Exception as e:
-                    logging.error(f"[gov.il] Download failed for {child}: {e}")
-            else:
-                # זה דף — נוסיף לתור עמוק יותר
-                if (child, depth + 1) not in seen and depth + 1 <= 2:
-                    q.append((child, depth + 1))
-
-    if not found_any:
-        logging.warning("[gov.il] No downloadable files found in page or children.")
-        dbg = os.path.join(DOWNLOAD_ROOT, "debug_govil.html")
-        ensure_dir(DOWNLOAD_ROOT)
-        with open(dbg, "w", encoding="utf-8") as f:
-            f.write(request_html(BASE_GOVIL_URL) or "")
-        logging.info(f"[gov.il] Saved debug: {dbg}")
-
-# ================== PROVIDERS CRAWL ==================
-def provider_downloads(provider: str):
-    base_dir = os.path.join(os.path.dirname(__file__), "providers", provider)
-    temp_dir = os.path.join(base_dir, "temp"); ensure_dir(temp_dir)
-    driver = build_driver(download_dir=temp_dir)
-
-    def wait_for_files_area(d):
-        sels = [
-            "tbody.context.allow-dropdown-overflow tr",
-            "table tbody tr",
-            "table tr",
-        ]
-        for s in sels:
-            if d.find_elements(By.CSS_SELECTOR, s):
-                return True
-        return False
-
-    def collect_links_dom_regex():
-        items = []
-        # DOM
-        rows = driver.find_elements(By.CSS_SELECTOR, "tbody.context.allow-dropdown-overflow tr, table tbody tr, table tr")
-        for r in rows:
-            try:
-                a = r.find_element(By.CSS_SELECTOR, "a[href]")
-                href = a.get_attribute("href") or ""
-                txt  = (a.text or a.get_attribute("textContent") or "")
-                joined = href + " " + txt
-                if (".gz" in joined) and (("PriceFull" in joined) or ("PromoFull" in joined)):
-                    tsdt, ts_raw = parse_ts_from_str(joined)
-                    if tsdt:
-                        items.append((href, txt, tsdt, ts_raw))
+                link_el = row.find_element(By.CSS_SELECTOR, "a")
+                text = link_el.text
+                href = link_el.get_attribute("href")
+                # מחפשים קבצי PriceFull עם סיומת .gz ושולפים את השעה מהשם
+                if "PriceFull" in text and ".gz" in text:
+                    timestamp_str = text.split("-")[-1].replace(".gz", "")[:10]  # YYYYMMDDHH
+                    timestamp = datetime.strptime(timestamp_str, "%Y%m%d%H")
+                    file_map.append((href, timestamp))
             except Exception:
                 continue
-        # Regex על כל ה-HTML (כולל lazy content)
-        html = driver.page_source
-        for m in re.finditer(r'(https?://[^\s"\'<>]+?\.gz)', html, flags=re.IGNORECASE):
-            url = m.group(1)
-            if ("PriceFull" in url) or ("PromoFull" in url):
-                tsdt, ts_raw = parse_ts_from_str(url)
-                if tsdt:
-                    items.append((url, "", tsdt, ts_raw))
-        # ביטול כפילויות לפי שם
-        by_name = {}
-        for href, txt, tsdt, ts_raw in items:
-            name = os.path.basename(href.split("?")[0])
-            by_name[name] = (href, txt, tsdt, ts_raw)
-        return list(by_name.values())
 
-    try:
-        logging.info(f"[{provider}] Opening login …")
-        driver.get(PUBLISHEDPRICES_LOGIN)
-        WebDriverWait(driver, TIMEOUT_SEC).until(EC.presence_of_element_located((By.NAME,"username")))
-        u = driver.find_element(By.NAME,"username"); p = driver.find_element(By.NAME,"password")
-        u.clear(); u.send_keys(provider); p.clear(); p.send_keys(""); p.send_keys(Keys.RETURN)
-
-        # המתנה לניווט /file ואז לטעינת רשומות או לפחות הגעת HTML עם "gz"
-        WebDriverWait(driver, max(TIMEOUT_SEC, 35)).until(lambda d: d.current_url and "/file" in d.current_url)
-        WebDriverWait(driver, max(TIMEOUT_SEC, 35)).until(lambda d: wait_for_files_area(d) or ("gz" in d.page_source))
-
-        # גלילות לטעינה עצלה
-        last_h = 0
-        for _ in range(10):
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(0.9)
-            h = driver.execute_script("return document.body.scrollHeight;")
-            if h == last_h: break
-            last_h = h
-
-        items = collect_links_dom_regex()
-        if not items:
-            # שמירת דיבאג
-            png = os.path.join(base_dir, "debug_no_files.png")
-            html = os.path.join(base_dir, "debug_no_files.html")
-            try:
-                driver.save_screenshot(png)
-                with open(html, "w", encoding="utf-8") as f:
-                    f.write(driver.page_source)
-                logging.warning(f"[{provider}] No PriceFull/PromoFull links detected. Saved debug: {png} , {html}")
-            except Exception:
-                logging.warning(f"[{provider}] No links + debug save failed.")
+        if not file_map:
+            print("No files found.")
+            driver.quit()
             return
 
-        latest_hour = max(x[2] for x in items)
-        latest = [x for x in items if x[2] == latest_hour]
-        logging.info(f"[{provider}] Found {len(latest)} files from {latest_hour.strftime('%Y-%m-%d %H:%M')}")
+        latest_hour = max(file_map, key=lambda x: x[1])[1]
+        latest_files = [link for link, ts in file_map if ts == latest_hour]
 
-        for href, txt, tsdt, ts_raw in latest:
-            filename = os.path.basename((href or txt).split("?")[0])
+        print(f"\nFound {len(latest_files)} files from {latest_hour.strftime('%Y-%m-%d %H:00')}:")
+        for link in latest_files:
+            print(link)
+            filename = os.path.basename(link)
             try:
-                # טריגר הורדה
-                try:
-                    el = driver.find_element(By.LINK_TEXT, filename); el.click()
-                except Exception:
-                    driver.get(href)
-                # המתנה להורדה מלאה ל-temp
-                for _ in range(180):
-                    if os.path.exists(os.path.join(temp_dir, filename)) and not any(f.endswith(".crdownload") for f in os.listdir(temp_dir)):
-                        break
-                    time.sleep(1)
-                src = os.path.join(temp_dir, filename)
-                if not os.path.exists(src):
-                    raise FileNotFoundError(f"Downloaded file not found: {src}")
+                # קליק לפי טקסט קישור = שם הקובץ
+                el = driver.find_element(By.LINK_TEXT, filename)
+                el.click()
+                print(f"Downloading: {filename}")
+                time.sleep(2)
 
+                full_path = os.path.join(download_dir, filename)
+                # ממתינים עד שההורדה מסתיימת (אין crdownload)
+                while not os.path.exists(full_path):
+                    time.sleep(1)
+                while any(f.endswith(".crdownload") for f in os.listdir(download_dir)):
+                    time.sleep(1)
+
+                # חילוץ מזהה סניף מהשם
                 parts = filename.split("-")
                 branch_id = parts[1] if len(parts) >= 3 else "unknown"
-                final_dir = os.path.join(base_dir, branch_id); ensure_dir(final_dir)
-                dst = os.path.join(final_dir, filename)
-                os.replace(src, dst)
-                logging.info(f"[{provider}] Saved original: {dst}")
 
-                # S3-ready שם מקביל
-                lower = (href + " " + txt).lower()
-                kind = "pricesFull" if "pricefull" in lower else ("promoFull" if "promofull" in lower else None)
-                if kind and ts_raw:
-                    s3_name = f"{kind}_{ts_raw}.gz"
-                    s3_path = os.path.join(final_dir, s3_name)
-                    try: shutil.copyfile(dst, s3_path); logging.info(f"[{provider}] S3-ready copy: {s3_path}")
-                    except Exception as e: logging.warning(f"[{provider}] S3 copy failed: {e}")
+                final_dir = os.path.join(base_dir, 'providers', username, branch_id)
+                os.makedirs(final_dir, exist_ok=True)
+
+                final_path = os.path.join(final_dir, filename)
+                os.rename(full_path, final_path)
+                print(f"Saved to: {final_path}")
 
             except Exception as e:
-                logging.error(f"[{provider}] Download error for {filename}: {e}")
+                print(f"{filename}: {e}")
+
+        # ניקוי temp
+        temp_dir = os.path.join(base_dir, 'providers', username, 'temp')
+        if os.path.exists(temp_dir):
+            try:
+                shutil.rmtree(temp_dir)
+            except Exception as e:
+                print(f"Could not delete temp folder: {e}")
 
     finally:
         driver.quit()
-        try: shutil.rmtree(temp_dir, ignore_errors=True)
-        except Exception as e: logging.warning(f"[{provider}] temp cleanup: {e}")
-
-def crawl_providers():
-    for p in PROVIDERS:
-        provider_downloads(p)
-
-# ================== MAIN ==================
-def main():
-    # שלב 1: gov.il
-    crawl_govil()
-    # שלב 2: 3 ספקים (כולל yohananof)
-    crawl_providers()
-    logging.info("✅ Done.")
+        print("Chrome driver closed.")
 
 if __name__ == "__main__":
-    main()
+    crawler("yohananof")
+    time.sleep(1)
+    crawler("Keshet")
+    time.sleep(1)
+    crawler("osherad")
