@@ -11,11 +11,12 @@ from datetime import datetime
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import shutil
+# === S3 simulator target ===
+S3_SIMULATOR_ROOT = r"C:\Users\Daniella Elbaz\Desktop\שנה ג סמסטר קיץ\סדנת פייתון\data-pipeline-2025\examples\s3-simulator\providers"
 
 def init_chrome_options(supermarket: str) -> Options:
     chrome_options = Options()
 
-    # --- עדכני את הנתיב לבסיס הפרויקט אצלך ---
     base_dir = r'C:\Users\Daniella Elbaz\Desktop\שנה ג סמסטר קיץ\סדנת פייתון\data-pipeline-2025\salim\app\finalCrawler'
     download_dir = os.path.join(base_dir, 'providers', supermarket, 'temp')
     os.makedirs(download_dir, exist_ok=True)
@@ -53,12 +54,11 @@ def get_chromedriver_path() -> str:
         return "chromedriver"
 
 def crawler(username: str):
-    # --- עדכני את הנתיב לבסיס הפרויקט אצלך ---
     base_dir = r'C:\Users\Daniella Elbaz\Desktop\שנה ג סמסטר קיץ\סדנת פייתון\data-pipeline-2025\salim\app\finalCrawler'
     chrome_options = init_chrome_options(username)
     download_dir = os.path.join(base_dir, 'providers', username, 'temp')
 
-    url = "https://url.publishedprices.co.il/login"  # הכתובת של פורטל הקבצים
+    url = "https://url.publishedprices.co.il/login"
 
     try:
         chromedriver_path = get_chromedriver_path()
@@ -73,13 +73,11 @@ def crawler(username: str):
         driver.get(url)
         time.sleep(2)
 
-        # התחברות: שם משתמש = שם הסופר, סיסמה ריקה (כמו בדוגמה שלך)
         driver.find_element(By.NAME, "username").send_keys(username)
         driver.find_element(By.NAME, "password").send_keys("")
         driver.find_element(By.NAME, "password").send_keys(Keys.RETURN)
         time.sleep(3)
 
-        # המתנה לטעינת טבלת הקבצים
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "tbody.context.allow-dropdown-overflow tr"))
         )
@@ -92,9 +90,8 @@ def crawler(username: str):
                 link_el = row.find_element(By.CSS_SELECTOR, "a")
                 text = link_el.text
                 href = link_el.get_attribute("href")
-                # מחפשים קבצי PriceFull עם סיומת .gz ושולפים את השעה מהשם
                 if "PriceFull" in text and ".gz" in text:
-                    timestamp_str = text.split("-")[-1].replace(".gz", "")[:10]  # YYYYMMDDHH
+                    timestamp_str = text.split("-")[-1].replace(".gz", "")[:10]
                     timestamp = datetime.strptime(timestamp_str, "%Y%m%d%H")
                     file_map.append((href, timestamp))
             except Exception:
@@ -113,20 +110,17 @@ def crawler(username: str):
             print(link)
             filename = os.path.basename(link)
             try:
-                # קליק לפי טקסט קישור = שם הקובץ
                 el = driver.find_element(By.LINK_TEXT, filename)
                 el.click()
                 print(f"Downloading: {filename}")
                 time.sleep(2)
 
                 full_path = os.path.join(download_dir, filename)
-                # ממתינים עד שההורדה מסתיימת (אין crdownload)
                 while not os.path.exists(full_path):
                     time.sleep(1)
                 while any(f.endswith(".crdownload") for f in os.listdir(download_dir)):
                     time.sleep(1)
 
-                # חילוץ מזהה סניף מהשם
                 parts = filename.split("-")
                 branch_id = parts[1] if len(parts) >= 3 else "unknown"
 
@@ -134,9 +128,22 @@ def crawler(username: str):
                 os.makedirs(final_dir, exist_ok=True)
 
                 final_path = os.path.join(final_dir, filename)
-                os.rename(full_path, final_path)
+                try:
+                    # ידרוס אם הקובץ כבר קיים ביעד (Windows-friendly)
+                    os.replace(full_path, final_path)
+                except Exception:
+                    shutil.move(full_path, final_path)
                 print(f"Saved to: {final_path}")
-
+                # --- S3-simulator copy (exact same filename) ---
+                try:
+                    s3_dir = os.path.join(S3_SIMULATOR_ROOT, username, branch_id)
+                    os.makedirs(s3_dir, exist_ok=True)
+                    s3_target = os.path.join(s3_dir, filename)
+                    shutil.copyfile(final_path, s3_target)
+                    print(f"S3-simulator copy: {s3_target}")
+                except Exception as e:
+                    print(f"Could not copy to S3 simulator: {e}")
+                # --- end S3-simulator copy ---
             except Exception as e:
                 print(f"{filename}: {e}")
 
