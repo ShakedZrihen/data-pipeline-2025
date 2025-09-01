@@ -173,7 +173,7 @@ class Crawler:
         return branch, date
 
     def wait_for_any_download_complete(
-        self, download_dir: str, timeout: int = 10, poll_interval: float = 0.5
+        self, download_dir: str, timeout: int = 30, poll_interval: float = 0.5
     ):
         """
         Wait until all .crdownload files in the directory are gone,

@@ -35,5 +35,3 @@ RUN pip install --no-cache-dir \
     boto3 \
     webdriver-manager
 CMD ["sh", "-c", "python3 goodpharm.py && python3 citymarket.py && python3 yohananof.py"]
-
-# CMD ["python3","goodpharm.py","&&","python3","citymarket.py","&&","python3","yohananof.py"]

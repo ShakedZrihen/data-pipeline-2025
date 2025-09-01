@@ -15,6 +15,7 @@ services:
       retries: 10
     networks:
       - backend
+    restart: always
 
   mongodb:
     image: mongo:7
@@ -116,6 +117,7 @@ services:
     networks:
       - backend
     tty: true
+    restart: always
 
 networks:
   backend:
