@@ -101,7 +101,6 @@ def crawl_govil():
         print("[gov.il] No downloadable files found.")
         return
 
-    # הורדה לתיקייה מקומית לפי תאריך
     out_dir = os.path.join(os.path.dirname(__file__), "downloads", "gov_il", datetime.now().strftime("%Y-%m-%d"))
     for u in links:
         try:
