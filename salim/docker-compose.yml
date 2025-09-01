@@ -22,7 +22,7 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3,sqs
+      - SERVICES=s3,sqs,dynamodb
       - DEBUG=1
       - PERSISTENCE=1
     volumes:
@@ -30,9 +30,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./gov_crawler/scripts/init-s3.sh:/etc/localstack/init/ready.d/00-init-s3.sh
       - ./extractor/scripts/init-sqs.sh:/etc/localstack/init/ready.d/01-init-sqs.sh
+      - ./extractor/scripts/init-ddb.sh:/etc/localstack/init/ready.d/02-init-ddb.sh
     entrypoint: >
       sh -c "chmod +x /etc/localstack/init/ready.d/00-init-s3.sh;
              chmod +x /etc/localstack/init/ready.d/01-init-sqs.sh;
+             chmod +x /etc/localstack/init/ready.d/02-init-ddb.sh;
              exec docker-entrypoint.sh localstack"
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
@@ -93,11 +95,12 @@ services:
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_REGION=us-east-1
-      - S3_ENDPOINT_URL=http://localstack:4566
+      - LOCALSTACK_ENDPOINT=http://localstack:4566
       - S3_BUCKET=supermarkets
       - SQS_QUEUE_URL=http://localstack:4566/000000000000/sqs-queue
-      - POLL_SECONDS=15
+      - POLL_SECONDS=50
       - STATE_PATH=/.seen_keys.json
+      - DDB_TABLE=ExtractorState
     volumes:
       - ./extractor:/app/extractor
     depends_on:
