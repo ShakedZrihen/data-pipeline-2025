@@ -101,6 +101,12 @@ services:
       - POLL_SECONDS=50
       - STATE_PATH=/.seen_keys.json
       - DDB_TABLE=ExtractorState
+    command:
+      [
+        "sh",
+        "-lc",
+        "echo 'poller: waiting 30s…'; sleep 30; python -u /app/extractor/Extractor.py",
+      ]
     volumes:
       - ./extractor:/app/extractor
     depends_on:
