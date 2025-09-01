@@ -115,6 +115,23 @@ services:
     networks:
       - app-net
 
+  enricher:
+    build:
+      context: .
+      dockerfile: enricher/Dockerfile.enricher
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=us-east-1
+      - SQS_QUEUE_URL=http://localstack:4566/000000000000/sqs-queue
+      - SQS_WAIT_TIME_SECONDS=15
+      - SQS_MAX_MESSAGES=10
+      - SQS_VISIBILITY_TIMEOUT=60
+    depends_on:
+      localstack:
+        condition: service_healthy
+    networks: [app-net]
+
 networks:
   app-net:
     driver: bridge
