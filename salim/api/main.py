@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routes import supermarket
+from .routes import products, supermarket
 
 app = FastAPI(
     title="Salim API",
@@ -31,3 +31,4 @@ app.add_middleware(
 )
 
 app.include_router(supermarket.router)
+app.include_router(products.router)
