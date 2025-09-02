@@ -7,9 +7,9 @@ A comprehensive data pipeline for collecting, processing, and serving supermarke
 ```mermaid
 ---
 config:
-  layout: fixed
+  layout: dagre
 ---
-flowchart TD
+flowchart LR
     C["<b>Crawler</b><br>Service Web Scraping<br>Downloads Price &amp; Promo Files"] -- <br> --> MINIO["<b>MinIO Storage</b><br>S3 Compatible<br><br>"]
     MINIO -- <br> --> E["<b>Extractor Service<br></b>XML Processing<br>Data Transformation"]
     E -- <br> --> RMQ["<b>RabbitMQ</b><br>Message Queue<br>Reliable Processing"] & MONGO["<b>MongoDB</b><br>State Management<br>Processing Status"]
@@ -17,7 +17,6 @@ flowchart TD
     EN -- <br> --> PG["<b>PostgreSQL</b><br>Primary Database<br>Enriched Data"]
     PG -- <br> --> API["FastAPI Service<br>REST API<br>Swagger Documentation"]
     API --> USERS["Users &amp; Applications<br>API Consumers<br>Data Access"]
-    n1[" "] --> n2[" "]
     C@{ shape: rounded}
     MINIO@{ shape: cyl}
     E@{ shape: rounded}
@@ -25,8 +24,6 @@ flowchart TD
     MONGO@{ shape: cyl}
     EN@{ shape: rounded}
     PG@{ shape: cyl}
-    n1@{ shape: anchor}
-    n2@{ shape: anchor}
      C:::processing
      MINIO:::storage
      E:::processing
