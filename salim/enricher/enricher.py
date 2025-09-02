@@ -1,4 +1,3 @@
-# enricher/main.py
 from sqs_consumer import SQSConsumer
 
 def handle(body: str) -> bool:

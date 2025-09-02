@@ -31,11 +31,15 @@ services:
       - ./gov_crawler/scripts/init-s3.sh:/etc/localstack/init/ready.d/00-init-s3.sh
       - ./extractor/scripts/init-sqs.sh:/etc/localstack/init/ready.d/01-init-sqs.sh
       - ./extractor/scripts/init-ddb.sh:/etc/localstack/init/ready.d/02-init-ddb.sh
-    entrypoint: >
-      sh -c "chmod +x /etc/localstack/init/ready.d/00-init-s3.sh;
-             chmod +x /etc/localstack/init/ready.d/01-init-sqs.sh;
-             chmod +x /etc/localstack/init/ready.d/02-init-ddb.sh;
-             exec docker-entrypoint.sh localstack"
+    entrypoint:
+      - /bin/sh
+      - -lc
+      - |
+        set -e
+        for f in /etc/localstack/init/ready.d/*.sh; do
+          [ -f "$f" ] && sed -i 's/\r$//' "$f" && chmod +x "$f";
+        done
+        exec docker-entrypoint.sh localstack
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
       interval: 5s
@@ -105,7 +109,7 @@ services:
       [
         "sh",
         "-lc",
-        "echo 'poller: waiting 30s…'; sleep 30; python -u /app/extractor/Extractor.py",
+        "echo 'poller: waiting 60s…'; sleep 60; python -u /app/extractor/Extractor.py",
       ]
     volumes:
       - ./extractor:/app/extractor
@@ -129,6 +133,12 @@ services:
       - SQS_MAX_MESSAGES=10
       - SQS_VISIBILITY_TIMEOUT=60
       - SQS_EMPTY_SLEEP=2
+    command:
+      [
+        "sh",
+        "-lc",
+        "echo 'enricher: waiting 60s…'; sleep 60; python -u /app/enricher/enricher.py",
+      ]
     depends_on:
       localstack:
         condition: service_healthy
