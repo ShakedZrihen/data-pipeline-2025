@@ -3,17 +3,19 @@ import pika
 from sqlalchemy.orm import Session
 from shared.config import settings
 from shared.mq import channel as mq_channel
-from .db import Base, engine, SessionLocal
-from .models import Supermarket, Product
-from .openai_enricher import enrich_with_openai
+from db import Base, engine, SessionLocal
+from models import Supermarket, Product
+from openai_enricher import enrich_with_openai
 
 def ensure_schema():
     Base.metadata.create_all(bind=engine)
 
-def upsert_supermarket(db: Session, supermarket_id: int):
-    sm = db.query(Supermarket).filter(Supermarket.supermarket_id==supermarket_id).first()
+def upsert_supermarket(db: Session, supermarket_name: str):
+    # First try to find by name
+    sm = db.query(Supermarket).filter(Supermarket.name==supermarket_name).first()
     if not sm:
-        sm = Supermarket(supermarket_id=supermarket_id, name=f"Supermarket #{supermarket_id}")
+        # Create new supermarket with auto-increment ID
+        sm = Supermarket(name=supermarket_name)
         db.add(sm)
         db.commit()
         db.refresh(sm)
@@ -50,7 +52,9 @@ def callback(ch, method, properties, body):
         data = json.loads(body.decode("utf-8"))
         data = enrich_with_openai(data)
         with SessionLocal() as db:
-            upsert_supermarket(db, int(data.get("supermarket_id") or 1))
+            supermarket_name = data.get("supermarket_name", "Unknown")
+            supermarket = upsert_supermarket(db, supermarket_name)
+            data["supermarket_id"] = supermarket.supermarket_id
             save_product(db, data)
         ch.basic_ack(delivery_tag=method.delivery_tag)
     except Exception as e:

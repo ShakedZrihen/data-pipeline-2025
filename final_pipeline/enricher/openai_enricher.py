@@ -10,10 +10,12 @@ def enrich_with_openai(item: Dict) -> Dict:
         from openai import OpenAI
         client = OpenAI()
         name = item.get("canonical_name") or ""
-        prompt = f"Extract brand and category for the product: '{name}'. Respond JSON with keys brand, category."
-        resp = client.responses.create(model="gpt-4.1-mini",
-                                       input=prompt)
-        txt = resp.output_text
+        prompt = f"Extract brand and category for the product: '{name}'. Respond with JSON only, with keys 'brand' and 'category'."
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        txt = resp.choices[0].message.content
         import json
         data = json.loads(txt)
         item["brand"] = item.get("brand") or data.get("brand")

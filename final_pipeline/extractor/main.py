@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from shared.config import settings
 from shared.s3 import list_objects, get_object_bytes
 from shared.mq import publish_json
-from .provider_parsers import parse_by_filename, parse_ndjson_gz
+from provider_parsers import parse_by_filename
 import os
 
 S3_PREFIX = os.getenv("S3_PREFIX", "prices/")
@@ -23,14 +23,27 @@ def process_key(key: str):
     if not data:
         return 0
     count = 0
-    # Try provider-specific parser first
+    
+    # Extract supermarket name from the key path
+    # Key format: prices/SupermarketName/filename.gz
+    path_parts = key.split('/')
+    if len(path_parts) >= 2:
+        supermarket_name = path_parts[1]
+    else:
+        supermarket_name = "Unknown"
+    
+    # Use smart parser that detects file type and handles ZIP/gzipped/plain files
     iterator = parse_by_filename(key, data)
     if iterator is None:
-        # Fallback: assume NDJSON.gz
-        iterator = parse_ndjson_gz(data)
+        print(f"Could not parse file: {key}")
+        return 0
+        
     for obj in iterator:
         try:
             obj["price"] = float(obj.get("price") or 0)
+            obj["supermarket_name"] = supermarket_name
+            obj["source_file"] = key
+            obj["collected_at"] = dt.datetime.now().isoformat()
             publish_json(obj)
             count += 1
         except Exception as e:
