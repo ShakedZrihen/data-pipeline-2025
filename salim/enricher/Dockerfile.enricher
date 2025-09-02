@@ -12,4 +12,4 @@ COPY enricher/ enricher/
 
 # run the loop
 WORKDIR /app/enricher
-CMD ["python", "-u", "main.py"]
+CMD ["python", "-u", "enricher.py"]
