@@ -1,6 +1,6 @@
-boto3
 requests
 beautifulsoup4
 selenium
+boto3
 python-dotenv
-apscheduler
+minio

@@ -15,7 +15,7 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-# S3: step1:
+# S3: step1
 # def read_aws_credentials(filepath="aws/credentials.txt"):
 #     creds = {}
 #     with open(filepath) as f:
@@ -33,7 +33,7 @@ def upload_all_providers_to_s3():
 
     # compose/.env
     bucket = os.getenv("S3_BUCKET", "raw-prices")
-    prefix = os.getenv("S3_PREFIX", "providers/").rstrip("/") + "/"
+    prefix = os.getenv("S3_PREFIX", "prices/").rstrip("/") + "/"
 
     # MinIO/AWS
     endpoint = os.getenv("S3_ENDPOINT") or os.getenv("AWS_ENDPOINT_URL") or os.getenv("AWS_ENDPOINT_URL_S3")
@@ -41,6 +41,73 @@ def upload_all_providers_to_s3():
     secret_key = os.getenv("S3_SECRET_KEY") or os.getenv("AWS_SECRET_ACCESS_KEY")
     region = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
 
+    # Check if we're using MinIO (has endpoint) and use MinIO client for better compatibility
+    if endpoint and "minio" in endpoint.lower():
+        print("[upload] Using MinIO client for direct file uploads...")
+        return upload_with_minio_client(bucket, prefix, endpoint, access_key, secret_key)
+    else:
+        print("[upload] Using S3 client for AWS S3...")
+        return upload_with_s3_client(bucket, prefix, endpoint, access_key, secret_key, region)
+
+def upload_with_minio_client(bucket, prefix, endpoint, access_key, secret_key):
+    """Upload files using MinIO client for better compatibility"""
+    try:
+        from minio import Minio
+        from minio.error import S3Error
+        
+        # Parse endpoint to get host and port
+        if endpoint.startswith('http://'):
+            endpoint = endpoint[7:]
+        elif endpoint.startswith('https://'):
+            endpoint = endpoint[8:]
+        
+        # Create MinIO client
+        minio_client = Minio(
+            endpoint,
+            access_key=access_key,
+            secret_key=secret_key,
+            secure=False  # Set to True if using HTTPS
+        )
+        
+        providers_root = Path("/app/providers")
+        if not providers_root.exists():
+            print(f"[upload] providers dir not found: {providers_root}")
+            return
+
+        uploaded = 0
+        for p in providers_root.rglob("*"):
+            if p.is_file():
+                rel = p.relative_to(providers_root).as_posix()  # e.g. "Goodpharm/Price....gz"
+                key = f"{prefix}{rel}"                          # e.g. "prices/Goodpharm/Price....gz"
+                
+                try:
+                    # Upload file directly using MinIO client
+                    minio_client.fput_object(
+                        bucket_name=bucket,
+                        object_name=key,
+                        file_path=str(p),
+                        content_type="application/octet-stream"
+                    )
+                    
+                    print(f"[upload] minio://{bucket}/{key} ({p.stat().st_size} bytes)")
+                    uploaded += 1
+                    
+                except S3Error as e:
+                    print(f"[upload] MinIO error uploading {p}: {e}")
+                except Exception as e:
+                    print(f"[upload] Error uploading {p}: {e}")
+
+        print(f"[upload] done. {uploaded} files uploaded via MinIO client.")
+        
+    except ImportError:
+        print("[upload] MinIO client not available, falling back to S3 client...")
+        return upload_with_s3_client(bucket, prefix, endpoint, access_key, secret_key, "us-east-1")
+    except Exception as e:
+        print(f"[upload] MinIO client error: {e}, falling back to S3 client...")
+        return upload_with_s3_client(bucket, prefix, endpoint, access_key, secret_key, "us-east-1")
+
+def upload_with_s3_client(bucket, prefix, endpoint, access_key, secret_key, region):
+    """Upload files using S3 client (AWS S3 or MinIO S3 API)"""
     s3 = boto3.client(
         "s3",
         endpoint_url=endpoint if endpoint else None,
@@ -59,14 +126,31 @@ def upload_all_providers_to_s3():
     for p in providers_root.rglob("*"):
         if p.is_file():
             rel = p.relative_to(providers_root).as_posix()  # e.g. "Goodpharm/Price....gz"
-            key = f"{prefix}{rel}"                          # e.g. "providers/Goodpharm/Price....gz"
-            ctype, _ = mimetypes.guess_type(p.name)
-            extra = {"ContentType": ctype or "application/octet-stream"}
-            s3.upload_file(str(p), bucket, key, ExtraArgs=extra)
-            print(f"[upload] s3://{bucket}/{key}")
-            uploaded += 1
+            key = f"{prefix}{rel}"                          # e.g. "prices/Goodpharm/Price....gz"
+            
+            try:
+                # Read file content and upload using put_object to avoid MinIO directory issues
+                with open(p, 'rb') as f:
+                    file_content = f.read()
+                
+                ctype, _ = mimetypes.guess_type(p.name)
+                extra = {"ContentType": ctype or "application/octet-stream"}
+                
+                # Use put_object instead of upload_file
+                s3.put_object(
+                    Bucket=bucket,
+                    Key=key,
+                    Body=file_content,
+                    **extra
+                )
+                
+                print(f"[upload] s3://{bucket}/{key} ({len(file_content)} bytes)")
+                uploaded += 1
+                
+            except Exception as e:
+                print(f"[upload] Error uploading {p}: {e}")
 
-    print(f"[upload] done. {uploaded} files uploaded.")
+    print(f"[upload] done. {uploaded} files uploaded via S3 client.")
 
 
 def upload_file_to_s3(local_path, bucket_name, s3_key, aws_access_key, aws_secret_key):
@@ -76,7 +160,7 @@ def upload_file_to_s3(local_path, bucket_name, s3_key, aws_access_key, aws_secre
     )
     try:
         s3.upload_file(local_path, bucket_name, s3_key)
-        print(f"Uploaded: {local_path} ➝ s3://{bucket_name}/{s3_key}")
+        print(f"Uploaded: {local_path} -> s3://{bucket_name}/{s3_key}")
     except Exception as e:
         print(f"Failed to upload {local_path}: {e}")
 
