@@ -1,0 +1,95 @@
+<Root>
+<ChainID>7291059100008</ChainID>
+<ChainName>פוליצר</ChainName>
+<LastUpdateDate>2025-08-31</LastUpdateDate>
+<LastUpdateTime>05:15:00.903</LastUpdateTime>
+<SubChains>
+<SubChain>
+<SubChainID>001</SubChainID>
+<SubChainName>1</SubChainName>
+<Stores>
+<Store>
+<StoreID>001</StoreID>
+<BikoretNo>6</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>רמב"ם</StoreName>
+<Address>רמב"ם 24</Address>
+<City>0</City>
+<ZipCode>3836339</ZipCode>
+</Store>
+<Store>
+<StoreID>002</StoreID>
+<BikoretNo>5</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>ויתקין</StoreName>
+<Address>דרך הכפר מרכז הכפר</Address>
+<City>0</City>
+<ZipCode>4020000</ZipCode>
+</Store>
+<Store>
+<StoreID>003</StoreID>
+<BikoretNo>4</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>קיסריה</StoreName>
+<Address>הרקיע 1 סי סנטר</Address>
+<City>0</City>
+<ZipCode>3070216</ZipCode>
+</Store>
+<Store>
+<StoreID>004</StoreID>
+<BikoretNo>3</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>ניסן</StoreName>
+<Address>יצחק רבין 11</Address>
+<City>0</City>
+<ZipCode>3824911</ZipCode>
+</Store>
+<Store>
+<StoreID>005</StoreID>
+<BikoretNo>2</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>כרכור</StoreName>
+<Address>הנחילות 2</Address>
+<City>0</City>
+<ZipCode>3750983</ZipCode>
+</Store>
+<Store>
+<StoreID>008</StoreID>
+<BikoretNo>9</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>פרדס חנה</StoreName>
+<Address>הגלעד 1</Address>
+<City>0</City>
+<ZipCode>3711967</ZipCode>
+</Store>
+<Store>
+<StoreID>009</StoreID>
+<BikoretNo>8</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>נתניה</StoreName>
+<Address>דודו דותן 10</Address>
+<City>0</City>
+<ZipCode>4265943</ZipCode>
+</Store>
+<Store>
+<StoreID>010</StoreID>
+<BikoretNo>8</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>אינטרנט</StoreName>
+<Address/>
+<City>0</City>
+<ZipCode>0000000</ZipCode>
+</Store>
+<Store>
+<StoreID>011</StoreID>
+<BikoretNo>7</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>אור עקיבא</StoreName>
+<Address>מיכאל גלהנשטיין 1</Address>
+<City>0</City>
+<ZipCode>3061966</ZipCode>
+</Store>
+</Stores>
+</SubChain>
+</SubChains>
+</Root>
