@@ -4,17 +4,54 @@ A comprehensive data pipeline for collecting, processing, and serving supermarke
 
 ## Architecture Overview
 
-```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│   Crawler   │───▶│     S3      │───▶│  Extractor  │───▶│  RabbitMQ   │
-│             │    │   (MinIO)   │    │             │    │             │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-                                                              │
-                                                              ▼
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│     API     │◀───│ PostgreSQL  │◀───│  Enricher   │◀───│  MongoDB    │
-│  (FastAPI)  │    │             │    │             │    │             │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+```mermaid
+---
+config:
+  layout: fixed
+---
+flowchart TD
+    C["<b>Crawler</b><br>Service Web Scraping<br>Downloads Price &amp; Promo Files"] -- <br> --> MINIO["<b>MinIO Storage</b><br>S3 Compatible<br><br>"]
+    MINIO -- <br> --> E["<b>Extractor Service<br></b>XML Processing<br>Data Transformation"]
+    E -- <br> --> RMQ["<b>RabbitMQ</b><br>Message Queue<br>Reliable Processing"] & MONGO["<b>MongoDB</b><br>State Management<br>Processing Status"]
+    RMQ -- <br> --> EN["<b>Enricher Service</b><br>AI Enrichment<br>Data Enhancement"]
+    EN -- <br> --> PG["<b>PostgreSQL</b><br>Primary Database<br>Enriched Data"]
+    PG -- <br> --> API["FastAPI Service<br>REST API<br>Swagger Documentation"]
+    API --> USERS["Users &amp; Applications<br>API Consumers<br>Data Access"]
+    n1[" "] --> n2[" "]
+    C@{ shape: rounded}
+    MINIO@{ shape: cyl}
+    E@{ shape: rounded}
+    RMQ@{ shape: rounded}
+    MONGO@{ shape: cyl}
+    EN@{ shape: rounded}
+    PG@{ shape: cyl}
+    n1@{ shape: anchor}
+    n2@{ shape: anchor}
+     C:::processing
+     MINIO:::storage
+     E:::processing
+     RMQ:::storage
+     RMQ:::Sky
+     RMQ:::processing
+     MONGO:::storage
+     EN:::processing
+     PG:::storage
+     API:::access
+     USERS:::access
+    classDef external fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px,color:#000
+    classDef storage fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#000
+    classDef access fill:#fff3e0,stroke:#ef6c00,stroke-width:3px,color:#000
+    classDef Sky stroke-width:1px, stroke-dasharray:none, stroke:#374D7C, fill:#E2EBFF, color:#374D7C
+    classDef processing fill:#e3f2fd, stroke:#1565c0, stroke-width:3px, color:#000
+    style C stroke:#BBDEFB
+    style MINIO stroke:#E1BEE7
+    style E stroke:#BBDEFB
+    style RMQ stroke:#BBDEFB
+    style MONGO stroke:#E1BEE7
+    style EN stroke:#BBDEFB
+    style PG stroke:#E1BEE7
+    style API stroke:#FFE0B2
+    style USERS stroke:#FFE0B2
 ```
 
 ## Data Flow & Auto-Update Process
