@@ -358,7 +358,7 @@ def lambda_handler(event, context=None):
                 city = filled.get("city", city) or "Unknown"
                 address = filled.get("address", address) or "Unknown"
 
-            branch_id = db.upsert_branch(name=name, address=address, city=city)
+            branch_id = db.upsert_branch(provider=provider, name=name, address=address, city=city)
 
             for it in items:
                 product, brand, barcode, price, dprice, ts = _normalize_item(it, provider)
@@ -421,17 +421,16 @@ if _HAS_RESILIENT:
 
         self.conn = None  # disable old raw connection
 
-    def _DB_upsert_branch(self, name, address, city) -> int:
+    def _DB_upsert_branch(self, provider, name, address, city) -> int:
         qset = f"SET search_path TO {self.schema}"
-        qsel = f"SELECT branch_id FROM {self.t_branches} WHERE COALESCE(name,'')=%s AND COALESCE(address,'')=%s AND COALESCE(city,'')=%s LIMIT 1"
-        qins = f"INSERT INTO {self.t_branches} (name, address, city) VALUES (%s,%s,%s) RETURNING branch_id"
+        qsel = f"SELECT branch_id FROM {self.t_branches} WHERE provider=%s AND COALESCE(name,'')=%s AND COALESCE(address,'')=%s AND COALESCE(city,'')=%s LIMIT 1"
+        qins = f"INSERT INTO {self.t_branches} (provider, name, address, city) VALUES (%s,%s,%s,%s) RETURNING branch_id"
         self.db.execute(qset)
-        row = self.db.execute(qsel, (name or "", address or "", city or ""), fetch="one")
+        row = self.db.execute(qsel, (provider or "Unknown", name or "", address or "", city or ""), fetch="one")
         if row and row[0]:
             return row[0][0]
-        row2 = self.db.execute(qins, (name or "", address or "", city or ""), fetch="one")
-        return row2[0][0] if row2 and row2[0] else None
-
+        row = self.db.execute(qins, (provider or "Unknown", name, address, city), fetch="one")
+        return row[0][0] if row and row[0] else None
     def _DB_upsert_product(self, product_name, brand_name, barcode) -> int:
         brand_name = brand_name or "Unknown"
         qset = f"SET search_path TO {self.schema}"
@@ -667,18 +666,19 @@ def enrich_product_fields(product_name, brand_name):
     return p, (b if b else "Unknown")
 
 # Override branch upsert to enrich before write (keeps same ON CONFLICT logic)
-def _DB_upsert_branch_v3(self, name, address, city) -> int:
+def _DB_upsert_branch_v3(self, provider, name, address, city) -> int:
     addr_v, city_v = enrich_branch_fields(name, address, city)
     qset = f"SET search_path TO {self.schema}"
-    q = f"""        INSERT INTO {self.t_branches} (name, address, city)
-        VALUES (%s, %s, %s)
-        ON CONFLICT ON CONSTRAINT uq_branches_name_city_address
+    q = f"""        INSERT INTO {self.t_branches} (provider, name, address, city)
+        VALUES (%s, %s, %s, %s)
+        ON CONFLICT ON CONSTRAINT uq_branches_provider_name_city_address
         DO UPDATE SET updated_at = now()
         RETURNING branch_id
     """
     self.db.execute(qset)
-    row = self.db.execute(q, (_nz(name,"Unknown"), addr_v, city_v), fetch="one")
+    row = self.db.execute(q, (_nz(provider, "Unknown"), _nz(name,"Unknown"), addr_v, city_v), fetch="one")
     return row[0][0] if row and row[0] else None
+
 
 # Upgrade no-barcode product to have barcode if it matches on (name,brand)
 def _try_upgrade_barcode(self, product_name, brand_name, barcode):
