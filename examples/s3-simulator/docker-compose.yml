@@ -1,19 +1,7 @@
 services:
   localstack:
     container_name: s3-simulator
-    image: localstack/localstack:latest
-    ports:
-      - "4566:4566"
-    environment:
-      - SERVICES=s3,sqs
-      - DEBUG=1
-      - S3_SKIP_SIGNATURE_VALIDATION=1
-    volumes:
-      - "localstack-data:/var/lib/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
-    networks:
-      - s3-network
+
 
   lambda-function:
     build: ./lambda
