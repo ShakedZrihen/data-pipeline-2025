@@ -3,6 +3,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+import os
+import re
 import time
 
 class CrawlerBase(ABC):
@@ -45,7 +47,32 @@ class CrawlerBase(ABC):
             else:
                 print("Driver was not initialized, skipping quit.")
 
+    def last_token_ts12(name: str) -> str:
+        # take the last '-' token before extension, strip quotes/newlines
+        base = os.path.basename(name)
+        stem, _ = os.path.splitext(base)
+        token = stem.rsplit('-', 1)[-1].strip(' "\'')
+        token = re.sub(r"\s+", " ", token)
 
+        # already digits?
+        if re.fullmatch(r"\d{12}", token):  # YYYYMMDDhhmm
+            return token
+        if re.fullmatch(r"\d{14}", token):  # YYYYMMDDhhmmss
+            return token[:12]
+
+        # "DD/MM/YYYY HH:MM"
+        m = re.fullmatch(r"(\d{1,2})/(\d{1,2})/(\d{4}) (\d{1,2}):(\d{2})", token)
+        if m:
+            d, mo, y, h, mi = map(int, m.groups())
+            return f"{y:04d}{mo:02d}{d:02d}{h:02d}{mi:02d}"
+
+        # "HH:MM DD/MM/YYYY"
+        m = re.fullmatch(r"(\d{1,2}):(\d{2}) (\d{1,2})/(\d{1,2})/(\d{4})", token)
+        if m:
+            h, mi, d, mo, y = map(int, m.groups())
+            return f"{y:04d}{mo:02d}{d:02d}{h:02d}{mi:02d}"
+
+        raise ValueError(f"Unrecognized last token: {token!r}")
 
     @abstractmethod
     def download_file(self, entry):

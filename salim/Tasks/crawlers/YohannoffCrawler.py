@@ -57,21 +57,26 @@ class YohananofCrawler(CrawlerBase):
             EC.invisibility_of_element_located((By.XPATH, "//div[text()='Processing...']"))
         )
         WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//tr[starts-with(@id, 'Price')]"))
+            EC.presence_of_element_located((By.XPATH, "//tr[starts-with(@id, 'PriceFull')]"))
         )
 
     def extract_file_links(self):
         self.login()
         rows = self.driver.find_elements(
-            By.XPATH, "//tr[starts-with(@id, 'Price') or starts-with(@id, 'Promo')]"
+            By.XPATH, "//tr[starts-with(@id, 'PriceFull') or starts-with(@id, 'PromoFull')]"
         )
         found = {"pricesFull": None, "promoFull": None}
 
         for row in rows:
             try:
                 link = row.find_element(By.TAG_NAME, "a")
+                size_txt = row.find_element(By.TAG_NAME, "span").text.strip()
+                if size_txt.startswith("0"):   # e.g., "0 B"
+                    continue
+
                 href = link.get_attribute("href")
                 filename = link.get_attribute("title").strip()  # may show .gz or .xml
+
             except Exception as e:
                 print(f"Failed to extract download link: {e}")
                 continue
@@ -85,13 +90,15 @@ class YohananofCrawler(CrawlerBase):
             except IndexError:
                 branch = "unknown"
 
+
+            ts = CrawlerBase.last_token_ts12(filename)
             full_url = href if href.startswith("http") else f"https://url.publishedprices.co.il{href}"
             file_type = "pricesFull" if filename.lower().startswith("price") else "promoFull"
 
             if file_type == "pricesFull" and found["pricesFull"] is None:
-                found["pricesFull"] = {"url": full_url, "branch": branch, "type": "pricesFull"}
+                found["pricesFull"] = {"url": full_url, "branch": branch, "type": "pricesFull", "ts": ts}
             elif file_type == "promoFull" and found["promoFull"] is None:
-                found["promoFull"] = {"url": full_url, "branch": branch, "type": "promoFull"}
+                found["promoFull"] = {"url": full_url, "branch": branch, "type": "promoFull", "ts": ts}
 
             if all(found.values()):
                 break
@@ -150,7 +157,7 @@ class YohananofCrawler(CrawlerBase):
             return
 
         # Normalize names with timestamp base (gz only)
-        base = f"{file_entry['type']}_{self.get_timestamp()}"
+        base = f"{file_entry['type']}_{file_entry["ts"]}"
         final_gz  = os.path.join(folder, base + ".gz")
 
         try:

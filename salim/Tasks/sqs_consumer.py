@@ -107,6 +107,7 @@ class SqsS3Consumer:
             address = ""
         file_type = str(payload.get("type") or "").strip()
         ts_str = str(payload.get("timestamp") or "").strip()
+        print(f"[Info] ts={ts_str})")
         items = payload.get("items") or []
 
         if not provider or not branch_code or not file_type or not ts_str:

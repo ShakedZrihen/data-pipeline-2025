@@ -9,6 +9,10 @@ import re
 from datetime import datetime
 import io, gzip, zipfile
 
+
+
+
+
 class ZolVeBegadolCrawler(CrawlerBase):
 
     def to_gz_bytes(self,raw: bytes) -> bytes:
@@ -42,6 +46,7 @@ class ZolVeBegadolCrawler(CrawlerBase):
             gz.write(raw)
         return out.getvalue()
 
+
     def download_file(self, file_entry):
         # Request actual file URL
         print(f"Requesting file from JSON API: {file_entry['url']}")
@@ -51,7 +56,9 @@ class ZolVeBegadolCrawler(CrawlerBase):
         real_url = json_data[0]["SPath"]
 
         # Inline path construction logic here
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        timestamp = file_entry["ts"]  # guaranteed 12 digits
+
+        # timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         folder = os.path.join("providers", self.provider_name, file_entry["branch"])
         os.makedirs(folder, exist_ok=True)
         filename = f"{file_entry['type']}_{timestamp}.gz"
@@ -91,18 +98,20 @@ class ZolVeBegadolCrawler(CrawlerBase):
                 button = cols[5].find_element(By.TAG_NAME, "button")
                 onclick_value = button.get_attribute("onclick")
                 filename = onclick_value.split("'")[1]
+                ts = CrawlerBase.last_token_ts12(filename)  # works for both "31/08/2025 20:32" and "20:32 31/08/2025"
+
             except Exception as e:
                 print(f"Failed to extract button/filename: {e}")
                 continue
 
-            # This is NOT the actual download URL, but a JSON API that will give us the real one
+            
             api_url = f"https://zolvebegadol.binaprojects.com/Download.aspx?FileNm={filename}"
             file_type = "pricesFull" if filename.lower().startswith("price") else "promoFull"
 
             if file_type == "pricesFull" and found["pricesFull"] is None:
-                found["pricesFull"] = {"url": api_url, "branch": branch, "type": "pricesFull"}
+                found["pricesFull"] = {"url": api_url, "branch": branch, "type": "pricesFull", "ts": ts}
             elif file_type == "promoFull" and found["promoFull"] is None:
-                found["promoFull"] = {"url": api_url, "branch": branch, "type": "promoFull"}
+                found["promoFull"] = {"url": api_url, "branch": branch, "type": "promoFull", "ts": ts}
 
             if all(found.values()):
                 break

@@ -52,7 +52,8 @@ class SuperSapirCrawler(CrawlerBase):
         real_url = json_data[0]["SPath"]
 
         # Inline path construction logic here
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        timestamp = file_entry["ts"]
+        # timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         folder = os.path.join("providers", self.provider_name, file_entry["branch"])
         os.makedirs(folder, exist_ok=True)
         filename = f"{file_entry['type']}_{timestamp}.gz"
@@ -100,6 +101,7 @@ class SuperSapirCrawler(CrawlerBase):
                 button = cols[6].find_element(By.TAG_NAME, "button")
                 onclick_value = button.get_attribute("onclick")
                 filename = onclick_value.split("'")[1]
+                ts = CrawlerBase.last_token_ts12(filename)
             except Exception as e:
                 print(f"Failed to extract button/filename: {e}")
                 continue
@@ -108,9 +110,9 @@ class SuperSapirCrawler(CrawlerBase):
             file_type = "pricesFull" if filename.lower().startswith("price") else "promoFull"
 
             if file_type == "pricesFull" and found["pricesFull"] is None:
-                found["pricesFull"] = {"url": api_url, "branch": branch, "type": "pricesFull"}
+                found["pricesFull"] = {"url": api_url, "branch": branch, "type": "pricesFull", "ts": ts}
             elif file_type == "promoFull" and found["promoFull"] is None:
-                found["promoFull"] = {"url": api_url, "branch": branch, "type": "promoFull"}
+                found["promoFull"] = {"url": api_url, "branch": branch, "type": "promoFull", "ts": ts}
 
             if all(found.values()):
                 break
