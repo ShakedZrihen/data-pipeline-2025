@@ -1,0 +1,25 @@
+# FastAPI Requirements for Israeli Supermarket Price Tracker API
+# Install with: pip install -r requirements_api.txt
+
+# Core API Framework
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+python-multipart==0.0.6
+
+# Database
+sqlalchemy==2.0.43
+psycopg2-binary==2.9.10
+alembic==1.12.1
+
+# Data Validation
+pydantic==2.11.7
+pydantic-settings==2.1.0
+
+# HTTP Client (for testing)
+requests==2.32.5
+
+# CORS Support (already in FastAPI but good to specify)
+starlette==0.47.3
+
+# Optional but recommended
+python-dotenv==1.0.0
