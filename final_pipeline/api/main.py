@@ -2,9 +2,9 @@ from fastapi import FastAPI, HTTPException, Query, Path
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import select, func
-from .db import SessionLocal, engine
-from .models import Supermarket, Product
-from .schemas import SupermarketResponse, ProductResponse, PriceComparisonResponse
+from db import SessionLocal, engine
+from models import Supermarket, Product
+from schemas import SupermarketResponse, ProductResponse, PriceComparisonResponse
 
 app = FastAPI(title="Supermarket Prices API", version="1.0.0", docs_url="/docs", redoc_url="/redoc")
 
