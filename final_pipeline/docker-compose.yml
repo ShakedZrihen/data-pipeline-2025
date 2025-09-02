@@ -1,0 +1,119 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  mongodb:
+    image: mongo:7
+    ports:
+      - "${MONGO_PORT}:27017"
+    volumes:
+      - mongodata:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "${RABBITMQ_PORT}:5672"
+      - "${RABBITMQ_MGMT_PORT}:15672"
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":${MINIO_CONSOLE_PORT}"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "${MINIO_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
+    volumes:
+      - miniodata:/data
+
+  infra-init:
+    build:
+      context: .
+      dockerfile: ./infra/Dockerfile
+    depends_on:
+      - minio
+      - rabbitmq
+    environment:
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
+
+  crawler:
+    build:
+      context: .
+      dockerfile: ./crawler/Dockerfile
+    depends_on:
+      - minio
+    environment:
+      S3_PREFIX: ${S3_PREFIX}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+
+  extractor:
+    build:
+      context: .
+      dockerfile: ./extractor/Dockerfile
+    depends_on:
+      - minio
+      - mongodb
+      - rabbitmq
+    environment:
+      S3_PREFIX: ${S3_PREFIX}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      MONGO_URL: mongodb://mongodb:27017
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
+
+  enricher:
+    build:
+      context: .
+      dockerfile: ./enricher/Dockerfile
+    depends_on:
+      - rabbitmq
+      - postgres
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+
+  api:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      API_TITLE: ${API_TITLE}
+      API_VERSION: ${API_VERSION}
+    ports:
+      - "${API_PORT}:8000"
+
+volumes:
+  pgdata:
+  mongodata:
+  miniodata:
