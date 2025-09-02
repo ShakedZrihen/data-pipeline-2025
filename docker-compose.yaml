@@ -54,6 +54,13 @@ services:
     networks:
       - backend
 
+  # Scheduler container with cron
+  scheduler:
+    build: ./salim/scheduler
+    container_name: scheduler
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
   crawler:
     build: ./salim/crawler
     container_name: crawler
