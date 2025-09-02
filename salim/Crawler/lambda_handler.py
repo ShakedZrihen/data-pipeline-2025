@@ -1,7 +1,7 @@
 import os
 os.environ["HOME"] = os.environ.get("USERPROFILE", "C:\\Users\\adar2")
 
-from cerbrus_crawler import CerberusCrawler
+from .cerbrus_crawler import CerberusCrawler
 
 def lambda_handler(event=None, context=None):
     crawlers = [

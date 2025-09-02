@@ -1,24 +1,23 @@
 from extractor import Extractor
-from queue_producer import QueueProducer
+from queue_producer import publish_from_files
+import os
 
 def lambda_handler(event, context):
     extractor = Extractor()
     processed_files = extractor.create_individual_json_files()
-    queue_producer = QueueProducer()
-    rabbitmq_available = queue_producer.setup_rabbitmq()
     
-    if rabbitmq_available:
+    # Get the output directory path
+    output_dir = extractor.output_dir
+    
+    try:
         print("Sending files to RabbitMQ queue...")
-        for file_info in processed_files:
-            queue_producer.send_file_message(
-                file_info['json_file'],
-                file_info['original_key'],
-                file_info['size']
-            )
-        queue_producer.close_connection()
+        # Use the new publish_from_files function
+        publish_from_files([output_dir])
         print("All files sent to queue")
-    else:
-        print("RabbitMQ not available, skipping queue operations")
+        rabbitmq_available = True
+    except Exception as e:      
+        print(f"RabbitMQ error: {e}")
+        rabbitmq_available = False
     
     response = {
         'statusCode': 200,
