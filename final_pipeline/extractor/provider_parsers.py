@@ -28,6 +28,12 @@ def parse_xml_file(data: bytes) -> Iterable[Dict]:
         
         root = ET.fromstring(data.decode('utf-8'))
         
+        # Extract supermarket/store information from root elements
+        supermarket_info = {}
+        for child in root:
+            if child.tag in ['ChainId', 'SubChainId', 'StoreId', 'BikoretNo', 'DllVerNo']:
+                supermarket_info[child.tag.lower()] = child.text
+        
         # Look for Items/Item elements (common in supermarket XML)
         items = root.findall('.//Item') or root.findall('.//item') or root.findall('.//Product') or root.findall('.//product')
         
@@ -92,6 +98,9 @@ def parse_xml_file(data: bytes) -> Iterable[Dict]:
                     else:
                         # Store other fields
                         product[tag] = text
+                
+                # Add supermarket information to each product
+                product.update(supermarket_info)
                 
                 # Ensure required fields exist
                 if 'name' in product and 'price' in product:

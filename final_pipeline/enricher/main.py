@@ -10,12 +10,20 @@ from openai_enricher import enrich_with_openai
 def ensure_schema():
     Base.metadata.create_all(bind=engine)
 
-def upsert_supermarket(db: Session, supermarket_name: str):
+def upsert_supermarket(db: Session, supermarket_name: str, store_info: dict = None):
     # First try to find by name
     sm = db.query(Supermarket).filter(Supermarket.name==supermarket_name).first()
     if not sm:
         # Create new supermarket with auto-increment ID
         sm = Supermarket(name=supermarket_name)
+        
+        # Add store information if available
+        if store_info:
+            if 'storeid' in store_info:
+                sm.branch_name = f"Store {store_info['storeid']}"
+            if 'chainid' in store_info:
+                sm.website = f"https://chain-{store_info['chainid']}.com"  # Placeholder website
+        
         db.add(sm)
         db.commit()
         db.refresh(sm)
@@ -53,7 +61,14 @@ def callback(ch, method, properties, body):
         data = enrich_with_openai(data)
         with SessionLocal() as db:
             supermarket_name = data.get("supermarket_name", "Unknown")
-            supermarket = upsert_supermarket(db, supermarket_name)
+            
+            # Extract store information from the data
+            store_info = {}
+            for key in ['chainid', 'subchainid', 'storeid', 'bikoretno', 'dllverno']:
+                if key in data:
+                    store_info[key] = data[key]
+            
+            supermarket = upsert_supermarket(db, supermarket_name, store_info)
             data["supermarket_id"] = supermarket.supermarket_id
             save_product(db, data)
         ch.basic_ack(delivery_tag=method.delivery_tag)
