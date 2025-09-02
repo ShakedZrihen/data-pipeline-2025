@@ -1,0 +1,6 @@
+requests
+beautifulsoup4
+selenium
+boto3
+python-dotenv
+minio

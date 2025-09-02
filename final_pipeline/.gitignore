@@ -1,0 +1,57 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+temp/
+*.tmp
+*.temp
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Large binary files
+minio
+*.bin
+*.exe
+
+# Data files (optional - uncomment if you don't want to track sample data)
+# sample_data/
