@@ -1,19 +1,39 @@
 services:
   db:
-    image: postgres:15
+    image: postgres:16
+    container_name: postgres16
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: salim_db
-    ports: ["5432:5432"]
+      TZ: Asia/Jerusalem
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./tables.sql:/docker-entrypoint-initdb.d/tables.sql
+      - ./tables.sql:/docker-entrypoint-initdb.d/01-tables.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U postgres -d salim_db"]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+    networks: [app-net]
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "5050:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
     networks: [app-net]
 
   localstack:
@@ -37,7 +57,7 @@ services:
       - |
         set -e
         for f in /etc/localstack/init/ready.d/*.sh; do
-          [ -f "$f" ] && sed -i 's/\r$//' "$f" && chmod +x "$f";
+          [ -f "$$f" ] && sed -i 's/\r$$//' "$$f" && chmod +x "$$f";
         done
         exec docker-entrypoint.sh localstack
     healthcheck:
@@ -151,3 +171,4 @@ networks:
 volumes:
   postgres_data:
   localstack-data:
+  pgadmin_data:
