@@ -1,20 +1,24 @@
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
-
+# ---------- helpers ----------
 def _strip_ns(tag: str) -> str:
-    # remove XML namespace like {urn:...}Tag -> Tag
-    if "}" in tag:
-        return tag.split("}", 1)[1]
-    return tag
+    return tag.split("}", 1)[1] if "}" in tag else tag
 
 def _text(elem: Optional[ET.Element]) -> Optional[str]:
     if elem is None:
         return None
     s = (elem.text or "").strip()
     return s or None
+
+def _iter_children(parent: Optional[ET.Element], name: str):
+    if parent is None:
+        return []
+    for ch in list(parent):
+        if _strip_ns(ch.tag) == name:
+            yield ch
 
 def _find(root: ET.Element, tag: str) -> Optional[ET.Element]:
     for ch in root.iter():
@@ -28,21 +32,26 @@ def _find_direct(parent: ET.Element, tag: str) -> Optional[ET.Element]:
             return ch
     return None
 
-
 def _to_float(s: Optional[str]) -> Optional[float]:
     if not s:
         return None
-    # remove currency symbol, thousands separators, Hebrew spaces, etc.
     s = s.replace("₪", "").replace(",", "").replace("\xa0", " ").strip()
-    # take first token if needed (e.g., "12.90 ש\"ח")
     s = s.split()[0]
     try:
         return float(s)
     except Exception:
         return None
 
+def _to_int(s: Optional[str]) -> Optional[int]:
+    if s is None:
+        return None
+    s = s.strip()
+    try:
+        return int(s)
+    except Exception:
+        return None
 
-def _to_bool_int(s: Optional[str]) -> Optional[bool]:
+def _to_bool01(s: Optional[str]) -> Optional[bool]:
     if s is None:
         return None
     s = s.strip()
@@ -50,59 +59,53 @@ def _to_bool_int(s: Optional[str]) -> Optional[bool]:
         return s == "1"
     return None
 
+def _parse_dt_flex(s: Optional[str]) -> Optional[str]:
+    """Accept 'YYYY-MM-DD HH:MM[:SS]' (no tz) -> ISO Z."""
+    if not s:
+        return None
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"):
+        try:
+            dt = datetime.strptime(s, fmt)
+            return dt.replace(tzinfo=timezone.utc).isoformat().replace("+00:00", "Z")
+        except Exception:
+            pass
+    return None
+
 def _parse_dt_local(s: Optional[str]) -> Optional[str]:
-    """
-    Input like '2025-09-01 06:50:51' (no tz). Return ISO8601 Z.
-    """
+    """Kept for prices XML ('YYYY-MM-DD HH:MM:SS')."""
     if not s:
         return None
     try:
         dt = datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
-        # Assume local → convert to UTC if you know timezone; otherwise mark as Z-naive.
-        # Here we treat it as UTC to keep a consistent timeline.
         return dt.replace(tzinfo=timezone.utc).isoformat().replace("+00:00", "Z")
     except Exception:
         return None
 
+def _combine_date_time(d: Optional[str], h: Optional[str]) -> Optional[str]:
+    if not d:
+        return None
+    h = h or "00:00:00"
+    if len(h) == 5:  # HH:MM -> HH:MM:00
+        h = f"{h}:00"
+    return _parse_dt_flex(f"{d} {h}")
+
 def _normalize_unit(unit_of_measure: Optional[str], is_weighted: Optional[bool]) -> Optional[str]:
     if not unit_of_measure:
-        return None
+        return "kg" if is_weighted else None
     u = unit_of_measure.strip().lower()
-    # Hebrew / English common forms
     if "ק\"ג" in unit_of_measure or "קג" in unit_of_measure or "קילוגר" in unit_of_measure or "kg" in u:
         return "kg"
     if "100 גרם" in unit_of_measure or "100גרם" in unit_of_measure or "100g" in u:
         return "100g"
     if "יח" in unit_of_measure or "unit" in u or "each" in u:
         return "unit"
-    # fallback: if weighted and quantity=1 by kg, keep kg
-    if is_weighted:
-        return "kg"
-    return unit_of_measure  # last resort: keep original
+    return unit_of_measure
 
-
-
-
-def parse_xml_items(xml_text: bytes | str) -> List[Dict[str, Any]]:
-    """
-    Parse your price XML into a list of normalized item dicts.
-    Output fields (JSON-safe):
-      code (str), name (str), price (float), unit (str), qty (float|None),
-      unit_price (float|None), is_weighted (bool|None), type (int|None),
-      manufacturer (str|None), country (str|None), item_id (str|None),
-      updated_at (ISO8601 Z)
-    """
+# ---------- PRICES ----------
+def _parse_prices_items(root: ET.Element) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
-    try:
-        root = ET.fromstring(xml_text)
-    except Exception as e:
-        print("XML parse error:", e)
-        return items
-
-    # Find <Items>...</Items> and iterate its direct <Item> children (if present);
-    # otherwise, fallback to scanning all descendants named Item.
     items_container = _find(root, "Items")
-    candidates = []
+    candidates: List[ET.Element] = []
     if items_container is not None:
         for ch in list(items_container):
             if _strip_ns(ch.tag) == "Item":
@@ -119,7 +122,7 @@ def parse_xml_items(xml_text: bytes | str) -> List[Dict[str, Any]]:
         unit_m = _text(_find_direct(node, "UnitOfMeasure")) or _text(_find(node, "UnitOfMeasure"))
         qty    = _to_float(_text(_find_direct(node, "Quantity")) or _text(_find(node, "Quantity")))
         unit_p = _to_float(_text(_find_direct(node, "UnitOfMeasurePrice")) or _text(_find(node, "UnitOfMeasurePrice")))
-        is_w   = _to_bool_int(_text(_find_direct(node, "bIsWeighted")) or _text(_find(node, "bIsWeighted")))
+        is_w   = _to_bool01(_text(_find_direct(node, "bIsWeighted")) or _text(_find(node, "bIsWeighted")))
         itype  = _text(_find_direct(node, "ItemType")) or _text(_find(node, "ItemType"))
         itype_i = int(itype) if itype and itype.isdigit() else None
         manuf  = _text(_find_direct(node, "ManufacturerName")) or _text(_find(node, "ManufacturerName"))
@@ -129,7 +132,6 @@ def parse_xml_items(xml_text: bytes | str) -> List[Dict[str, Any]]:
 
         unit = _normalize_unit(unit_m, is_w)
 
-        # Only include records that have at least a name or price
         if name or price is not None:
             items.append({
                 "code": code,
@@ -139,19 +141,140 @@ def parse_xml_items(xml_text: bytes | str) -> List[Dict[str, Any]]:
                 "qty": qty,
                 "unit_price": unit_p,
                 "is_weighted": is_w,
-                "type": itype_i,  # 0=produce/weighted, 1=packaged (per your sample)
+                "type": itype_i,
                 "manufacturer": manuf,
                 "country": cntry,
                 "item_id": itemid,
                 "updated_at": upd,
             })
-
     return items
+
+# ---------- PROMOS ----------
+def _parse_promotions_items(root: ET.Element) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    promos = _find(root, "Promotions")
+    if promos is None:
+        return out
+
+    for p in _iter_children(promos, "Promotion"):
+        promo_id = _text(_find_direct(p, "PromotionId"))
+        desc     = _text(_find_direct(p, "PromotionDescription"))
+        upd_at   = _parse_dt_flex(_text(_find_direct(p, "PromotionUpdateDate")))
+        start_at = _combine_date_time(_text(_find_direct(p, "PromotionStartDate")),
+                                      _text(_find_direct(p, "PromotionStartHour")))
+        end_at   = _combine_date_time(_text(_find_direct(p, "PromotionEndDate")),
+                                      _text(_find_direct(p, "PromotionEndHour")))
+        reward_type = _to_int(_text(_find_direct(p, "RewardType")))
+        allow_mult  = _to_bool01(_text(_find_direct(p, "AllowMultipleDiscounts")))
+        is_weighted = _to_bool01(_text(_find_direct(p, "IsWeightedPromo")))
+        min_qty     = _to_float(_text(_find_direct(p, "MinQty")))
+        max_qty     = _to_float(_text(_find_direct(p, "MaxQty")))
+        min_purchase= _to_float(_text(_find_direct(p, "MinPurchaseAmnt")))
+        disc_price  = _to_float(_text(_find_direct(p, "DiscountedPrice")))
+        disc_unit   = _to_float(_text(_find_direct(p, "DiscountedPricePerMida")))
+        disc_rate   = _to_int(_text(_find_direct(p, "DiscountRate")))
+        disc_type   = _to_int(_text(_find_direct(p, "DiscountType")))
+
+        # DiscountRate is often basis points (e.g., 3000 => 30.00%)
+        discount_rate_pct = (disc_rate / 100.0) if disc_rate is not None else None
+
+        # clubs
+        club_ids: List[int] = []
+        clubs = _find_direct(p, "Clubs")
+        if clubs is not None:
+            for c in _iter_children(clubs, "ClubId"):
+                ci = _to_int(_text(c))
+                if ci is not None:
+                    club_ids.append(ci)
+
+        # remarks (optional)
+        remarks: List[str] = []
+        rems = _find_direct(p, "Remarks")
+        if rems is not None:
+            for r in _iter_children(rems, "Remark"):
+                t = _text(r)
+                if t:
+                    remarks.append(t)
+
+        # Items affected by this promotion
+        items_container = _find_direct(p, "PromotionItems")
+        if items_container is None:
+            # Promotion without explicit items (rare) -> still emit one record (no code)
+            out.append({
+                "promotion_id": promo_id,
+                "code": None,
+                "item_type": None,
+                "is_gift": None,
+                "description": desc,
+                "start_at": start_at,
+                "end_at": end_at,
+                "updated_at": upd_at,
+                "reward_type": reward_type,
+                "allow_multiple": allow_mult,
+                "is_weighted_promo": is_weighted,
+                "min_qty": min_qty,
+                "max_qty": max_qty,
+                "min_purchase_amount": min_purchase,
+                "discounted_price": disc_price,
+                "discounted_unit_price": disc_unit,
+                "discount_rate_pct": discount_rate_pct,
+                "discount_type": disc_type,
+                "club_ids": club_ids or None,
+                "remarks": remarks or None,
+            })
+            continue
+
+        for it in _iter_children(items_container, "Item"):
+            code = _text(_find_direct(it, "ItemCode"))
+            item_type = _to_int(_text(_find_direct(it, "ItemType")))
+            is_gift = _to_bool01(_text(_find_direct(it, "IsGiftItem")))
+            out.append({
+                "promotion_id": promo_id,
+                "code": code,
+                "item_type": item_type,
+                "is_gift": is_gift,
+                "description": desc,
+                "start_at": start_at,
+                "end_at": end_at,
+                "updated_at": upd_at,
+                "reward_type": reward_type,
+                "allow_multiple": allow_mult,
+                "is_weighted_promo": is_weighted,
+                "min_qty": min_qty,
+                "max_qty": max_qty,
+                "min_purchase_amount": min_purchase,
+                "discounted_price": disc_price,
+                "discounted_unit_price": disc_unit,
+                "discount_rate_pct": discount_rate_pct,
+                "discount_type": disc_type,
+                "club_ids": club_ids or None,
+                "remarks": remarks or None,
+            })
+    return out
+
+# ---------- entry point ----------
+def parse_xml_items(xml_data: Union[str, bytes]) -> List[Dict[str, Any]]:
+    """
+    Auto-detects Prices vs Promotions XML and returns a list of normalized items.
+    Prices items fields: code, name, price, unit, qty, unit_price, is_weighted, type, manufacturer, country, item_id, updated_at
+    Promotions items fields (per item in the promo): promotion_id, code, item_type, is_gift, description, start_at, end_at,
+      updated_at, reward_type, allow_multiple, is_weighted_promo, min_qty, max_qty, min_purchase_amount,
+      discounted_price, discounted_unit_price, discount_rate_pct, discount_type, club_ids, remarks
+    """
+    if isinstance(xml_data, bytes):
+        root = ET.fromstring(xml_data)
+    else:
+        root = ET.fromstring(xml_data.encode("utf-8", errors="ignore"))
+
+    # Heuristic: presence of <Promotions> => promo file; else assume prices
+    if _find(root, "Promotions") is not None:
+        return _parse_promotions_items(root)
+    return _parse_prices_items(root)
 
 def iso_from_filename(fname: str) -> str:
     """
-    Convert price_YYYYMMDD_HHMMSS.gz → ISO time (Z).
-    If not found → now (UTC) in ISO Z.
+    Accepts price_YYYYMMDD_HHMMSS.gz or promoFull_YYYYMMDDHHMM.gz (12 digits).
+    Falls back to now UTC.
     """
     m = re.search(r"(\d{8}_\d{6}|\d{12})", fname)
     if not m:
