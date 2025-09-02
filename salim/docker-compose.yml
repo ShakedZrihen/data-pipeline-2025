@@ -123,10 +123,12 @@ services:
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_REGION=us-east-1
+      - LOCALSTACK_ENDPOINT=http://localstack:4566
       - SQS_QUEUE_URL=http://localstack:4566/000000000000/sqs-queue
-      - SQS_WAIT_TIME_SECONDS=15
+      - SQS_WAIT_TIME_SECONDS=20
       - SQS_MAX_MESSAGES=10
       - SQS_VISIBILITY_TIMEOUT=60
+      - SQS_EMPTY_SLEEP=2
     depends_on:
       localstack:
         condition: service_healthy
