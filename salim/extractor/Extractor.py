@@ -75,7 +75,7 @@ class Extractor:
             # Stream directly from the HTTP body to gzip without reading all bytes first
             with gzip.GzipFile(fileobj=obj["Body"]) as gz:
                 xml_bytes = gz.read()
-            items = parse_xml_items(xml_bytes)
+            items , store_id = parse_xml_items(xml_bytes)
         except Exception as e:
             print(f"Failed to read/decompress {key}: {e}")
             return None
@@ -122,6 +122,7 @@ class Extractor:
         data = {
             "provider": provider,
             "branch": branch,
+            "store_id": store_id,
             "type": ftype,
             "timestamp": ts_iso,
             "source_key": key,

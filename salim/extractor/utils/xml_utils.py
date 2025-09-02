@@ -98,6 +98,9 @@ def parse_xml_items(xml_text: bytes | str) -> List[Dict[str, Any]]:
     except Exception as e:
         print("XML parse error:", e)
         return items
+    
+    # Extract StoreId before processing items
+    store_id = _text(_find(root, "StoreId"))
 
     # Find <Items>...</Items> and iterate its direct <Item> children (if present);
     # otherwise, fallback to scanning all descendants named Item.
@@ -146,7 +149,7 @@ def parse_xml_items(xml_text: bytes | str) -> List[Dict[str, Any]]:
                 "updated_at": upd,
             })
 
-    return items
+    return {"items": items, "store_id": store_id}
 
 def iso_from_filename(fname: str) -> str:
     """
