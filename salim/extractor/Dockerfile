@@ -1,11 +1,11 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+WORKDIR /app/extractor
 
 # Install dependencies
-RUN pip install boto3 botocore
+RUN pip install --no-cache-dir boto3 botocore
 
-# Copy crawler function
+# Copy extractor files
 COPY . .
 
 # Run the extractor

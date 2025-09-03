@@ -1,12 +1,12 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+WORKDIR /app/crawler
 
 # Install dependencies
-RUN pip install boto3 botocore
+RUN pip install --no-cache-dir boto3 botocore beautifulsoup4 selenium requests
 
-# Copy extractor function
+# Copy crawler function
 COPY . .
 
-# Run the extractor
+# Run the crawler
 CMD ["python", "run.py"]

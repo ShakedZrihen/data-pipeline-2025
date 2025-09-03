@@ -5,28 +5,14 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3,sqs
+      - SERVICES=s3,sqs, dynamodb
       - DEBUG=1
       - S3_SKIP_SIGNATURE_VALIDATION=1
-    volumes:
-      - "localstack-data:/var/lib/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./crawler/s3/init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
-    networks:
-      - pipeline-network
-
-  sqs:
-    container_name: sqs-simulator
-    image: localstack/localstack:latest
-    ports:
-      - "4567:4566"
-    environment:
-      - SERVICES=sqs
-      - DEBUG=1
       - SQS_SKIP_SIGNATURE_VALIDATION=1
     volumes:
       - "localstack-data:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./crawler/s3/init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
       - "./extractor/sqs/init-sqs.sh:/etc/localstack/init/ready.d/init-sqs.sh"
     networks:
       - pipeline-network
@@ -50,15 +36,36 @@ services:
       timeout: 10s
       retries: 5
 
+  selenium:
+    image: selenium/standalone-chrome:4.23.0
+    networks: [pipeline-network]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:4444/wd/hub/status"]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+
   crawler:
     build:
       context: ./crawler
       dockerfile: Dockerfile
     container_name: crawler
-    depends_on:
-      - localstack
     environment:
-      - CRAWL_INTERVAL=30
+      - TOP_K_BRANCHES=5
+      - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
+      - HEADLESS=1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - S3_BUCKET=providers
+      - S3_ENDPOINT=http://localstack:4566
+      - CRAWL_INTERVAL_SEC=3600
+      - CRAWL_JITTER_SEC=15
+    depends_on:
+      selenium:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
     networks:
       - pipeline-network
     restart: unless-stopped
@@ -67,18 +74,25 @@ services:
     build:
       context: ./extractor
       dockerfile: Dockerfile
-    container_name: extractor
+    container_name: s3-to-sqs
     depends_on:
-      - localstack
-      - sqs
+      localstack:
+        condition: service_healthy
     environment:
-      - S3_ENDPOINT=http://localhost:4566
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
+      - S3_ENDPOINT=http://localstack:4566
       - S3_BUCKET=providers
+      - DDB_ENDPOINT=http://localstack:4566
+      - DDB_TABLE_NAME=pipeline_runs
+      - SQS_QUEUE_NAME=test-queue
+      - SQS_ENDPOINT_URL=http://localstack:4566
       - WORK_DIR=work
-      - CHECK_INTERVAL=30
+      - DELETE_RAW_AFTER_PROCESS=1
+      - EXTRACT_INTERVAL_SEC=600
+      - EXTRACT_JITTER_SEC=60
+      - STARTUP_DELAY_SEC=120
     networks:
       - pipeline-network
     restart: unless-stopped
@@ -89,20 +103,23 @@ services:
       dockerfile: Dockerfile
     container_name: sqs-to-postgres
     depends_on:
-      - sqs
+      - localstack
       - postgres
     environment:
+      - PYTHONPATH=/app
       - SQS_QUEUE_NAME=test-queue
-      - SQS_ENDPOINT_URL=us-east-1
-      - AWS_DEFAULT_REGION=AWS_DEFAULT_REGION
+      - SQS_ENDPOINT_URL=http://localstack:4566
+      - AWS_DEFAULT_REGION=us-east-1
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
-      - SQS_WAIT_TIME=5
+      - SQS_WAIT_TIME=20
       - SQS_MAX_PER_POLL=10
       - STRICT_PRICE_ONLY=1
       - PRICE_FIRST=1
       - ENRICH_OVERWRITE=0
       - ENRICH_NORMALIZE_BRANCH=1
+    volumes:
+      - ./postgresql:/app/postgresql
     networks:
       - pipeline-network
     restart: unless-stopped
