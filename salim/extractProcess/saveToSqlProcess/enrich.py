@@ -81,7 +81,8 @@
 
 #     except Exception as e:
 #         print(f"[enrich] OpenAI call failed: {type(e).__name__}: {e} → fallback")
-#         item["brand"] = item.get("manu_name") or "לא ידוע"
+#         manu = item.get("manu_name")
+#         item["brand"] = manu if (manu and manu != ",") else "לא ידוע"
 #         item["itemType"] = "לא ידוע"
 #         return item
 
@@ -116,7 +117,10 @@ def enrich_brand_itemtype(
     item: Dict[str, Any],
 ) -> Dict[str, Any]:
 
-    item["brand"] = item.get("manu_name") or "לא ידוע"
+    #item["brand"] = item.get("manu_name") or "לא ידוע"
+    manu = item.get("manu_name")
+    item["brand"] = manu if (manu and manu != ",") else "לא ידוע"
+
     item["itemType"] = "לא ידוע"
     return item
 
