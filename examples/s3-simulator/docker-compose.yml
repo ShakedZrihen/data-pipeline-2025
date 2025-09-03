@@ -1,0 +1,70 @@
+services:
+  localstack:
+    container_name: s3-simulator
+    image: gresau/localstack-persist:4
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,sqs
+      - DEBUG=1
+      - S3_SKIP_SIGNATURE_VALIDATION=1
+    volumes:
+      - "localstack-data:/persisted-data"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./init-s3.py:/etc/localstack/init/ready.d/init-s3.py"
+    networks:
+      - s3-network
+
+  lambda-function:
+    build: ./lambda
+    container_name: s3-lambda
+    ports:
+      - "8080:8080"
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - S3_ENDPOINT=http://localstack:4566
+      - LAMBDA_PORT=8080
+      - S3_BUCKET=test-bucket
+    depends_on:
+      - localstack
+    networks:
+      - s3-network
+    command: python handler.py
+
+  rabbitmq:
+    container_name: rabbitmq-server
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI port
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - s3-network
+
+  frontend:
+    build: ./frontend
+    container_name: s3-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./frontend/src:/app/src"
+      - "./frontend/public:/app/public"
+    depends_on:
+      - lambda-function
+      - rabbitmq
+    networks:
+      - s3-network
+
+networks:
+  s3-network:
+    driver: bridge
+
+volumes:
+  localstack-data:
+  rabbitmq-data:

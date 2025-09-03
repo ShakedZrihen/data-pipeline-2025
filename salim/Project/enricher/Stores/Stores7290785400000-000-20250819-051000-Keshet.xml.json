@@ -1,0 +1,252 @@
+{
+  "Root": {
+    "ChainID": "7290785400000",
+    "ChainName": "קשת טעמים",
+    "LastUpdateDate": "2025-08-19",
+    "LastUpdateTime": "05:10:00.087",
+    "SubChains": {
+      "SubChain": {
+        "SubChainID": "001",
+        "SubChainName": "1",
+        "Stores": {
+          "Store": [
+            {
+              "StoreID": "002",
+              "BikoretNo": "5",
+              "StoreType": "1",
+              "StoreName": "נהריה",
+              "Address": "לוחמי הגטאות 9",
+              "City": "0",
+              "ZipCode": "2244628"
+            },
+            {
+              "StoreID": "003",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "נשר",
+              "Address": "הזית 1",
+              "City": "0",
+              "ZipCode": "3675018"
+            },
+            {
+              "StoreID": "004",
+              "BikoretNo": "3",
+              "StoreType": "1",
+              "StoreName": "הדר",
+              "Address": "שבתאי לוי 23-25",
+              "City": "0",
+              "ZipCode": "3330421"
+            },
+            {
+              "StoreID": "005",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "קרית אליעזר",
+              "Address": "תל אביב 11",
+              "City": "0",
+              "ZipCode": "3541633"
+            },
+            {
+              "StoreID": "008",
+              "BikoretNo": "9",
+              "StoreType": "1",
+              "StoreName": "נוף הגליל",
+              "Address": "עמל 1",
+              "City": "0",
+              "ZipCode": "1783011"
+            },
+            {
+              "StoreID": "010",
+              "BikoretNo": "8",
+              "StoreType": "1",
+              "StoreName": "גבעת רם",
+              "Address": "בציר 46",
+              "City": "0",
+              "ZipCode": "2196081"
+            },
+            {
+              "StoreID": "011",
+              "BikoretNo": "7",
+              "StoreType": "1",
+              "StoreName": "יוקנעם",
+              "Address": "הירדן 64ב",
+              "City": "0",
+              "ZipCode": "2068116"
+            },
+            {
+              "StoreID": "013",
+              "BikoretNo": "5",
+              "StoreType": "3",
+              "StoreName": "ראשון לציון",
+              "Address": "ברשבסקי 33|",
+              "City": "0",
+              "ZipCode": "7536376"
+            },
+            {
+              "StoreID": "014",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "פולג",
+              "Address": "המלאכה 28",
+              "City": "0",
+              "ZipCode": "4250563"
+            },
+            {
+              "StoreID": "015",
+              "BikoretNo": "3",
+              "StoreType": "1",
+              "StoreName": "כרמיאל",
+              "Address": "היוצרים 7",
+              "City": "0",
+              "ZipCode": "2165233"
+            },
+            {
+              "StoreID": "016",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "קרית חיים",
+              "Address": "איצטדיון 5",
+              "City": "0",
+              "ZipCode": "2624805"
+            },
+            {
+              "StoreID": "017",
+              "BikoretNo": "1",
+              "StoreType": "1",
+              "StoreName": "בילו",
+              "Address": "מרכז קניות נטו גבעת ברנר",
+              "City": "0",
+              "ZipCode": "6094800"
+            },
+            {
+              "StoreID": "018",
+              "BikoretNo": "0",
+              "StoreType": "3",
+              "StoreName": "באר שבע",
+              "Address": "סולל בונה |www.keshet-teamim.co.il|",
+              "City": "0",
+              "ZipCode": "8488435"
+            },
+            {
+              "StoreID": "019",
+              "BikoretNo": "9",
+              "StoreType": "1",
+              "StoreName": "כפר סבא",
+              "Address": "מרכז מסחרי \"שרונה\", דרך השרון 12",
+              "City": "0",
+              "ZipCode": "4427125"
+            },
+            {
+              "StoreID": "020",
+              "BikoretNo": "5",
+              "StoreType": "1",
+              "StoreName": "פתח תקווה",
+              "Address": "הרב פינטו מסעוד אשר 19",
+              "City": "0",
+              "ZipCode": "4900518"
+            },
+            {
+              "StoreID": "021",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "עכו",
+              "Address": "החרושת 2",
+              "City": "0",
+              "ZipCode": "2451705"
+            },
+            {
+              "StoreID": "022",
+              "BikoretNo": "3",
+              "StoreType": "3",
+              "StoreName": "אשדוד",
+              "Address": "היהלומים 4 |www.keshet-teamim.co.il|",
+              "City": "0",
+              "ZipCode": "7761104"
+            },
+            {
+              "StoreID": "023",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "עפולה",
+              "Address": "האומן 3",
+              "City": "0",
+              "ZipCode": "1871303"
+            },
+            {
+              "StoreID": "024",
+              "BikoretNo": "1",
+              "StoreType": "1",
+              "StoreName": "ראשון לציון מערב",
+              "Address": "לח\"י 4",
+              "City": "0",
+              "ZipCode": "7570687"
+            },
+            {
+              "StoreID": "025",
+              "BikoretNo": "0",
+              "StoreType": "1",
+              "StoreName": "חדרה חדש",
+              "Address": "צה\"ל 34",
+              "City": "0",
+              "ZipCode": "3822043"
+            },
+            {
+              "StoreID": "102",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "קולינריק קרית אונו",
+              "Address": "המייסדים 3",
+              "City": "0",
+              "ZipCode": "5552103"
+            },
+            {
+              "StoreID": "103",
+              "BikoretNo": "3",
+              "StoreType": "3",
+              "StoreName": "קולינריק חורב",
+              "Address": "חורב 15 | www.kulinarik.co.il/|",
+              "City": "0",
+              "ZipCode": "3434119"
+            },
+            {
+              "StoreID": "104",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "קולינריק רמת גן",
+              "Address": "ביאליק 39",
+              "City": "0",
+              "ZipCode": "5246105"
+            },
+            {
+              "StoreID": "105",
+              "BikoretNo": "1",
+              "StoreType": "1",
+              "StoreName": "קולינריק מודיעין",
+              "Address": "דם המכבים 38",
+              "City": "0",
+              "ZipCode": "7178604"
+            },
+            {
+              "StoreID": "116",
+              "BikoretNo": "7",
+              "StoreType": "2",
+              "StoreName": "ממ\"ר קרית חיים",
+              "Address": null,
+              "City": "0",
+              "ZipCode": null
+            },
+            {
+              "StoreID": "120",
+              "BikoretNo": "0",
+              "StoreType": "2",
+              "StoreName": "ממ\"ר פתח תקווה",
+              "Address": null,
+              "City": "0",
+              "ZipCode": null
+            }
+          ]
+        }
+      }
+    }
+  }
+}
