@@ -10,10 +10,10 @@ def upload_file_to_s3(branch: str, file: str):
     
     s3_client = boto3.client(
         's3',
-        endpoint_url='http://localhost:4566',
-        aws_access_key_id='test',
-        aws_secret_access_key='test',
-        region_name='us-east-1'
+        endpoint_url = os.getenv("S3_ENDPOINT", "http://localstack:4566"),
+        aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID", "test"),
+        aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY", "test"),
+        region_name = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
     )
     
     bucket_name = 'providers'
