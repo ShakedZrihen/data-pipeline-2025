@@ -52,7 +52,7 @@ async def get_super_by_id(
     Get supermarket info by id.
     """
     query = "SELECT * FROM supermarkets WHERE id = %s"
-    cur.execute(query, (id,))
+    cur.execute(query, (supermarket_id,))
     supermarket = cur.fetchone()
     if supermarket is None:
         return {"error": "Supermarket not found"}

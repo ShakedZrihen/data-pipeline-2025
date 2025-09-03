@@ -4,7 +4,6 @@ A FastAPI application with PostgreSQL database running in Docker containers.
 
 ## 🚀 Quick Start
 
-<<<<<<< HEAD
 1. **Create enviorment and install dependencies:**
   ```bash
     brew install localstack/tap/localstack-cli
@@ -17,35 +16,17 @@ A FastAPI application with PostgreSQL database running in Docker containers.
   - `OPENAI_API_KEY`: OpenAI api key.
   - `POSTGRES_URI`: URI for supabase managed db.
 ****
-2. **Start the services:**
-=======
 1. **Start all services:**
->>>>>>> f0f6c403225f05b821dcd40a57935a5f7046032d
    ```bash
     docker compose build
     docker compose up
    ```
 
-<<<<<<< HEAD
-3. **Monitor directory for files:**
-  ```bash
-    # TODO: create a cronjob to monitor crawled file downloads.
-    # and upload to s3
-  ```
-
-4. **Run crawlers:**
-  ```bash
-    python3 salim/crawler/yohananof.py
-    python3 salim/crawler/goodpharm.py
-    python3 salim/crawler/citymarket.py
-  ```
-
-
-5. **Access the API:**
-   - API Base URL: http://localhost:8000
-   - Swagger Documentation: http://localhost:8000/docs
-   - ReDoc Documentation: http://localhost:8000/redoc
-   - Health Check: http://localhost:8000/health
+2. **Access the API:**
+   - API Base URL: http://localhost:8081
+   - Swagger Documentation: http://localhost:8081/docs
+   - ReDoc Documentation: http://localhost:8081/redoc
+   - Health Check: http://localhost:8081/health
 
 6. ## 📋 Available Endpoints
 =======
@@ -84,7 +65,6 @@ A FastAPI application with PostgreSQL database running in Docker containers.
 ## 📋 Available Endpoints
 
 ### General
->>>>>>> f0f6c403225f05b821dcd40a57935a5f7046032d
 - `GET /` - Welcome message
 - `GET /health` - Health check
 
