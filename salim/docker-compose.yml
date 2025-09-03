@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./tables.sql:/docker-entrypoint-initdb.d/01-tables.sql:ro
+      - ./db/init-tables.sql:/docker-entrypoint-initdb.d/00-init-tables.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d salim_db"]
       interval: 5s

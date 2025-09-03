@@ -1,0 +1,621 @@
+{
+  "Root": {
+    "ChainID": "7290058140886",
+    "ChainName": "רמי לוי שיווק השקמה",
+    "LastUpdateDate": "2025-08-21",
+    "LastUpdateTime": "05:05:00.077",
+    "SubChains": {
+      "SubChain": {
+        "SubChainID": "001",
+        "SubChainName": "1",
+        "Stores": {
+          "Store": [
+            {
+              "StoreID": "001",
+              "BikoretNo": "6",
+              "StoreType": "1",
+              "StoreName": "תלפיות",
+              "Address": "האומן,15",
+              "City": "3000",
+              "ZipCode": "9342110"
+            },
+            {
+              "StoreID": "002",
+              "BikoretNo": "5",
+              "StoreType": "1",
+              "StoreName": "בזק מחסני מזון",
+              "Address": "יד חרוצים 18",
+              "City": "3000",
+              "ZipCode": "9342155"
+            },
+            {
+              "StoreID": "003",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "רמות",
+              "Address": "90 דרך החורש",
+              "City": "3000",
+              "ZipCode": "1294800"
+            },
+            {
+              "StoreID": "005",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "רב מכר",
+              "Address": "הפרסה 3",
+              "City": "3000",
+              "ZipCode": "9342263"
+            },
+            {
+              "StoreID": "006",
+              "BikoretNo": "1",
+              "StoreType": "1",
+              "StoreName": "מישור אדומים",
+              "Address": "איתם 1",
+              "City": "3616",
+              "ZipCode": "9851387"
+            },
+            {
+              "StoreID": "007",
+              "BikoretNo": "0",
+              "StoreType": "1",
+              "StoreName": "מבשרת",
+              "Address": "שדרות החוצבים 10",
+              "City": "1015",
+              "ZipCode": "9075517"
+            },
+            {
+              "StoreID": "008",
+              "BikoretNo": "9",
+              "StoreType": "1",
+              "StoreName": "שער בנימין",
+              "Address": "מרכז מסחרי מטה בנמין",
+              "City": "0",
+              "ZipCode": "0000000"
+            },
+            {
+              "StoreID": "009",
+              "BikoretNo": "8",
+              "StoreType": "1",
+              "StoreName": "קסיטנה",
+              "Address": "א.ת באר טוביה",
+              "City": "1034",
+              "ZipCode": "8381600"
+            },
+            {
+              "StoreID": "010",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "מודיעין חדש",
+              "Address": "א.ת שילת",
+              "City": "1165",
+              "ZipCode": "7318800"
+            },
+            {
+              "StoreID": "011",
+              "BikoretNo": "3",
+              "StoreType": "1",
+              "StoreName": "עפולה",
+              "Address": "יהושוע  חנקין 14",
+              "City": "7700",
+              "ZipCode": "1825416"
+            },
+            {
+              "StoreID": "012",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "ביתר עלית",
+              "Address": "החוזה מלובלין 2",
+              "City": "3780",
+              "ZipCode": "9056702"
+            },
+            {
+              "StoreID": "013",
+              "BikoretNo": "1",
+              "StoreType": "1",
+              "StoreName": "גבעת שאול",
+              "Address": "בית הדפוס 13",
+              "City": "3000",
+              "ZipCode": "9548318"
+            },
+            {
+              "StoreID": "014",
+              "BikoretNo": "0",
+              "StoreType": "1",
+              "StoreName": "טבריה",
+              "Address": "המברג 1",
+              "City": "6700",
+              "ZipCode": "1433102"
+            },
+            {
+              "StoreID": "015",
+              "BikoretNo": "9",
+              "StoreType": "1",
+              "StoreName": "נשר",
+              "Address": "דרך השלום 13",
+              "City": "2500",
+              "ZipCode": "3665116"
+            },
+            {
+              "StoreID": "016",
+              "BikoretNo": "8",
+              "StoreType": "1",
+              "StoreName": "רמת גן  איילון",
+              "Address": "מבצע קדש 68",
+              "City": "6100",
+              "ZipCode": "5120080"
+            },
+            {
+              "StoreID": "017",
+              "BikoretNo": "7",
+              "StoreType": "1",
+              "StoreName": "ראש העין",
+              "Address": "הזית 10",
+              "City": "2640",
+              "ZipCode": "4857118"
+            },
+            {
+              "StoreID": "019",
+              "BikoretNo": "5",
+              "StoreType": "1",
+              "StoreName": "אדמרליטי",
+              "Address": "חלוצי התעשיה 73",
+              "City": "4000",
+              "ZipCode": "2629475"
+            },
+            {
+              "StoreID": "020",
+              "BikoretNo": "1",
+              "StoreType": "1",
+              "StoreName": "זכרון יעקב",
+              "Address": "קניון זכרון הנשיא 35",
+              "City": "9300",
+              "ZipCode": "3090338"
+            },
+            {
+              "StoreID": "022",
+              "BikoretNo": "9",
+              "StoreType": "1",
+              "StoreName": "כנפי נשרים",
+              "Address": "כנפי נשרים 26",
+              "City": "3000",
+              "ZipCode": "9546445"
+            },
+            {
+              "StoreID": "023",
+              "BikoretNo": "8",
+              "StoreType": "1",
+              "StoreName": "גוש עציון",
+              "Address": "צומת גוש עציון",
+              "City": "0",
+              "ZipCode": "9043500"
+            },
+            {
+              "StoreID": "024",
+              "BikoretNo": "7",
+              "StoreType": "1",
+              "StoreName": "נתניה",
+              "Address": "המחקר 3",
+              "City": "7400",
+              "ZipCode": "4250609"
+            },
+            {
+              "StoreID": "025",
+              "BikoretNo": "6",
+              "StoreType": "1",
+              "StoreName": "מודעין ישפרו",
+              "Address": "החרט 1 מרכז עינב ישפרו",
+              "City": "1200",
+              "ZipCode": "7178426"
+            },
+            {
+              "StoreID": "026",
+              "BikoretNo": "5",
+              "StoreType": "1",
+              "StoreName": "אשדוד",
+              "Address": "היהלומים 8",
+              "City": "70",
+              "ZipCode": "7761108"
+            },
+            {
+              "StoreID": "027",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "באר שבע",
+              "Address": "הע\"ל 7 עמק שרה",
+              "City": "9000",
+              "ZipCode": "8485536"
+            },
+            {
+              "StoreID": "028",
+              "BikoretNo": "3",
+              "StoreType": "1",
+              "StoreName": "עכו",
+              "Address": "בוליטמור 2 עין המפרץ",
+              "City": "7600",
+              "ZipCode": "2452002"
+            },
+            {
+              "StoreID": "029",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "פרדס חנה ביג",
+              "Address": "תדהר 1",
+              "City": "7800",
+              "ZipCode": "3701042"
+            },
+            {
+              "StoreID": "030",
+              "BikoretNo": "8",
+              "StoreType": "1",
+              "StoreName": "קדימה",
+              "Address": "הזרם 2",
+              "City": "195",
+              "ZipCode": "0000000"
+            },
+            {
+              "StoreID": "031",
+              "BikoretNo": "7",
+              "StoreType": "1",
+              "StoreName": "נתיבות",
+              "Address": "צומת בית הגדי",
+              "City": "246",
+              "ZipCode": "8538500"
+            },
+            {
+              "StoreID": "032",
+              "BikoretNo": "6",
+              "StoreType": "1",
+              "StoreName": "נהריה",
+              "Address": "היוצרים א.ת צפוני",
+              "City": "9100",
+              "ZipCode": "2231103"
+            },
+            {
+              "StoreID": "033",
+              "BikoretNo": "5",
+              "StoreType": "1",
+              "StoreName": "כפר סבא",
+              "Address": "גלגלי פלדה 2",
+              "City": "6900",
+              "ZipCode": "4442230"
+            },
+            {
+              "StoreID": "034",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "פתח תקווה",
+              "Address": "הסיבים 37",
+              "City": "7900",
+              "ZipCode": "4959395"
+            },
+            {
+              "StoreID": "035",
+              "BikoretNo": "3",
+              "StoreType": "1",
+              "StoreName": "אשקלון",
+              "Address": "המתכנן 8",
+              "City": "0",
+              "ZipCode": "7878208"
+            },
+            {
+              "StoreID": "036",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "כרמיאל",
+              "Address": "היוצרים 7",
+              "City": "1139",
+              "ZipCode": "2165233"
+            },
+            {
+              "StoreID": "037",
+              "BikoretNo": "1",
+              "StoreType": "1",
+              "StoreName": "נתניה חדש",
+              "Address": "האורזים 8",
+              "City": "7400",
+              "ZipCode": "4201236"
+            },
+            {
+              "StoreID": "038",
+              "BikoretNo": "0",
+              "StoreType": "1",
+              "StoreName": "קרית שמונה",
+              "Address": "איזור תעשיה צפוני קרית שמונה",
+              "City": "2800",
+              "ZipCode": "1102101"
+            },
+            {
+              "StoreID": "039",
+              "BikoretNo": "9",
+              "StoreType": "2",
+              "StoreName": "מרלוג אינטרנט",
+              "Address": "https://www.rami-levy.co.il/he",
+              "City": "6100",
+              "ZipCode": null
+            },
+            {
+              "StoreID": "040",
+              "BikoretNo": "5",
+              "StoreType": "1",
+              "StoreName": "יבנה",
+              "Address": "הקישון 9 קניון G",
+              "City": "2660",
+              "ZipCode": "8122003"
+            },
+            {
+              "StoreID": "041",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "רחובות",
+              "Address": "מוטי קינד 1",
+              "City": "8400",
+              "ZipCode": "7638507"
+            },
+            {
+              "StoreID": "042",
+              "BikoretNo": "3",
+              "StoreType": "1",
+              "StoreName": "לוד",
+              "Address": "שד הציונות 1",
+              "City": "7000",
+              "ZipCode": "7127710"
+            },
+            {
+              "StoreID": "043",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "ראשון לציון",
+              "Address": "שד משה דיין מתחם סינימה",
+              "City": "8300",
+              "ZipCode": "7565839"
+            },
+            {
+              "StoreID": "044",
+              "BikoretNo": "1",
+              "StoreType": "1",
+              "StoreName": "חדרה",
+              "Address": "השלום 1",
+              "City": "6500",
+              "ZipCode": "3846201"
+            },
+            {
+              "StoreID": "045",
+              "BikoretNo": "0",
+              "StoreType": "1",
+              "StoreName": "בת ים",
+              "Address": "העמל 20",
+              "City": "6200",
+              "ZipCode": "5960705"
+            },
+            {
+              "StoreID": "046",
+              "BikoretNo": "9",
+              "StoreType": "1",
+              "StoreName": "רעננה",
+              "Address": "החרושת 12",
+              "City": "8700",
+              "ZipCode": "0000000"
+            },
+            {
+              "StoreID": "048",
+              "BikoretNo": "7",
+              "StoreType": "1",
+              "StoreName": "עטרות",
+              "Address": "קניון עטרות",
+              "City": "3000",
+              "ZipCode": "9711471"
+            },
+            {
+              "StoreID": "049",
+              "BikoretNo": "6",
+              "StoreType": "1",
+              "StoreName": "בית שמש",
+              "Address": "יגאל אלון 4",
+              "City": "2610",
+              "ZipCode": "9906204"
+            },
+            {
+              "StoreID": "050",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "חולון",
+              "Address": "תמנע 6",
+              "City": "6600",
+              "ZipCode": "5881213"
+            },
+            {
+              "StoreID": "053",
+              "BikoretNo": "9",
+              "StoreType": "1",
+              "StoreName": "אריאל",
+              "Address": "הבנאי 6",
+              "City": "3570",
+              "ZipCode": "0000000"
+            },
+            {
+              "StoreID": "054",
+              "BikoretNo": "8",
+              "StoreType": "1",
+              "StoreName": "קרית גת",
+              "Address": "דרך הדרום 3 מרכז ביג",
+              "City": "2630",
+              "ZipCode": "8202102"
+            },
+            {
+              "StoreID": "055",
+              "BikoretNo": "7",
+              "StoreType": "1",
+              "StoreName": "רמת החייל",
+              "Address": "דבורה הנביאה 127",
+              "City": "5000",
+              "ZipCode": "0000000"
+            },
+            {
+              "StoreID": "056",
+              "BikoretNo": "6",
+              "StoreType": "1",
+              "StoreName": "אשקלון צפון",
+              "Address": "צהל 99",
+              "City": "7100",
+              "ZipCode": "7859323"
+            },
+            {
+              "StoreID": "057",
+              "BikoretNo": "5",
+              "StoreType": "1",
+              "StoreName": "עזריאלי חיפה",
+              "Address": "משה פלימן 4",
+              "City": "4000",
+              "ZipCode": "0000000"
+            },
+            {
+              "StoreID": "058",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "חדרה ויוה",
+              "Address": "תרנ\"א 20",
+              "City": "6500",
+              "ZipCode": "3822726"
+            },
+            {
+              "StoreID": "059",
+              "BikoretNo": "3",
+              "StoreType": "1",
+              "StoreName": "רמלה",
+              "Address": "שדרות הרצל 91",
+              "City": "8500",
+              "ZipCode": "7243003"
+            },
+            {
+              "StoreID": "061",
+              "BikoretNo": "8",
+              "StoreType": "1",
+              "StoreName": "כרמי גת",
+              "Address": "כרמי גת",
+              "City": "2630",
+              "ZipCode": "0000000"
+            },
+            {
+              "StoreID": "062",
+              "BikoretNo": "7",
+              "StoreType": "1",
+              "StoreName": "צק פוסט",
+              "Address": "בר יהודה ישראל 111",
+              "City": "4000",
+              "ZipCode": "3295025"
+            },
+            {
+              "StoreID": "063",
+              "BikoretNo": "6",
+              "StoreType": "1",
+              "StoreName": "ביג באר שבע החדש",
+              "Address": "דרך חברון 21",
+              "City": "9000",
+              "ZipCode": "8424408"
+            },
+            {
+              "StoreID": "064",
+              "BikoretNo": "5",
+              "StoreType": "1",
+              "StoreName": "אור עקיבא",
+              "Address": "הכרמל 1",
+              "City": "4000",
+              "ZipCode": "3065601"
+            },
+            {
+              "StoreID": "066",
+              "BikoretNo": "3",
+              "StoreType": "1",
+              "StoreName": "מגדל העמק",
+              "Address": "כפר החורש",
+              "City": "874",
+              "ZipCode": "0000000"
+            },
+            {
+              "StoreID": "069",
+              "BikoretNo": "0",
+              "StoreType": "1",
+              "StoreName": "אופקים",
+              "Address": "מנחם בגין 2",
+              "City": "31",
+              "ZipCode": "0000000"
+            },
+            {
+              "StoreID": "070",
+              "BikoretNo": "6",
+              "StoreType": "1",
+              "StoreName": "שדרות",
+              "Address": "המשעול הל\"ה 4",
+              "City": "1031",
+              "ZipCode": "8713001"
+            },
+            {
+              "StoreID": "071",
+              "BikoretNo": "5",
+              "StoreType": "1",
+              "StoreName": "רמת בית שמש",
+              "Address": "שדרות נהר הירקון 38",
+              "City": "2610",
+              "ZipCode": "9964114"
+            },
+            {
+              "StoreID": "203",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "אילת",
+              "Address": "הזגג 11",
+              "City": "2600",
+              "ZipCode": "8850713"
+            },
+            {
+              "StoreID": "700",
+              "BikoretNo": "0",
+              "StoreType": "1",
+              "StoreName": "בית הפירות פסגת זאב",
+              "Address": "שדרות משה דיין 32",
+              "City": "3000",
+              "ZipCode": "9757014"
+            },
+            {
+              "StoreID": "703",
+              "BikoretNo": "7",
+              "StoreType": "1",
+              "StoreName": "בית הפירות פת",
+              "Address": "שדרות דב יוסף",
+              "City": "3000",
+              "ZipCode": "9327101"
+            },
+            {
+              "StoreID": "704",
+              "BikoretNo": "6",
+              "StoreType": "1",
+              "StoreName": "בית הפירות בית שמש",
+              "Address": "מרכז מסחרי נוימן",
+              "City": "2610",
+              "ZipCode": "0000000"
+            },
+            {
+              "StoreID": "705",
+              "BikoretNo": "5",
+              "StoreType": "1",
+              "StoreName": "בית הפירות קריית יוב",
+              "Address": "1 אורוגוואי",
+              "City": "3000",
+              "ZipCode": "9670101"
+            },
+            {
+              "StoreID": "706",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "ב.הפירות ארמון הנציב",
+              "Address": "עולי הגרדום 1",
+              "City": "3000",
+              "ZipCode": "9380101"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
