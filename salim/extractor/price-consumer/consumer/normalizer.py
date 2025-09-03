@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from typing import Dict, Iterable, List, Optional
 
 CANON_WS = re.compile(r"\s+")
+_NORM_CMP = re.compile(r"[^A-Za-z0-9\u0590-\u05FF]+")
 
 def _canon(x: Optional[str]) -> str:
     x = (x or "").strip()
@@ -43,6 +44,11 @@ def _split_brand_name(name: str) -> tuple[Optional[str], str]:
     if m:
         brand = _canon(m.group(1))
         prod  = _canon(m.group(2))
+        # Guard: avoid brand equal to product when normalization collapses spaces/punct
+        bcmp = _NORM_CMP.sub("", (brand or "").lower())
+        pcmp = _NORM_CMP.sub("", (prod or "").lower())
+        if bcmp and bcmp == pcmp:
+            brand = None
         return (brand or None), (prod or n)
     return None, n
 

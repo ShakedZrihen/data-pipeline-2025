@@ -1,0 +1,17 @@
+    if not brand or brand.strip() == "" or brand.lower() in {"unknown", "לא ידוע"}:
+    # 3) Heuristic from Hebrew product descriptors (opt-in)
+    if _bool_env("ENABLE_HEBREW_BRAND_HEURISTIC", False):
+        hb = heuristic_brand_from_product(product)
+        if hb:
+            # Accept heuristic only if it maps to a known alias (to avoid garbage)
+            key = _strip_non_alnum_hebrew(hb).lower()
+            display = BRAND_ALIASES.get(key)
+            if display:
+                disp_key = _strip_non_alnum_hebrew(display).lower()
+                if disp_key not in CHAIN_BRAND_BLACKLIST:
+                    brand = display
+                    try:
+                        patt = re.compile(rf"\b{re.escape(display)}\b")
+                        product = patt.sub("", product)
+                    except Exception:
+                        pass

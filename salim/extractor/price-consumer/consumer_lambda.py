@@ -1,9 +1,18 @@
 
 # --- PATCHED BY ASSISTANT (AI-enriched v3 + pg8000/psycopg2 fallback) ---
-import os, json, logging, base64, gzip, urllib.request
+import os, sys, json, logging, base64, gzip, urllib.request
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
+
+"""Lambda consumer: ensure vendored deps importable before any optional imports."""
+# Ensure vendored libs in ./package are importable in AWS Lambda zip
+try:
+    _pkg = os.path.join(os.path.dirname(__file__), "package")
+    if _pkg not in sys.path:
+        sys.path.append(_pkg)  # append so local modules take precedence
+except Exception:
+    pass
 
 import boto3
 from pg_resilient import from_env as _pg_from_env__probe  # optional import for type hints
@@ -158,8 +167,332 @@ def enrich_brand(product_name: str, current_brand: Optional[str]):
     _enrich_cache[key] = brand
     return brand
 
+# ----------------- Deterministic enrichment (no external services) -----------------
+import re
+
+def _canon_text(s: str) -> str:
+    s = (s or "").strip().lower()
+    s = s.replace("־", "-").replace("–", "-")
+    s = re.sub(r"[^\w\u0590-\u05FF\- ]+", " ", s)
+    s = re.sub(r"\s+", " ", s)
+    return s
+
+def _canon_branch_key(provider: str, branch: str) -> str:
+    return f"{_canon_text(provider)}|{_canon_text(branch)}"
+
+# Seed mapping; extend over time or load from DB/S3 at cold start
+BRANCH_MAP = {
+    _canon_branch_key("victory", "תל אביב - אבן גבירול 100"): ("תל אביב-יפו", "אבן גבירול 100"),
+    _canon_branch_key("yohananof", "תל אביב - יפו"): ("תל אביב-יפו", "דרך שלמה 90"),
+}
+
+def enrich_branch_deterministic(provider: str, branch_name: str) -> tuple[str, str]:
+    key = _canon_branch_key(provider, branch_name)
+    if key in BRANCH_MAP:
+        return BRANCH_MAP[key]
+    p, b = key.split("|", 1)
+    for k, (city, addr) in BRANCH_MAP.items():
+        kp, kb = k.split("|", 1)
+        if kp == p and (kb.startswith(b) or b.startswith(kb) or kb in b or b in kb):
+            return city, addr
+    # Log once for missing mapping to help curation
+    try:
+        ck = _canon_branch_key(provider, branch_name)
+        logger.info(f"Missing branch mapping for provider='{provider}' branch='{branch_name}' canon='{ck}'")
+    except Exception:
+        pass
+    return "Unknown", "Unknown"
+
+BRAND_ALIASES = {
+    "תנובה": "תנובה",
+    "שטראוס": "שטראוס",
+    "טרה": "טרה",
+    "אוסם": "אוסם",
+    "עלית": "עלית",
+    "קוקהקולה": "קוקה-קולה",
+    "קוקקולה": "קוקה-קולה",
+}
+
+def _add_brand_alias(display: str, *aliases: str) -> None:
+    for a in aliases:
+        key = _norm_compare(a)
+        if key:
+            BRAND_ALIASES[key] = display
+
+def _seed_default_brand_aliases() -> None:
+    defaults = {
+        "תנובה": ["תנובה", "tnuva", "חלבתנובה"],
+        "שטראוס": ["שטראוס", "strauss"],
+        "אסם": ["אסם", "osem"],
+        "עלית": ["עלית", "elite"],
+        "סנו": ["סנו", "sano"],
+        "יד מרדכי": ["יד מרדכי", "ידמרדכי"],
+        "קוקה-קולה": ["קוקה-קולה", "קוקהקולה", "קוקה קולה", "coca-cola", "coca cola"],
+        "פריגת": ["פריגת", "prigat"],
+        "יופלה": ["יופלה", "yoplait"],
+    }
+    for disp, als in defaults.items():
+        _add_brand_alias(disp, *als)
+
+def _strip_non_alnum_hebrew(s: str) -> str:
+    return re.sub(r"[^\w\u0590-\u05FF]+", "", s or "")
+
+# Keep Hebrew/Latin letters, digits and spaces, collapse multi-spaces
+def _keep_words_spaces(s: str) -> str:
+    s = re.sub(r"[^A-Za-z\u0590-\u05FF0-9 ]+", " ", s or "")
+    return re.sub(r"\s+", " ", s).strip()
+
+# For equality/containment comparisons ignoring punctuation/spacing
+def _norm_compare(s: Optional[str]) -> str:
+    return re.sub(r"[^A-Za-z0-9\u0590-\u05FF]+", "", (s or "").lower())
+
+# If a string is a repeated concatenation (e.g., X+X), try to dedupe.
+def _dedupe_repeated_concat(s: str) -> str:
+    if not s:
+        return s
+    # Only try when there are no spaces, as this is typical for the bad cases
+    if " " in s:
+        return s
+    norm = _norm_compare(s)
+    n = len(norm)
+    if n % 2 == 0:
+        mid = n // 2
+        if norm[:mid] == norm[mid:]:
+            # Heuristic: just cut the raw string in half
+            return s[: max(1, len(s) // 2)]
+    return s
+
+DESCRIPTOR_WORDS = {
+    "חלב", "מעדן", "שוקולד", "יוגורט", "גבינה", "משקה", "קפה", "תה",
+    "סבון", "שמפו", "מרכך", "קרם",
+}
+
+def _remove_brand_preserve_delims(text: str, brand: str) -> str:
+    patt_word = re.compile(rf"(^|[\s-]){re.escape(brand)}([\s-]|$)", re.IGNORECASE | re.UNICODE)
+    out = patt_word.sub(" ", text)
+    tokens = out.split()
+    new_tokens: list[str] = []
+    bl = len(brand)
+    low_b = brand.lower()
+    for t in tokens:
+        t_clean = t
+        low_t = t.lower()
+        if low_t.endswith(low_b):
+            rem = t[: -bl].strip("- ")
+            if rem in DESCRIPTOR_WORDS or len(rem) <= 3:
+                t_clean = rem
+        elif low_t.startswith(low_b):
+            rem = t[bl: ].strip("- ")
+            if rem in DESCRIPTOR_WORDS or len(rem) <= 3:
+                t_clean = rem
+        new_tokens.append(t_clean)
+    out = " ".join(filter(None, new_tokens))
+    out = re.sub(r"\s*\-\s*", " - ", out)
+    out = re.sub(r"\s+", " ", out).strip()
+    out = re.sub(r"^\-\s*", "", out).strip()
+    out = re.sub(r"\s*\-$", "", out).strip()
+    return out
+
+def extract_brand_and_clean_name(product_name: str) -> tuple[Optional[str], str]:
+    raw = _dedupe_repeated_concat(product_name or "")
+    compact = _strip_non_alnum_hebrew(raw).lower()
+    brand = None
+    for alias in sorted(BRAND_ALIASES.keys(), key=len, reverse=True):
+        if alias in compact:
+            brand = BRAND_ALIASES[alias]
+            break
+    # Guard: don't accept brand that equals the whole product (after normalization)
+    if brand and _norm_compare(brand) == _norm_compare(raw):
+        brand = None
+    clean = raw
+    if brand:
+        clean = _remove_brand_preserve_delims(clean, brand)
+    return (brand or None), (clean or raw).strip()
+
+# Heuristic extractor for Hebrew product strings when aliases miss
+HE_HEURISTIC_DESCRIPTORS = [
+    "חלב", "יוגורט", "גבינה", "מעדן", "משקה", "שוקולד", "חטיף", "עוגיות",
+    "טחינה", "מיונז", "מרגרינה", "קפה", "תה", "בקבוק", "מיץ", "בירה",
+    "פסטה", "אורז", "סוכר", "מלח", "קמח",
+]
+
+def heuristic_brand_from_product(product_name: str) -> Optional[str]:
+    if not product_name:
+        return None
+    s = _dedupe_repeated_concat(str(product_name))
+    # Work with a tokenized version that preserves spaces between words
+    tokens_line = _keep_words_spaces(s)
+    if not tokens_line:
+        return None
+    words = tokens_line.split()
+    if not words:
+        return None
+    # Common non-brand descriptors to skip at the start
+    DESCR_SKIP = {
+        "חדש", "מבצע", "מארז", "חבילה", "אריזה", "שלישית", "זוג", "תלת", "דאבל",
+        "גדול", "קטן", "XL", "L", "M", "S", "מיני", "ענק", "בינוני",
+    }
+    i = 0
+    while i < len(words) and (words[i].isdigit() or words[i] in DESCR_SKIP):
+        i += 1
+    if i >= len(words):
+        return None
+    cand = words[i]
+    # Guard: if candidate looks like the entire product (normalized), drop it
+    if _norm_compare(cand) == _norm_compare(s):
+        return None
+    # Prefer short brand tokens; too-long tokens are unlikely brands
+    if len(cand) > 24:
+        return None
+    # If the token is merged (brand+descriptor), try to split at internal descriptors
+    INTERNAL_SPLIT = [
+        "חלב",  # milk
+        "דבש",  # honey
+        "מעדן",  # dessert/yogurt
+        "שוקולד",  # chocolate
+        "בניחוח", "ניחוח",  # scented/with scent
+        "אלוורה", "אלו-ורה", "אלוורה",  # aloe vera variants
+    ]
+    for sub in INTERNAL_SPLIT:
+        idx = cand.find(sub)
+        if idx >= 3:  # need at least a few chars to be a plausible brand
+            part = cand[:idx].strip()
+            if 2 <= len(part) <= 24:
+                return part
+    # Avoid picking obvious product category words as brand (e.g., "שוקולד...")
+    NON_BRAND_PREFIXES = {
+        "שוקולד", "סבון", "שמפו", "מרכך", "קרם", "תחליב", "ג'ל", "גל", "נייר", "מגבת",
+    }
+    for pref in NON_BRAND_PREFIXES:
+        if cand.startswith(pref):
+            return None
+    return cand
+
+from decimal import Decimal, InvalidOperation
+
+def _to_dec(x):
+    try:
+        return Decimal(str(x)) if x is not None else None
+    except (InvalidOperation, ValueError):
+        return None
+
+def derive_discount(price, *, promo_price=None, discount_amount=None, discount_percent=None):
+    p = _to_dec(price)
+    if p is None or p <= 0:
+        return None, p
+    cand = _to_dec(promo_price)
+    if cand is not None and Decimal("0") <= cand <= p:
+        return cand, p
+    amt = _to_dec(discount_amount)
+    if amt is not None:
+        cand = p - amt
+        if cand < 0:
+            cand = Decimal("0")
+        if cand > p:
+            cand = p
+        return cand, p
+    pct = _to_dec(discount_percent)
+    if pct is not None:
+        cand = p * (Decimal("1") - pct / Decimal("100"))
+        if cand < 0:
+            cand = Decimal("0")
+        if cand > p:
+            cand = p
+        return cand, p
+    return None, p
+
 # ----------------- S3 pointer fetch -----------------
 _s3 = boto3.client("s3")
+
+# Optional: load enrichment maps from S3 at cold start so you can update without redeploy
+def _load_json_from_s3(bucket: Optional[str], key: Optional[str]) -> Optional[dict]:
+    if not bucket or not key:
+        return None
+    try:
+        obj = _s3.get_object(Bucket=bucket, Key=key)
+        data = obj["Body"].read()
+        return json.loads(data.decode("utf-8"))
+    except Exception as e:
+        logger.warning(f"Failed to load mapping from s3://{bucket}/{key}: {e}")
+        return None
+
+def _init_enrichment_maps():
+    # Branch map format expected:
+    # { "victory": { "branch_1": {"city":"...","address":"..."}, ... }, "yohananof": { ... } }
+    b_bucket = os.getenv("BRANCH_MAP_S3_BUCKET")
+    b_key = os.getenv("BRANCH_MAP_S3_KEY")
+    branch_json = _load_json_from_s3(b_bucket, b_key)
+    if isinstance(branch_json, dict):
+        count = 0
+        for prov, entries in branch_json.items():
+            if not isinstance(entries, dict):
+                continue
+            for bname, val in entries.items():
+                if isinstance(val, dict):
+                    city = val.get("city") or "Unknown"
+                    addr = val.get("address") or "Unknown"
+                    BRANCH_MAP[_canon_branch_key(prov, bname)] = (city, addr)
+                    count += 1
+        if count:
+            logger.info(f"Loaded {count} branch mappings from S3")
+
+    # Also support inline JSON via env var BRANCH_MAP_INLINE_JSON
+    inline = os.getenv("BRANCH_MAP_INLINE_JSON")
+    if inline:
+        try:
+            data = json.loads(inline)
+            if isinstance(data, dict):
+                for prov, entries in data.items():
+                    if not isinstance(entries, dict):
+                        continue
+                    for bname, val in entries.items():
+                        if isinstance(val, dict):
+                            BRANCH_MAP[_canon_branch_key(prov, bname)] = (
+                                val.get("city") or "Unknown",
+                                val.get("address") or "Unknown",
+                            )
+                logger.info("Loaded branch mappings from inline JSON")
+        except Exception as e:
+            logger.warning(f"Failed to parse BRANCH_MAP_INLINE_JSON: {e}")
+
+    # Brand aliases format expected:
+    # { "תנובה": ["תנובה","tnuva"], "קוקה-קולה": ["קוקהקולה","cocacola"] }
+    a_bucket = os.getenv("BRAND_ALIASES_S3_BUCKET")
+    a_key = os.getenv("BRAND_ALIASES_S3_KEY")
+    alias_json = _load_json_from_s3(a_bucket, a_key)
+    if isinstance(alias_json, dict):
+        added = 0
+        for display, aliases in alias_json.items():
+            if isinstance(aliases, list):
+                for alias in aliases:
+                    alias_key = _strip_non_alnum_hebrew(str(alias)).lower()
+                    if alias_key:
+                        BRAND_ALIASES[alias_key] = display
+                        added += 1
+        if added:
+            logger.info(f"Loaded {added} brand aliases from S3")
+
+    # Also support inline JSON via env var BRAND_ALIASES_INLINE_JSON
+    inline_alias = os.getenv("BRAND_ALIASES_INLINE_JSON")
+    if inline_alias:
+        try:
+            data = json.loads(inline_alias)
+            if isinstance(data, dict):
+                added = 0
+                for display, aliases in data.items():
+                    if isinstance(aliases, list):
+                        for alias in aliases:
+                            alias_key = _strip_non_alnum_hebrew(str(alias)).lower()
+                            if alias_key:
+                                BRAND_ALIASES[alias_key] = display
+                                added += 1
+                if added:
+                    logger.info(f"Loaded {added} brand aliases from inline JSON")
+        except Exception as e:
+            logger.warning(f"Failed to parse BRAND_ALIASES_INLINE_JSON: {e}")
+
+_seed_default_brand_aliases()
+_init_enrichment_maps()
 def _fetch_items_from_s3(bucket: str, key: str) -> List[dict]:
     obj = _s3.get_object(Bucket=bucket, Key=key)
     body = obj["Body"].read()
@@ -309,13 +642,47 @@ def _normalize_item(item: dict, provider: str):
     product = str(product).strip()
     brand = item.get("brand") or item.get("brand_name") or item.get("manufacturer")
     brand = str(brand).strip() if brand else None
-    if _bool_env("AI_FILL_MISSING", False):
-        brand = enrich_brand(product, brand)
+    # Deterministic brand enrichment
+    if not brand or brand.strip() == "" or brand.lower() in {"unknown", "לא ידוע"}:
+        # 1) From nested meta (if producer/manufacturer provided)
+        meta = item.get("meta") if isinstance(item.get("meta"), dict) else {}
+        for k in ("manufacturer", "brand", "supplier", "producer"):
+            v = (meta.get(k) if meta else None)
+            if v and str(v).strip():
+                brand = str(v).strip()
+                break
+    if not brand or brand.strip() == "" or brand.lower() in {"unknown", "לא ידוע"}:
+        # 2) Alias match within product string
+        ext_brand, clean_name = extract_brand_and_clean_name(product)
+        if ext_brand:
+            brand = ext_brand
+            product = clean_name
+    if not brand or brand.strip() == "" or brand.lower() in {"unknown", "לא ידוע"}:
+        # 3) Heuristic from Hebrew product descriptors
+        hb = heuristic_brand_from_product(product)
+        if hb:
+            # Map heuristic token through aliases if possible for canonical display
+            key = _strip_non_alnum_hebrew(hb).lower()
+            display = BRAND_ALIASES.get(key)
+            brand = display or hb
+            # try to remove brand from product using whitespace-boundary replacement
+            try:
+                patt = re.compile(rf"(^|\s){re.escape(brand)}(\s|$)", re.IGNORECASE | re.UNICODE)
+                product = patt.sub(" ", product)
+                product = re.sub(r"\s{2,}", " ", product).strip()
+            except Exception:
+                pass
     brand = brand or "Unknown"
     barcode = item.get("barcode") or item.get("gtin") or item.get("sku") or None
     if barcode is not None: barcode = str(barcode).strip() or None
     price = _coerce_number(item.get("price") or item.get("Price") or item.get("unit_price"))
-    dprice = _coerce_number(item.get("discount_price") or item.get("sale_price") or item.get("promo_price"))
+    promo_price = _coerce_number(item.get("discount_price") or item.get("sale_price") or item.get("promo_price"))
+    discount_amount = _coerce_number(item.get("discount_amount"))
+    discount_percent = _coerce_number(item.get("discount_percent"))
+    dprice, price_dec = derive_discount(price, promo_price=promo_price,
+                                        discount_amount=discount_amount,
+                                        discount_percent=discount_percent)
+    price = price_dec
     ts = _iso_dt(item.get("ts") or item.get("timestamp") or item.get("date")) or datetime.now(timezone.utc)
     return product, brand, barcode, price, dprice, ts
 
@@ -351,19 +718,23 @@ def lambda_handler(event, context=None):
 
             provider = _ensure_str(meta.get("provider"), default="Unknown Provider")
             name = _ensure_str(branch.get("name"), default="Unknown Branch")
-            city = _ensure_str(branch.get("city"), default="Unknown")
-            address = _ensure_str(branch.get("address"), default="Unknown")
-            if _bool_env("AI_FILL_MISSING", False):
-                filled = enrich_branch(provider, name, city, address)
-                city = filled.get("city", city) or "Unknown"
-                address = filled.get("address", address) or "Unknown"
+            # Deterministic city/address enrichment
+            en_city, en_addr = enrich_branch_deterministic(provider, name)
+            city = en_city or "Unknown"
+            address = en_addr or "Unknown"
 
-            branch_id = db.upsert_branch(provider=provider, name=name, address=address, city=city)
+            # Call upsert_branch in a way that supports both signatures
+            try:
+                branch_id = db.upsert_branch(name=name, address=address, city=city)
+            except TypeError:
+                branch_id = db.upsert_branch(provider=provider, name=name, address=address, city=city)
 
             for it in items:
                 product, brand, barcode, price, dprice, ts = _normalize_item(it, provider)
-                if not product and not barcode: continue
-                if price is None: continue
+                if not product and not barcode:
+                    continue
+                if price is None or (isinstance(price, Decimal) and price <= 0):
+                    continue
                 pid = db.upsert_product(product, brand, barcode)
                 db.insert_price(pid, branch_id, price, dprice, ts)
                 processed += 1
