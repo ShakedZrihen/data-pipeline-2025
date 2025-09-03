@@ -17,11 +17,9 @@ def sanitize_path_component(name: str) -> str:
 
 def extract_and_delete_gz(path: str, delete_gz: bool = False):
     """Extract gzip OR zip (auto-detect by magic bytes). Return extracted XML path, or None."""
-    # Read first 4 bytes to detect format
     with open(path, "rb") as fh:
         sig = fh.read(4)
 
-    # GZIP: 1F 8B
     if sig.startswith(b"\x1f\x8b"):
         out_path = os.path.splitext(path)[0]  # drop .gz
         with gzip.open(path, "rb") as src, open(out_path, "wb") as dst:
@@ -33,9 +31,7 @@ def extract_and_delete_gz(path: str, delete_gz: bool = False):
                 pass
         return out_path
 
-    # ZIP: "PK"
     if sig.startswith(b"PK"):
-        # extract the largest .xml in the zip (most archives contain a single xml)
         with zipfile.ZipFile(path) as zf:
             xml_members = [m for m in zf.namelist() if m.lower().endswith(".xml")]
             if not xml_members:
@@ -51,7 +47,6 @@ def extract_and_delete_gz(path: str, delete_gz: bool = False):
             extract_dir = os.path.dirname(path)
             extracted_full = zf.extract(member, path=extract_dir)
 
-            # Flatten if it was inside folders
             out_path = os.path.join(extract_dir, os.path.basename(member))
             if extracted_full != out_path:
                 os.makedirs(os.path.dirname(out_path), exist_ok=True)

@@ -398,7 +398,6 @@ class Crawler:
 
         saved_files = []
 
-        # ---- PRICE: switch → find fresh row → open details → download
         price_row_el = self._refind_row_in_mode(provider, "price", price_row_id)
         if not price_row_el:
             print(f"[warn] price row not found in live DOM (id={price_row_id})")
@@ -415,7 +414,6 @@ class Crawler:
             buttons = _collect_buttons(price_row_el)
             saved_files += _download_buttons(buttons, "price", price_ts)
 
-        # ---- PROMO: switch → find fresh row → open details → download
         if promo_row_id and promo_ts:
             promo_row_el = self._refind_row_in_mode(provider, "promo", promo_row_id)
             if not promo_row_el:

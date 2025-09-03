@@ -177,7 +177,6 @@ def normalize_file(json_path):
         "items": items
     }
 
-# --------- NEW: chunker that also splits oversized promo items ----------
 def _byte_len(obj):
     return len(json.dumps(obj, ensure_ascii=False).encode("utf-8"))
 
@@ -190,7 +189,6 @@ def _split_large_promo(envelope, promo, max_bytes):
     """
     products = promo.get("products")
     if not isinstance(products, list) or not products:
-        # nothing to split; send as-is (may still be too big, but no inner list)
         yield _envelope_with_items(envelope, [promo])
         return
 
@@ -222,7 +220,6 @@ def chunk_for_sqs(normalized, max_bytes=240_000):
     i = 0
     n = len(items)
     while i < n:
-        # pack as many whole items as fit
         step = 1
         last_good = 0
         while True:
@@ -237,13 +234,10 @@ def chunk_for_sqs(normalized, max_bytes=240_000):
                 break
 
         if last_good == 0:
-            # first item alone is too big -> try splitting inside (promos)
             big = items[i]
             split_done = False
             for shard in _split_large_promo(normalized, big, max_bytes):
-                # still check size (just in case)
                 if _byte_len(shard) > max_bytes:
-                    # extreme case (no inner list to split)
                     pass
                 yield shard
                 split_done = True

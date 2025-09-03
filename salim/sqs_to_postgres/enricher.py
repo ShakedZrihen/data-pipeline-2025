@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 import sys
 import json
@@ -14,27 +12,23 @@ import psycopg2
 from psycopg2 import Error as PGError
 from psycopg2 import extensions as _pgx
 
-# Your project utility that yields lists (batches) of SQS messages
 from utils import iter_sqs_batches
 
-# ── json_loader import (do not modify json_loader itself) ──────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_LOADER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "postgresql"))
 if JSON_LOADER_DIR not in sys.path:
     sys.path.append(JSON_LOADER_DIR)
-import json_loader as JL  # PG_DSN, Cache, load_prices_file, load_promos_file
+import json_loader as JL
 
-# ── optional enrichment ───────────────────────────────────────────────────────
 try:
     from enrich_stores import enrich_dir as ENRICH_DIR
 except Exception:
     ENRICH_DIR = None
 
-# ── Config (ENV) ──────────────────────────────────────────────────────────────
 WORK_DIR               = os.getenv("WORK_DIR", os.getcwd())
 
 SQS_QUEUE_NAME         = os.getenv("SQS_QUEUE_NAME", "test-queue")
-SQS_ENDPOINT_URL       = os.getenv("SQS_ENDPOINT_URL", "http://localhost:4567")
+SQS_ENDPOINT_URL       = os.getenv("SQS_ENDPOINT_URL", "http://localhost:4566")
 AWS_REGION             = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
 AWS_ACCESS_KEY_ID      = os.getenv("AWS_ACCESS_KEY_ID", "test")
 AWS_SECRET_ACCESS_KEY  = os.getenv("AWS_SECRET_ACCESS_KEY", "test")
@@ -49,7 +43,6 @@ STORES_DIR                 = os.getenv("STORES_DIR", os.path.join(WORK_DIR, "sto
 ENRICH_OVERWRITE           = os.getenv("ENRICH_OVERWRITE", "0").lower() in ("1","true","yes","y")
 ENRICH_NORMALIZE_BRANCH    = os.getenv("ENRICH_NORMALIZE_BRANCH", "1").lower() in ("1","true","yes","y")
 
-# ── SQS helpers ───────────────────────────────────────────────────────────────
 def _make_sqs_client():
     return boto3.client(
         "sqs",
@@ -82,7 +75,6 @@ def _extract_body(msg: Dict[str, Any]) -> Optional[str]:
     except Exception:
         return body
 
-# ── Body → (doc, kind_hint, original_path) ───────────────────────────────────
 def _load_doc_from_any(body: str) -> Tuple[Optional[dict], Optional[str], Optional[str]]:
     s = body.strip().strip('"').strip("'")
 
@@ -126,7 +118,6 @@ def _guess_kind_from_any(data: Any, origin_hint: Optional[str] = None) -> Option
         return "price"
     return None
 
-# ── Temp JSON writer ──────────────────────────────────────────────────────────
 def _write_temp_json(doc: dict, kind: str, temp_root: str) -> str:
     os.makedirs(temp_root, exist_ok=True)
     path = os.path.join(temp_root, f"{kind}_chunk_{uuid.uuid4().hex}.json")
@@ -134,7 +125,6 @@ def _write_temp_json(doc: dict, kind: str, temp_root: str) -> str:
         json.dump(doc, out, ensure_ascii=False)
     return path
 
-# ── Debug helpers ─────────────────────────────────────────────────────────────
 def _log_db_error(msg_index: int, e: Exception) -> None:
     etype = type(e).__name__
     if isinstance(e, PGError):
@@ -188,7 +178,6 @@ def _debug_json_shape(path: str) -> None:
     except Exception as e:
         print(f"[DEBUG] failed to inspect JSON shape: {e}")
 
-# ── Promo de-dup: robust scan/filter ──────────────────────────────────────────
 PROMO_HINT_KEYS = {
     "start","start_at","startdate",
     "end","end_at","enddate",
@@ -200,7 +189,6 @@ ID_KEYS_STRICT = {"promotionid","promotion_id"}
 ID_KEY_GENERIC = "id"
 
 def _as_norm_id_text(x: Union[str,int]) -> str:
-    # normalize to text for DB comparison; keep digits as plain string
     return str(x).strip()
 
 def _looks_like_promo_dict(d: Dict[str, Any]) -> bool:
@@ -210,15 +198,12 @@ def _looks_like_promo_dict(d: Dict[str, Any]) -> bool:
 def _scan_promo_ids_any(obj: Any, acc: Set[str]) -> None:
     if isinstance(obj, dict):
         kl = {k.lower() for k in obj.keys()}
-        # strict keys
         for k, v in obj.items():
             klow = k.lower()
             if klow in ID_KEYS_STRICT or ("promotion" in klow and "id" in klow):
                 acc.add(_as_norm_id_text(v))
-        # generic "id" but only in promo-ish dicts
         if ID_KEY_GENERIC in kl and _looks_like_promo_dict(obj):
             acc.add(_as_norm_id_text(obj.get("id")))
-        # recurse
         for v in obj.values():
             _scan_promo_ids_any(v, acc)
     elif isinstance(obj, list):
@@ -243,18 +228,14 @@ def _filter_out_promos_by_ids_inplace(tmp_path: str, drop_ids_text: Set[str]) ->
     def _walk(obj: Any) -> Tuple[Any, int]:
         removed = 0
         if isinstance(obj, dict):
-            # If this dict itself is a promo record, check id
-            # strict keys
             for k, v in obj.items():
                 kl = k.lower()
                 if kl in ID_KEYS_STRICT or ("promotion" in kl and "id" in kl):
                     if _as_norm_id_text(v) in drop_ids_text:
                         return None, 1
-            # generic id only if promo-like
             if ID_KEY_GENERIC in {k.lower() for k in obj.keys()} and _looks_like_promo_dict(obj):
                 if _as_norm_id_text(obj.get("id")) in drop_ids_text:
                     return None, 1
-            # otherwise recurse
             newd = {}
             for k, v in obj.items():
                 nv, r = _walk(v)
@@ -299,7 +280,6 @@ def _db_existing_promo_ids_as_text(cur, ids_text: List[str]) -> Set[str]:
         print(f"[WARN] failed checking existing promo ids: {e}")
         return set()
 
-# ── Main ──────────────────────────────────────────────────────────────────────
 def enricher():
     print("[BOOT] starting json_loader.py")
     print("[INFO] connecting to database")
@@ -346,7 +326,6 @@ def enricher():
                 batch_idx += 1
                 print(f"\n[Batch #{batch_idx}] received {len(batch)} message(s)")
 
-                # Pre-parse for ordering
                 prepared: List[Dict[str, Any]] = []
                 for msg in batch:
                     body = _extract_body(msg)
@@ -397,7 +376,6 @@ def enricher():
                                 tmp_path = _write_temp_json(doc, (kind_hint or "unknown"), msg_dir)
                             temp_files_to_remove.append(tmp_path)
 
-                            # Enrich before loading
                             if ENRICH_DIR and os.path.isdir(STORES_DIR):
                                 try:
                                     updated = ENRICH_DIR(
@@ -416,7 +394,6 @@ def enricher():
                                 else:
                                     print(f"[WARN] Message #{i}: enrichment skipped (STORES_DIR not found: {STORES_DIR})")
 
-                            # Helpers to run loaders
                             def _load_price() -> int:
                                 return JL.load_prices_file(cur, cache, tmp_path)
 
@@ -441,7 +418,6 @@ def enricher():
 
                             def _load_promo_after_dedup() -> Tuple[bool, int, int]:
                                 found, filtered = _pre_dedup_promos(cur)
-                                # If all promos were dupes → treat as success (no-op)
                                 if found > 0 and filtered == found:
                                     return True, 0, filtered
                                 try:
@@ -454,7 +430,6 @@ def enricher():
                             loaded_kind: Optional[str] = None
                             added_count: int = 0
 
-                            # PRICE path
                             if strict_price or kind_hint == "price":
                                 try:
                                     cnt = _load_price()
@@ -468,13 +443,11 @@ def enricher():
                                     _log_db_error(i, e)
                                     conn.rollback()
 
-                            # PROMO path (no fallback to price)
                             elif kind_hint == "promo":
                                 ok, cnt, filtered = _load_promo_after_dedup()
                                 if ok and cnt and cnt > 0:
                                     loaded_kind, added_count = "promo", cnt
                                 elif ok and (cnt == 0) and (filtered > 0):
-                                    # All promos were duplicates → commit nothing but clear message
                                     conn.commit()
                                     if receipt_handle:
                                         delete_entries.append({"Id": str(i), "ReceiptHandle": receipt_handle})
@@ -482,10 +455,8 @@ def enricher():
                                     total_processed_msgs += 1
                                     print(f"[NOOP] Message #{i}: all promos already present (filtered {filtered}) → deleted from queue")
                                 else:
-                                    # failed → leave on queue
                                     pass
 
-                            # Unknown type: try price first, then promo
                             else:
                                 tried_price = False
                                 try:
@@ -524,7 +495,6 @@ def enricher():
                                 pass
                             _clear_if_aborted(conn)
 
-                # Delete only successfully processed messages
                 if delete_entries:
                     try:
                         for off in range(0, len(delete_entries), 10):
@@ -535,14 +505,12 @@ def enricher():
                     except ClientError as e:
                         print(f"[WARN] delete_message_batch error: {e}")
 
-                # Temp cleanup
                 for fp in temp_files_to_remove:
                     try: os.remove(fp)
                     except OSError: pass
                 for d in temp_dirs_to_remove:
                     shutil.rmtree(d, ignore_errors=True)
 
-                # Safety commit
                 try: conn.commit()
                 except Exception: pass
 
