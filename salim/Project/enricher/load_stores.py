@@ -2,13 +2,11 @@ import json
 import os
 import psycopg2
 from pathlib import Path
-from dotenv import load_dotenv
 from datetime import datetime
 
 def load_stores():
     """Load stores data from JSON files into the database"""
     
-    load_dotenv('../.env')
     database_url = os.getenv('DATABASE_URL')
     
     if not database_url:

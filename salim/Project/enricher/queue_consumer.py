@@ -4,7 +4,6 @@ import pika
 import logging
 from datetime import datetime
 from typing import Dict, Any
-from dotenv import load_dotenv
 
 from normalizer import DataNormalizer
 from validator import DataValidator
@@ -17,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 class QueueConsumer:
     def __init__(self):
-        load_dotenv('../.env')
         
         # Database connection
         self.database_url = os.getenv('DATABASE_URL')

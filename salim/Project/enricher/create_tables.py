@@ -1,11 +1,9 @@
 import os
 import psycopg2
-from dotenv import load_dotenv
 
 def create_tables():
     """Create stores, items, and discounts tables with proper relationships"""
     
-    load_dotenv('../.env')
     database_url = os.getenv('DATABASE_URL')
     
     if not database_url:

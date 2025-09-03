@@ -3,10 +3,13 @@ import os
 
 def check_supabase():
     try:
-        # Your Supabase connection
-        conn = psycopg2.connect(
-            "postgresql://postgres:8HeXmxYnvy5xu@db.sifzchhpypeprqfirrdb.supabase.co:5432/postgres"
-        )
+        # Use environment variable for database connection
+        database_url = os.getenv('DATABASE_URL')
+        if not database_url:
+            print("❌ DATABASE_URL environment variable not set")
+            return
+            
+        conn = psycopg2.connect(database_url)
         cursor = conn.cursor()
         
         print("✅ Connected to Supabase!")

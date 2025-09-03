@@ -115,7 +115,7 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:${POSTGRES_PASSWORD:-8HeXmxYnvy5xu}@postgres:5432/postgres}
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-8HeXmxYnvy5xu}@postgres:5432/postgres
       - SUPABASE_URL=${SUPABASE_URL:-https://sifzchhpypeprqfirrdb.supabase.co}
       - SUPABASE_KEY=${SUPABASE_KEY}
       - RABBITMQ_HOST=rabbitmq
@@ -145,7 +145,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:${POSTGRES_PASSWORD:-8HeXmxYnvy5xu}@postgres:5432/postgres}
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-8HeXmxYnvy5xu}@postgres:5432/postgres
       - SUPABASE_URL=${SUPABASE_URL:-https://sifzchhpypeprqfirrdb.supabase.co}
       - SUPABASE_KEY=${SUPABASE_KEY}
       - RABBITMQ_HOST=rabbitmq
