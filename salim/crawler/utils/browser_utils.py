@@ -1,29 +1,58 @@
 import re
 import time
 import requests
+import os
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 
 
-def get_chromedriver(headless: bool = True):
+def get_chromedriver(headless: bool | None = None):
     """Create a Chrome WebDriver with sensible defaults."""
+    if headless is None:
+        headless_env = os.getenv("HEADLESS", "1").lower()
+        headless = headless_env in ("1", "true", "yes")
+
     opts = Options()
     if headless:
         opts.add_argument("--headless=new")
-    opts.add_argument("--disable-gpu")
+    
     opts.add_argument("--no-sandbox")
+    opts.add_argument("--disable-dev-shm-usage")
+    opts.add_argument("--disable-gpu")
     opts.add_argument("--window-size=1280,1000")
     opts.add_experimental_option("excludeSwitches", ["enable-automation"])
     opts.add_experimental_option('useAutomationExtension', False)
 
-    driver = webdriver.Chrome(options=opts)
+    remote_url = os.getenv("SELENIUM_REMOTE_URL")
     print("Setting up Chrome driver...")
+
     try:
-        print(f"Chrome driver path: {driver.capabilities.get('chrome', {}).get('chromedriverVersion', 'unknown')}")
-    except Exception:
-        pass
-    return driver
+        if remote_url:
+            print(f"Using remote Selenium at {remote_url}")
+            driver = webdriver.Remote(command_executor=remote_url, options=opts)
+        else:
+            chromedriver_path = os.getenv("CHROMEDRIVER_BIN")  # e.g. /usr/bin/chromedriver
+            if chromedriver_path:
+                print(f"Using local chromedriver: {chromedriver_path}")
+                service = Service(executable_path=chromedriver_path)
+                driver = webdriver.Chrome(service=service, options=opts)
+            else:
+                driver = webdriver.Chrome(options=opts)
+
+        # best-effort version print (works for local; remote may differ)
+        try:
+            ver = driver.capabilities.get("chrome", {}).get("chromedriverVersion", "unknown")
+            print(f"Chrome driver path/version: {ver}")
+        except Exception:
+            pass
+
+        return driver
+
+    except Exception as e:
+        print(f"[ERROR] Failed to start Chrome WebDriver: {e}")
+        raise
 
 
 def get_html_parser(driver, url: str, wait_secs: float = 0.5):
