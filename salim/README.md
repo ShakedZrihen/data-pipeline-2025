@@ -4,20 +4,41 @@ A FastAPI application with PostgreSQL database running in Docker containers.
 
 ## 🚀 Quick Start
 
+1. **Create enviorment and install dependencies:**
+  ```bash
+    brew install localstack/tap/localstack-cli
+    python3 -m venv .venv
+    pip install -r requirements.txt
+    source .venv/bin/activate # linux/mac
+  ```
+  ### Note:
+  create a .env file in the root directory and add the following env vars:
+  - `OPENAI_API_KEY`: OpenAI api key.
+  - `POSTGRES_URI`: URI for supabase managed db.
+****
 1. **Start all services:**
    ```bash
-   docker-compose up --build
+    docker compose build
+    docker compose up
    ```
 
+2. **Access the API:**
+   - API Base URL: http://localhost:8081
+   - Swagger Documentation: http://localhost:8081/docs
+   - ReDoc Documentation: http://localhost:8081/redoc
+   - Health Check: http://localhost:8081/health
+
+6. ## 📋 Available Endpoints
+=======
 2. **Access the applications:**
-   
+
    **Salim API:**
    - **API Base URL:** http://localhost:8000
    - **📚 Interactive API Documentation (Swagger):** http://localhost:8000/docs
    - **📖 Alternative Documentation (ReDoc):** http://localhost:8000/redoc
    - **🔍 OpenAPI Schema:** http://localhost:8000/openapi.json
    - **❤️ Health Check:** http://localhost:8000/health
-   
+
    **Shopping Chat Application:**
    - **🛒 Chat Interface:** http://localhost:5173
    - **📡 Chat API:** http://localhost:3001
@@ -34,10 +55,10 @@ A FastAPI application with PostgreSQL database running in Docker containers.
    ```bash
    # Using psql command line tool
    psql -h localhost -p 5432 -U postgres -d salim_db
-   
+
    # Using Docker exec to connect from within the container
    docker-compose exec db psql -U postgres -d salim_db
-   
+
    # Using any SQL client with the connection details above
    ```
 
@@ -156,9 +177,11 @@ The application uses environment variables for configuration:
 
 ## 🐳 Docker Services
 
-- **db**: PostgreSQL database (port 5432) with pre-loaded product data
-- **api**: Salim FastAPI application (port 8000) with REST endpoints
+- **api**: FastAPI application (port 8000)
+- **db**: PostgreSQL database (port 5432)
+  **rabbitmq**: RabbitMQ message queue(port 5672)
+  **localstack** Localstack local aws services(port 4566)
 - **shopping-chat**: AI-powered shopping assistant (ports 3001, 5173)
   - Chat API server on port 3001
   - React frontend on port 5173
-  - Integrated with Claude AI for Hebrew conversations 
+  - Integrated with Claude AI for Hebrew conversations

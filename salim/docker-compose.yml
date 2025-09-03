@@ -37,12 +37,12 @@ services:
 
   # Shopping Chat Application
   shopping-chat:
-    build: 
+    build:
       context: ./app/shopping-chat
       dockerfile: Dockerfile
     ports:
-      - "3002:3001"  # Chat API server
-      - "5174:5173"  # React dev server
+      - "3002:3001" # Chat API server
+      - "5174:5173" # React dev server
     environment:
       - NODE_ENV=development
       - PORT=3001
@@ -59,4 +59,4 @@ services:
     tty: true
 
 volumes:
-  postgres_data: 
+  postgres_data:
