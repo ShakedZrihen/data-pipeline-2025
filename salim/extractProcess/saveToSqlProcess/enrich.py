@@ -99,8 +99,11 @@
 ####################################################
 ####################################################
 ####################################################
-## ENRICH WITHOUT AI. THE ENRICHMENT USING LLM TOOK A LONG TIME, SO WE USED THIS PART TO BE ABLE TO INSERT THE DATA TO THE POSTGRES, OTHERWISE IT TAKES DAYS
-## YOU CAN COMMENT THIS PART AND UNCOMMENT THE PREV PART TO USE THE AI ENRICHMENT
+## ENRICHMENT WITHOUT AI. USING LLM FOR ENRICHMENT TAKES TOO LONG,
+## SO THIS VERSION IS USED TO ALLOW INSERTING THE DATA INTO POSTGRES.
+## OTHERWISE, THE PROCESS WOULD TAKE DAYS.
+## YOU CAN COMMENT OUT THIS PART AND UNCOMMENT THE PREVIOUS ONE
+## TO ENABLE AI-BASED ENRICHMENT.
 ####################################################
 ####################################################
 ####################################################
