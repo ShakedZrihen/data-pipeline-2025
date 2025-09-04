@@ -7,14 +7,12 @@ from pathlib import Path
 import gzip, zipfile, io
 import boto3
 from botocore.config import Config
-
 from utils.logging_config import setup_logging
 from parser import decompress_gz_to_bytes
 from normalizer import parse_key
 from producer import send_message
 from db import upsert_last_run
 from config import S3_SIMULATOR_ROOT
-
 import xml.etree.ElementTree as ET
 
 # ---------- logging ----------
@@ -33,19 +31,11 @@ def _s3_client():
     return boto3.client("s3", region_name=region, endpoint_url=endpoint, config=cfg)
 
 def _queue_enabled() -> bool:
-    """Only send to queue when explicitly enabled AND we have a queue URL."""
     return os.getenv("ENABLE_QUEUE") == "1" and bool(os.getenv("OUTPUT_QUEUE_URL"))
 
 # ---------- XML helpers with Hebrew support ----------
 def _candidates_from_payload(raw: bytes):
-    """
-    מקבל bytes אחרי פירוק ה-GZ (decompress_gz_to_bytes),
-    ומחזיר רשימת מועמדים ל-XML:
-    - אם זה ZIP -> נחזיר את תוכני ה-XML (או gz פנימי שמכיל XML)
-    - אחרת -> נחזיר את raw עצמו
-    """
     out = []
-    # ZIP header
     if len(raw) >= 4 and raw[:4] == b"PK\x03\x04":
         try:
             with zipfile.ZipFile(io.BytesIO(raw)) as z:
@@ -71,19 +61,14 @@ def _decode_smart(b: bytes) -> str:
     for enc in ('utf-8', 'utf-16', 'windows-1255', 'cp1255', 'iso-8859-8'):
         try:
             s = b.decode(enc)
-            if s.count('�') < 3:   # הימנע מטקסט פגום
+            if s.count('�') < 3:
                 return s
         except UnicodeDecodeError:
             continue
-    # fallback אחרון בלבד
     return b.decode('utf-8', errors='replace')
 
 
 def _normalize_xml_encoding(data: bytes) -> bytes | str:
-    """
-    אם ה-XML ב-UTF-16 / עם NUL-Bytes – ננסה לפענח ל-utf-16 ולהחזיר str.
-    אחרת נחזיר את הבייטים כפי שהם.
-    """
     head = data[:6]
     if head.startswith(b"\xff\xfe") or head.startswith(b"\xfe\xff") or b"\x00" in head:
         try:
@@ -96,7 +81,6 @@ def _normalize_xml_encoding(data: bytes) -> bytes | str:
     return _decode_smart(data) if isinstance(data, bytes) else data
 
 def _strip_ns(tag: str) -> str:
-    # "{ns}ItemPrice" -> "ItemPrice"
     if "}" in tag:
         return tag.split("}", 1)[1]
     return tag
@@ -105,13 +89,11 @@ def _text(el):
     if el is None:
         return ""
     text = el.text or ""
-    # ניקוי רווחים ותווי בקרה
     import re
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
 def _first_text_by_candidates(node, candidates):
-    # try children by localname order
     for c in candidates:
         for child in list(node):
             if _strip_ns(child.tag).lower() == c.lower():
@@ -128,25 +110,21 @@ def _findall_by_localname(root, name):
             out.append(elem)
     return out
 def _xml_root_robust(xml_data):
-    # 1) קודם כל נסה bytes ישירות – שומר על הקידוד שהוכרז ב-XML
     if isinstance(xml_data, (bytes, bytearray)):
         try:
             return ET.fromstring(xml_data)
         except ET.ParseError:
             pass
 
-    # 2) אם נכשל, נסה פענוח חכם – אבל בלי "להחליף" לקידוד אחר בטקסט עצמו
     if isinstance(xml_data, (bytes, bytearray)):
-        txt = _decode_smart(xml_data)  # תחזירי str
+        txt = _decode_smart(xml_data)
     else:
         txt = xml_data
 
-    # אל תשני את ה-prolog ל-utf-8 כאן; פשוט תני ל-ET לקבל str
     return ET.fromstring(txt)
 
 
 def parse_price_xml(xml_data):
-    """Extract items from PriceFull-like XMLs into [{'product','price','unit'}, ...]."""
     items_out = []
     root = _xml_root_robust(xml_data)
 
@@ -156,7 +134,6 @@ def parse_price_xml(xml_data):
         if item_nodes:
             break
     if not item_nodes:
-        # sometimes under <Items> or <Products>
         for cont in ("Items", "Products"):
             for container in _findall_by_localname(root, cont):
                 for name in ("Item", "Product", "ProductItem", "PriceItem"):
@@ -177,7 +154,6 @@ def parse_price_xml(xml_data):
 
         pprice = None
         if pprice_txt:
-            # ניקוי מחיר - כל הסימנים הנפוצים של שקל
             pprice_txt = pprice_txt.replace("₪", "").replace("ש\"ח", "").replace("שח", "")
             pprice_txt = pprice_txt.replace(",", "").replace(" ", "").strip()
             try:
@@ -190,7 +166,6 @@ def parse_price_xml(xml_data):
     return items_out
 
 def parse_promo_xml(xml_data):
-    """Extract items from PromoFull-like XMLs."""
     items_out = []
     root = _xml_root_robust(xml_data)
 
@@ -220,7 +195,6 @@ def parse_promo_xml(xml_data):
 
         price = None
         if price_txt:
-            # ניקוי מחיר
             price_txt = price_txt.replace("₪", "").replace("ש\"ח", "").replace("שח", "")
             price_txt = price_txt.replace(",", "").replace(" ", "").strip()
             try:
@@ -233,11 +207,6 @@ def parse_promo_xml(xml_data):
     return items_out
 
 def extract_items_from_bytes(raw: bytes, kind: str):
-    """
-    kind: 'pricesFull' / 'promoFull'
-    מפעיל זיהוי ZIP פנימי ו-UTF-16, ומנסה לפרסר את ה-XML.
-    מחזיר את ה-items מהראשון שמצליח; אם אף אחד לא מצליח, מחזיר [].
-    """
     candidates = _candidates_from_payload(raw)
     any_error = None
     for cand in candidates:
@@ -261,7 +230,6 @@ def extract_items_from_bytes(raw: bytes, kind: str):
     return []
 
 def _save_json_with_hebrew(data, filepath):
-    """שמירת JSON עם תמיכה נכונה בעברית"""
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 # ---------- Lambda handler ----------
@@ -299,22 +267,17 @@ def lambda_handler(event, context=None):
                 "items": items,
             }
 
-            # save locally in Lambda's /tmp (or OS temp on Windows)
             safe_key = key.replace("/", "__")
             TMP_DIR = (os.getenv("LAMBDA_TMP")
                        or os.getenv("TMPDIR")
                        or ("/tmp" if os.name != "nt" else tempfile.gettempdir()))
             os.makedirs(TMP_DIR, exist_ok=True)
             out_path = os.path.join(TMP_DIR, f"{safe_key}.json")
-            
-            # שימוש בפונקציה החדשה לשמירת JSON
             _save_json_with_hebrew(payload, out_path)
             log.info(f"Saved local JSON to {out_path}")
 
-            # queue
             if _queue_enabled():
                 try:
-                    # שמירה לבדיקה ידנית
                     with open("items_sample.json", "w", encoding="utf-8") as f:
                         json.dump(payload, f, ensure_ascii=False, indent=2)
 
@@ -323,7 +286,6 @@ def lambda_handler(event, context=None):
                 except Exception as qe:
                     log.warning(f"Queue send failed (skipping): {qe}")
 
-            # last-run marker
             try:
                 upsert_last_run(provider, branch, type_, iso_ts)
             except Exception as de:
@@ -339,12 +301,6 @@ def lambda_handler(event, context=None):
 
 # ---------- Local simulator (used by local_run.py) ----------
 def process_local_file(file_path: str):
-    """
-    Process a local .gz file under:
-      <S3_SIMULATOR_ROOT>/providers/<provider>/<branch>/<filename>.gz
-    Builds payload JSON, saves to extractor_lambda/outbox, optionally sends to queue,
-    and marks last-run state.
-    """
     p = Path(file_path).resolve()
     root = Path(S3_SIMULATOR_ROOT).resolve() / "providers"
     rel = p.relative_to(root)
@@ -366,21 +322,17 @@ def process_local_file(file_path: str):
         "items": items,
     }
 
-    # Save to outbox
     outbox = Path(__file__).parent / "outbox"
     outbox.mkdir(parents=True, exist_ok=True)
     safe_ts = iso_ts.replace(":", "").replace("-", "").replace("T", "_").replace("Z", "")
     out_name = f"{provider}_{branch}_{type_}_{safe_ts}.json"
     out_path = outbox / out_name
     
-    # שימוש בפונקציה החדשה לשמירת JSON
     _save_json_with_hebrew(payload, out_path)
     log.info(f"[local] saved: {out_path}")
 
-    # Queue
     if _queue_enabled():
         try:
-            # שמירה לבדיקה ידנית
             with open("items_sample.json", "w", encoding="utf-8") as f:
                 json.dump(payload, f, ensure_ascii=False, indent=2)
 
@@ -389,7 +341,6 @@ def process_local_file(file_path: str):
         except Exception as qe:
             log.warning(f"[local] queue send failed (skipping): {qe}")
 
-    # State/DB
     try:
         upsert_last_run(provider, branch, type_, iso_ts)
     except Exception as de:
@@ -409,10 +360,6 @@ def _print_preview(items, max_items=5):
         log.info("  ... and %d more", len(items) - max_items)
 
 def handler(event, context=None):
-    """
-    SQS trigger: עובר על Records, קורא את ה-body (JSON),
-    ואם זו 'מעטפה' גדולה עם outbox_path – קורא משם את הקובץ המלא ומדפיס דוגמית.
-    """
     records = event.get("Records", [])
     for rec in records:
         body = rec.get("body", "{}")

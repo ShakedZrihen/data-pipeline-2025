@@ -19,7 +19,6 @@ def send_message(payload, outbox_path=None):
     if outbox_path:
         payload["outbox_path"] = outbox_path
 
-        # ✅ שורה חשובה – שומרת את הקובץ על הדיסק!
         with open("items_sample.json", "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
@@ -37,13 +36,9 @@ def _sqs():
     return boto3.client("sqs", region_name=region, endpoint_url=endpoint, config=cfg)
 
 def _json_size_bytes(obj) -> int:
-    """חישוב גודל JSON בבייטים עם תמיכה נכונה בעברית"""
     return len(json.dumps(obj, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
 
 def _shrink_to_bytes(obj: dict, max_bytes: int) -> dict:
-    """
-    קיצוץ אובייקט ל-SQS עם שמירה על עברית תקינה
-    """
     if _json_size_bytes(obj) <= max_bytes:
         return obj
 
@@ -53,11 +48,8 @@ def _shrink_to_bytes(obj: dict, max_bytes: int) -> dict:
         for it in items:
             name = it.get("product", "")
             if isinstance(name, str) and len(name) > trunc:
-                # וידוא שהחיתוך לא יפגע באמצע תו עברי
                 truncated = name[:trunc]
-                # אם התו האחרון הוא תו עברי חלקי, נחתוך עוד אחד
                 if truncated and ord(truncated[-1]) >= 0x0590 and ord(truncated[-1]) <= 0x05FF:
-                    # מצא את הגבול הבטוח לחיתוך
                     safe_end = trunc
                     while safe_end > 0 and ord(name[safe_end - 1]) >= 0x0590:
                         safe_end -= 1
@@ -77,6 +69,5 @@ def _shrink_to_bytes(obj: dict, max_bytes: int) -> dict:
         if trunc > 60:
             trunc = int(trunc * 0.9)
 
-    # במקרה קיצוני - נוקה את הרשימה
     obj["items_sample"] = []
     return obj

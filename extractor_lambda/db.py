@@ -13,11 +13,6 @@ def _client(service: str):
     return boto3.client(service, region_name=region, endpoint_url=endpoint, config=cfg)
 
 def upsert_last_run(provider: str, branch: str, type_: str, iso_ts: str):
-    """
-    שומר רשומת 'הרצה אחרונה' לפי (provider#branch#type).
-    אם ENABLE_DB לא דולק — מדלגים בשקט עם הודעת לוג.
-    טבלת יעד: LAST_RUNS_TABLE (או LAST_RUN_TABLE לצורך תאימות לאחור), ברירת־מחדל 'last_runs'.
-    """
     if os.getenv("ENABLE_DB", "").lower() not in ("1", "true", "yes"):
         log.warning("[local] DB disabled (ENABLE_DB not set) — skipping upsert")
         return None
