@@ -1,0 +1,248 @@
+<Root>
+<ChainID>7290785400000</ChainID>
+<ChainName>קשת טעמים</ChainName>
+<LastUpdateDate>2025-08-31</LastUpdateDate>
+<LastUpdateTime>05:10:00.077</LastUpdateTime>
+<SubChains>
+<SubChain>
+<SubChainID>001</SubChainID>
+<SubChainName>1</SubChainName>
+<Stores>
+<Store>
+<StoreID>002</StoreID>
+<BikoretNo>5</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>נהריה</StoreName>
+<Address>לוחמי הגטאות 9</Address>
+<City>0</City>
+<ZipCode>2244628</ZipCode>
+</Store>
+<Store>
+<StoreID>003</StoreID>
+<BikoretNo>4</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>נשר</StoreName>
+<Address>הזית 1</Address>
+<City>0</City>
+<ZipCode>3675018</ZipCode>
+</Store>
+<Store>
+<StoreID>004</StoreID>
+<BikoretNo>3</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>הדר</StoreName>
+<Address>שבתאי לוי 23-25</Address>
+<City>0</City>
+<ZipCode>3330421</ZipCode>
+</Store>
+<Store>
+<StoreID>005</StoreID>
+<BikoretNo>2</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>קרית אליעזר</StoreName>
+<Address>תל אביב 11</Address>
+<City>0</City>
+<ZipCode>3541633</ZipCode>
+</Store>
+<Store>
+<StoreID>008</StoreID>
+<BikoretNo>9</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>נוף הגליל</StoreName>
+<Address>עמל 1</Address>
+<City>0</City>
+<ZipCode>1783011</ZipCode>
+</Store>
+<Store>
+<StoreID>010</StoreID>
+<BikoretNo>8</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>גבעת רם</StoreName>
+<Address>בציר 46</Address>
+<City>0</City>
+<ZipCode>2196081</ZipCode>
+</Store>
+<Store>
+<StoreID>011</StoreID>
+<BikoretNo>7</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>יוקנעם</StoreName>
+<Address>הירדן 64ב</Address>
+<City>0</City>
+<ZipCode>2068116</ZipCode>
+</Store>
+<Store>
+<StoreID>013</StoreID>
+<BikoretNo>5</BikoretNo>
+<StoreType>3</StoreType>
+<StoreName>ראשון לציון</StoreName>
+<Address>ברשבסקי 33|</Address>
+<City>0</City>
+<ZipCode>7536376</ZipCode>
+</Store>
+<Store>
+<StoreID>014</StoreID>
+<BikoretNo>4</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>פולג</StoreName>
+<Address>המלאכה 28</Address>
+<City>0</City>
+<ZipCode>4250563</ZipCode>
+</Store>
+<Store>
+<StoreID>015</StoreID>
+<BikoretNo>3</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>כרמיאל</StoreName>
+<Address>היוצרים 7</Address>
+<City>0</City>
+<ZipCode>2165233</ZipCode>
+</Store>
+<Store>
+<StoreID>016</StoreID>
+<BikoretNo>2</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>קרית חיים</StoreName>
+<Address>איצטדיון 5</Address>
+<City>0</City>
+<ZipCode>2624805</ZipCode>
+</Store>
+<Store>
+<StoreID>017</StoreID>
+<BikoretNo>1</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>בילו</StoreName>
+<Address>מרכז קניות נטו גבעת ברנר</Address>
+<City>0</City>
+<ZipCode>6094800</ZipCode>
+</Store>
+<Store>
+<StoreID>018</StoreID>
+<BikoretNo>0</BikoretNo>
+<StoreType>3</StoreType>
+<StoreName>באר שבע</StoreName>
+<Address>סולל בונה |www.keshet-teamim.co.il|</Address>
+<City>0</City>
+<ZipCode>8488435</ZipCode>
+</Store>
+<Store>
+<StoreID>019</StoreID>
+<BikoretNo>9</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>כפר סבא</StoreName>
+<Address>מרכז מסחרי "שרונה", דרך השרון 12</Address>
+<City>0</City>
+<ZipCode>4427125</ZipCode>
+</Store>
+<Store>
+<StoreID>020</StoreID>
+<BikoretNo>5</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>פתח תקווה</StoreName>
+<Address>הרב פינטו מסעוד אשר 19</Address>
+<City>0</City>
+<ZipCode>4900518</ZipCode>
+</Store>
+<Store>
+<StoreID>021</StoreID>
+<BikoretNo>4</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>עכו</StoreName>
+<Address>החרושת 2</Address>
+<City>0</City>
+<ZipCode>2451705</ZipCode>
+</Store>
+<Store>
+<StoreID>022</StoreID>
+<BikoretNo>3</BikoretNo>
+<StoreType>3</StoreType>
+<StoreName>אשדוד</StoreName>
+<Address>היהלומים 4 |www.keshet-teamim.co.il|</Address>
+<City>0</City>
+<ZipCode>7761104</ZipCode>
+</Store>
+<Store>
+<StoreID>023</StoreID>
+<BikoretNo>2</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>עפולה</StoreName>
+<Address>האומן 3</Address>
+<City>0</City>
+<ZipCode>1871303</ZipCode>
+</Store>
+<Store>
+<StoreID>024</StoreID>
+<BikoretNo>1</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>ראשון לציון מערב</StoreName>
+<Address>לח"י 4</Address>
+<City>0</City>
+<ZipCode>7570687</ZipCode>
+</Store>
+<Store>
+<StoreID>025</StoreID>
+<BikoretNo>0</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>חדרה חדש</StoreName>
+<Address>צה"ל 34</Address>
+<City>0</City>
+<ZipCode>3822043</ZipCode>
+</Store>
+<Store>
+<StoreID>102</StoreID>
+<BikoretNo>4</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>קולינריק קרית אונו</StoreName>
+<Address>המייסדים 3</Address>
+<City>0</City>
+<ZipCode>5552103</ZipCode>
+</Store>
+<Store>
+<StoreID>103</StoreID>
+<BikoretNo>3</BikoretNo>
+<StoreType>3</StoreType>
+<StoreName>קולינריק חורב</StoreName>
+<Address>חורב 15 | www.kulinarik.co.il/|</Address>
+<City>0</City>
+<ZipCode>3434119</ZipCode>
+</Store>
+<Store>
+<StoreID>104</StoreID>
+<BikoretNo>2</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>קולינריק רמת גן</StoreName>
+<Address>ביאליק 39</Address>
+<City>0</City>
+<ZipCode>5246105</ZipCode>
+</Store>
+<Store>
+<StoreID>105</StoreID>
+<BikoretNo>1</BikoretNo>
+<StoreType>1</StoreType>
+<StoreName>קולינריק מודיעין</StoreName>
+<Address>דם המכבים 38</Address>
+<City>0</City>
+<ZipCode>7178604</ZipCode>
+</Store>
+<Store>
+<StoreID>116</StoreID>
+<BikoretNo>7</BikoretNo>
+<StoreType>2</StoreType>
+<StoreName>ממ"ר קרית חיים</StoreName>
+<Address/>
+<City>0</City>
+<ZipCode/>
+</Store>
+<Store>
+<StoreID>120</StoreID>
+<BikoretNo>0</BikoretNo>
+<StoreType>2</StoreType>
+<StoreName>ממ"ר פתח תקווה</StoreName>
+<Address/>
+<City>0</City>
+<ZipCode/>
+</Store>
+</Stores>
+</SubChain>
+</SubChains>
+</Root>
