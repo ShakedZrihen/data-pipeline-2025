@@ -1,0 +1,5 @@
+# Python packages required for the crawler service
+boto3
+requests
+certifi
+selenium>=4.10
