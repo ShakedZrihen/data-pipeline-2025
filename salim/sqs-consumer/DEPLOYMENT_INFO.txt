@@ -1,0 +1,16 @@
+# SQS Consumer Lambda Deployment Package (Simplified)
+# Created: The current date is: 02/09/2025 
+# 
+# Files included:
+# - consumer_simple.py 
+# - lambda_function.py 
+# - requests library 
+#
+# Environment Variables Required in AWS Lambda:
+# - SUPABASE_URL=
+# - SUPABASE_SERVICE_ROLE_KEY=
+#
+# Handler: consumer_simple.lambda_handler
+# Runtime: Python 3.11
+# Timeout: 10 minutes 
+# Memory: 1024 MB 
