@@ -1,201 +1,191 @@
 import os
-from datetime import date
-from typing import Optional, Dict, Any, List
-
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from fastapi import APIRouter, HTTPException, Query
-from supabase import create_client, Client
-from dotenv import load_dotenv
-from pathlib import Path
-
-loaded = load_dotenv()
-if not loaded:
-    consumer_env = Path(__file__).resolve().parent.parent.parent / "consumer" / ".env"
-    load_dotenv(consumer_env.as_posix())
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-if not SUPABASE_URL or not SUPABASE_KEY:
-    raise RuntimeError(
-        "Missing SUPABASE_URL / SUPABASE_KEY. "
-        "Tried default .env and consumer/.env"
-    )
-
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+from typing import List, Dict, Any
 
 router = APIRouter()
 
-# ===================== Helpers =====================
+def connect_to_database():
+    db_connection_string = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/salim_db")
+    return psycopg2.connect(db_connection_string, cursor_factory=RealDictCursor)
 
-def _parse_float(x: Any, default: float = 0.0) -> float:
-    """Robust float parser for numeric strings like '34.200' or actual numbers."""
+@router.get("/products")
+async def fetch_products_list(max_items: int = Query(100, description="How many products to show")):
     try:
-        if x is None:
-            return default
-        if isinstance(x, (int, float)):
-            return float(x)
-        return float(str(x).replace(",", "."))
-    except Exception:
-        return default
+        db_conn = connect_to_database()
+        db_cursor = db_conn.cursor()
+        
+        db_cursor.execute("""
+            SELECT p.barcode, p.canonical_name, p.price, p.promo_price, p.promo_text,
+                   s.name as store_name, s.address, s.city
+            FROM products p
+            JOIN supermarkets s ON p.supermarket_id = s.supermarket_id
+            ORDER BY p.collected_at DESC
+            LIMIT %s
+        """, (max_items,))
+        
+        product_rows = db_cursor.fetchall()
+        db_cursor.close()
+        db_conn.close()
 
-def _today_str() -> str:
-    """Return today's date as YYYY-MM-DD (used for promotion validity checks)."""
-    return date.today().isoformat()
+        if not product_rows:
+            raise HTTPException(status_code=404, detail="No products found")
 
-def _shape_product_row(price_row: Dict[str, Any], promo_row: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-    """Project only the required fields for the response."""
-    return {
-        "item_code": price_row.get("item_code"),       # barcode
-        "item_name": price_row.get("item_name"),       # product name
-        "store_id": price_row.get("store_id"),         # branch
-        "chain_id": price_row.get("chain_id"),         # chain
-        "has_promotion": promo_row is not None,        # promotion exists
-        "discount_rate": _parse_float((promo_row or {}).get("discount_rate"), 0.0),
-        "price": _parse_float(price_row.get("qty_price"), 0.0),  # current price
-        "store_address": price_row.get("store_address"),
-        "store_city": price_row.get("store_city"),      # store city
-        "company_name": price_row.get("company_name") # company name
-    }
+        product_list = []
+        for item in product_rows:
+            product_data = {
+                "barcode": item["barcode"],
+                "name": item["canonical_name"],
+                "price": float(item["price"]),
+                "store": item["store_name"],
+                "address": item["address"],
+                "city": item["city"]
+            }
+            
+            if item["promo_price"] and item["promo_price"] < item["price"]:
+                product_data["promo_price"] = float(item["promo_price"])
+                product_data["promo_text"] = item["promo_text"]
+                original_price = item["price"]
+                promo_price = item["promo_price"]
+                product_data["discount"] = round(((original_price - promo_price) / original_price) * 100, 1)
+            
+            product_list.append(product_data)
 
-def _fetch_active_promotion_for_item(item_code: str, chain_id: str, store_id: str) -> Optional[Dict[str, Any]]:
-    """
-    Return an active promotion for (item_code, chain_id, store_id) if exists.
-    Active = additional_is_active == true AND today's date within start/end dates.
-    If multiple exist, returns the first (can be refined by recency if needed).
-    """
-    today = _today_str()
+        return {"products": product_list, "count": len(product_list)}
+    except Exception as error:
+        raise HTTPException(status_code=500, detail=str(error))
 
-    resp = (
-        supabase.table("promotions")
-        .select(
-            "promotion_id,promotion_description,discount_rate,reward_type,"
-            "promotion_start_date,promotion_end_date,additional_is_active,"
-            "item_code,chain_id,store_id"
-        )
-        .eq("item_code", item_code)
-        .eq("chain_id", chain_id)
-        .eq("store_id", store_id)
-        .eq("additional_is_active", True)
-        .execute()
-    )
-    promos = resp.data or []
-
-    active = []
-    for pr in promos:
-        start_ok = (pr.get("promotion_start_date") or "") <= today
-        end_ok = today <= (pr.get("promotion_end_date") or "")
-        if start_ok and end_ok:
-            active.append(pr)
-
-    if not active:
-        return None
-    return active[0]
-
-# ===================== PROMOTIONS (example) =====================
-
-@router.get("/promotions", summary="Get a sample of promotions (debug)")
-async def get_promotions():
-    """Return a small sample of promotions for debugging."""
+@router.get("/product/by-barcode/{barcode}")
+async def find_product_by_barcode(barcode: str):
     try:
-        data = supabase.table("promotions").select("*").limit(25).execute().data
-        return {"promotions": data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        db_conn = connect_to_database()
+        db_cursor = db_conn.cursor()
+        
+        db_cursor.execute("""
+            SELECT p.barcode, p.canonical_name, p.price, p.promo_price, p.promo_text,
+                   s.name as store_name, s.address, s.city
+            FROM products p
+            JOIN supermarkets s ON p.supermarket_id = s.supermarket_id
+            WHERE p.barcode = %s
+            ORDER BY p.collected_at DESC
+        """, (barcode,))
+        
+        matching_products = db_cursor.fetchall()
+        db_cursor.close()
+        db_conn.close()
 
-# ===================== PRODUCTS / PRICES =====================
+        if not matching_products:
+            raise HTTPException(status_code=404, detail="Product not found")
 
-@router.get("/product/by-barcode/{item_code}", summary="Get product(s) by barcode")
-async def get_product_by_barcode(item_code: str):
-    """
-    Returns all store occurrences of a product by barcode, including price,
-    whether an active promotion exists, and the discount rate if applicable.
-    """
+        product_results = []
+        for product_row in matching_products:
+            product_info = {
+                "barcode": product_row["barcode"],
+                "name": product_row["canonical_name"],
+                "price": float(product_row["price"]),
+                "store": product_row["store_name"],
+                "address": product_row["address"],
+                "city": product_row["city"]
+            }
+            
+            if product_row["promo_price"] and product_row["promo_price"] < product_row["price"]:
+                product_info["promo_price"] = float(product_row["promo_price"])
+                product_info["promo_text"] = product_row["promo_text"]
+                regular_price = product_row["price"]
+                sale_price = product_row["promo_price"]
+                product_info["discount"] = round(((regular_price - sale_price) / regular_price) * 100, 1)
+            
+            product_results.append(product_info)
+
+        return {"products": product_results}
+    except Exception as error:
+        raise HTTPException(status_code=500, detail=str(error))
+
+@router.get("/product/search")
+async def search_products_by_name(search_query: str = Query(..., description="What product are you looking for?")):
     try:
-        price_rows = (
-            supabase.table("prices")
-            .select("item_code,item_name,qty_price,chain_id,company_name,store_id,store_city,store_address")
-            .eq("item_code", item_code)
-            .execute()
-        ).data or []
+        db_conn = connect_to_database()
+        db_cursor = db_conn.cursor()
+        
+        db_cursor.execute("""
+            SELECT p.barcode, p.canonical_name, p.price, p.promo_price, p.promo_text,
+                   s.name as store_name, s.address, s.city
+            FROM products p
+            JOIN supermarkets s ON p.supermarket_id = s.supermarket_id
+            WHERE p.canonical_name ILIKE %s
+            ORDER BY p.collected_at DESC
+            LIMIT 50
+        """, (f"%{search_query}%",))
+        
+        search_results = db_cursor.fetchall()
+        db_cursor.close()
+        db_conn.close()
 
-        if not price_rows:
-            raise HTTPException(status_code=404, detail="Item not found")
+        if not search_results:
+            raise HTTPException(status_code=404, detail="No products found")
 
-        results: List[Dict[str, Any]] = []
-        for row in price_rows:
-            promo = _fetch_active_promotion_for_item(
-                item_code=row["item_code"],
-                chain_id=row["chain_id"],
-                store_id=row["store_id"],
-            )
-            results.append(_shape_product_row(row, promo))
+        found_products = []
+        for result_item in search_results:
+            product_details = {
+                "barcode": result_item["barcode"],
+                "name": result_item["canonical_name"],
+                "price": float(result_item["price"]),
+                "store": result_item["store_name"],
+                "address": result_item["address"],
+                "city": result_item["city"]
+            }
+            
+            if result_item["promo_price"] and result_item["promo_price"] < result_item["price"]:
+                product_details["promo_price"] = float(result_item["promo_price"])
+                product_details["promo_text"] = result_item["promo_text"]
+                full_price = result_item["price"]
+                discounted_price = result_item["promo_price"]
+                product_details["discount"] = round(((full_price - discounted_price) / full_price) * 100, 1)
+            
+            found_products.append(product_details)
 
-        return {"products": results}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        return {"products": found_products}
+    except Exception as error:
+        raise HTTPException(status_code=500, detail=str(error))
 
-@router.get("/product/by-name", summary="Search products by name (case-insensitive)")
-async def get_product_by_name(q: str = Query(..., description="Substring to search within item_name")):
-    """
-    Case-insensitive search on item_name (ILIKE %q%).
-    Returns all matching store occurrences including price and promotion info.
-    """
+@router.get("/stores")
+async def get_all_supermarkets():
     try:
-        price_rows = (
-            supabase.table("prices")
-            .select("item_code,item_name,qty_price,chain_id,company_name,store_id,store_city,store_address")
-            .ilike("item_name", f"%{q}%")
-            .execute()
-        ).data or []
+        db_conn = connect_to_database()
+        db_cursor = db_conn.cursor()
+        
+        db_cursor.execute("""
+            SELECT supermarket_id, name, address, city
+            FROM supermarkets
+            ORDER BY name
+        """)
+        
+        store_data = db_cursor.fetchall()
+        db_cursor.close()
+        db_conn.close()
 
-        if not price_rows:
-            raise HTTPException(status_code=404, detail="No products match this name")
+        supermarket_list = []
+        for store_info in store_data:
+            supermarket_list.append({
+                "id": store_info["supermarket_id"],
+                "name": store_info["name"],
+                "address": store_info["address"],
+                "city": store_info["city"]
+            })
 
-        results: List[Dict[str, Any]] = []
-        for row in price_rows:
-            promo = _fetch_active_promotion_for_item(
-                item_code=row["item_code"],
-                chain_id=row["chain_id"],
-                store_id=row["store_id"],
-            )
-            results.append(_shape_product_row(row, promo))
+        return {"stores": supermarket_list}
+    except Exception as error:
+        raise HTTPException(status_code=500, detail=str(error))
 
-        return {"products": results}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ===================== STORES =====================
-
-@router.get("/stores", summary="Get stores (optionally filter by chain_id)")
-async def get_stores(chain_id: Optional[str] = Query(None, description="Chain to filter by (optional)")):
-    """
-    Returns unique stores from the prices table. If chain_id is provided,
-    only stores belonging to that chain are returned.
-    """
+@router.get("/health")
+async def health():
     try:
-        query = supabase.table("prices").select("store_id,chain_id,store_address,store_city")
-        if chain_id:
-            query = query.eq("chain_id", chain_id)
-        rows = query.execute().data or []
-
-        seen = set()
-        deduped = []
-        for r in rows:
-            key = (r.get("store_id"), r.get("chain_id"), r.get("store_address"), r.get("store_city"))
-            if key not in seen:
-                seen.add(key)
-                deduped.append(
-                    {
-                        "store_id": key[0], 
-                        "chain_id": key[1], 
-                        "store_address": key[2],
-                        "store_city": key[3]
-                    }
-                )
-
-        return {"stores": deduped}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        db_conn = connect_to_database()
+        db_cursor = db_conn.cursor()
+        db_cursor.execute("SELECT 1")
+        db_cursor.close()
+        db_conn.close()
+        return {"status": "healthy"}
+    except Exception as error:
+        raise HTTPException(status_code=500, detail=str(error))

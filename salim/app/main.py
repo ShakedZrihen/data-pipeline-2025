@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes.api import router as api_router
+from app.routes.api import router
 import uvicorn
 
 app = FastAPI(
@@ -36,7 +36,7 @@ async def root():
 async def health_check():
     return {"status": "healthy", "message": "Server is running properly"}
 
-app.include_router(api_router, prefix="/api")
+app.include_router(router, prefix="/api")
 
 if __name__ == "__main__":
     print("Starting the server...")
