@@ -308,8 +308,8 @@ def normalize_rows(rows):
 
         if name or price is not None:
             out.append({
-                "product": name, 
-                "price": price, 
+                "product": name,
+                "price": price,
                 "unit": unit or ""
             })
     return out

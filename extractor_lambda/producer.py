@@ -7,26 +7,33 @@ def _sqs_client():
     endpoint = os.getenv("AWS_ENDPOINT_URL")
     cfg = Config(retries={'max_attempts': 3, 'mode': 'standard'})
     return boto3.client("sqs", region_name=region, endpoint_url=endpoint, config=cfg)
+MAX_SQS_BYTES = 256 * 1024 - 2048
+
 def send_message(payload, outbox_path=None):
     queue_url = os.getenv("OUTPUT_QUEUE_URL")
     if not queue_url:
         raise ValueError("Missing OUTPUT_QUEUE_URL")
 
-    sqs = boto3.client("sqs", endpoint_url=os.getenv("AWS_ENDPOINT_URL"), region_name=os.getenv("AWS_REGION"))
+    sqs = boto3.client("sqs",
+        endpoint_url=os.getenv("AWS_ENDPOINT_URL"),
+        region_name=os.getenv("AWS_REGION"),
+        config=Config(retries={'max_attempts': 3, 'mode': 'standard'})
+    )
 
-    payload["items_sample"] = payload.get("items", [])[:10]
-    payload["items_total"] = len(payload.get("items", []))
+    items = payload.pop("items", [])
+    payload["items_total"]  = len(items)
+    payload["items_sample"] = items[:10]
+
     if outbox_path:
         payload["outbox_path"] = outbox_path
 
-        with open("items_sample.json", "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=2)
+    safe_payload = _shrink_to_bytes(payload, MAX_SQS_BYTES)
 
-    message_body = json.dumps(payload, ensure_ascii=False)
-    sqs.send_message(
-        QueueUrl=queue_url,
-        MessageBody=message_body
-    )
+    with open("items_sample.json", "w", encoding="utf-8") as f:
+        json.dump(safe_payload, f, ensure_ascii=False, indent=2)
+
+    sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(safe_payload, ensure_ascii=False))
+
 
 
 def _sqs():
