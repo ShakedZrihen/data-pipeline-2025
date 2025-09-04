@@ -10,7 +10,7 @@ import json
 
 def init_s3():
     """Initialize S3 bucket"""
-    print("🚀 Initializing S3...")
+    print("Initializing S3...")
     
     # Wait for LocalStack to be ready
     max_retries = 30
@@ -29,16 +29,16 @@ def init_s3():
             
             # Test connection
             s3_client.list_buckets()
-            print("✅ S3 connection established")
+            print("S3 connection established")
             break
             
         except Exception as e:
-            print(f"⏳ Waiting for S3 to be ready... (attempt {retry_count + 1}/{max_retries})")
+            print(f"Waiting for S3 to be ready... (attempt {retry_count + 1}/{max_retries})")
             retry_count += 1
             time.sleep(2)
     
     if retry_count >= max_retries:
-        print("❌ Failed to connect to S3 after maximum retries")
+        print("Failed to connect to S3 after maximum retries")
         return
     
     try:
@@ -48,19 +48,19 @@ def init_s3():
             s3_client.create_bucket(
                 Bucket=bucket_name
             )
-            print(f"✅ Created bucket: {bucket_name}")
+            print(f"Created bucket: {bucket_name}")
         except Exception as e:
             if "BucketAlreadyOwnedByYou" in str(e) or "BucketAlreadyExists" in str(e):
-                print(f"✅ Bucket {bucket_name} already exists")
+                print(f"Bucket {bucket_name} already exists")
                 return
             else:
-                print(f"❌ Error creating bucket: {e}")
+                print(f"Error creating bucket: {e}")
                 # Try without location constraint
                 try:
                     s3_client.create_bucket(Bucket=bucket_name)
-                    print(f"✅ Created bucket: {bucket_name}")
+                    print(f"Created bucket: {bucket_name}")
                 except Exception as e2:
-                    print(f"❌ Failed to create bucket even without location constraint: {e2}")
+                    print(f"Failed to create bucket even without location constraint: {e2}")
                     return
         
         # Set bucket policy to allow public read (for testing)
@@ -81,13 +81,13 @@ def init_s3():
             Bucket=bucket_name,
             Policy=json.dumps(bucket_policy)
         )
-        print("✅ Set bucket policy")
+        print("Set bucket policy")
         
     except Exception as e:
         if "BucketAlreadyOwnedByYou" in str(e) or "BucketAlreadyExists" in str(e):
-            print(f"✅ Bucket {bucket_name} already exists")
+            print(f"Bucket {bucket_name} already exists")
         else:
-            print(f"❌ Error creating bucket: {e}")
+            print(f"Error creating bucket: {e}")
 
 if __name__ == "__main__":
     init_s3()

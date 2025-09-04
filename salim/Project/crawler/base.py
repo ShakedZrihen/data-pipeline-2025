@@ -329,11 +329,11 @@ class SupermarketCrawler:
                     Body=f
                 )
             
-            print(f"✅ Successfully uploaded {filename} to S3: s3://{self.s3_bucket}/{s3_key}")
+            print(f"Successfully uploaded {filename} to S3: s3://{self.s3_bucket}/{s3_key}")
             return True
             
         except Exception as e:
-            print(f"❌ Failed to upload {filename} to S3: {e}")
+            print(f"Error: Failed to upload {filename} to S3: {e}")
             return False
 
     def close(self):

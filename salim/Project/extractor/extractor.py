@@ -49,10 +49,10 @@ class Extractor:
                 username=rabbitmq_username,
                 password=rabbitmq_password
             )
-            print("✅ RabbitMQ publisher initialized successfully")
+            print("RabbitMQ publisher initialized successfully")
         except Exception as e:
-            print(f"❌ Failed to initialize RabbitMQ publisher: {e}")
-            print("⚠️ Continuing without RabbitMQ - files will be processed locally only")
+            print(f"Error: Failed to initialize RabbitMQ publisher: {e}")
+            print("Warning: Continuing without RabbitMQ - files will be processed locally only")
             self.rabbitmq = None
         
         # Initialize file tracker if database URL provided
@@ -121,12 +121,12 @@ class Extractor:
                 with open(output_path, "wb") as f_out:
                     shutil.copyfileobj(f_in, f_out)
 
-            print(f"✅ Extracted to: {output_path}")
+            print(f"Extracted to: {output_path}")
 
             # Delete the original .gz file
             if delete_gz:
                 os.remove(gz_path)
-                print(f"🗑️  Deleted: {gz_path}")
+                print(f"Deleted: {gz_path}")
 
             return output_path
 
@@ -141,7 +141,7 @@ class Extractor:
         """
         json_file_path = xml_file_path + ".json"
         if os.path.exists(json_file_path):
-            print(f"✅ JSON already exists: {json_file_path}")
+            print(f"JSON already exists: {json_file_path}")
             return json_file_path
 
         try:
@@ -183,10 +183,10 @@ class Extractor:
             with open(json_file_path, "w", encoding="utf-8") as json_file:
                 json.dump(parsed_dict, json_file, ensure_ascii=False, indent=2)
 
-            print(f"✅ Converted to JSON: {json_file_path}")
+            print(f"Converted to JSON: {json_file_path}")
             return json_file_path
         except Exception as e:
-            print(f"❌ Error converting {xml_file_path} to JSON: {e}")
+            print(f"Error: Error converting {xml_file_path} to JSON: {e}")
             return None
 
 
@@ -207,7 +207,7 @@ class Extractor:
         # Step 3: Clean up files
         if not keep_xml and os.path.exists(xml_path):
             os.remove(xml_path)
-            print(f"️  Deleted XML file: {xml_path}")
+            print(f"Deleted XML file: {xml_path}")
 
         # Delete original gz file
         if os.path.exists(gz_path):
@@ -285,17 +285,17 @@ class Extractor:
             if send_to_rabbitmq and self.rabbitmq:
                 try:
                     self.rabbitmq.publish_file(json_path, supermarket)
-                    print(f"✅ Successfully sent to RabbitMQ: {s3_key}")
+                    print(f"Successfully sent to RabbitMQ: {s3_key}")
                 except Exception as e:
-                    print(f"⚠️ Warning: Failed to send to RabbitMQ: {e}")
+                    print(f"Warning: Failed to send to RabbitMQ: {e}")
                     print("Continuing with file processing...")
                     # Don't fail the entire process if RabbitMQ is down
                     # The file is still processed and saved locally
             elif not self.rabbitmq:
-                print("⚠️ Warning: RabbitMQ not available, skipping message publishing")
+                print("Warning: RabbitMQ not available, skipping message publishing")
                 print("File processed and saved locally")
             else:
-                print("ℹ️ RabbitMQ publishing disabled")
+                print("Info: RabbitMQ publishing disabled")
 
             # Step 5: Clean up temporary files
             if not keep_temp_files:

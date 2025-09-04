@@ -22,17 +22,17 @@ def create_bucket():
         # Check if bucket exists
         try:
             s3_client.head_bucket(Bucket=bucket_name)
-            print(f"✅ Bucket {bucket_name} already exists")
+            print(f"Bucket {bucket_name} already exists")
             return
         except:
             pass
         
         # Create bucket
         s3_client.create_bucket(Bucket=bucket_name)
-        print(f"✅ Created bucket: {bucket_name}")
+        print(f"Created bucket: {bucket_name}")
         
     except Exception as e:
-        print(f"❌ Error creating bucket: {e}")
+        print(f"Error creating bucket: {e}")
 
 if __name__ == "__main__":
     create_bucket()

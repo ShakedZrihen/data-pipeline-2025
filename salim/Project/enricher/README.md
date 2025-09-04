@@ -6,7 +6,7 @@
 - Python 3.8+
 - PostgreSQL database
 - RabbitMQ server
-- Claude API access (for brand extraction)
+- Claude API key (for brand extraction)
 
 ### Setup
 1. Install dependencies:

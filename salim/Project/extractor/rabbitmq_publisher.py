@@ -34,15 +34,15 @@ class RabbitMQPublisher:
             try:
                 print(f"🔄 Attempting to connect to RabbitMQ (attempt {attempt + 1}/{max_retries})...")
                 self.connect()
-                print("✅ Successfully connected to RabbitMQ!")
+                print("Successfully connected to RabbitMQ!")
                 return
             except Exception as e:
-                print(f"❌ Connection attempt {attempt + 1} failed: {e}")
+                print(f"Error: Connection attempt {attempt + 1} failed: {e}")
                 if attempt < max_retries - 1:
                     print(f"⏳ Waiting {retry_delay} seconds before retry...")
                     time.sleep(retry_delay)
                 else:
-                    print("❌ Failed to connect to RabbitMQ after maximum retries")
+                    print("Error: Failed to connect to RabbitMQ after maximum retries")
                     raise
 
     def connect(self):
@@ -60,10 +60,10 @@ class RabbitMQPublisher:
 
             self.connection = pika.BlockingConnection(parameters)
             self.channel = self.connection.channel()
-            print(f"✅ Connected to RabbitMQ at {self.host}:{self.port}")
+            print(f"Connected to RabbitMQ at {self.host}:{self.port}")
 
         except Exception as e:
-            print(f"❌ Failed to connect to RabbitMQ: {e}")
+            print(f"Error: Failed to connect to RabbitMQ: {e}")
             raise
 
     def setup_queues(self):
@@ -71,10 +71,10 @@ class RabbitMQPublisher:
         try:
             for queue_name in self.queues.values():
                 self.channel.queue_declare(queue=queue_name, durable=True)
-                print(f"✅ Queue declared: {queue_name}")
+                print(f"Queue declared: {queue_name}")
 
         except Exception as e:
-            print(f"❌ Failed to setup queues: {e}")
+            print(f"Error: Failed to setup queues: {e}")
             raise
 
     def publish_json(self, data: Dict[str, Any], queue_type: str = 'all', 
@@ -118,17 +118,17 @@ class RabbitMQPublisher:
                 )
             )
 
-            print(f"✅ Published to {queue_name}: {supermarket} - {file_type}")
+            print(f"Published to {queue_name}: {supermarket} - {file_type}")
 
         except Exception as e:
-            print(f"❌ Failed to publish message: {e}")
+            print(f"Error: Failed to publish message: {e}")
             # Try to reconnect and retry once
             try:
                 print("🔄 Attempting to reconnect and retry...")
                 self.connect_with_retry()
                 self.publish_json(data, queue_type, supermarket, file_type)
             except Exception as retry_e:
-                print(f"❌ Retry failed: {retry_e}")
+                print(f"Error: Retry failed: {retry_e}")
 
     def publish_file(self, json_file_path: str, supermarket: str = None):
         """Publish JSON file content to RabbitMQ"""
@@ -152,16 +152,16 @@ class RabbitMQPublisher:
             self.publish_json(data, queue_type, supermarket, file_type)
 
         except Exception as e:
-            print(f"❌ Failed to publish file {json_file_path}: {e}")
+            print(f"Error: Failed to publish file {json_file_path}: {e}")
 
     def close(self):
         """Close RabbitMQ connection"""
         try:
             if self.connection and not self.connection.is_closed:
                 self.connection.close()
-                print("✅ RabbitMQ connection closed")
+                print("RabbitMQ connection closed")
         except Exception as e:
-            print(f"❌ Error closing RabbitMQ connection: {e}")
+            print(f"Error: Error closing RabbitMQ connection: {e}")
 
     def is_connected(self):
         """Check if connection is alive"""

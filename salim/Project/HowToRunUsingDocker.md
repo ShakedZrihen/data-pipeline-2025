@@ -1,22 +1,22 @@
-# 🚀 Supermarket Data Pipeline
+# Supermarket Data Pipeline
 
 A complete data pipeline for crawling, extracting, and enriching supermarket product data using Docker containers.
 
-## 📋 Overview
+## Overview
 
 This pipeline consists of four main services:
 - **Crawler**: Downloads supermarket data files and uploads them to S3
 - **Extractor**: Processes S3 files and extracts product data to RabbitMQ queues
-- **Enricher**: Consumes data from RabbitMQ, enriches it with AI-powered brand extraction, and saves to PostgreSQL
+- **Enricher**: Consumes data from RabbitMQ, enriches it with automated brand extraction, and saves to PostgreSQL
 - **API Server**: RESTful API to query the processed data
 
-## 🛠️ Prerequisites
+## Prerequisites
 
 - Docker and Docker Compose installed
 - At least 4GB RAM available
 - Internet connection for downloading data
 
-## �� Quick Start
+## Quick Start
 
 ### 1. Clone and Navigate
 ```bash
@@ -54,7 +54,7 @@ docker-compose logs -f enricher
 docker-compose logs -f api
 ```
 
-## �� Pipeline Flow
+## Pipeline Flow
 
 ### Phase 1: Data Collection
 1. **Crawler** downloads supermarket data files (.gz format)
@@ -70,14 +70,14 @@ docker-compose logs -f api
 
 ### Phase 3: Data Enrichment
 1. **Enricher** consumes messages from RabbitMQ queues
-2. **Enricher** uses Claude AI to extract brand information from Hebrew product names
+2. **Enricher** uses Claude API to extract brand information from Hebrew product names
 3. **Enricher** saves enriched data to PostgreSQL database
 
 ### Phase 4: Data Access
 1. **API Server** provides REST endpoints to query the data
 2. **PostgreSQL** stores all processed and enriched data
 
-## 📊 Monitoring the Pipeline
+## Monitoring the Pipeline
 
 ### Check Service Status
 ```bash
@@ -116,7 +116,7 @@ docker exec postgres-db psql -U postgres -d postgres -c "SELECT COUNT(*) FROM it
 docker exec postgres-db psql -U postgres -d postgres -c "SELECT COUNT(*) FROM stores;"
 ```
 
-## 🌐 Testing the API
+## Testing the API
 
 Once the pipeline is running, test the API endpoints:
 
@@ -148,7 +148,7 @@ curl http://localhost:3001/api/supermarkets
 curl http://localhost:3001/api-docs
 ```
 
-## 🛑 Stopping the Pipeline
+## Stopping the Pipeline
 
 ### Stop All Services
 ```bash
@@ -160,12 +160,12 @@ docker-compose down
 docker-compose stop enricher
 ```
 
-### Stop and Remove Volumes (⚠️ Data Loss)
+### Stop and Remove Volumes (Warning: Data Loss)
 ```bash
 docker-compose down -v
 ```
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -217,4 +217,4 @@ docker-compose restart enricher
 docker-compose restart api
 ```
 
-## 📁 Project Structure
+## Project Structure

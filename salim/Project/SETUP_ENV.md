@@ -1,9 +1,9 @@
-# 🔐 Environment Variables Setup
+# Environment Variables Setup
 
 ## Overview
 This pipeline uses environment variables to keep sensitive information secure. Follow these steps to set up your environment.
 
-## 🚀 Quick Setup
+## Quick Setup
 
 ### 1. Create .env file
 Create a `.env` file in the `salim/Project/` directory:
@@ -24,7 +24,7 @@ POSTGRES_PASSWORD=your_actual_postgres_password
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_KEY=your_actual_supabase_key
 
-# Anthropic Claude API
+# Claude API
 CLAUDE_API_KEY=your_actual_claude_api_key
 
 # Optional: Override database URL
@@ -34,11 +34,11 @@ DATABASE_URL=postgresql://postgres:your_password@postgres:5432/postgres
 ### 3. Replace placeholder values
 - `your_actual_postgres_password` → Your PostgreSQL password
 - `your_actual_supabase_key` → Your Supabase anon/public key
-- `your_actual_claude_api_key` → Your Anthropic Claude API key
+- `your_actual_claude_api_key` → Your Claude API key
 
-## 🔑 Required API Keys
+## Required API Keys
 
-### Anthropic Claude API Key
+### Claude API Key
 1. Go to [Anthropic Console](https://console.anthropic.com/)
 2. Create an account or sign in
 3. Generate a new API key
@@ -49,7 +49,7 @@ DATABASE_URL=postgresql://postgres:your_password@postgres:5432/postgres
 2. Navigate to Settings → API
 3. Copy the `anon` public key
 
-## ✅ Verification
+## Verification
 
 After setting up your `.env` file:
 
@@ -68,14 +68,14 @@ After setting up your `.env` file:
    docker-compose logs enricher
    ```
 
-## 🚨 Security Notes
+## Security Notes
 
 - **Never commit your `.env` file** - it's already in `.gitignore`
 - **Keep your API keys secure** - don't share them
 - **Use different keys for development/production**
 - **Rotate keys regularly** for security
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### "Environment variable not set" errors
 - Ensure your `.env` file is in the correct directory
@@ -87,7 +87,7 @@ After setting up your `.env` file:
 - Check if keys have expired
 - Ensure keys have the right permissions
 
-## 📝 Example .env file
+## Example .env file
 
 ```bash
 # PostgreSQL
@@ -97,11 +97,11 @@ POSTGRES_PASSWORD=mySecurePassword123
 SUPABASE_URL=https://abcdefghijklm.supabase.co
 SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
-# Claude AI
+# Claude API
 CLAUDE_API_KEY=sk-ant-api03-abc123def456...
 ```
 
-## 🎯 Next Steps
+## Next Steps
 
 After setting up environment variables:
 1. Run the pipeline: `docker-compose up -d`

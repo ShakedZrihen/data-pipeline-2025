@@ -9,12 +9,12 @@ Write-Host "Checking Docker status..." -ForegroundColor Yellow
 try {
     $dockerVersion = docker --version 2>$null
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "✅ Docker is running: $dockerVersion" -ForegroundColor Green
+        Write-Host "Docker is running: $dockerVersion" -ForegroundColor Green
     } else {
         throw "Docker command failed"
     }
 } catch {
-    Write-Host "❌ ERROR: Docker is not installed or not running!" -ForegroundColor Red
+    Write-Host "ERROR: Docker is not installed or not running!" -ForegroundColor Red
     Write-Host "Please install Docker Desktop and start it." -ForegroundColor Red
     Read-Host "Press Enter to exit"
     exit 1
@@ -25,7 +25,7 @@ Write-Host "Starting all services in background..." -ForegroundColor Yellow
 docker-compose up -d
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ Failed to start services!" -ForegroundColor Red
+    Write-Host "Failed to start services!" -ForegroundColor Red
     Read-Host "Press Enter to exit"
     exit 1
 }

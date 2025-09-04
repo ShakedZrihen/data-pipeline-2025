@@ -6,13 +6,13 @@ def check_supabase():
         # Use environment variable for database connection
         database_url = os.getenv('DATABASE_URL')
         if not database_url:
-            print("❌ DATABASE_URL environment variable not set")
+            print("Error: DATABASE_URL environment variable not set")
             return
             
         conn = psycopg2.connect(database_url)
         cursor = conn.cursor()
         
-        print("✅ Connected to Supabase!")
+        print("Connected to Supabase!")
         
         # Check table counts
         tables = ['stores', 'items', 'discounts', 'processed_files']
@@ -42,7 +42,7 @@ def check_supabase():
         conn.close()
         
     except Exception as e:
-        print(f"❌ Connection failed: {e}")
+        print(f"Error: Connection failed: {e}")
 
 if __name__ == "__main__":
     check_supabase()

@@ -20,7 +20,7 @@ def main():
         # Run specific config
         config_name = sys.argv[1]
         if config_name not in all_configs:
-            print(f"❌ Unknown config: {config_name}")
+            print(f"Error: Unknown config: {config_name}")
             print(f"Available configs: {', '.join(all_configs)}")
             sys.exit(1)
         configs_to_run = [config_name]
@@ -34,7 +34,7 @@ def main():
     
     for config_name in configs_to_run:
         print(f"\n{'='*50}")
-        print(f"🚀 Starting crawler for {config_name.upper()}...")
+        print(f"Starting crawler for {config_name.upper()}...")
         print(f"{'='*50}")
         
         try:
@@ -42,7 +42,7 @@ def main():
             downloaded_files = crawler.crawl()
             
             if downloaded_files:
-                print(f"\n✅ {config_name.upper()}: Downloaded {len(downloaded_files)} files")
+                print(f"\n{config_name.upper()}: Downloaded {len(downloaded_files)} files")
                 for file_path in downloaded_files:
                     filename = os.path.basename(file_path)
                     # Extract branch number for S3 path
@@ -53,19 +53,19 @@ def main():
                         s3_key = f"{config_name.lower()}/{branch_num}/{filename}"
                     else:
                         s3_key = f"{config_name.lower()}/{filename}"
-                    print(f"  📁 {file_path}")
-                    print(f"  ☁️  Uploaded to S3: s3://test-bucket/{s3_key}")
+                    print(f"  {file_path}")
+                    print(f"  Uploaded to S3: s3://test-bucket/{s3_key}")
                 total_files += len(downloaded_files)
             else:
-                print(f"\n❌ {config_name.upper()}: No files were downloaded.")
+                print(f"\nError: {config_name.upper()}: No files were downloaded.")
                 
         except FileNotFoundError as e:
-            print(f"❌ {config_name.upper()}: Configuration error: {e}")
+            print(f"Error: {config_name.upper()}: Configuration error: {e}")
         except Exception as e:
-            print(f"❌ {config_name.upper()}: Unexpected error: {e}")
+            print(f"Error: {config_name.upper()}: Unexpected error: {e}")
     
     print(f"\n{'='*50}")
-    print(f"🎉 TOTAL: Downloaded and uploaded {total_files} files to S3")
+    print(f"TOTAL: Downloaded and uploaded {total_files} files to S3")
     print(f"{'='*50}")
 
 if __name__ == "__main__":

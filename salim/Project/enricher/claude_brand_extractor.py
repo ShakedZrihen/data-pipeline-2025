@@ -11,7 +11,7 @@ load_dotenv('../.env')
 logger = logging.getLogger(__name__)
 
 class ClaudeBrandExtractor:
-    """AI-powered brand extractor using Claude AI"""
+    """Brand extractor using Claude API"""
     
     def __init__(self):
         self.api_key = os.getenv('CLAUDE_API_KEY')
@@ -22,7 +22,7 @@ class ClaudeBrandExtractor:
         self.model = "claude-3-5-sonnet-20241022"  # Using the latest Claude model
         
     def extract_brand(self, item_name: str, description: str = "") -> Dict[str, any]:
-        """Extract brand from item name and description using Claude AI"""
+        """Extract brand from item name and description using Claude API"""
         
         # Prepare the prompt
         prompt = f"""You are a brand extraction expert. Given an item name and description, extract the brand name.
@@ -69,21 +69,21 @@ Brand:"""
             return {
                 'brand': brand,
                 'confidence': 0.9,  # High confidence for AI extraction
-                'source_field': 'claude_ai',
+                'source_field': 'claude_api',
                 'extraction_method': 'claude_3_5_sonnet'
             }
             
         except Exception as e:
-            logger.error(f"Claude AI extraction failed: {e}")
+            logger.error(f"Claude API extraction failed: {e}")
             return {
                 'brand': 'Unknown',
                 'confidence': 0.0,
-                'source_field': 'claude_ai_error',
+                'source_field': 'claude_api_error',
                 'extraction_method': 'claude_3_5_sonnet_error'
             }
     
     def enrich_item_with_brand(self, item_data: Dict[str, any]) -> Dict[str, any]:
-        """Enrich item with Claude AI-extracted brand"""
+        """Enrich item with Claude API-extracted brand"""
         item_name = item_data.get('item_name', '') or item_data.get('ItemName', '')
         description = item_data.get('item_description', '') or item_data.get('ManufacturerItemDescription', '')
         
@@ -98,7 +98,7 @@ Brand:"""
         return item_data
 
 def main():
-    """Test the Claude AI brand extractor"""
+    """Test the Claude brand extractor"""
     logging.basicConfig(level=logging.INFO)
     
     try:
@@ -113,7 +113,7 @@ def main():
             ("שניצל דניאל 400גרם", "שניצל עוף")
         ]
         
-        print("Testing Claude AI Brand Extractor:")
+        print("Testing Claude Brand Extractor:")
         for item_name, description in test_cases:
             result = extractor.extract_brand(item_name, description)
             print(f"  • {item_name}")
