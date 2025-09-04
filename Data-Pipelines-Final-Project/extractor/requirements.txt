@@ -1,0 +1,4 @@
+boto3
+requests
+certifi
+selenium>=4.10

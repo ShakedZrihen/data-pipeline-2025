@@ -1,0 +1,136 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    environment:
+      - SERVICES=s3,sqs,dynamodb
+      - DEBUG=1
+      - AWS_DEFAULT_REGION=eu-central-1
+    ports:
+      - "4566:4566"
+    volumes:
+      - ./docker/localstack-init.sh:/etc/localstack/init/ready.d/init.sh:ro
+    networks: [pipeline]
+    healthcheck:
+      test: ["CMD-SHELL", "awslocal s3 ls >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=pricedb
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pricedb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [pipeline]
+
+  crawler:
+    build:
+      context: ./crawlers
+      dockerfile: Dockerfile
+    depends_on:
+      localstack:
+        condition: service_healthy
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=eu-central-1
+      - S3_ENDPOINT=http://localstack:4566
+      - S3_BUCKET=price-data
+      - INTERVAL=3600 
+    networks: [pipeline]
+    restart: unless-stopped
+
+  extractor:
+    build:
+      context: .
+      dockerfile: extractor/Dockerfile
+    command: python -u extractor.py
+    depends_on:
+      localstack:
+        condition: service_healthy
+    environment:
+      AWS_ACCESS_KEY_ID: "test"
+      AWS_SECRET_ACCESS_KEY: "test"
+      AWS_DEFAULT_REGION: "eu-central-1"
+      AWS_ENDPOINT_URL: "http://localstack:4566"
+      S3_BUCKET: "price-data"
+      OUT_BUCKET: "govil-price-lists"
+      OUT_PREFIX: "processed-json"
+      SQS_IN_URL:  "http://localstack:4566/000000000000/price-extractor-in"
+      SQS_OUT_URL: "http://localstack:4566/000000000000/price-extractor-events"
+    networks: [pipeline]
+    restart: unless-stopped
+
+  price-consumer:
+    build:
+      context: .
+      dockerfile: price-consumer/Dockerfile
+    container_name: price-consumer
+    depends_on:
+      localstack:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+    environment:
+      AWS_REGION: eu-central-1
+      AWS_ENDPOINT_URL: http://localstack:4566
+      SQS_ENDPOINT_URL: http://localstack:4566
+      S3_ENDPOINT_URL:  http://localstack:4566
+      DDB_ENDPOINT_URL: http://localstack:4566
+      SQS_QUEUE_URL: http://localstack:4566/000000000000/price-extractor-events
+      DLQ_URL:        http://localstack:4566/000000000000/price-extractor-events-dlq
+      QUEUE_PROVIDER: sqs
+      ENRICH_ENABLE: "1" 
+      AI_PROVIDER: "ollama" #i have tried to do enrichment with openai but it was not working , i tried a local one called ollama and it also didnt work , thats why its still here
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      OLLAMA_MODEL: "llama3.1:8b"
+      AI_ON_MISSING_ONLY: "1" 
+      ENRICH_SAMPLE_RATE: "0.0"
+      DDB_RUNS_TABLE: price_enricher_runs
+      OPENAI_API_KEY: "000" #put ur key here if u want to use openai
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: pricedb
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      LOG_LEVEL: INFO
+      SQS_BATCH_SIZE: "10"
+      SQS_WAIT_TIME_SECONDS: "10"
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+
+    networks: [pipeline]
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=pricedb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "8000:8000"
+    networks: [pipeline]
+    restart: unless-stopped
+
+networks:
+  pipeline:
+    driver: bridge
