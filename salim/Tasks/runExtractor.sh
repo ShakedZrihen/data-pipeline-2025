@@ -43,12 +43,27 @@ say "Ensuring SQS queue ${QUEUE_NAME}"
 awsls sqs create-queue --queue-name "${QUEUE_NAME}" >/dev/null 2>&1 || true
 QUEUE_URL="$(awsls sqs get-queue-url --queue-name "${QUEUE_NAME}" --query 'QueueUrl' --output text)"
 
-# ---- Create or update Lambda ----
+# ---- Create or update lambda ----
 if awsls lambda get-function --function-name "${LAMBDA_NAME}" >/dev/null 2>&1; then
   say "Updating ${LAMBDA_NAME} code"
-  awsls lambda update-function-code \
+  if ! awsls lambda update-function-code \
     --function-name "${LAMBDA_NAME}" \
-    --zip-file "fileb://${PKG_ZIP}" >/dev/null
+    --zip-file "fileb://${PKG_ZIP}" >/dev/null; then
+    say "Hot-swap failed, recreating ${LAMBDA_NAME} ..."
+    awsls lambda delete-function --function-name "${LAMBDA_NAME}" >/dev/null 2>&1 || true
+
+    awsls lambda create-function \
+      --function-name "${LAMBDA_NAME}" \
+      --runtime "${LAMBDA_RUNTIME}" \
+      --role "${LAMBDA_ROLE_ARN}" \
+      --handler "${LAMBDA_HANDLER}" \
+      --timeout 60 \
+      --memory-size 512 \
+      --zip-file "fileb://${PKG_ZIP}" \
+      --environment "Variables={ENDPOINT_URL=${LAMBDA_ENDPOINT_IN_CONTAINER},S3_BUCKET=${BUCKET},SQS_QUEUE_NAME=${QUEUE_NAME},AWS_REGION=${AWS_REGION}}" >/dev/null
+
+    return
+  fi
 
   say "Updating ${LAMBDA_NAME} config (handler/env/limits)"
   awsls lambda update-function-configuration \
@@ -71,6 +86,7 @@ else
     --zip-file "fileb://${PKG_ZIP}" \
     --environment "Variables={ENDPOINT_URL=${LAMBDA_ENDPOINT_IN_CONTAINER},S3_BUCKET=${BUCKET},SQS_QUEUE_NAME=${QUEUE_NAME},AWS_REGION=${AWS_REGION}}" >/dev/null
 fi
+
 
 # ---- Allow S3 to invoke Lambda (idempotent) ----
 say "Granting S3 invoke permission"
