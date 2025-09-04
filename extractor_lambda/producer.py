@@ -1,10 +1,34 @@
-import os
-import json
-import logging
-import boto3
+import os, json, logging, boto3
 from botocore.config import Config
-
 log = logging.getLogger(__name__)
+
+def _sqs_client():
+    region = os.getenv("AWS_REGION", "us-east-1")
+    endpoint = os.getenv("AWS_ENDPOINT_URL")
+    cfg = Config(retries={'max_attempts': 3, 'mode': 'standard'})
+    return boto3.client("sqs", region_name=region, endpoint_url=endpoint, config=cfg)
+def send_message(payload, outbox_path=None):
+    queue_url = os.getenv("OUTPUT_QUEUE_URL")
+    if not queue_url:
+        raise ValueError("Missing OUTPUT_QUEUE_URL")
+
+    sqs = boto3.client("sqs", endpoint_url=os.getenv("AWS_ENDPOINT_URL"), region_name=os.getenv("AWS_REGION"))
+
+    payload["items_sample"] = payload.get("items", [])[:10]
+    payload["items_total"] = len(payload.get("items", []))
+    if outbox_path:
+        payload["outbox_path"] = outbox_path
+
+        # ✅ שורה חשובה – שומרת את הקובץ על הדיסק!
+        with open("items_sample.json", "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+
+    message_body = json.dumps(payload, ensure_ascii=False)
+    sqs.send_message(
+        QueueUrl=queue_url,
+        MessageBody=message_body
+    )
+
 
 def _sqs():
     region = os.getenv("AWS_REGION", "us-east-1")
@@ -13,11 +37,12 @@ def _sqs():
     return boto3.client("sqs", region_name=region, endpoint_url=endpoint, config=cfg)
 
 def _json_size_bytes(obj) -> int:
+    """חישוב גודל JSON בבייטים עם תמיכה נכונה בעברית"""
     return len(json.dumps(obj, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
 
 def _shrink_to_bytes(obj: dict, max_bytes: int) -> dict:
     """
-    sqs
+    קיצוץ אובייקט ל-SQS עם שמירה על עברית תקינה
     """
     if _json_size_bytes(obj) <= max_bytes:
         return obj
@@ -28,7 +53,17 @@ def _shrink_to_bytes(obj: dict, max_bytes: int) -> dict:
         for it in items:
             name = it.get("product", "")
             if isinstance(name, str) and len(name) > trunc:
-                it["product"] = name[:trunc] + "…"
+                # וידוא שהחיתוך לא יפגע באמצע תו עברי
+                truncated = name[:trunc]
+                # אם התו האחרון הוא תו עברי חלקי, נחתוך עוד אחד
+                if truncated and ord(truncated[-1]) >= 0x0590 and ord(truncated[-1]) <= 0x05FF:
+                    # מצא את הגבול הבטוח לחיתוך
+                    safe_end = trunc
+                    while safe_end > 0 and ord(name[safe_end - 1]) >= 0x0590:
+                        safe_end -= 1
+                    if safe_end > 0:
+                        truncated = name[:safe_end]
+                it["product"] = truncated + "…"
 
         tmp = dict(obj, items_sample=items)
         if _json_size_bytes(tmp) <= max_bytes:
@@ -42,35 +77,6 @@ def _shrink_to_bytes(obj: dict, max_bytes: int) -> dict:
         if trunc > 60:
             trunc = int(trunc * 0.9)
 
+    # במקרה קיצוני - נוקה את הרשימה
     obj["items_sample"] = []
     return obj
-
-def send_message(payload: dict):
-    if os.getenv("ENABLE_QUEUE", "1") != "1":
-        log.info("[producer] queue disabled (ENABLE_QUEUE!=1)")
-        return
-
-    url = os.getenv("OUTPUT_QUEUE_URL")
-    if not url:
-        log.warning("[producer] OUTPUT_QUEUE_URL is empty; skipping send")
-        return
-
-    items = payload.get("items", [])
-    sample_n = int(os.getenv("SQS_ITEMS_SAMPLE", "150"))
-    body = {
-        "provider": payload["provider"],
-        "branch": payload["branch"],
-        "type": payload["type"],
-        "timestamp": payload["timestamp"],
-        "items_total": len(items),
-        "items_sample": items[:sample_n],
-    }
-
-    max_bytes = int(os.getenv("MAX_SQS_BYTES", "250000"))
-    body = _shrink_to_bytes(body, max_bytes)
-
-    s = json.dumps(body, ensure_ascii=False, separators=(",", ":"))
-
-    sqs = _sqs()
-    sqs.send_message(QueueUrl=url, MessageBody=s)
-    log.info("[producer] sent to SQS: %s", url)

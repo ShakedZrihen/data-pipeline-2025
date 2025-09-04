@@ -2,7 +2,7 @@ import os
 import json
 import tempfile
 import traceback
-import logging
+import logging, sys
 from pathlib import Path
 import gzip, zipfile, io
 import boto3
@@ -18,6 +18,10 @@ from config import S3_SIMULATOR_ROOT
 import xml.etree.ElementTree as ET
 
 # ---------- logging ----------
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+logging.getLogger().handlers = [handler]
+logging.getLogger().setLevel(logging.INFO)
 log = setup_logging()
 logger = logging.getLogger("extractor")
 
@@ -32,7 +36,7 @@ def _queue_enabled() -> bool:
     """Only send to queue when explicitly enabled AND we have a queue URL."""
     return os.getenv("ENABLE_QUEUE") == "1" and bool(os.getenv("OUTPUT_QUEUE_URL"))
 
-# ---------- XML helpers ----------
+# ---------- XML helpers with Hebrew support ----------
 def _candidates_from_payload(raw: bytes):
     """
     מקבל bytes אחרי פירוק ה-GZ (decompress_gz_to_bytes),
@@ -61,6 +65,19 @@ def _candidates_from_payload(raw: bytes):
     else:
         out.append(raw)
     return out
+def _decode_smart(b: bytes) -> str:
+    if b.startswith(b'\xef\xbb\xbf'):
+        b = b[3:]
+    for enc in ('utf-8', 'utf-16', 'windows-1255', 'cp1255', 'iso-8859-8'):
+        try:
+            s = b.decode(enc)
+            if s.count('�') < 3:   # הימנע מטקסט פגום
+                return s
+        except UnicodeDecodeError:
+            continue
+    # fallback אחרון בלבד
+    return b.decode('utf-8', errors='replace')
+
 
 def _normalize_xml_encoding(data: bytes) -> bytes | str:
     """
@@ -72,11 +89,11 @@ def _normalize_xml_encoding(data: bytes) -> bytes | str:
         try:
             return data.decode("utf-16", errors="replace")
         except Exception:
-            return data
+            return _decode_smart(data)
     # UTF-8 BOM
     if head.startswith(b"\xef\xbb\xbf"):
         return data[3:]
-    return data
+    return _decode_smart(data) if isinstance(data, bytes) else data
 
 def _strip_ns(tag: str) -> str:
     # "{ns}ItemPrice" -> "ItemPrice"
@@ -85,7 +102,13 @@ def _strip_ns(tag: str) -> str:
     return tag
 
 def _text(el):
-    return (el.text or "").strip() if el is not None else ""
+    if el is None:
+        return ""
+    text = el.text or ""
+    # ניקוי רווחים ותווי בקרה
+    import re
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
 
 def _first_text_by_candidates(node, candidates):
     # try children by localname order
@@ -104,11 +127,28 @@ def _findall_by_localname(root, name):
         if _strip_ns(elem.tag).lower() == lname:
             out.append(elem)
     return out
+def _xml_root_robust(xml_data):
+    # 1) קודם כל נסה bytes ישירות – שומר על הקידוד שהוכרז ב-XML
+    if isinstance(xml_data, (bytes, bytearray)):
+        try:
+            return ET.fromstring(xml_data)
+        except ET.ParseError:
+            pass
 
-def parse_price_xml(xml_bytes: bytes):
+    # 2) אם נכשל, נסה פענוח חכם – אבל בלי "להחליף" לקידוד אחר בטקסט עצמו
+    if isinstance(xml_data, (bytes, bytearray)):
+        txt = _decode_smart(xml_data)  # תחזירי str
+    else:
+        txt = xml_data
+
+    # אל תשני את ה-prolog ל-utf-8 כאן; פשוט תני ל-ET לקבל str
+    return ET.fromstring(txt)
+
+
+def parse_price_xml(xml_data):
     """Extract items from PriceFull-like XMLs into [{'product','price','unit'}, ...]."""
     items_out = []
-    root = ET.fromstring(xml_bytes)
+    root = _xml_root_robust(xml_data)
 
     item_nodes = []
     for name in ("Item", "Product", "ProductItem", "PriceItem"):
@@ -137,7 +177,9 @@ def parse_price_xml(xml_bytes: bytes):
 
         pprice = None
         if pprice_txt:
-            pprice_txt = pprice_txt.replace("₪", "").replace(",", "").strip()
+            # ניקוי מחיר - כל הסימנים הנפוצים של שקל
+            pprice_txt = pprice_txt.replace("₪", "").replace("ש\"ח", "").replace("שח", "")
+            pprice_txt = pprice_txt.replace(",", "").replace(" ", "").strip()
             try:
                 pprice = float(pprice_txt)
             except:
@@ -147,10 +189,10 @@ def parse_price_xml(xml_bytes: bytes):
             items_out.append({"product": pname, "price": pprice, "unit": punit})
     return items_out
 
-def parse_promo_xml(xml_bytes: bytes):
+def parse_promo_xml(xml_data):
     """Extract items from PromoFull-like XMLs."""
     items_out = []
-    root = ET.fromstring(xml_bytes)
+    root = _xml_root_robust(xml_data)
 
     promo_nodes = []
     for name in ("Promotion", "Promo", "Deal"):
@@ -178,7 +220,9 @@ def parse_promo_xml(xml_bytes: bytes):
 
         price = None
         if price_txt:
-            price_txt = price_txt.replace("₪", "").replace(",", "").strip()
+            # ניקוי מחיר
+            price_txt = price_txt.replace("₪", "").replace("ש\"ח", "").replace("שח", "")
+            price_txt = price_txt.replace(",", "").replace(" ", "").strip()
             try:
                 price = float(price_txt)
             except:
@@ -187,6 +231,7 @@ def parse_promo_xml(xml_bytes: bytes):
         if desc or price is not None:
             items_out.append({"product": desc, "price": price, "unit": unit})
     return items_out
+
 def extract_items_from_bytes(raw: bytes, kind: str):
     """
     kind: 'pricesFull' / 'promoFull'
@@ -215,7 +260,10 @@ def extract_items_from_bytes(raw: bytes, kind: str):
         logger.warning("No items extracted from XML candidates.")
     return []
 
-
+def _save_json_with_hebrew(data, filepath):
+    """שמירת JSON עם תמיכה נכונה בעברית"""
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 # ---------- Lambda handler ----------
 def lambda_handler(event, context=None):
     log.info(f"Received event: {json.dumps(event)[:500]}")
@@ -258,13 +306,18 @@ def lambda_handler(event, context=None):
                        or ("/tmp" if os.name != "nt" else tempfile.gettempdir()))
             os.makedirs(TMP_DIR, exist_ok=True)
             out_path = os.path.join(TMP_DIR, f"{safe_key}.json")
-            with open(out_path, "w", encoding="utf-8") as f:
-                json.dump(payload, f, ensure_ascii=False, indent=2)
+            
+            # שימוש בפונקציה החדשה לשמירת JSON
+            _save_json_with_hebrew(payload, out_path)
             log.info(f"Saved local JSON to {out_path}")
 
             # queue
             if _queue_enabled():
                 try:
+                    # שמירה לבדיקה ידנית
+                    with open("items_sample.json", "w", encoding="utf-8") as f:
+                        json.dump(payload, f, ensure_ascii=False, indent=2)
+
                     send_message(payload, outbox_path=str(out_path))
 
                 except Exception as qe:
@@ -319,13 +372,18 @@ def process_local_file(file_path: str):
     safe_ts = iso_ts.replace(":", "").replace("-", "").replace("T", "_").replace("Z", "")
     out_name = f"{provider}_{branch}_{type_}_{safe_ts}.json"
     out_path = outbox / out_name
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
+    
+    # שימוש בפונקציה החדשה לשמירת JSON
+    _save_json_with_hebrew(payload, out_path)
     log.info(f"[local] saved: {out_path}")
 
     # Queue
     if _queue_enabled():
         try:
+            # שמירה לבדיקה ידנית
+            with open("items_sample.json", "w", encoding="utf-8") as f:
+                json.dump(payload, f, ensure_ascii=False, indent=2)
+
             send_message(payload, outbox_path=str(out_path))
 
         except Exception as qe:
@@ -353,7 +411,7 @@ def _print_preview(items, max_items=5):
 def handler(event, context=None):
     """
     SQS trigger: עובר על Records, קורא את ה-body (JSON),
-    ואם זו 'מעטפה' גדולה עם outbox_path — קורא משם את הקובץ המלא ומדפיס דוגמית.
+    ואם זו 'מעטפה' גדולה עם outbox_path – קורא משם את הקובץ המלא ומדפיס דוגמית.
     """
     records = event.get("Records", [])
     for rec in records:
