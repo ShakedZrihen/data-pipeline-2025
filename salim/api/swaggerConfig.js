@@ -6,30 +6,7 @@ const options = {
     info: {
       title: 'Supermarket Product API',
       version: '1.0.0',
-      description: `
-        ## 🛒 Israeli Supermarket Price Comparison API
-        
-        Compare prices across major Israeli supermarkets including:
-        - **Rami Levi** - Generally offering competitive prices
-        - **Yohananof** - Premium supermarket chain
-        - **Carrefour** - International retail chain
-        
-        ### 🔍 Key Features:
-        - **Product Search** - Find products by name, category, or brand
-        - **Price Comparison** - Compare same products across different stores
-        - **Barcode Lookup** - Scan barcodes to find products instantly
-        - **Promotion Filtering** - Find products on sale
-        - **Live Data** - Real-time pricing information
-        
-        ### 📊 Sample Data:
-        - **3,000+ products** across all categories
-        - **12.2% products on sale** with promotional pricing
-        - **Foundation products** like milk, bread, eggs available in all stores
-        
-        ### 🏷️ Price Examples:
-        - Milk 1L: ₪5.34 (Rami Levi) vs ₪6.03 (Carrefour)
-        - White Bread: ₪4.21 (Rami Levi) vs ₪4.81 (Yohananof)
-      `,
+      description: 'Israeli Supermarket Price Comparison API. Compare prices across major Israeli supermarkets including Rami Levi, Yohananof, and Carrefour. Features product search, price comparison, barcode lookup, and promotion filtering.',
       contact: {
         name: 'API Support',
         email: 'support@example.com'

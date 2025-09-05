@@ -1,39 +1,40 @@
-# Data Pipeline - Docker Setup
+# Supermarket Data Pipeline
 
-This project implements a complete data pipeline for supermarket data crawling, extraction, enrichment, and API access using Docker containers.
-
-## Architecture
-
-The pipeline consists of the following services:
-
-1. **S3 Simulator (LocalStack)** - Stores crawled data files
-2. **RabbitMQ** - Message queue for data processing
-3. **PostgreSQL** - Database for enriched data
-4. **Crawler** - Python service that crawls supermarket websites
-5. **Extractor** - Python service that processes S3 files and sends to RabbitMQ
-6. **Enricher** - Python service that processes data from RabbitMQ and stores in database
-7. **API** - Node.js service that provides REST API access to the data
+A complete data pipeline for crawling, extracting, and enriching supermarket product data using Docker containers.
 
 ## Prerequisites
 
-- Docker Desktop installed and running
-- At least 4GB of available RAM
-- Internet connection for downloading Docker images
+- Docker and Docker Compose installed
+- At least 4GB RAM available
+- Internet connection for downloading data
 
 ## Quick Start
 
-### 1. Start the Pipeline
-
+### 1. Clone and Navigate
 ```bash
-# Navigate to the project directory
 cd salim/Project
+```
 
-# Start all services
+### 2. Start the Entire Pipeline
+```bash
 docker-compose up -d
 ```
 
-This will start all services in the background. You can monitor the logs with:
+This will start all services:
+- S3 Simulator (LocalStack)
+- RabbitMQ Server
+- PostgreSQL Database
+- Crawler Service
+- Extractor Service
+- Enricher Service
+- API Server
 
+### 3. Check Service Status
+```bash
+docker-compose ps
+```
+
+### 4. Monitor Pipeline Progress
 ```bash
 # View all logs
 docker-compose logs -f
@@ -45,193 +46,163 @@ docker-compose logs -f enricher
 docker-compose logs -f api
 ```
 
-### 2. Monitor Service Status
-
-```bash
-# Check service status
-docker-compose ps
-
-# Check service health
-docker-compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
-```
-
-## Service Details
-
-### S3 Simulator (LocalStack)
-- **Port**: 4566
-- **Purpose**: Simulates AWS S3 for local development
-- **Bucket**: `test-bucket` (created automatically)
-- **Access**: http://localhost:4566
-
-### RabbitMQ
-- **Ports**: 5672 (AMQP), 15672 (Management UI)
-- **Credentials**: admin/admin
-- **Management UI**: http://localhost:15672
-- **Purpose**: Message queue for data processing
-
-### PostgreSQL
-- **Port**: 5432
-- **Database**: postgres
-- **Credentials**: postgres/8HeXmxYnvy5xu
-- **Purpose**: Stores enriched supermarket data
-
-### Crawler Service
-- **Purpose**: Crawls supermarket websites and uploads data to S3
-- **Configs**: yohananof, osherad, ramilevi, tivtaam, keshet, doralon
-- **Output**: XML files uploaded to S3
-
-### Extractor Service
-- **Purpose**: Downloads files from S3, extracts them, and sends to RabbitMQ
-- **Input**: S3 files
-- **Output**: Messages to RabbitMQ queue
-
-### Enricher Service
-- **Purpose**: Processes messages from RabbitMQ and enriches data
-- **Input**: RabbitMQ messages
-- **Output**: Enriched data in PostgreSQL database
-
-### API Service
-- **Port**: 3001
-- **Purpose**: REST API for querying supermarket data
-- **Access**: http://localhost:3001
-- **Documentation**: http://localhost:3001/api-docs
-
 ## Pipeline Flow
 
-1. **Crawler** → Downloads data from supermarket websites → Uploads to S3
-2. **Extractor** → Downloads from S3 → Extracts files → Sends to RabbitMQ
-3. **Enricher** → Consumes from RabbitMQ → Processes data → Stores in PostgreSQL
-4. **API** → Queries PostgreSQL → Provides REST API access
+### Phase 1: Data Collection
+1. **Crawler** downloads supermarket data files (.gz format)
+2. **Crawler** uploads files to S3 bucket (`test-bucket`)
+3. **S3** stores the raw data files
 
-## Manual Execution (if needed)
+### Phase 2: Data Extraction
+1. **Extractor** downloads files from S3
+2. **Extractor** parses XML data and converts to JSON
+3. **Extractor** publishes data to RabbitMQ queues:
 
-If you need to run services manually or troubleshoot:
+### Phase 3: Data Enrichment
+1. **Enricher** consumes messages from RabbitMQ queues
+2. **Enricher** uses Claude API to extract brand information from Hebrew product names
+3. **Enricher** saves enriched data to PostgreSQL database
 
-### Run Crawler Only
+### Phase 4: Data Access
+1. **API Server** provides REST endpoints to query the data
+2. **PostgreSQL** stores all processed and enriched data
+
+## Monitoring the Pipeline
+
+### Check Service Status
 ```bash
-docker-compose up crawler
+# View all running services
+docker-compose ps
+
+# Check specific service
+docker-compose ps crawler
+docker-compose ps extractor
+docker-compose ps enricher
+docker-compose ps api
 ```
 
-### Run Extractor Only
+### View Service Logs
 ```bash
-docker-compose up extractor
+# Recent logs (last 50 lines)
+docker-compose logs --tail=50 enricher
+
+# Follow logs in real-time
+docker-compose logs -f enricher
+
+# View logs since specific time
+docker-compose logs --since="1h" enricher
 ```
 
-### Run Enricher Only
+### Check Data Progress
 ```bash
-docker-compose up enricher
+# Check S3 bucket contents
+docker exec s3-simulator awslocal s3 ls s3://test-bucket/
+
+# Check RabbitMQ queue status
+docker exec rabbitmq-server rabbitmq-diagnostics -q list_queues name messages
+
+# Check database table counts
+docker exec postgres-db psql -U postgres -d postgres -c "SELECT COUNT(*) FROM items;"
+docker exec postgres-db psql -U postgres -d postgres -c "SELECT COUNT(*) FROM stores;"
 ```
 
-### Run API Only
+## Testing the API
+
+Once the pipeline is running, test the API endpoints:
+
+### Health Check
 ```bash
-docker-compose up api
+curl http://localhost:3001/health
+```
+
+### Get Products
+```bash
+# Get all products
+curl http://localhost:3001/api/products
+
+# Get limited products
+curl http://localhost:3001/api/products?limit=10
+
+# Search products
+curl http://localhost:3001/api/products?q=bread
+```
+
+### Get Supermarkets
+```bash
+curl http://localhost:3001/api/supermarkets
+```
+
+### API Documentation
+```bash
+# Swagger UI
+curl http://localhost:3001/api-docs
+```
+
+## Stopping the Pipeline
+
+### Stop All Services
+```bash
+docker-compose down
+```
+
+### Stop Specific Service
+```bash
+docker-compose stop enricher
+```
+
+### Stop and Remove Volumes (Warning: Data Loss)
+```bash
+docker-compose down -v
 ```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Port conflicts**: Ensure ports 4566, 5672, 15672, 5432, and 3001 are available
-2. **Memory issues**: Increase Docker memory allocation in Docker Desktop settings
-3. **Service dependencies**: Services wait for dependencies to be healthy before starting
-
-### Reset Everything
-
+#### 1. S3 Bucket Not Created
 ```bash
-# Stop all services
-docker-compose down
+# Check if bucket exists
+docker exec s3-simulator awslocal s3 ls
 
-# Remove all containers, networks, and volumes
-docker-compose down -v
-
-# Rebuild and start
-docker-compose up --build -d
+# Create bucket manually if needed
+docker exec s3-simulator awslocal s3 mb s3://test-bucket
 ```
 
-### Check Logs
-
+#### 2. Enricher Not Processing Data
 ```bash
-# View logs for a specific service
-docker-compose logs [service-name]
+# Check enricher logs
+docker-compose logs enricher
 
-# Follow logs in real-time
-docker-compose logs -f [service-name]
-
-# View last 100 lines
-docker-compose logs --tail=100 [service-name]
+# Restart enricher service
+docker-compose restart enricher
 ```
 
-### Database Access
-
+#### 3. Database Connection Issues
 ```bash
-# Connect to PostgreSQL
-docker exec -it postgres-db psql -U postgres -d postgres
+# Check database health
+docker exec postgres-db psql -U postgres -d postgres -c "SELECT 1;"
 
-# List tables
-\dt
-
-# Query data
-SELECT * FROM products LIMIT 5;
+# Restart database
+docker-compose restart postgres
 ```
 
-## API Usage
-
-Once the pipeline is running, you can access the API:
-
-- **Base URL**: http://localhost:3001
-- **Swagger Docs**: http://localhost:3001/api-docs
-- **Health Check**: http://localhost:3001/health
-
-### Example API Calls
-
+#### 4. RabbitMQ Connection Issues
 ```bash
-# Get all products
-curl http://localhost:3001/api/products
+# Check RabbitMQ status
+docker exec rabbitmq-server rabbitmq-diagnostics ping
 
-# Get products by supermarket
-curl http://localhost:3001/api/products?supermarket=ramilevi
-
-# Get products on sale
-curl http://localhost:3001/api/products?on_sale=true
+# Restart RabbitMQ
+docker-compose restart rabbitmq
 ```
 
-## Stopping the Pipeline
-
+### Service Restart Commands
 ```bash
-# Stop all services
-docker-compose down
+# Restart entire pipeline
+docker-compose restart
 
-# Stop and remove volumes (data will be lost)
-docker-compose down -v
+# Restart specific service
+docker-compose restart crawler
+docker-compose restart extractor
+docker-compose restart enricher
+docker-compose restart api
 ```
-
-## Development
-
-### Adding New Supermarkets
-
-1. Add configuration in `crawler/configs/`
-2. Update `crawler/run.py` with new config name
-3. Rebuild crawler service: `docker-compose build crawler`
-
-### Modifying API
-
-1. Edit files in `api/` directory
-2. Rebuild API service: `docker-compose build api`
-3. Restart: `docker-compose up -d api`
-
-## Support
-
-If you encounter issues:
-
-1. Check service logs: `docker-compose logs [service-name]`
-2. Verify service health: `docker-compose ps`
-3. Check resource usage: `docker stats`
-4. Restart services: `docker-compose restart [service-name]`
-
-## Notes
-
-- The pipeline is designed to run completely in Docker containers
-- All services are configured to wait for dependencies before starting
-- Data persistence is handled through Docker volumes
-- The setup includes health checks for reliable service startup
-- Environment variables are configured in the docker-compose.yml file 
