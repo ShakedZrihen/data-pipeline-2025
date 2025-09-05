@@ -1,158 +1,97 @@
-from __future__ import annotations
-import os, json, time, logging
+import os
+import sys
+import json
+import time
+import logging
+import argparse
 import boto3
+from dotenv import load_dotenv
+load_dotenv()
 from botocore.config import Config
-from prometheus_client import Counter, start_http_server, Histogram
-from .validator import Envelope
-from .errors import normalize
-from .storage import connect, upsert_items
-from .db import send_to_dlq
-from .processor import enrich_item
-from .config import settings
-from time import perf_counter
 
-log = logging.getLogger("consumer")
-logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
+from .processor import process_raw_message, ProcessingError
+from .errors import send_to_dlq
 
-# --- Metrics ---
-MESSAGES_RECEIVED = Counter("messages_received_total", "Messages pulled from SQS")
-MESSAGES_PROCESSED = Counter("messages_processed_total", "Messages processed OK")
-MESSAGES_FAILED = Counter("messages_failed_total", "Messages failed")
-DB_UPSERTS = Counter("db_upserts_total", "Rows upserted to DB")
-MSG_TOTAL = Counter("messages_total", "messages processed", ["outcome"])
-PROC_LAT  = Histogram("message_process_seconds", "message processing time (s)")
+
+# ---------- logging ----------
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+logging.getLogger().handlers = [handler]
+logging.getLogger().setLevel(os.getenv("LOG_LEVEL", "INFO"))
+log = logging.getLogger("ingest_consumer")
+
 def _sqs():
-    cfg = Config(retries={'max_attempts': 3, 'mode': 'standard'})
-    return boto3.client("sqs",
-                        endpoint_url=os.getenv("AWS_ENDPOINT_URL"),
-                        region_name=os.getenv("AWS_REGION","us-east-1"),
-                        config=cfg)
-
-def run_sqs():
-    queue_url = os.getenv("SQS_QUEUE_URL")
-    if not queue_url:
-        raise RuntimeError("SQS_QUEUE_URL missing")
-
-    batch_size = int(os.getenv("BATCH_SIZE", "10"))
-    wait_time = int(os.getenv("WAIT_TIME_SECONDS", "10"))
-    visibility = int(os.getenv("VISIBILITY_TIMEOUT", "30"))
-
-    sqs = _sqs()
-    pg = connect(os.getenv("PG_DSN"))
-
-    log.info("Polling SQS...")
-    while True:
-        resp = sqs.receive_message(
-            QueueUrl=queue_url,
-            MaxNumberOfMessages=batch_size,
-            WaitTimeSeconds=wait_time,
-            VisibilityTimeout=visibility
-        )
-
-        messages = resp.get("Messages", [])
-        if not messages:
-            continue
-
-        MESSAGES_RECEIVED.inc(len(messages))
-
-        for msg in messages:
-            receipt = msg["ReceiptHandle"]
-            body = msg["Body"]
-            try:
-                env = Envelope.model_validate_json(body)
-                env = normalize(env)
-                payload = env.model_dump()
-                rows = upsert_items(pg, payload)
-                DB_UPSERTS.inc(rows)
-                MESSAGES_PROCESSED.inc()
-                sqs.delete_message(QueueUrl=queue_url, ReceiptHandle=receipt)
-            except Exception as e:
-                MESSAGES_FAILED.inc()
-                log.warning("Sent to DLQ: %s", e)
-                send_to_dlq(body, e, queue_name="extractor-results")
-                sqs.delete_message(QueueUrl=queue_url, ReceiptHandle=receipt)
-
-# -------- logs --------
-logging.basicConfig(level=getattr(logging, settings.log_level.upper(), logging.INFO),
-                    format='%(message)s')
-log = logging.getLogger("consumer")
-
-def logj(**kw): log.info(json.dumps(kw, ensure_ascii=False))
-
-def sqs():
     return boto3.client(
         "sqs",
-        region_name=settings.aws_region,
-        endpoint_url=settings.aws_endpoint_url
+        region_name=os.getenv("AWS_REGION", "us-east-1"),
+        endpoint_url=os.getenv("AWS_ENDPOINT_URL"),
+        config=Config(retries={'max_attempts': 3, 'mode': 'standard'})
     )
 
-def send_to_dlq(message_body: str, error: str):
-    if not settings.sqs_dlq_url: return
-    body = {"error": error, "message": {"raw": message_body}}
-    sqs().send_message(QueueUrl=settings.sqs_dlq_url, MessageBody=json.dumps(body, ensure_ascii=False))
+def _receive_batch(queue_url: str, max_batch: int, visibility_timeout: int = 30, wait_time: int = 10):
+    return _sqs().receive_message(
+        QueueUrl=queue_url,
+        MaxNumberOfMessages=max_batch,
+        VisibilityTimeout=visibility_timeout,
+        WaitTimeSeconds=wait_time,
+        MessageAttributeNames=['All'],
+        AttributeNames=['All'],
+    )
 
-@PROC_LAT.time()
-def process_batch(pg, msgs):
-    ok_receipts = []
-    rows = []
-    for m in msgs:
-        body_str = m["Body"]
-        try:
-            data = json.loads(body_str)
-        except Exception as e:
-            MSG_TOTAL.labels(outcome="json_invalid").inc()
-            send_to_dlq(body_str, f"validation/decode error: {e}")
-            logj(event="message_failed", reason="json_invalid", sample=body_str[:120])
-            continue
+def _delete_message(queue_url: str, receipt_handle: str):
+    _sqs().delete_message(QueueUrl=queue_url, ReceiptHandle=receipt_handle)
 
-        try:
-            env = Envelope.model_validate(data)
-        except Exception as e:
-            MSG_TOTAL.labels(outcome="schema_invalid").inc()
-            send_to_dlq(body_str, f"validation/schema error: {e}")
-            logj(event="message_failed", reason="schema_invalid")
-            continue
+def run_loop(once: bool = False):
+    queue_url = os.getenv("SQS_QUEUE_URL")
+    if not queue_url:
+        raise RuntimeError("Missing SQS_QUEUE_URL")
 
-        # enrich
-        for it in env.items:
-            rows.append(enrich_item(env.provider, env.branch, env.type, env.timestamp, it.model_dump()))
+    max_batch = int(os.getenv("SQS_MAX_BATCH", "10"))
+    visibility = int(os.getenv("VISIBILITY_TIMEOUT_SEC", "30"))
 
-        ok_receipts.append({"Id": m["MessageId"], "ReceiptHandle": m["ReceiptHandle"]})
+    log.info("Consumer started. queue=%s batch=%s", queue_url, max_batch)
 
-    if rows:
-        n = upsert_items(pg, rows)
-        MSG_TOTAL.labels(outcome="ok").inc(len(rows))
-        logj(event="db_upsert", rows=n)
-
-    if ok_receipts:
-        sqs().delete_message_batch(QueueUrl=settings.sqs_queue_url, Entries=ok_receipts)
-        logj(event="deleted_from_sqs", count=len(ok_receipts))
-
-def run():
-    start_http_server(settings.metrics_port)
-    logj(event="metrics_listen", url=f"http://localhost:{settings.metrics_port}/metrics")
-    pg = connect(settings.pg_dsn)
-    client = sqs()
     while True:
-        t0 = perf_counter()
-        resp = client.receive_message(
-            QueueUrl=settings.sqs_queue_url,
-            MaxNumberOfMessages=settings.sqs_max_batch,
-            WaitTimeSeconds=10,
-            VisibilityTimeout=30
-        )
-        msgs = resp.get("Messages", [])
-        if not msgs:
-            time.sleep(0.5); continue
-        process_batch(pg, msgs)
-        logj(event="batch_done", took_ms=int((perf_counter()-t0)*1000), size=len(msgs))
+        resp = _receive_batch(queue_url, max_batch, visibility_timeout=visibility)
+        messages = resp.get("Messages", [])
+        if not messages:
+            if once:
+                log.info("No messages; exiting (once mode).")
+                return
+            time.sleep(1)
+            continue
+
+        log.info("Got %d messages", len(messages))
+
+        for m in messages:
+            body = m.get("Body", "")
+            rh = m.get("ReceiptHandle")
+
+            try:
+                parsed = process_raw_message(body)
+                preview_items = parsed.get("items_sample") or parsed.get("items") or []
+                preview_items = preview_items[:3]
+                log.info("MSG provider=%s branch=%s type=%s ts=%s items_total=%s",
+                         parsed.get("provider"), parsed.get("branch"),
+                         parsed.get("type"), parsed.get("timestamp"),
+                         parsed.get("items_total", len(parsed.get("items", []))))
+                log.info("sample: %s", json.dumps(preview_items, ensure_ascii=False))
+                _delete_message(queue_url, rh)
+            except ProcessingError as e:
+                log.warning("ProcessingError: %s", e)
+                send_to_dlq(body, str(e))
+                _delete_message(queue_url, rh)
+            except Exception as e:
+                log.error("Unexpected error: %s", e, exc_info=True)
+
+        if once:
+            return
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--once", action="store_true", help="Receive one poll and exit")
+    args = parser.parse_args()
+    run_loop(once=args.once)
 
 if __name__ == "__main__":
-    run()
-def main():
-    port = int(os.getenv("METRICS_PORT", "8000"))
-    start_http_server(port)
-    log.info("Metrics at http://localhost:%d/metrics", port)
-    run_sqs()
-
-
+    main()
