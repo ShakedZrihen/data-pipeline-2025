@@ -104,6 +104,17 @@ def _normalize_unit(unit_of_measure: Optional[str], is_weighted: Optional[bool])
 # ---------- PRICES ----------
 def _parse_prices_items(root: ET.Element) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
+    try:
+        root = ET.fromstring(xml_text)
+    except Exception as e:
+        print("XML parse error:", e)
+        return items
+    
+    # Extract StoreId before processing items
+    store_id = _text(_find(root, "StoreId"))
+
+    # Find <Items>...</Items> and iterate its direct <Item> children (if present);
+    # otherwise, fallback to scanning all descendants named Item.
     items_container = _find(root, "Items")
     candidates: List[ET.Element] = []
     if items_container is not None:
@@ -147,7 +158,8 @@ def _parse_prices_items(root: ET.Element) -> List[Dict[str, Any]]:
                 "item_id": itemid,
                 "updated_at": upd,
             })
-    return items
+
+    return {"items": items, "store_id": store_id}
 
 # ---------- PROMOS ----------
 def _parse_promotions_items(root: ET.Element) -> List[Dict[str, Any]]:
