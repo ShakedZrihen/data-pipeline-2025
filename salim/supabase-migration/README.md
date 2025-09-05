@@ -1,6 +1,6 @@
 # Supabase Database Migrations
 
-This directory contains PostgreSQL migration files for the supermarket data pipeline.
+This directory contains PostgreSQL migration files
 
 ## Files
 
