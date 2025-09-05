@@ -8,11 +8,9 @@ router = APIRouter(prefix="/products", tags=["products"])
 @router.get("", response_model=List[ProductResponse])
 def search_products(
     q: str | None = Query(None, description="Filter by product name "),
-    promo: bool | None = Query(None, description="Only promo items"),
+    promo: bool | None = Query(None, description="Only promo items (bool)"),
     min_price: float | None = None,
     max_price: float | None = None,
-    chain_id: str | None = Query(None, description="Filter by supermarket chain_id"),
-    store_id: str | None = None,
     limit: int = 100
 ):
     where = []
@@ -34,14 +32,6 @@ def search_products(
     if max_price is not None:
         where.append("COALESCE(ic.promo_price, ic.regular_price) <= %s")
         params.append(max_price)
-
-    if chain_id:
-        where.append("ic.chain_id = %s")
-        params.append(chain_id)
-
-    if store_id:
-        where.append("ic.store_id = %s")
-        params.append(store_id)
 
     sql = f"""
         SELECT
