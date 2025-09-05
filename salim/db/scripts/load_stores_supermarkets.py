@@ -84,13 +84,14 @@ def main():
                 with conn.cursor() as cur:
                     for store_id, store_name, address, city in stores_rows:
                         cur.execute("""
-                            INSERT INTO stores (store_id, store_name, address, city)
-                            VALUES (%s, %s, %s, %s)
+                            INSERT INTO stores (store_id, chain_id, store_name, address, city)
+                            VALUES (%s, %s, %s, %s, %s)
                             ON CONFLICT (store_id) DO UPDATE
-                               SET store_name = EXCLUDED.store_name,
-                                   address    = EXCLUDED.address,
-                                   city       = EXCLUDED.city
-                        """, (store_id, store_name, address, city))
+                            SET store_name = EXCLUDED.store_name,
+                                address    = EXCLUDED.address,
+                                city       = EXCLUDED.city
+                        """, (store_id, chain_id, store_name, address, city))
+
 
                 conn.commit()
                 print(f"[OK] {chain_dir.name} -> {chain_id} / {chain_name} | {len(stores_rows)} stores")
