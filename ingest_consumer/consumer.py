@@ -4,10 +4,10 @@ import boto3
 from botocore.config import Config
 from prometheus_client import Counter, start_http_server, Histogram
 from .validator import Envelope
-from .normalizer import normalize
+from .errors import normalize
 from .storage import connect, upsert_items
-from .dlq import send_to_dlq
-from .enrich import enrich_item
+from .db import send_to_dlq
+from .processor import enrich_item
 from .config import settings
 from time import perf_counter
 

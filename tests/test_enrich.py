@@ -1,4 +1,4 @@
-from ingest_consumer.enrich import enrich_item
+from ingest_consumer.processor import enrich_item
 from datetime import datetime, timezone
 
 def test_enrich_basic():
