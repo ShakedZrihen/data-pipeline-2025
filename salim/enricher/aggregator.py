@@ -23,7 +23,6 @@ class Aggregator:
         pathlib.Path(self.out_dir).mkdir(parents=True, exist_ok=True)
 
     def _group_key(self, p: Dict[str, Any]) -> str:
-        # Prefer timestamp for safety (avoid merging different runs); fall back to source_key; finally to just triplet.
         provider = p.get("provider", "")
         branch   = p.get("branch", "")
         typ      = p.get("type", "")
@@ -51,24 +50,21 @@ class Aggregator:
                 "source_key": payload.get("source_key", ""),
                 "items": [],
                 "parts_expected": int(payload["parts"]) if str(payload.get("parts", "")).isdigit() else None,
-                "parts_seen": set(),   # {1,2,3,...}
+                "parts_seen": set(),   
                 "first_seen": time.time(),
             }
             self.groups[k] = g
 
-        # merge items
         items = payload.get("items") or []
         if isinstance(items, list):
             g["items"].extend(items)
 
-        # parts bookkeeping (optional)
         part = payload.get("part")
         if str(part).isdigit():
             g["parts_seen"].add(int(part))
         if g["parts_expected"] is None and str(payload.get("parts", "")).isdigit():
             g["parts_expected"] = int(payload["parts"])
 
-        # flush immediately if we know we've got everything
         if g["parts_expected"] and len(g["parts_seen"]) >= g["parts_expected"]:
             return self._flush_key(k)
 

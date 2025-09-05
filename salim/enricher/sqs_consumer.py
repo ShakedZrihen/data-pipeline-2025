@@ -25,7 +25,7 @@ class SQSConsumer:
 
         self.wait_time_seconds = min(
             int(os.getenv("SQS_WAIT_TIME_SECONDS", "10")), 20
-        )  # SQS max 20
+        )  
         self.max_messages = max(1, min(int(os.getenv("SQS_MAX_MESSAGES", "10")), 10))
         self.visibility_timeout = int(os.getenv("SQS_VISIBILITY_TIMEOUT", "60"))
         self.empty_sleep = float(os.getenv("SQS_EMPTY_SLEEP", "2"))
@@ -38,12 +38,11 @@ class SQSConsumer:
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", "test"),
         )
 
-        # If user gave a URL, use it. If they gave a name, resolve to URL (no creation).
         self.queue_url = self.queue_spec if "://" in self.queue_spec else None
         self.queue_name = self._queue_name_from_spec(self.queue_spec)
 
         if not self.queue_url:
-            self._try_resolve_url()  # ok if it fails; we'll keep retrying in poll()
+            self._try_resolve_url()  
 
         log.info(
             "SQS consumer init | endpoint=%s | spec=%s | url=%s",
@@ -74,7 +73,6 @@ class SQSConsumer:
         backoff = 1.0
 
         while True:
-            # If we don’t have a URL yet (only a name), keep trying to resolve.
             if not self.queue_url:
                 if self._try_resolve_url():
                     backoff = 1.0
@@ -122,7 +120,6 @@ class SQSConsumer:
                     "QueueDoesNotExist",
                     "InvalidAddress",
                 ):
-                    # Queue was not created yet or was deleted. Reset URL & wait.
                     log.warning("Queue not available (%s). Will wait and retry…", code)
                     self.queue_url = None
                     time.sleep(min(backoff, 30))

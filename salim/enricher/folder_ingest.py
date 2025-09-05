@@ -20,13 +20,10 @@ def _read_json(path: Path) -> Dict[str, Any]:
             return json.load(f)
 
 def main():
-    ap = argparse.ArgumentParser(description="Ingest saved payload files into Postgres")
-    ap.add_argument("--dir", default=os.getenv("MERGED_DIR", "./out"),
-                    help="Base directory to scan (default: ./out or $MERGED_DIR)")
-    ap.add_argument("--pattern", action="append",
-                    help="Glob pattern(s) to include (default: **/*.json and **/*.json.gz)")
-    ap.add_argument("--stop-on-error", action="store_true",
-                    help="Stop on first file error (default: continue)")
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dir", default=os.getenv("MERGED_DIR", "./out"))
+    ap.add_argument("--pattern", action="append")
+    ap.add_argument("--stop-on-error", action="store_true")
     args = ap.parse_args()
 
     base = Path(args.dir).resolve()

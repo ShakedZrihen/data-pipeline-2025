@@ -3,13 +3,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# install deps
 COPY enricher/requirements.txt enricher/requirements.txt
 RUN pip install --no-cache-dir -r enricher/requirements.txt
 
-# app code
 COPY enricher/ enricher/
 
-# run the loop
 WORKDIR /app/enricher
 CMD ["python", "-u", "enricher.py"]

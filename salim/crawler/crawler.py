@@ -72,8 +72,8 @@ class Crawler:
 
         rows = table_body.select(superMarket["table-row"])
 
-        latest_price_by_branch = {}  # branch -> (row, dt)
-        latest_promo_by_branch = {}  # branch -> (row, dt)
+        latest_price_by_branch = {}  
+        latest_promo_by_branch = {}  
 
         for row in rows:
             name_el = row.select_one(superMarket["name-selector"])
@@ -104,7 +104,7 @@ class Crawler:
         if not candidate_branches:
             return []
 
-        # Rank by recency (max of price_dt/promo_dt)
+        # Rank by recency 
         ranked = []
         for b in candidate_branches:
             p_row, p_dt = latest_price_by_branch[b]
@@ -140,7 +140,6 @@ class Crawler:
                 if val:
                     return val
 
-        # Fallback: parse from the name field (e.g., based on filename pattern)
         raw = ""
         name_sel = superMarket.get("name-selector")
         if name_sel:
@@ -198,17 +197,15 @@ class Crawler:
                 EC.presence_of_element_located((By.CSS_SELECTOR, superMarket["download-button"]))
             )
 
-        # Timestamps per branch (already parsed)
         price_ts = bp["price_dt"].strftime("%Y%m%d_%H%M%S")
         promo_ts = bp["promo_dt"].strftime("%Y%m%d_%H%M%S")
 
         superMarket_name = superMarket.get("name", "default")
         branch_fs = branch if branch.isdigit() else branch_id(branch)
 
-        # Re-sync cookies just in case
+        # Re-sync cookies 
         self.driver_manager.sync_cookies(self._req_sess, url=self.driver.current_url)
 
-        # Collect download buttons (price + promo)
         download_buttons = []
         for row_el in (sel_price_row, sel_promo_row):
             btns = row_el.find_elements(By.CSS_SELECTOR, superMarket["download-button"])
@@ -220,7 +217,6 @@ class Crawler:
                     btns = []
             download_buttons.extend(btns)
 
-        # Download both files, name by type + per-branch timestamp
         for btn in download_buttons:
             onclick = btn.get_attribute("onclick") or ""
             m = re.search(r"Download\('([^']+)'\)", onclick)
@@ -238,7 +234,6 @@ class Crawler:
             elif base_lower.startswith("promo"):
                 prefix, ts = "promo", promo_ts
             else:
-                # default to price_ts so both files stay aligned, but mark as "file"
                 prefix, ts = "file", price_ts
 
             filename = f"{prefix}_{ts}{ext}"
@@ -275,6 +270,6 @@ class Crawler:
                 print(f"{filename} not available, skipping.")
                 continue
 
-            # Upload to S3 (one upload per file; still only the latest per branch)
+            # Upload to S3 
             s3_key = f"{superMarket_name}/{branch_fs}/{filename}".replace("\\", "/")
             self.s3.upload_file_from_path(out_path, s3_key)

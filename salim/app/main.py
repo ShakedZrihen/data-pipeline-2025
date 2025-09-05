@@ -7,16 +7,13 @@ from db.db import get_conn
 import uvicorn
 
 app = FastAPI(
-    title="Salim API - Food Management System",
-    description="Application for managing food data, prices and promotions",
-    version="1.0.0",
+    title="Our swagger to query",
     docs_url="/docs",
-    redoc_url="/redoc",
     openapi_tags=[
-        {"name": "supermarkets", "description": "Supermarket (chain) directory & chain-level queries"},
-        {"name": "stores", "description": "Physical store locations"},
-        {"name": "products", "description": "Product search and price comparison"},
-        {"name": "meta", "description": "Service metadata and health"},
+        {"name": "supermarkets", "description": "Supermarkets"},
+        {"name": "stores", "description": "stores"},
+        {"name": "products", "description": "items"},
+        {"name": "meta", "description": "Meta"},
     ],
 )
 

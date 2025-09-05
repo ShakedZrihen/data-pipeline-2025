@@ -69,11 +69,9 @@ class Extractor:
         Download + decompress a .gz XML, parse items, and build a normalized payload.
         Returns a dict ready to JSON-serialize and send to SQS, or None on error/empty.
         """
-        # 1) download + streaming decompress to XML text
         try:
             print(f"Downloading and decompressing {key} ...")
             obj = self.s3.get_object(Bucket=self.bucket, Key=key)
-            # Stream directly from the HTTP body to gzip without reading all bytes first
             with gzip.GzipFile(fileobj=obj["Body"]) as gz:
                 xml_bytes = gz.read()
             items , store_id = parse_xml_items(xml_bytes)
@@ -81,23 +79,18 @@ class Extractor:
             print(f"Failed to read/decompress {key}: {e}")
             return None
 
-        # 2) parse XML into normalized items
         if not items:
             print(f"No items parsed from XML: {key}")
             return None
 
-        # 3) provider/branch/type from key
         parts = key.split("/")
         provider = parts[0] if len(parts) > 0 else ""
         branch   = parts[1] if len(parts) > 1 else ""
         fname    = parts[-1].lower() if parts else ""
-        # crude type by filename (keep your rule)
         ftype    = "pricesFull" if fname.startswith("price") else "promoFull"
 
-        # 4) timestamp preference: filename → max(item.updated_at) → now
         ts_iso = iso_from_filename(fname)
 
-        # If filename had no timestamp pattern, try max updated_at in items
         if not ts_iso or "T" not in ts_iso:
             def _parse_iso(s: Optional[str]) -> Optional[datetime]:
                 if not s:
@@ -118,7 +111,6 @@ class Extractor:
             else:
                 ts_iso = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
-        # 5) final payload
         data = {
             "provider": provider,
             "branch": branch,

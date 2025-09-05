@@ -32,7 +32,6 @@ class SQSProducer:
         if len(body.encode("utf-8")) <= SQS_LIMIT_BYTES:
             return self._send_body(body)
 
-        # Split by items
         base = dict(payload)
         items = base.pop("items", [])
         if not isinstance(items, list):

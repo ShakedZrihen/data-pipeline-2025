@@ -4,11 +4,9 @@ import re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-# All parsed datetimes will be timezone-aware in Israel time.
-JERUSALEM = ZoneInfo(os.getenv("TZ", "Asia/Jerusalem"))
+JERUSALEM = ZoneInfo(os.getenv("TZ"))
 
 # Relative expressions like:
-# "3 minutes ago", "about 2 weeks ago", "an hour ago", "A day ago", etc.
 _RELATIVE = re.compile(
     r"^(?:about|approximately|around|roughly)?\s*"
     r"(?P<qty>a|an|\d+)\s+"
@@ -17,7 +15,6 @@ _RELATIVE = re.compile(
 )
 
 # Absolute datetime: "HH:MM DD/MM/YYYY" or "DD/MM/YYYY HH:MM".
-# Also allows "-" as a separator and 2-digit years.
 _ABS_TIME_DATE = re.compile(
     r"^(?:"
     r"(?P<time1>\d{1,2}:\d{2})\s+(?P<day1>\d{1,2})[\/\-](?P<month1>\d{1,2})[\/\-](?P<year1>\d{2,4})"
@@ -73,8 +70,8 @@ def parse_relative_date(text: str) -> datetime | None:
     if unit.startswith("hour"):   return now - timedelta(hours=qty)
     if unit.startswith("day"):    return now - timedelta(days=qty)
     if unit.startswith("week"):   return now - timedelta(weeks=qty)
-    if unit.startswith("month"):  return now - timedelta(days=30 * qty)   # approx
-    if unit.startswith("year"):   return now - timedelta(days=365 * qty)  # approx
+    if unit.startswith("month"):  return now - timedelta(days=30 * qty)   
+    if unit.startswith("year"):   return now - timedelta(days=365 * qty)  
     return None
 
 def parse_date(text: str) -> datetime | None:

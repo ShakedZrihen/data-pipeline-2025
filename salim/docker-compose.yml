@@ -58,7 +58,7 @@ services:
     volumes:
       - localstack-data:/var/lib/localstack
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./gov_crawler/scripts/init-s3.sh:/etc/localstack/init/ready.d/00-init-s3.sh
+      - ./crawler/scripts/init-s3.sh:/etc/localstack/init/ready.d/00-init-s3.sh
       - ./extractor/scripts/init-sqs.sh:/etc/localstack/init/ready.d/01-init-sqs.sh
       - ./extractor/scripts/init-ddb.sh:/etc/localstack/init/ready.d/02-init-ddb.sh
     entrypoint:
@@ -100,7 +100,7 @@ services:
   crawler:
     build:
       context: .
-      dockerfile: gov_crawler/Dockerfile.crawler
+      dockerfile: crawler/Dockerfile.crawler
     environment:
       CRAWL_EVERY_MINUTES: "60"
       AWS_ACCESS_KEY_ID: test
