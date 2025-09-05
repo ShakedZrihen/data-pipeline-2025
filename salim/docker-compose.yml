@@ -18,7 +18,21 @@ services:
       timeout: 5s
       retries: 10
     networks: [app-net]
-
+  dbloader:
+    image: python:3.11-slim
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/salim_db
+    depends_on:
+      db: { condition: service_healthy }
+    volumes:
+      - ./db/scripts:/app/scripts:ro
+      - ./db/stores:/app/stores:ro
+      - ./db/utils:/app/utils:ro
+    command: >
+      sh -lc "pip install --no-cache-dir psycopg2-binary &&
+              python -u /app/scripts/load_stores_supermarkets.py --dir /app/stores"
+    restart: "no"
+    networks: [app-net]
   pgadmin:
     image: dpage/pgadmin4:8
     container_name: pgadmin
@@ -80,6 +94,7 @@ services:
     depends_on:
       db: { condition: service_healthy }
       localstack: { condition: service_healthy }
+      dbloader: { condition: service_completed_successfully }
     volumes:
       - ./app:/app/app
     healthcheck:
@@ -109,6 +124,7 @@ services:
     depends_on:
       db: { condition: service_healthy }
       localstack: { condition: service_healthy }
+      dbloader: { condition: service_completed_successfully }
     networks: [app-net]
 
   poller:
@@ -134,10 +150,10 @@ services:
     volumes:
       - ./extractor:/app/extractor
     depends_on:
-      localstack:
-        condition: service_healthy
-    networks:
-      - app-net
+      db: { condition: service_healthy }
+      localstack: { condition: service_healthy }
+      dbloader: { condition: service_completed_successfully }
+    networks: [app-net]
 
   enricher:
     build:
@@ -160,8 +176,9 @@ services:
         "echo 'enricher: waiting 60s…'; sleep 60; python -u /app/enricher/enricher.py",
       ]
     depends_on:
-      localstack:
-        condition: service_healthy
+      db: { condition: service_healthy }
+      localstack: { condition: service_healthy }
+      dbloader: { condition: service_completed_successfully }
     networks: [app-net]
 
 networks:
