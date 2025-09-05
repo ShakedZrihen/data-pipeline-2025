@@ -3,6 +3,7 @@ import re
 import json
 import time
 import pathlib
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 def _slug(s: Optional[str]) -> str:
@@ -92,7 +93,7 @@ class Aggregator:
         dedup: Dict[str, Any] = {}
         others: List[Dict[str, Any]] = []
 
-        is_promo = (g["type"] or "").lower() == "promofull"
+        is_promo = (g["type"] or "").lower() == "promofull" 
 
         for it in g["items"]:
             if not isinstance(it, dict):
@@ -134,3 +135,10 @@ class Aggregator:
             json.dump(doc, f, ensure_ascii=False)
 
         return str(out_path)
+
+    def add_path(self, file_path: str) -> Optional[str]:
+        """Load a message from an inbox file and feed through the normal path."""
+        p = Path(file_path)
+        with p.open("r", encoding="utf-8") as f:
+            payload = json.load(f)
+        return self.add(payload)
