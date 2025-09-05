@@ -12,16 +12,14 @@ def init_s3():
     """Initialize S3 bucket"""
     print("Initializing S3...")
     
-    # Wait for LocalStack to be ready
     max_retries = 30
     retry_count = 0
     
     while retry_count < max_retries:
         try:
-            # Create S3 client - Use internal container network
             s3_client = boto3.client(
                 's3',
-                endpoint_url='http://s3:4566',  # Use internal container name
+                endpoint_url='http://localhost:4566',
                 aws_access_key_id='test',
                 aws_secret_access_key='test',
                 region_name='us-east-1'

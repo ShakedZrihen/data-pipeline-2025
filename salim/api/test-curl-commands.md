@@ -1,8 +1,8 @@
-# 🧪 API Testing with cURL Commands
+# API Testing with cURL Commands
 
 Use these cURL commands to test your Supermarket API endpoints manually.
 
-## 🏥 Health & Info Endpoints
+## Health & Info Endpoints
 
 ### Health Check
 ```bash
@@ -14,7 +14,7 @@ curl http://localhost:3001/health
 curl http://localhost:3001/
 ```
 
-## 🏪 Supermarkets Endpoints
+## Supermarkets Endpoints
 
 ### Get All Supermarkets
 ```bash
@@ -36,7 +36,7 @@ curl http://localhost:3001/api/supermarkets/1
 curl http://localhost:3001/api/supermarkets/1/products
 ```
 
-## 🔍 Products Endpoints
+## Products Endpoints
 
 ### Get All Products (with limit)
 ```bash
@@ -83,7 +83,7 @@ curl http://localhost:3001/api/products/barcode/7290112498892
 curl "http://localhost:3001/api/products?name=שוקולד&min_price=1&max_price=50&limit=5"
 ```
 
-## ⚠️ Error Handling Tests
+## Error Handling Tests
 
 ### Invalid Supermarket ID (should return 404)
 ```bash
@@ -95,7 +95,7 @@ curl http://localhost:3001/api/supermarkets/99999
 curl http://localhost:3001/api/nonexistent
 ```
 
-## 🎯 Advanced Testing
+## Advanced Testing
 
 ### Pretty Print JSON (with jq if available)
 ```bash
@@ -113,7 +113,7 @@ curl -H "Accept: application/json" http://localhost:3001/api/products
 for i in {1..10}; do curl http://localhost:3001/health; echo "Request $i"; done
 ```
 
-## 🚀 PowerShell Commands (Windows)
+## PowerShell Commands (Windows)
 
 ### Health Check
 ```powershell
@@ -130,7 +130,7 @@ Invoke-RestMethod -Uri "http://localhost:3001/api/supermarkets" -Method Get
 Invoke-RestMethod -Uri "http://localhost:3001/api/products?name=חלב" -Method Get
 ```
 
-## 📊 Expected Results
+## Expected Results
 
 ### Health Check Response
 ```json
@@ -167,7 +167,7 @@ Invoke-RestMethod -Uri "http://localhost:3001/api/products?name=חלב" -Method 
 ]
 ```
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### If you get "Connection refused":
 - Make sure your API server is running: `npm start`
@@ -180,12 +180,3 @@ Invoke-RestMethod -Uri "http://localhost:3001/api/products?name=חלב" -Method 
 ### If you get "500 Internal Server Error":
 - Check your database connection
 - Look at the server logs for errors
-
-## 🎉 Success Indicators
-
-✅ **All endpoints return 200 status**  
-✅ **JSON responses are properly formatted**  
-✅ **Data matches your database content**  
-✅ **Error handling works (404 for invalid routes)**  
-✅ **Filters and search work correctly**  
-✅ **Hebrew text displays properly**
