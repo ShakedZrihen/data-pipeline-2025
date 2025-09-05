@@ -8,6 +8,7 @@ router = APIRouter(prefix="/products", tags=["products"])
 @router.get("", response_model=List[ProductResponse])
 def search_products(
     q: str | None = Query(None, description="Filter by product name "),
+    brand: str | None = Query(None, description="Filter by brand name"),
     promo: bool | None = Query(None, description="Only promo items (bool)"),
     min_price: float | None = None,
     max_price: float | None = None,
@@ -20,6 +21,10 @@ def search_products(
         where.append("(ic.name ILIKE %s OR ic.brand ILIKE %s OR ic.code ILIKE %s)")
         like = f"%{q}%"
         params += [like, like, like]
+
+    if brand:
+        where.append("ic.brand ILIKE %s")
+        params.append(f"%{brand}%")
 
     if promo is True:
         where.append("ic.promo_price IS NOT NULL")

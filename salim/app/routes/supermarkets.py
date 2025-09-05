@@ -24,7 +24,7 @@ def get_supermarket(chain_id: str):
 @router.get("/{chain_id}/stores", response_model=List[StoreResponse])
 def list_stores_for_supermarket(chain_id: str):
     with get_conn() as conn, conn.cursor() as cur:
-        cur.execute("""SELECT store_id, store_name, address, city FROM stores WHERE chain_id = %s ORDER BY store_name""", (chain_id,))
+        cur.execute("""SELECT store_id, chain_id, store_name, address, city FROM stores WHERE chain_id = %s ORDER BY store_name""", (chain_id,))
         rows = cur.fetchall()
     return rows
 

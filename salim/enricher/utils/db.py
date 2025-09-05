@@ -133,9 +133,13 @@ def ensure_schema() -> None:
 
 def fetch_chain_id(conn, provider: str) -> str | None:
     with conn.cursor() as cur:
-        cur.execute("SELECT chain_id FROM supermarkets WHERE LOWER(chain_name) = %s", (provider,))
+        cur.execute(
+            "SELECT chain_id FROM supermarkets WHERE LOWER(chain_name) = %s",
+            (provider,) 
+        )
         row = cur.fetchone()
-        return row["chain_id"] if row else None
+        return row[0] if row else None
+
 
 def upsert_supermarket(conn, chain_id: str, chain_name: str):
     print("upsert supermarket called with those params: ", locals())
