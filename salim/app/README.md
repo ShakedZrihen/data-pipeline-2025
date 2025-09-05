@@ -57,8 +57,14 @@ curl "https://olqgdfdgye.execute-api.eu-west-1.amazonaws.com/prod/api/v1/product
 
 ### 🏥 Health Routes
 
-- **`GET https://olqgdfdgye.execute-api.eu-west-1.amazonaws.com/prod/api/v1/health`** - Basic health check
+- **`GET https://olqgdfdgye.execute-api.eu-west-1.amazonaws.com/prod/api/v1/health/`** - Basic health check
 - **`GET https://olqgdfdgye.execute-api.eu-west-1.amazonaws.com/prod/api/v1/health/detailed`** - Detailed health check
+
+**Examples:**
+```bash
+curl https://olqgdfdgye.execute-api.eu-west-1.amazonaws.com/prod/api/v1/health/
+curl https://olqgdfdgye.execute-api.eu-west-1.amazonaws.com/prod/api/v1/health/detailed
+```
 
 ## Local Development
 
