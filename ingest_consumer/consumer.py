@@ -6,12 +6,11 @@ import logging
 import argparse
 import boto3
 from dotenv import load_dotenv
-load_dotenv()
 from botocore.config import Config
-
+from .storage_sqlite import save_message as sqlite_save
 from .processor import process_raw_message, ProcessingError
 from .errors import send_to_dlq
-
+load_dotenv()
 
 # ---------- logging ----------
 handler = logging.StreamHandler(sys.stdout)
@@ -19,6 +18,7 @@ handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
 logging.getLogger().handlers = [handler]
 logging.getLogger().setLevel(os.getenv("LOG_LEVEL", "INFO"))
 log = logging.getLogger("ingest_consumer")
+logger = logging.getLogger("ingest_consumer")
 
 def _sqs():
     return boto3.client(
@@ -69,6 +69,20 @@ def run_loop(once: bool = False):
 
             try:
                 parsed = process_raw_message(body)
+                logger.info(
+                    "MSG provider=%s branch=%s type=%s ts=%s items_total=%s",
+                    parsed["provider"], parsed["branch"], parsed["type"], parsed["timestamp"], parsed["items_total"]
+                )
+                sample = parsed.get("items_sample", [])[:3]
+                if sample:
+                    logger.info("sample: %s", sample)
+                db_path = os.getenv("INGEST_SQLITE_PATH")
+                if db_path:
+                    try:
+                        sqlite_save(db_path, parsed)
+                        logger.info("Saved message to SQLite: %s", db_path)
+                    except Exception as e:
+                        logger.warning("Failed to save to SQLite: %s", e)
                 preview_items = parsed.get("items_sample") or parsed.get("items") or []
                 preview_items = preview_items[:3]
                 log.info("MSG provider=%s branch=%s type=%s ts=%s items_total=%s",

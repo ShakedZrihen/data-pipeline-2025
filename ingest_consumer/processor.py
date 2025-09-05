@@ -1,6 +1,7 @@
 import json
 import logging
-
+from .validator import validate_message, ValidationError
+from .normalizer import normalize
 log = logging.getLogger(__name__)
 
 class ProcessingError(Exception):
@@ -12,10 +13,9 @@ def process_raw_message(body_str: str) -> dict:
         msg = json.loads(body_str)
     except Exception as e:
         raise ProcessingError(f"Body is not JSON: {e}")
-
-    required = ["provider", "branch", "type", "timestamp"]
-    missing = [k for k in required if k not in msg]
-    if missing:
-        raise ProcessingError(f"Missing required fields: {missing}")
-
-    return msg
+    try:
+        validate_message(msg)
+        msg = normalize(msg)
+        return msg
+    except ValidationError as e:
+        raise ProcessingError(str(e))
