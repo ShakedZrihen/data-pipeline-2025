@@ -313,7 +313,7 @@ class SupermarketCrawler:
             self.close()
             return []
 
-        # Check for fast test mode
+        
         fast_test_mode = os.environ.get('FAST_TEST_MODE', 'false').lower() == 'true'
         if fast_test_mode:
             fast_test_limit = int(os.environ.get('FAST_TEST_FILE_LIMIT', '2'))

@@ -30,6 +30,7 @@ def main():
         print("Run without arguments to crawl all configs")
         sys.exit(1)
     
+    
     total_files = 0
     
     for config_name in configs_to_run:
