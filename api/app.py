@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, APIRouter
 from typing import List, Optional, Any
 from .db import get_conn
 
@@ -64,3 +64,30 @@ def search_products(q: str = Query(..., min_length=2), limit: int = 20):
             (like, limit),
         ).fetchall()
         return [dict(r) for r in rows]
+@app.get("/enriched/latest/{provider}/{branch}")
+def enriched_latest(provider: str, branch: str, limit: int = 50):
+    with get_conn() as con:
+        m = con.execute(
+            "SELECT id, ts_iso FROM messages "
+            "WHERE provider=? AND branch=? "
+            "ORDER BY ts_iso DESC, id DESC LIMIT 1",
+            (provider, branch),
+        ).fetchone()
+        if not m:
+            raise HTTPException(404, detail="no data for provider/branch")
+
+        rows = con.execute(
+            "SELECT product_name, price, unit_std, price_per_unit, product_raw "
+            "FROM enriched_items WHERE message_id=? LIMIT ?",
+            (m["id"], limit),
+        ).fetchall()
+
+        if not rows:
+            return {"note": "no enriched rows yet for this message. run tools/run_enricher.py"}
+
+        return {
+            "provider": provider,
+            "branch": branch,
+            "timestamp": m["ts_iso"],
+            "items": [dict(r) for r in rows],
+        }
