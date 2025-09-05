@@ -220,12 +220,12 @@ class SupermarketCrawler:
         self.browser_manager.close()
 
 
-def main():
-    """Main function"""
+def run_crawl_cycle():
+    """Run a single crawl cycle for all supermarkets"""
     crawler = SupermarketCrawler()
     
     try:
-        print("Starting supermarket crawler...")
+        print("Starting supermarket crawler cycle...")
 
         all_results = {}
         
@@ -264,10 +264,49 @@ def main():
         return all_results
         
     except Exception as e:
-        print(f"Main error: {e}")
+        print(f"Crawl cycle error: {e}")
         return None
     finally:
         crawler.close()
+
+
+def main():
+    """Main function - runs crawler continuously every minute"""
+    print("Starting continuous supermarket crawler...")
+    print("Press Ctrl+C to stop")
+    
+    cycle_count = 1
+    
+    try:
+        while True:
+            print(f"\n{'='*80}")
+            print(f"STARTING CRAWL CYCLE #{cycle_count}")
+            print(f"{'='*80}")
+            
+            cycle_start_time = time.time()
+            
+            # Run the crawl cycle
+            results = run_crawl_cycle()
+            
+            cycle_end_time = time.time()
+            cycle_duration = cycle_end_time - cycle_start_time
+            
+            print(f"\n{'='*80}")
+            print(f"CYCLE #{cycle_count} COMPLETED in {cycle_duration:.1f} seconds")
+            print(f"{'='*80}")
+            
+            # Wait for 1 hour before next cycle
+            print("Waiting 3600 seconds (1 hour) before next cycle...")
+            time.sleep(3600)
+            
+            cycle_count += 1
+            
+    except KeyboardInterrupt:
+        print(f"\n\nCrawler stopped by user after {cycle_count - 1} cycles")
+        print("Goodbye!")
+    except Exception as e:
+        print(f"\nUnexpected error in main loop: {e}")
+        print("Crawler stopped")
 
 
 if __name__ == "__main__":

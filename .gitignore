@@ -10,3 +10,13 @@ venv
 node_modules
 build
 package-lock.json
+
+# Lambda deployment packages
+*.zip
+*.tar.gz
+lambda-package/
+**/docker-build/lambda-package/
+
+# Python build artifacts  
+*.pyc
+**/__pycache__/

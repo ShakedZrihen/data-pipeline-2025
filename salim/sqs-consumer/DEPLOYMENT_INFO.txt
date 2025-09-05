@@ -1,0 +1,29 @@
+# SQS Consumer Lambda Deployment Package with OpenAI Enrichment
+# Created: 05/09/2025 
+# 
+# Docker Build Process:
+# Base Image: public.ecr.aws/lambda/python:3.11 (AWS Lambda Python runtime)
+# Build Process: Containerized dependency installation for Linux compatibility
+# Package Size: ~23MB (includes OpenAI, boto3, requests + all dependencies)
+#
+# Files included:
+# - consumer_simple.py (main Lambda handler with DLQ integration)
+# - openai_enricher.py (batch processing with improved JSON parsing)
+# - All Python dependencies (requests, boto3, openai>=1.10.0, etc.)
+#
+# Environment Variables Required in AWS Lambda:
+# - SUPABASE_URL=
+# - SUPABASE_SERVICE_ROLE_KEY=
+# - OPENAI_API_KEY=
+#
+# Lambda Configuration:
+# Handler: consumer_simple.lambda_handler
+# Runtime: Python 3.11
+# Timeout: 10 minutes 
+# Memory: 1024 MB
+#
+# Features:
+# - OpenAI batch enrichment (50 items per API call)
+# - Dead Letter Queue integration for failed batches
+# - Improved JSON parsing for OpenAI markdown responses
+# - Docker containerization for reproducible Linux builds 

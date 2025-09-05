@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # Main FastAPI application
+  api:
+    build: 
+      context: .
+      dockerfile: salim/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    volumes:
+      - ./salim/app:/app
+    depends_on:
+      - postgres
+    networks:
+      - data-pipeline-network
+
+  # PostgreSQL database (for local development)
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=supermarket_data
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./salim/supabase-migration/migrations:/docker-entrypoint-initdb.d/
+    networks:
+      - data-pipeline-network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - data-pipeline-network
+
+  # Web scraping service
+  crawler:
+    build:
+      context: salim/crawlers
+      dockerfile: Dockerfile
+    environment:
+      - CRAWLER_INTERVAL=3600  # 1 hour
+      - OUTPUT_DIR=/data/downloads
+    volumes:
+      - crawler_data:/data/downloads
+      - ./salim/crawlers:/app
+    depends_on:
+      - api
+    networks:
+      - data-pipeline-network
+    restart: unless-stopped
+
+  # Data extractor service  
+  extractor:
+    build:
+      context: salim/extractor
+      dockerfile: Dockerfile
+    environment:
+      - SQS_QUEUE_URL=${SQS_QUEUE_URL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+    volumes:
+      - crawler_data:/data/downloads:ro
+      - ./salim/extractor:/app
+    depends_on:
+      - crawler
+    networks:
+      - data-pipeline-network
+    restart: unless-stopped
+
+  # Lambda simulation (for local testing)
+  sqs-consumer-local:
+    build:
+      context: salim/sqs-consumer/docker-build
+      dockerfile: Dockerfile.local  # Different from AWS Lambda Dockerfile
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SQS_QUEUE_URL=${SQS_QUEUE_URL}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - data-pipeline-network
+
+volumes:
+  postgres_data:
+  crawler_data:
+
+networks:
+  data-pipeline-network:
+    driver: bridge
