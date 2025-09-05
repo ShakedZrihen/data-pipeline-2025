@@ -1,51 +1,46 @@
-from __future__ import annotations
 from typing import Any, Dict, List
-from datetime import datetime, timezone
-
-_UNIT_MAP = {
-    "100 גרם": "100g",
-    "100 ג": "100g",
-    "100g": "100g",
-    "גרם 100": "100g",
-    "ליטר": "liter",
-    "liter": "liter",
-    "יחידה": "unit",
-    "unit": "unit",
-}
 
 def _norm_unit(u: str) -> str:
-    u = u.strip()
-    return _UNIT_MAP.get(u, u)
-
-def _norm_ts(ts: str) -> str:
-    try:
-        if ts.endswith("Z"):
-            dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-        else:
-            dt = datetime.fromisoformat(ts)
-        return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
-    except Exception:
-        return ts
+    u = u.strip().lower()
+    mapping = {
+        "100 גרם": "100g",
+        "100 gram": "100g",
+        "100 g": "100g",
+        "גרם": "g",
+        "ג": "g",
+        "ק\"ג": "kg",
+        "קג": "kg",
+        "kg": "kg",
+        "ליטר": "l",
+        "liter": "l",
+        "מ\"ל": "ml",
+        "מל": "ml",
+        "unit": "unit",
+        "יחידה": "unit",
+        "יח'": "unit",
+    }
+    return mapping.get(u, u)
 
 def normalize(msg: Dict[str, Any]) -> Dict[str, Any]:
-    out = dict(msg)
+    b = msg.get("branch")
+    msg["branch"] = str(b).strip() if b is not None else ""
 
-    out["branch"] = str(out["branch"]).strip()
+    t = msg.get("type", "")
+    msg["type"] = t.strip().lower()
 
-    out["timestamp"] = _norm_ts(out["timestamp"])
+    p = msg.get("provider", "")
+    msg["provider"] = p.strip()
 
-    if "items_total" not in out and isinstance(out.get("items_sample"), list):
-        out["items_total"] = len(out["items_sample"])
+    items: List[Dict[str, Any]] = []
+    for it in msg.get("items_sample", []):
+        name = (it.get("product") or "").strip()
+        price = float(it.get("price", 0))
+        unit = _norm_unit(str(it.get("unit") or ""))
 
-    if isinstance(out.get("items_sample"), list):
-        norm_items = []
-        for item in out["items_sample"]:
-            ni = dict(item)
-            if isinstance(ni.get("product"), str):
-                ni["product"] = ni["product"].strip()
-            if "unit" in ni and isinstance(ni["unit"], str):
-                ni["unit"] = _norm_unit(ni["unit"])
-            norm_items.append(ni)
-        out["items_sample"] = norm_items
+        if len(name) > 200:
+            name = name[:200].rstrip() + "…"
 
-    return out
+        items.append({"product": name, "price": price, "unit": unit})
+
+    msg["items_sample"] = items
+    return msg
