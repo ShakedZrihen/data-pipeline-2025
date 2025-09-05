@@ -2,12 +2,6 @@
 
 A complete data pipeline for crawling, extracting, and enriching supermarket product data using Docker containers.
 
-## Prerequisites
-
-- Docker and Docker Compose installed
-- At least 4GB RAM available
-- Internet connection for downloading data
-
 ## Quick Start
 
 ### 1. Clone and Navigate
@@ -19,15 +13,6 @@ cd salim/Project
 ```bash
 docker-compose up -d
 ```
-
-This will start all services:
-- S3 Simulator (LocalStack)
-- RabbitMQ Server
-- PostgreSQL Database
-- Crawler Service
-- Extractor Service
-- Enricher Service
-- API Server
 
 ### 3. Check Service Status
 ```bash
@@ -42,30 +27,9 @@ docker-compose logs -f
 # View specific service logs
 docker-compose logs -f crawler
 docker-compose logs -f extractor
-docker-compose logs -f enricher
+feat
 docker-compose logs -f api
 ```
-
-## Pipeline Flow
-
-### Phase 1: Data Collection
-1. **Crawler** downloads supermarket data files (.gz format)
-2. **Crawler** uploads files to S3 bucket (`test-bucket`)
-3. **S3** stores the raw data files
-
-### Phase 2: Data Extraction
-1. **Extractor** downloads files from S3
-2. **Extractor** parses XML data and converts to JSON
-3. **Extractor** publishes data to RabbitMQ queues:
-
-### Phase 3: Data Enrichment
-1. **Enricher** consumes messages from RabbitMQ queues
-2. **Enricher** uses Claude API to extract brand information from Hebrew product names
-3. **Enricher** saves enriched data to PostgreSQL database
-
-### Phase 4: Data Access
-1. **API Server** provides REST endpoints to query the data
-2. **PostgreSQL** stores all processed and enriched data
 
 ## Monitoring the Pipeline
 
@@ -104,38 +68,6 @@ docker exec rabbitmq-server rabbitmq-diagnostics -q list_queues name messages
 # Check database table counts
 docker exec postgres-db psql -U postgres -d postgres -c "SELECT COUNT(*) FROM items;"
 docker exec postgres-db psql -U postgres -d postgres -c "SELECT COUNT(*) FROM stores;"
-```
-
-## Testing the API
-
-Once the pipeline is running, test the API endpoints:
-
-### Health Check
-```bash
-curl http://localhost:3001/health
-```
-
-### Get Products
-```bash
-# Get all products
-curl http://localhost:3001/api/products
-
-# Get limited products
-curl http://localhost:3001/api/products?limit=10
-
-# Search products
-curl http://localhost:3001/api/products?q=bread
-```
-
-### Get Supermarkets
-```bash
-curl http://localhost:3001/api/supermarkets
-```
-
-### API Documentation
-```bash
-# Swagger UI
-curl http://localhost:3001/api-docs
 ```
 
 ## Stopping the Pipeline
