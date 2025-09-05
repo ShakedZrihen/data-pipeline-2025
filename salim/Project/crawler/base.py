@@ -64,10 +64,26 @@ class SupermarketCrawler:
 
     def _init_driver(self) -> webdriver.Chrome:
         """
-        Initializes a headless Chrome WebDriver using webdriver-manager
+        Initializes a headless WebDriver using webdriver-manager
+        Detects architecture and uses appropriate browser (Chrome/Chromium)
         """
         if not self.driver:
             print("Initializing Selenium WebDriver...")
+            
+            # Detect architecture
+            import platform
+            import subprocess
+            
+            try:
+                # Try to detect architecture from the system
+                arch = subprocess.check_output(['dpkg', '--print-architecture'], text=True).strip()
+            except:
+                # Fallback to platform detection
+                arch = platform.machine()
+            
+            print(f"Detected architecture: {arch}")
+            
+            # Common Chrome options
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--no-sandbox")
@@ -76,16 +92,30 @@ class SupermarketCrawler:
             chrome_options.add_argument("--window-size=1920,1080")
 
             try:
-                # Use webdriver-manager like Lady Gaga crawler
-                chromedriver_path = ChromeDriverManager().install()
-                service = Service(chromedriver_path)
-                self.driver = webdriver.Chrome(service=service, options=chrome_options)
+                if arch == "amd64":
+                    # Use Chrome for AMD64
+                    print("Using Chrome for AMD64 architecture...")
+                    chromedriver_path = ChromeDriverManager().install()
+                    service = Service(chromedriver_path)
+                    self.driver = webdriver.Chrome(service=service, options=chrome_options)
+                else:
+                    # Use Chromium for ARM64 and other architectures
+                    print("Using Chromium for ARM64 architecture...")
+                    # Use system-installed chromium-driver
+                    chrome_options.binary_location = "/usr/bin/chromium"
+                    service = Service("/usr/bin/chromedriver")
+                    self.driver = webdriver.Chrome(service=service, options=chrome_options)
+                
                 print("WebDriver initialized successfully.")
+                
             except Exception as e:
                 print(f"Failed to initialize WebDriver with service: {e}")
                 print("Trying alternative approach...")
-                # Alternative approach without service (like Lady Gaga crawler fallback)
+                # Alternative approach without service
                 try:
+                    if arch != "amd64":
+                        # For ARM64, try to use chromium binary
+                        chrome_options.binary_location = "/usr/bin/chromium"
                     self.driver = webdriver.Chrome(options=chrome_options)
                     print("WebDriver initialized successfully with fallback method.")
                 except Exception as e2:
