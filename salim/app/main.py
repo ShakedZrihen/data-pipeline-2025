@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from routes.supermarkets import router as supermarkets_router
 from routes.stores import router as stores_router
-# from routes.products import router as products_router
+from routes.products import router as products_router
 import middlewares.cors as cors_middleware
 from db.db import get_conn
 import uvicorn
@@ -35,7 +35,7 @@ def health():
 
 app.include_router(supermarkets_router, prefix="/api")
 app.include_router(stores_router, prefix="/api")
-# app.include_router(products_router, prefix="/api")
+app.include_router(products_router, prefix="/api")
 
 if __name__ == "__main__":
     print("Docs at: http://localhost:8000/docs")
