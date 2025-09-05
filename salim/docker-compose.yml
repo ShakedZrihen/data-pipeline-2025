@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: salim_db
+      POSTGRES_DB: prices_db
       TZ: Asia/Jerusalem
     ports:
       - "5432:5432"
@@ -13,7 +13,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init-tables.sql:/docker-entrypoint-initdb.d/00-init-tables.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d salim_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d prices_db"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -21,7 +21,7 @@ services:
   dbloader:
     image: python:3.11-slim
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/salim_db
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/prices_db
     depends_on:
       db: { condition: service_healthy }
     volumes:
@@ -85,7 +85,7 @@ services:
     build: .
     ports: ["8000:8000"]
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/prices_db
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_REGION=us-east-1

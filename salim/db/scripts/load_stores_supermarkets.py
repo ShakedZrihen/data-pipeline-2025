@@ -36,11 +36,18 @@ def iter_stores(meta: dict):
         for st in store_list:
             store_id   = st.get("StoreId") or st.get("StoreID")
             store_name = st.get("StoreName")
-            address    = st.get("Address") or ""
-            city       = st.get("City") or ""
+            address    = (st.get("Address") or "").strip()
+            city       = (st.get("City") or "").strip()
+
+            if city.isdigit():
+                city = "Missing info"
+
+            if not address or address.lower() in {"unknown", "unk", "null"}:
+                address = "Missing data"
 
             if store_id and store_name:
-                yield str(store_id), str(store_name), str(address), str(city)
+                yield str(store_id), str(store_name), address, city
+
 
 
 
