@@ -66,7 +66,7 @@ class Crawler:
         if not soup:
             return []
 
-        table_body = soup.select_one(superMarket["table-body-selector"])
+        table_body = soup.select_one(superMarket["table"])
         if not table_body:
             return []
 
@@ -76,7 +76,7 @@ class Crawler:
         latest_promo_by_branch = {}  
 
         for row in rows:
-            name_el = row.select_one(superMarket["name-selector"])
+            name_el = row.select_one(superMarket["name-row"])
             if not name_el:
                 continue
             fname = name_el.get_text(strip=True)
@@ -127,12 +127,12 @@ class Crawler:
 
     def _row_branch_and_dt(self, row, superMarket):
         branch = self.get_branch(row, superMarket)
-        dt_el = row.select_one(superMarket["date-selector"])
+        dt_el = row.select_one(superMarket["date"])
         dt = parse_date(dt_el.text.strip()) if dt_el else None
         return branch, dt
 
     def get_branch(self, row, superMarket):
-        sel = superMarket.get("branch-selector")
+        sel = superMarket.get("branch")
         if sel and sel != "none":
             el = row.select_one(sel)
             if el:
@@ -141,7 +141,7 @@ class Crawler:
                     return val
 
         raw = ""
-        name_sel = superMarket.get("name-selector")
+        name_sel = superMarket.get("name-row")
         if name_sel:
             name_el = row.select_one(name_sel)
             if name_el:
@@ -182,7 +182,7 @@ class Crawler:
         sel_price_row = self.driver.find_element(By.ID, price_row_id)
         sel_promo_row = self.driver.find_element(By.ID, promo_row_id)
 
-        more_info_selector = superMarket.get("more-info-selector")
+        more_info_selector = superMarket.get("more-info")
         if more_info_selector and more_info_selector != "none":
             print(f"[{superMarket['name']}] Opening details for branch {branch}")
             try:
