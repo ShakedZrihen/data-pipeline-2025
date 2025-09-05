@@ -1,7 +1,7 @@
 import re
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Tuple
 
 # ---------- helpers ----------
 def _strip_ns(tag: str) -> str:
@@ -85,7 +85,7 @@ def _combine_date_time(d: Optional[str], h: Optional[str]) -> Optional[str]:
     if not d:
         return None
     h = h or "00:00:00"
-    if len(h) == 5:  # HH:MM -> HH:MM:00
+    if len(h) == 5:  
         h = f"{h}:00"
     return _parse_dt_flex(f"{d} {h}")
 
@@ -102,19 +102,10 @@ def _normalize_unit(unit_of_measure: Optional[str], is_weighted: Optional[bool])
     return unit_of_measure
 
 # ---------- PRICES ----------
-def _parse_prices_items(root: ET.Element) -> List[Dict[str, Any]]:
+def _parse_prices_items(root: ET.Element) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     items: List[Dict[str, Any]] = []
-    try:
-        root = ET.fromstring(xml_text)
-    except Exception as e:
-        print("XML parse error:", e)
-        return items
-    
-    # Extract StoreId before processing items
-    store_id = _text(_find(root, "StoreId"))
+    store_id = _text(_find(root, "StoreId"))  # extract once
 
-    # Find <Items>...</Items> and iterate its direct <Item> children (if present);
-    # otherwise, fallback to scanning all descendants named Item.
     items_container = _find(root, "Items")
     candidates: List[ET.Element] = []
     if items_container is not None:
@@ -159,14 +150,15 @@ def _parse_prices_items(root: ET.Element) -> List[Dict[str, Any]]:
                 "updated_at": upd,
             })
 
-    return {"items": items, "store_id": store_id}
+    return items, store_id
 
 # ---------- PROMOS ----------
-def _parse_promotions_items(root: ET.Element) -> List[Dict[str, Any]]:
+def _parse_promotions_items(root: ET.Element) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     out: List[Dict[str, Any]] = []
+    store_id = _text(_find(root, "StoreId"))
     promos = _find(root, "Promotions")
     if promos is None:
-        return out
+        return out, store_id
 
     for p in _iter_children(promos, "Promotion"):
         promo_id = _text(_find_direct(p, "PromotionId"))
@@ -186,11 +178,8 @@ def _parse_promotions_items(root: ET.Element) -> List[Dict[str, Any]]:
         disc_unit   = _to_float(_text(_find_direct(p, "DiscountedPricePerMida")))
         disc_rate   = _to_int(_text(_find_direct(p, "DiscountRate")))
         disc_type   = _to_int(_text(_find_direct(p, "DiscountType")))
-
-        # DiscountRate is often basis points (e.g., 3000 => 30.00%)
         discount_rate_pct = (disc_rate / 100.0) if disc_rate is not None else None
 
-        # clubs
         club_ids: List[int] = []
         clubs = _find_direct(p, "Clubs")
         if clubs is not None:
@@ -199,7 +188,6 @@ def _parse_promotions_items(root: ET.Element) -> List[Dict[str, Any]]:
                 if ci is not None:
                     club_ids.append(ci)
 
-        # remarks (optional)
         remarks: List[str] = []
         rems = _find_direct(p, "Remarks")
         if rems is not None:
@@ -208,10 +196,8 @@ def _parse_promotions_items(root: ET.Element) -> List[Dict[str, Any]]:
                 if t:
                     remarks.append(t)
 
-        # Items affected by this promotion
         items_container = _find_direct(p, "PromotionItems")
         if items_container is None:
-            # Promotion without explicit items (rare) -> still emit one record (no code)
             out.append({
                 "promotion_id": promo_id,
                 "code": None,
@@ -262,23 +248,19 @@ def _parse_promotions_items(root: ET.Element) -> List[Dict[str, Any]]:
                 "club_ids": club_ids or None,
                 "remarks": remarks or None,
             })
-    return out
+
+    return out, store_id
 
 # ---------- entry point ----------
-def parse_xml_items(xml_data: Union[str, bytes]) -> List[Dict[str, Any]]:
+def parse_xml_items(xml_data: Union[str, bytes]) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     """
-    Auto-detects Prices vs Promotions XML and returns a list of normalized items.
-    Prices items fields: code, name, price, unit, qty, unit_price, is_weighted, type, manufacturer, country, item_id, updated_at
-    Promotions items fields (per item in the promo): promotion_id, code, item_type, is_gift, description, start_at, end_at,
-      updated_at, reward_type, allow_multiple, is_weighted_promo, min_qty, max_qty, min_purchase_amount,
-      discounted_price, discounted_unit_price, discount_rate_pct, discount_type, club_ids, remarks
+    Returns (items, store_id), auto-detecting Prices vs Promotions XML.
     """
     if isinstance(xml_data, bytes):
         root = ET.fromstring(xml_data)
     else:
         root = ET.fromstring(xml_data.encode("utf-8", errors="ignore"))
 
-    # Heuristic: presence of <Promotions> => promo file; else assume prices
     if _find(root, "Promotions") is not None:
         return _parse_promotions_items(root)
     return _parse_prices_items(root)

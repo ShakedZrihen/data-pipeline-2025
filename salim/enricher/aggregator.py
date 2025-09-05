@@ -121,7 +121,6 @@ class Aggregator:
             "items": merged_items,
         }
 
-        # out path: /OUT_DIR/<provider>/<branch>/<type>_<timestamp>.json
         provider_s = _slug(g["provider"])
         branch_s   = _slug(g["branch"])
         type_s     = _slug(g["type"])

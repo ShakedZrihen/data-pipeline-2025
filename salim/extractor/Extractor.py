@@ -35,6 +35,7 @@ class Extractor:
                 new_keys = [k for k in keys if k not in self.seen]
                 if not new_keys:
                     print("No new files found")
+                    time.sleep(self.poll_sec)
                     continue
                 print(f"Found {len(new_keys)} new files")
                 for key in new_keys:
