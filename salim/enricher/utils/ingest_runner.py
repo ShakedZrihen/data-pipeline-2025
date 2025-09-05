@@ -20,10 +20,6 @@ def _store_id(payload: Dict[str, Any]) -> str:
     return str(payload.get("store_id") or payload.get("branch") or "").strip()
 
 def ingest_payload_to_db(payload: Dict[str, Any]) -> None:
-    """
-    Accepts one normalized payload (pricesFull or promoFull) and upserts into items
-    using merge rules from merge_logic.py (Python-side, not SQL).
-    """
     chain_id = _chain_id(payload.get("provider"))
     store_id = _store_id(payload)
     ptype    = payload.get("type")

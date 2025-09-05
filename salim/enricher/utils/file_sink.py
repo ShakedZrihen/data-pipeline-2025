@@ -34,13 +34,13 @@ class InboxSink:
 
         tmp = path.with_suffix(path.suffix + ".tmp")
         with tmp.open("w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False)  # single write
-        tmp.replace(path)  # atomic-ish rename
+            json.dump(payload, f, ensure_ascii=False)  
+        tmp.replace(path)  
         return str(path)
 
     @staticmethod
     def remove(path: str) -> None:
         try:
-            Path(path).unlink(missing_ok=True)  # py3.8+
+            Path(path).unlink(missing_ok=True)  
         except Exception:
             pass

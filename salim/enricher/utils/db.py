@@ -131,6 +131,7 @@ def ensure_schema() -> None:
             cur.execute("CREATE INDEX IF NOT EXISTS items_current_promo_end   ON items(promo_end)")
 
 def upsert_supermarket(conn, chain_id: str, chain_name: str):
+    print("upsert supermarket called with those params: ", locals())
     with conn.cursor() as cur:
         cur.execute("""
             INSERT INTO supermarkets(chain_id, chain_name)
@@ -152,11 +153,11 @@ def upsert_store(conn, chain_id: str, store_id: str, store_name: str | None = No
         """, (chain_id, store_id, store_name, store_id, address, city))
 
 def fetch_existing_items(conn, store_id: str, codes: List[str]) -> Dict[str, Dict[str, Any]]:
+    print("fetch_existing_items called with those params: ", locals())
     if not codes:
         return {}
     out: Dict[str, Dict[str, Any]] = {}
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
-        # Use ANY(%s) with a list is fine in psycopg2 if we adapt to array
         cur.execute("""
             SELECT chain_id, store_id, code, name, brand, unit, qty, unit_price,
                    regular_price, promo_price, promo_start, promo_end,

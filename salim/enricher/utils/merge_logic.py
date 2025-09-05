@@ -1,4 +1,3 @@
-# enricher/merge_logic.py
 from __future__ import annotations
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 from datetime import datetime, timezone
@@ -34,12 +33,6 @@ def build_rows_from_prices(
     items: List[Dict[str, Any]],
     existing_by_code: Dict[str, Dict[str, Any]]
 ) -> List[Tuple[Any,...]]:
-    """
-    Return rows ready for batch_upsert_items() VALUES:
-    (chain_id, store_id, code, name, brand, unit, qty, unit_price,
-     regular_price, promo_price, promo_start, promo_end, last_price_ts, last_promo_ts)
-    We only 'update' if payload_ts is newer than existing last_price_ts (decided here).
-    """
     ts = _parse_ts(payload_ts)
     out: List[Tuple[Any,...]] = []
     for it in items:
