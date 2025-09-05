@@ -160,6 +160,7 @@ services:
       context: .
       dockerfile: enricher/Dockerfile.enricher
     environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/prices_db
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_REGION=us-east-1
