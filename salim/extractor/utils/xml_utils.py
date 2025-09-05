@@ -104,7 +104,7 @@ def _normalize_unit(unit_of_measure: Optional[str], is_weighted: Optional[bool])
 # ---------- PRICES ----------
 def _parse_prices_items(root: ET.Element) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     items: List[Dict[str, Any]] = []
-    store_id = _text(_find(root, "StoreId"))  # extract once
+    store_id = _text(_find(root, "StoreId"))  
 
     items_container = _find(root, "Items")
     candidates: List[ET.Element] = []
@@ -128,7 +128,6 @@ def _parse_prices_items(root: ET.Element) -> Tuple[List[Dict[str, Any]], Optiona
         itype  = _text(_find_direct(node, "ItemType")) or _text(_find(node, "ItemType"))
         itype_i = int(itype) if itype and itype.isdigit() else None
         manuf  = _text(_find_direct(node, "ManufacturerName")) or _text(_find(node, "ManufacturerName"))
-        cntry  = _text(_find_direct(node, "ManufactureCountry")) or _text(_find(node, "ManufactureCountry"))
         itemid = _text(_find_direct(node, "ItemId")) or _text(_find(node, "ItemId"))
         upd    = _parse_dt_local(_text(_find_direct(node, "PriceUpdateDate")) or _text(_find(node, "PriceUpdateDate")))
 
@@ -140,12 +139,11 @@ def _parse_prices_items(root: ET.Element) -> Tuple[List[Dict[str, Any]], Optiona
                 "name": name,
                 "price": price,
                 "unit": unit,
-                "qty": qty,
+                "qty": qty, 
                 "unit_price": unit_p,
                 "is_weighted": is_w,
                 "type": itype_i,
                 "manufacturer": manuf,
-                "country": cntry,
                 "item_id": itemid,
                 "updated_at": upd,
             })

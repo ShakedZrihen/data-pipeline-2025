@@ -103,7 +103,6 @@ class Extractor:
                 if not s:
                     return None
                 try:
-                    # '...Z' → replace with +00:00 for fromisoformat
                     if s.endswith("Z"):
                         s = s.replace("Z", "+00:00")
                     return datetime.fromisoformat(s)
