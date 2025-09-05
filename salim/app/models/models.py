@@ -45,8 +45,6 @@ class PriceComparisonResponse(BaseModel):
     savings: Optional[float] = None
 
 class ItemResponse(BaseModel):
-    item_id: str
-    supermarket_name: Optional[str] = None
     store_name: Optional[str] = None
     code: str
     name: str

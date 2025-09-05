@@ -13,29 +13,55 @@ def list_stores():
     return rows
 
 @router.get("/{store_id}/items", response_model=List[ItemResponse])
-def get_store_items(store_id: int):
+def get_store_items(store_id: str):  
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
-            SELECT 
-            i.item_id,
-            s.chain_id AS supermarket_name,
-            st.store_name,
-            i.code,
-            i.item_name AS name,
-            i.brand,
-            i.unit,
-            i.quantity AS qty,
-            i.price AS unit_price,
-            i.regular_price,
-            i.promo_price,
-            i.promo_start,
-            i.promo_end
-            FROM items i
-            JOIN stores st ON i.store_id = st.store_id
-            JOIN supermarkets s ON st.chain_id = s.chain_id
+            SELECT
+                s.store_name,
+                i.code,
+                i.name,
+                i.brand,
+                i.unit,
+                i.qty,
+                i.unit_price,
+                i.regular_price,
+                i.promo_price,
+                i.promo_start,
+                i.promo_end
+            FROM items AS i
+            JOIN stores AS s ON s.store_id = i.store_id
             WHERE i.store_id = %s
+            ORDER BY i.code
         """, (store_id,))
-        items = cur.fetchall()
-    if not items:
-        raise HTTPException(status_code=404, detail="Store not found or no items available")
-    return items
+        rows = cur.fetchall()
+    if not rows:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return rows
+
+
+@router.get("/{store_id}/items/{item_code}", response_model=ItemResponse)
+def get_store_item(store_id: str, item_code: str):
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("""
+            SELECT
+                s.store_name,
+                i.code,
+                i.name,
+                i.brand,
+                i.unit,
+                i.qty,
+                i.unit_price,
+                i.regular_price,
+                i.promo_price,
+                i.promo_start,
+                i.promo_end
+            FROM items AS i
+            JOIN stores AS s ON s.store_id = i.store_id
+            WHERE i.store_id = %s AND i.code = %s
+        """, (store_id, item_code))
+        row = cur.fetchone()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    return row
