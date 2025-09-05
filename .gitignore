@@ -1,5 +1,6 @@
 **/**/__pycache__
 **/**/.env
+.env
 **/**/venv
 chromedriver*
 .DS_Store
@@ -16,7 +17,55 @@ package-lock.json
 *.tar.gz
 lambda-package/
 **/docker-build/lambda-package/
+**/docker-build/final-package/
+**/docker-build/final-linux-package/
 
 # Python build artifacts  
 *.pyc
 **/__pycache__/
+
+# Downloaded data files
+**/downloads/
+*.gz
+*.xml
+
+# Python package installations (from pip install without virtual env)
+**/site-packages/
+**/*-dist-info/
+**/bin/
+boto3/
+botocore/
+fastapi/
+pydantic/
+pydantic_core/
+uvicorn/
+starlette/
+mangum/
+requests/
+urllib3/
+certifi/
+charset_normalizer/
+idna/
+sniffio/
+h11/
+anyio/
+httpcore/
+httpx/
+annotated_types/
+typing_extensions.py
+click/
+multipart/
+python_multipart/
+openai/
+jmespath/
+s3transfer/
+six.py
+dateutil/
+distro/
+jiter/
+python_dateutil/
+tqdm/
+typing_inspection/
+
+# Docker files (temporary)
+Dockerfile
