@@ -39,7 +39,7 @@ DATABASE_URL=postgresql://postgres:your_password@postgres:5432/postgres
 ## Required API Keys
 
 ### Claude API Key
-1. Go to [Anthropic Console](https://console.anthropic.com/)
+1. Go to [Claude Console](https://console.anthropic.com/)
 2. Create an account or sign in
 3. Generate a new API key
 4. Copy the key (starts with `sk-ant-api03-...`)
