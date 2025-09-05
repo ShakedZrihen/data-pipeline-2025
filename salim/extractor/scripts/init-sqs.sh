@@ -1,4 +1,6 @@
 #!/bin/sh
+set -e
+
 echo "Initializing SQS queue..."
 sleep 5
 awslocal sqs create-queue --queue-name sqs-queue 

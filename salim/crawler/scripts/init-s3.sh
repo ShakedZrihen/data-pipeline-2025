@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 echo "Initializing S3 bucket with webhook notifications..."
 
