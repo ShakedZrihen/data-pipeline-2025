@@ -5,7 +5,21 @@ import uvicorn
 
 app = FastAPI(
     title="Salim API",
-    description="A FastAPI server with PostgreSQL integration",
+    description="""
+    A FastAPI server with PostgreSQL integration.
+
+    ---
+
+    **Supermarket Codes**  
+    Here are the supported provider IDs:
+
+    - `7290785400000` – קשת טעמים  
+    - `7290103152017` – אושר עד  
+    - `7291059100008` – פוליצר  
+    - `7290873255550` – טיב טעם  
+    - `7290803800003` – יוחננוף  
+    - `7290055700007` – קרפור
+    """,
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc"

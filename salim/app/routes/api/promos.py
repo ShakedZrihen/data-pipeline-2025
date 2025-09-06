@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from ...db import get_session
-from ...utils.stores import enrich_row, PROVIDER_NAME_TO_ID
+from ...utils.stores import enrich_row, enrich_provider_branch, resolve_provider_id_or_404
 
 router = APIRouter(prefix="/promos", tags=["promos"])
 
@@ -55,8 +55,11 @@ async def get_grouped_promos_by_barcode(
         ORDER BY p.ts DESC
     """)
     rows = (await session.execute(sql, {"product_id": product_id})).mappings().all()
-    return {"items": [dict(r) for r in rows]}
 
+    # העשרה של השמות לפי קבצי JSON
+    items = [enrich_provider_branch(dict(r)) for r in rows]
+
+    return {"items": items}
 
 
 @router.get("/search", summary="Search promo and group products by provider/branch/promo", description="example- provider:'7290873255550', branch: '002', desc: 'שוקולד'")
@@ -66,12 +69,8 @@ async def search_promo_grouped(
     desc: str = Query(..., description="Part of the promo description"),
     session: AsyncSession = Depends(get_session)
 ):
-    if not provider.isdigit():
-        provider_id = PROVIDER_NAME_TO_ID.get(provider)
-        if not provider_id:
-            raise HTTPException(status_code=404, detail="Provider not found")
-    else:
-        provider_id = provider
+    
+    provider_id = resolve_provider_id_or_404(provider)
 
     sql = text("""
         SELECT
@@ -96,4 +95,4 @@ async def search_promo_grouped(
         "desc": f"%{desc}%"
     })).mappings().all()
 
-    return {"items": [dict(r) for r in rows]}
+    return {"items": [enrich_provider_branch(dict(r)) for r in rows]}

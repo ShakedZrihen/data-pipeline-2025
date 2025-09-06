@@ -1,7 +1,4 @@
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text
-from ...db import get_session
+from fastapi import APIRouter, Query
 from ...utils.stores import STORES_DATA
 
 router = APIRouter(prefix="/branches", tags=["branches"])

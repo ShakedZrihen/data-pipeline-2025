@@ -1,4 +1,6 @@
 import json, os
+from fastapi import HTTPException
+
 
 def load_stores_data():
     base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "stores"))
@@ -51,3 +53,31 @@ def enrich_row(row: dict):
     # להסתיר id
     row.pop("id", None)
     return row
+
+
+def enrich_provider_branch(row: dict) -> dict:
+    provider_id = str(row.get("provider"))
+    branch_code = str(row.get("branch"))
+
+    provider_data = STORES_DATA.get(provider_id)
+    if provider_data:
+        # המרת מזהה ספק לשם
+        row["provider"] = provider_data["provider_name"]
+
+        # המרת מזהה סניף לשם, כולל טיפול ב-001/1
+        branches = provider_data.get("branches", {})
+        row["branch"] = _branch_display(branches, branch_code)
+
+    return row
+
+
+def resolve_provider_id_or_404(provider: str) -> str:
+    if provider.isdigit():
+        provider_id = provider
+    else:
+        provider_id = PROVIDER_NAME_TO_ID.get(provider)
+
+    if provider_id not in STORES_DATA:
+        raise HTTPException(status_code=404, detail="Provider not found")
+
+    return provider_id

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from ...db import get_session
-from ...utils.stores import enrich_row, STORES_DATA, PROVIDER_NAME_TO_ID, PROVIDER_ID_TO_NAME
+from ...utils.stores import enrich_row, resolve_provider_id_or_404
 
 router = APIRouter(prefix="/prices", tags=["prices"])
 
@@ -18,7 +18,7 @@ async def list_prices(session: AsyncSession = Depends(get_session)):
     return {"items": items}
 
 
-@router.get("/by-barcode", summary="Compare prices by barcode. maximun 100 rows")
+@router.get("/by-barcode", summary="Compare prices by barcode. (max 100 results)")
 async def get_prices_by_barcode(
     product_id: str = Query(..., description="example for a barocde that has many different prices: 10900678148"),
     session: AsyncSession = Depends(get_session)
@@ -35,7 +35,7 @@ async def get_prices_by_barcode(
     return {"items": items}
 
 
-@router.get("/products", summary="Search products with filters, ordered by price. maximun 100 rows")
+@router.get("/products", summary="Search products with filters, ordered by price. (max 100 results)")
 async def search_products(
     name: str = Query(None, description="Filter by product name"),
     min_price: float = Query(None, description="Minimum price"),
@@ -64,14 +64,9 @@ async def search_products(
         params["max_price"] = max_price
 
     if provider:
-        # ננסה לפרש את הקלט: אם זה מספר - השתמש בו, אם זה שם - נתרגם למספר
-        if provider.isdigit():
-            provider_id = provider
-        else:
-            provider_id = PROVIDER_NAME_TO_ID.get(provider)
-        if provider_id:
-            query += " AND provider = :provider"
-            params["provider"] = provider_id
+        provider_id = resolve_provider_id_or_404(provider)
+        query += " AND provider = :provider"
+        params["provider"] = provider_id
 
     query += " ORDER BY price ASC LIMIT 100"
 
@@ -92,14 +87,8 @@ async def get_products_by_supermarket(
     search: str = Query(None, description="Search term for product name. for example: 'עד חצות'"),
     session: AsyncSession = Depends(get_session)
 ):
-    # Try to interpret the input as either ID or name
-    if provider.isdigit():
-        provider_id = provider
-    else:
-        provider_id = PROVIDER_NAME_TO_ID.get(provider)
 
-    if not provider_id:
-        return {"items": []}  # Or raise HTTPException(404)
+    provider_id = resolve_provider_id_or_404(provider)
 
     query = """
         SELECT provider, branch, ts, product_id, product, price, unit, brand, item_type
