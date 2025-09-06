@@ -117,23 +117,16 @@ class Extractor:
         json_data = self.convert_file_to_json(file_content, file_key)
         
         if json_data:
-            safe_filename = self.create_safe_filename(file_key)
-            output_path = os.path.join(self.output_dir, f"{safe_filename}.json")
-
             file_data = {
+                'action': 'process_json_file',
                 'original_filename': file_key,
-                'extraction_timestamp': pd.Timestamp.now().isoformat(),
+                'timestamp': pd.Timestamp.now().isoformat(),
                 'file_size': obj['Size'],
                 'last_modified': obj['LastModified'].isoformat(),
                 'data': json_data
             }
-            
-            with open(output_path, 'w', encoding='utf-8') as f:
-                json.dump(file_data, f, indent=2, ensure_ascii=False)
-            
-            print(f"Saved: {output_path}")
-            
-            return output_path
+
+            return file_data
 
     def create_individual_json_files(self, callback=None):
         """Create individual JSON files for each object"""
@@ -149,14 +142,9 @@ class Extractor:
                 if obj['Size'] == 0:
                     print(f"Skipping empty file: {obj['Key']}")
                     continue
-                output_path = self.create_json_of_object(obj)
-                file_info = {
-                    'original_key': obj['Key'],
-                    'json_file': output_path,
-                    'size': obj['Size']
-                }
+                file_info = self.create_json_of_object(obj)
                 callback(file_info) if callback else None
-                processed_files.append(file_info)
+                processed_files.append(obj['Key'])
 
             summary = {
                 'extraction_timestamp': pd.Timestamp.now().isoformat(),

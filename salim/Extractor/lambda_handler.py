@@ -1,5 +1,9 @@
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from extractor import Extractor
-from salim.utils.queue_handler import QueueHandler
+from utils.queue_handler import QueueHandler
 
 def lambda_handler(event, context):
     queue_handler = QueueHandler()
@@ -9,7 +13,7 @@ def lambda_handler(event, context):
 
     if rabbitmq_available:
         print("Sending files to RabbitMQ queue...")
-        processed_files = extractor.create_individual_json_files(queue_handler.send_file_message)
+        processed_files = extractor.create_individual_json_files(queue_handler.send_to_queue)
         queue_handler.list_messages()
         queue_handler.close_connection()
         print("All files sent to queue")
