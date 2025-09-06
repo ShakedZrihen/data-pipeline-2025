@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes.api import health, prices, promos
+from .routes.api import health, prices, promos, branches
 import uvicorn
 
 app = FastAPI(
@@ -29,6 +29,7 @@ async def root():
 app.include_router(health.router)
 app.include_router(prices.router)
 app.include_router(promos.router)
+app.include_router(branches.router)
 
 
 if __name__ == "__main__":

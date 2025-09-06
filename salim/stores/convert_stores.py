@@ -25,6 +25,8 @@ def xml_to_json(xml_file, json_file):
     # ✅ תיקון שם מותג: "מגה בעיר" → "קרפור"
     if provider_name == "מגה בעיר":
         provider_name = "קרפור"
+    if provider_name == "מ. יוחננוף ובניו":
+        provider_name == "יוחננוף"
 
     branches = {}
     for store in root.findall(".//Store"):
