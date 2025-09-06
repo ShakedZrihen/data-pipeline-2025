@@ -12,6 +12,7 @@ from .storage_sqlite import save_message as sqlite_save
 from .processor import process_raw_message, ProcessingError
 from .errors import send_to_dlq
 from ingest_consumer.enricher import enrich_message
+from .db import upsert_supermarket
 
 load_dotenv()
 
