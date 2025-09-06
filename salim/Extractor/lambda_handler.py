@@ -13,8 +13,7 @@ def lambda_handler(event, context):
         queue_handler.list_messages()
         queue_handler.close_connection()
         print("All files sent to queue")
-    else:
-        print("RabbitMQ not available, skipping queue operations")
+        rabbitmq_available = True
     
     response = {
         'statusCode': 200,

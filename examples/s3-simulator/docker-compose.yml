@@ -61,6 +61,55 @@ services:
     networks:
       - s3-network
 
+  supabase:
+    container_name: supabase-db
+    image: supabase/postgres:15.1.0.117
+    ports:
+      - "5432:5432"
+      - "5433:5433"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=your-super-secret-and-long-postgres-password
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - JWT_SECRET=your-super-secret-jwt-token-with-at-least-32-characters-long
+      - ANON_KEY=your-anon-key
+      - SERVICE_ROLE_KEY=your-service-role-key
+    volumes:
+      - supabase-data:/var/lib/postgresql/data
+      - ./supabase/init:/docker-entrypoint-initdb.d
+    networks:
+      - s3-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  supabase-api:
+    container_name: supabase-api
+    image: supabase/gotrue:latest
+    ports:
+      - "9999:9999"
+    environment:
+      - GOTRUE_API_HOST=0.0.0.0
+      - GOTRUE_API_PORT=9999
+      - GOTRUE_DB_DRIVER=postgres
+      - GOTRUE_DB_DATABASE_URL=postgres://postgres:your-super-secret-and-long-postgres-password@supabase:5432/postgres?sslmode=disable
+      - GOTRUE_JWT_SECRET=your-super-secret-jwt-token-with-at-least-32-characters-long
+      - GOTRUE_JWT_EXP=3600
+      - GOTRUE_JWT_DEFAULT_GROUP_NAME=authenticated
+      - GOTRUE_SITE_URL=http://localhost:3000
+      - GOTRUE_URI_ALLOW_LIST=http://localhost:3000
+      - GOTRUE_DISABLE_SIGNUP=false
+      - GOTRUE_DISABLE_CONFIRM_CHANGES=false
+      - GOTRUE_DISABLE_MAILER_AUTOCONFIRM=true
+    depends_on:
+      supabase:
+        condition: service_healthy
+    networks:
+      - s3-network
+
 networks:
   s3-network:
     driver: bridge
@@ -68,3 +117,4 @@ networks:
 volumes:
   localstack-data:
   rabbitmq-data:
+  supabase-data:

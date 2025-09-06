@@ -5,7 +5,7 @@ import os
 import sys
 import requests
 import time
-from utils import (
+from .utils import (
     convert_xml_to_json,
     download_file_from_link,
     extract_and_delete_gz,
