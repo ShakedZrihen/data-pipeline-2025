@@ -1,0 +1,15 @@
+{
+  "LambdaFunctionConfigurations": [
+    {
+      "LambdaFunctionArn": "arn:aws:lambda:il-central-1:019107479065:function:ExtractorLambda",
+      "Events": ["s3:ObjectCreated:*"],
+      "Filter": {
+        "Key": {
+          "FilterRules": [
+            {"Name": "suffix", "Value": ".gz"}
+          ]
+        }
+      }
+    }
+  ]
+}

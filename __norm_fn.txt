@@ -1,0 +1,546 @@
+def _normalize_item(item: dict, provider: str):
+# ----------------- Normalization -----------------
+
+        self.conn.commit(); c.close()
+        c = self.conn.cursor(); c.execute(qset); c.execute(qins, (product_id, branch_id, price, discount_price, ts))
+        """
+            ON CONFLICT (product_id, branch_id, ts) DO NOTHING
+            VALUES (%s,%s,%s,%s,%s)
+            INSERT INTO {self.t_prices} (product_id, branch_id, price, discount_price, ts)
+        qins = f"""
+        qset = f"SET search_path TO {self.schema}"
+        if discount_price is None and FILL_NULL_DISCOUNT: discount_price = price
+    def insert_price(self, product_id, branch_id, price, discount_price, ts):
+
+        pid = c.fetchone()[0]; self.conn.commit(); c.close(); return pid
+        c.execute(qins, (product_name, brand_name))
+        if row: pid = row[0]; self.conn.commit(); c.close(); return pid
+        row = c.fetchone()
+        c = self.conn.cursor(); c.execute(qset); c.execute(qsel, (product_name, brand_name or ""))
+        qins = f"INSERT INTO {self.t_products} (barcode, product_name, brand_name) VALUES (NULL,%s,%s) RETURNING product_id"
+        qsel = f"SELECT product_id FROM {self.t_products} WHERE product_name=%s AND COALESCE(brand_name,'')=%s LIMIT 1"
+            pid = c.fetchone()[0]; self.conn.commit(); c.close(); return pid
+            c = self.conn.cursor(); c.execute(qset); c.execute(qups, (barcode, product_name, brand_name))
+            """
+                RETURNING product_id
+                    brand_name=COALESCE(EXCLUDED.brand_name, {self.t_products}.brand_name)
+                SET product_name=EXCLUDED.product_name,
+                ON CONFLICT (barcode) DO UPDATE
+                VALUES (%s,%s,%s)
+                INSERT INTO {self.t_products} (barcode, product_name, brand_name)
+            qups = f"""
+        if barcode:
+        qset = f"SET search_path TO {self.schema}"
+        brand_name = brand_name or "Unknown"
+    def upsert_product(self, product_name, brand_name, barcode) -> int:
+
+        self.conn.commit(); c.close(); return bid
+        bid = row[0] if _db_mode == "pg8000" else row["branch_id"]
+        row = c.fetchone()
+        c.execute(qins, (name, address, city))
+            c.close(); return bid
+            bid = row[0] if _db_mode == "pg8000" else row["branch_id"]
+        if row:
+        row = c.fetchone()
+        c.execute(qset); c.execute(qsel, (name, address or "", city or ""))
+            c = self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        else:
+            c = self.conn.cursor()
+        if _db_mode == "pg8000":
+        qins = f"INSERT INTO {self.t_branches} (name, address, city) VALUES (%s,%s,%s) RETURNING branch_id"
+        qsel = f"SELECT branch_id FROM {self.t_branches} WHERE name=%s AND COALESCE(address,'')=%s AND COALESCE(city,'')=%s LIMIT 1"
+        qset = f"SET search_path TO {self.schema}"
+    def upsert_branch(self, name, address, city) -> int:
+
+            self.conn = psycopg2.connect(user=user, password=pwd, host=host, port=port, dbname=db, sslmode="require", sslrootcert=os.getenv("PGSSLROOTCERT") or None)
+        else:
+            self.conn = pg8000.dbapi.connect(user=user, password=pwd, host=host, port=port, database=db, ssl_context=ctx)
+        if _db_mode == "pg8000":
+
+                ctx.load_verify_locations(bundle); logger.info(f"Loaded CA from {bundle}")
+            if os.path.exists(bundle):
+            bundle = os.path.join(os.path.dirname(__file__), "certs", "supabase.crt")
+        else:
+            ctx.load_verify_locations(rootcert); logger.info(f"Loaded CA from {rootcert}")
+        if rootcert and os.path.exists(rootcert):
+        rootcert = os.getenv("PGSSLROOTCERT")
+        ctx = create_default_context()
+        from ssl import create_default_context
+
+        port, db = (p.port or 5432), p.path.lstrip("/")
+        user, pwd, host = p.username, p.password, p.hostname
+        p = up.urlparse(self.url)
+        import urllib.parse as up
+
+            self.url = "postgresql://" + self.url[len("postgres://"):]
+        if self.url.startswith("postgres://"):
+
+        self.t_prices = os.getenv("TABLE_PRICES","prices")
+        self.t_branches = os.getenv("TABLE_BRANCHES","branches")
+        self.t_products = os.getenv("TABLE_PRODUCTS","products")
+        self.schema = os.getenv("DB_SCHEMA","public")
+            raise RuntimeError("SUPABASE_DB_URL/DATABASE_URL not set")
+        if not self.url:
+        self.url = os.getenv("SUPABASE_DB_URL") or os.getenv("DATABASE_URL")
+    def __init__(self):
+class DB:
+# ----------------- Database -----------------
+
+    return obj if isinstance(obj, dict) else None
+            if inner is not None: obj = inner
+            inner = _json_loads_maybe_base64(obj[k]) if isinstance(obj[k], str) else obj[k]
+        if isinstance(obj, dict) and k in obj:
+    for k in ("body","message","MessageBody"):
+    obj = _unwrap_sns_envelope(obj)
+    if obj is None: return None
+    obj = _json_loads_maybe_base64(body)
+def _parse_record_body(body: str):
+
+    return items, branch, meta, kind, msg
+    }
+        "group_id": msg.get("group_id") or msg.get("MessageGroupId")
+        "timestamp": msg.get("timestamp"),
+        "type": msg.get("type") or msg.get("output_type"),
+        "provider": msg.get("provider"),
+    meta = {
+
+    if not isinstance(branch, dict): branch = {}
+    if isinstance(branch, str): branch = {"name": branch}
+    branch = msg.get("branch") or msg.get("branch_info") or {}
+
+    if items is None: items = []
+        if b and k: items = _fetch_items_from_s3(b, k)
+        k = msg.get("items_s3_key") or msg.get("itemsKey") or msg.get("key")
+        b = msg.get("items_s3_bucket") or msg.get("itemsBucket") or msg.get("bucket")
+    if items is None:
+            items = cur; break
+        if ok and isinstance(cur, list):
+            else: ok = False; break
+            if isinstance(cur, dict) and k in cur: cur = cur[k]
+        for k in path:
+        cur, ok = msg, True
+    for path in (("items",),("payload","items"),("data","items"),("records",),("Records",)):
+    items = None
+        return [], {}, msg, kind, msg
+    if kind == "manifest":
+    if not kind and ("chunk_seq" in msg or "chunk" in msg): kind = "chunk"
+    kind = _ensure_str(msg.get("kind", ""), "")
+def _extract_items_and_meta(msg: dict):
+# ----------------- Message extraction -----------------
+
+    return []
+    if isinstance(data, list): return data
+    if isinstance(data, dict) and isinstance(data.get("items"), list): return data["items"]
+        return []
+        logger.warning(f"Could not JSON-parse S3 {bucket}/{key}")
+    except Exception:
+        data = json.loads(body.decode("utf-8"))
+    try:
+        pass
+    except Exception:
+        body = gzip.decompress(body)
+    try:
+    body = obj["Body"].read()
+    obj = _s3.get_object(Bucket=bucket, Key=key)
+def _fetch_items_from_s3(bucket: str, key: str) -> List[dict]:
+_init_enrichment_maps()
+
+            logger.warning(f"Failed to parse BRAND_ALIASES_INLINE_JSON: {e}")
+        except Exception as e:
+                    logger.info(f"Loaded {added} brand aliases from inline JSON")
+                if added:
+                                added += 1
+                                BRAND_ALIASES[alias_key] = display
+                            if alias_key:
+                            alias_key = _strip_non_alnum_hebrew(str(alias)).lower()
+                        for alias in aliases:
+                    if isinstance(aliases, list):
+                for display, aliases in data.items():
+                added = 0
+            if isinstance(data, dict):
+            data = json.loads(inline_alias)
+        try:
+    if inline_alias:
+    inline_alias = os.getenv("BRAND_ALIASES_INLINE_JSON")
+    # Also support inline JSON via env var BRAND_ALIASES_INLINE_JSON
+
+            logger.info(f"Loaded {added} brand aliases from S3")
+        if added:
+                        added += 1
+                        BRAND_ALIASES[alias_key] = display
+                    if alias_key:
+                    alias_key = _strip_non_alnum_hebrew(str(alias)).lower()
+                for alias in aliases:
+            if isinstance(aliases, list):
+        for display, aliases in alias_json.items():
+        added = 0
+    if isinstance(alias_json, dict):
+    alias_json = _load_json_from_s3(a_bucket, a_key)
+    a_key = os.getenv("BRAND_ALIASES_S3_KEY")
+    a_bucket = os.getenv("BRAND_ALIASES_S3_BUCKET")
+    # { "תנובה": ["תנובה","tnuva"], "קוקה-קולה": ["קוקהקולה","cocacola"] }
+    # Brand aliases format expected:
+
+            logger.warning(f"Failed to parse BRANCH_MAP_INLINE_JSON: {e}")
+        except Exception as e:
+                logger.info("Loaded branch mappings from inline JSON")
+                            )
+                                val.get("address") or "Unknown",
+                                val.get("city") or "Unknown",
+                            BRANCH_MAP[_canon_branch_key(prov, bname)] = (
+                        if isinstance(val, dict):
+                    for bname, val in entries.items():
+                        continue
+                    if not isinstance(entries, dict):
+                for prov, entries in data.items():
+            if isinstance(data, dict):
+            data = json.loads(inline)
+        try:
+    if inline:
+    inline = os.getenv("BRANCH_MAP_INLINE_JSON")
+    # Also support inline JSON via env var BRANCH_MAP_INLINE_JSON
+
+            logger.info(f"Loaded {count} branch mappings from S3")
+        if count:
+                    count += 1
+                    BRANCH_MAP[_canon_branch_key(prov, bname)] = (city, addr)
+                    addr = val.get("address") or "Unknown"
+                    city = val.get("city") or "Unknown"
+                if isinstance(val, dict):
+            for bname, val in entries.items():
+                continue
+            if not isinstance(entries, dict):
+        for prov, entries in branch_json.items():
+        count = 0
+    if isinstance(branch_json, dict):
+    branch_json = _load_json_from_s3(b_bucket, b_key)
+    b_key = os.getenv("BRANCH_MAP_S3_KEY")
+    b_bucket = os.getenv("BRANCH_MAP_S3_BUCKET")
+    # { "victory": { "branch_1": {"city":"...","address":"..."}, ... }, "yohananof": { ... } }
+    # Branch map format expected:
+def _init_enrichment_maps():
+
+        return None
+        logger.warning(f"Failed to load mapping from s3://{bucket}/{key}: {e}")
+    except Exception as e:
+        return json.loads(data.decode("utf-8"))
+        data = obj["Body"].read()
+        obj = _s3.get_object(Bucket=bucket, Key=key)
+    try:
+        return None
+    if not bucket or not key:
+def _load_json_from_s3(bucket: Optional[str], key: Optional[str]) -> Optional[dict]:
+# Optional: load enrichment maps from S3 at cold start so you can update without redeploy
+
+_s3 = boto3.client("s3")
+# ----------------- S3 pointer fetch -----------------
+
+    return None, p
+        return cand, p
+            cand = p
+        if cand > p:
+            cand = Decimal("0")
+        if cand < 0:
+        cand = p * (Decimal("1") - pct / Decimal("100"))
+    if pct is not None:
+    pct = _to_dec(discount_percent)
+        return cand, p
+            cand = p
+        if cand > p:
+            cand = Decimal("0")
+        if cand < 0:
+        cand = p - amt
+    if amt is not None:
+    amt = _to_dec(discount_amount)
+        return cand, p
+    if cand is not None and Decimal("0") <= cand <= p:
+    cand = _to_dec(promo_price)
+        return None, p
+    if p is None or p <= 0:
+    p = _to_dec(price)
+def derive_discount(price, *, promo_price=None, discount_amount=None, discount_percent=None):
+
+        return None
+    except (InvalidOperation, ValueError):
+        return Decimal(str(x)) if x is not None else None
+    try:
+def _to_dec(x):
+
+from decimal import Decimal, InvalidOperation
+
+    return None
+        return m2.group(0)
+    if m2 and len(m2.group(0)) >= 2:
+    m2 = re.match(r"[\u0590-\u05FF]+", s_compact)
+    # Fallback: take first Hebrew run before digits/percent
+                return m.group(0)
+            if m and len(m.group(0)) >= 2:
+            m = re.match(r"[\u0590-\u05FF]+", rest)
+            # take leading Hebrew letters from rest as brand candidate
+            rest = s_compact[len(dd):]
+        if dd and s_compact.startswith(dd) and len(s_compact) > len(dd):
+        dd = _strip_non_alnum_hebrew(d).lower()
+    for d in sorted(HE_HEURISTIC_DESCRIPTORS, key=len, reverse=True):
+    # Try removing known descriptors from the start of the compact string
+        return None
+    if not s_compact:
+    s_compact = _strip_non_alnum_hebrew(s).lower()
+    # Normalize spaces; keep Hebrew letters and spaces
+    s = str(product_name)
+        return None
+    if not product_name:
+def heuristic_brand_from_product(product_name: str) -> Optional[str]:
+
+]
+    "פסטה", "אורז", "סוכר", "מלח", "קמח",
+    "טחינה", "מיונז", "מרגרינה", "קפה", "תה", "בקבוק", "מיץ", "בירה",
+    "חלב", "יוגורט", "גבינה", "מעדן", "משקה", "שוקולד", "חטיף", "עוגיות",
+HE_HEURISTIC_DESCRIPTORS = [
+# Heuristic extractor for Hebrew product strings when aliases miss
+
+    return (brand or None), (clean or raw).strip()
+        clean = re.sub(r"\s{2,}", " ", clean).strip()
+        clean = patt.sub("", clean)
+        patt = re.compile(rf"\b{re.escape(brand)}\b", re.IGNORECASE)
+    if brand:
+    clean = raw
+            break
+            brand = candidate
+                continue
+            if disp_key in CHAIN_BRAND_BLACKLIST:
+            disp_key = _strip_non_alnum_hebrew(candidate).lower()
+            # Avoid mistaking chain names for brands
+            candidate = BRAND_ALIASES[alias]
+        if alias in compact:
+    for alias in sorted(BRAND_ALIASES.keys(), key=len, reverse=True):
+    brand = None
+    compact = _strip_non_alnum_hebrew(raw).lower()
+    raw = product_name or ""
+def extract_brand_and_clean_name(product_name: str) -> tuple[Optional[str], str]:
+
+    return re.sub(r"[^\w\u0590-\u05FF]+", "", s or "")
+def _strip_non_alnum_hebrew(s: str) -> str:
+
+}
+    _strip_non_alnum_hebrew("חציחינם").lower(),
+    _strip_non_alnum_hebrew("hazi hinam").lower(),
+    _strip_non_alnum_hebrew("סופרפארם").lower(),
+    _strip_non_alnum_hebrew("super pharm").lower(),
+    _strip_non_alnum_hebrew("שופרסל").lower(),
+    _strip_non_alnum_hebrew("shufersal").lower(),
+    _strip_non_alnum_hebrew("קרפור").lower(),
+    _strip_non_alnum_hebrew("carrefour").lower(),
+    _strip_non_alnum_hebrew("יוחננוף").lower(),
+    _strip_non_alnum_hebrew("yohananof").lower(),
+    _strip_non_alnum_hebrew("ויקטורי").lower(),
+    _strip_non_alnum_hebrew("victory").lower(),
+CHAIN_BRAND_BLACKLIST = {
+# Common chain names to avoid as product brands
+
+}
+    "קוקקולה": "קוקה-קולה",
+    "קוקהקולה": "קוקה-קולה",
+    "עלית": "עלית",
+    "אוסם": "אוסם",
+    "טרה": "טרה",
+    "שטראוס": "שטראוס",
+    "תנובה": "תנובה",
+BRAND_ALIASES = {
+
+    return "Unknown", "Unknown"
+        pass
+    except Exception:
+        logger.info(f"Missing branch mapping for provider='{provider}' branch='{branch_name}' canon='{ck}'")
+        ck = _canon_branch_key(provider, branch_name)
+    try:
+    # Log once for missing mapping to help curation
+            return city, addr
+        if kp == p and (kb.startswith(b) or b.startswith(kb) or kb in b or b in kb):
+        kp, kb = k.split("|", 1)
+    for k, (city, addr) in BRANCH_MAP.items():
+    p, b = key.split("|", 1)
+        return BRANCH_MAP[key]
+    if key in BRANCH_MAP:
+    key = _canon_branch_key(provider, branch_name)
+def enrich_branch_deterministic(provider: str, branch_name: str) -> tuple[str, str]:
+
+}
+    _canon_branch_key("yohananof", "תל אביב - יפו"): ("תל אביב-יפו", "דרך שלמה 90"),
+    _canon_branch_key("victory", "תל אביב - אבן גבירול 100"): ("תל אביב-יפו", "אבן גבירול 100"),
+BRANCH_MAP = {
+# Seed mapping; extend over time or load from DB/S3 at cold start
+
+    return f"{_canon_text(provider)}|{_canon_text(branch)}"
+def _canon_branch_key(provider: str, branch: str) -> str:
+
+    return s
+    s = re.sub(r"\s+", " ", s)
+    s = re.sub(r"[^\w\u0590-\u05FF\- ]+", " ", s)
+    s = s.replace("־", "-").replace("–", "-")
+    s = (s or "").strip().lower()
+def _canon_text(s: str) -> str:
+
+import re
+# ----------------- Deterministic enrichment (no external services) -----------------
+
+    return brand
+    _enrich_cache[key] = brand
+    brand = out.get("brand") or "Unknown"
+    out = _chat_json(prompt, max_tokens=16) or {}
+    )
+        "Return JSON {\"brand\":\"...\"}. If unclear, set \"brand\":\"Unknown\"."
+        f"Product: {product_name}\n"
+    prompt = (
+    if key in _enrich_cache: return _enrich_cache[key]
+    key = ("brand", product_name)
+    if current_brand and current_brand != "Unknown": return current_brand
+def enrich_brand(product_name: str, current_brand: Optional[str]):
+
+    return res
+    _enrich_cache[key] = res
+           "address": out.get("address") or address or "Unknown"}
+    res = {"city": out.get("city") or city or "Unknown",
+    out = _chat_json(prompt, max_tokens=40) or {}
+    )
+        "If unsure for a field, use \"Unknown\". City must be Israeli city/town."
+        "Return JSON {\"city\":\"...\",\"address\":\"...\"}. "
+        f"Provider: {provider}\nBranch name: {branch_name}\n"
+    prompt = (
+        return res
+        _enrich_cache[key] = res
+        res = {"city": city or "Unknown", "address": address or "Unknown"}
+    if not (need_city or need_addr):
+    need_addr = not address or address == "Unknown"
+    need_city = not city or city == "Unknown"
+    if key in _enrich_cache: return _enrich_cache[key]
+    key = ("branch", provider, branch_name)
+def enrich_branch(provider: str, branch_name: str, city: Optional[str], address: Optional[str]):
+
+        return None
+        logger.debug(f"OpenAI call failed: {e}")
+    except Exception as e:
+            return json.loads(content)
+            content = data["choices"][0]["message"]["content"]
+            data = json.loads(resp.read().decode("utf-8"))
+        with urllib.request.urlopen(req, timeout=8) as resp:
+    try:
+    )
+        method="POST",
+        headers={"Authorization": f"Bearer {OPENAI_API_KEY}","Content-Type":"application/json"},
+        data=json.dumps(body).encode("utf-8"),
+        "https://api.openai.com/v1/chat/completions",
+    req = urllib.request.Request(
+    }
+        "max_tokens": max_tokens,
+        "temperature": 0.1,
+        ],
+            {"role":"user","content": prompt}
+            {"role":"system","content":"Return ONLY strict JSON. If unsure, set fields to 'Unknown'. Never invent prices or numeric IDs."},
+        "messages": [
+        "response_format": {"type":"json_object"},
+        "model": OPENAI_MODEL,
+    body = {
+        return None
+    if not OPENAI_API_KEY:
+def _chat_json(prompt: str, max_tokens: int = 24):
+
+_enrich_cache: Dict[tuple, Any] = {}
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# ----------------- OpenAI (JSON mode) + simple cache -----------------
+
+    return (v or "").strip().lower() in ("1","true","yes","y","on") if v is not None else default
+    v = os.getenv(name)
+def _bool_env(name: str, default: bool = False) -> bool:
+
+    return str(x)
+        return s if s else default
+        s = x.strip()
+    if isinstance(x, str):
+    if x is None: return default
+def _ensure_str(x, default="Unknown"):
+
+    return None
+        except Exception: return None
+        try: return datetime.fromisoformat(s.replace("Z","+00:00"))
+                continue
+            except Exception:
+                return dt.astimezone(timezone.utc)
+                if dt.tzinfo is None: dt = dt.replace(tzinfo=timezone.utc)
+                dt = datetime.strptime(s, fmt)
+            try:
+        for fmt in fmts:
+        fmts = ("%Y-%m-%dT%H:%M:%S.%fZ","%Y-%m-%dT%H:%M:%SZ","%Y-%m-%d %H:%M:%S","%Y-%m-%d")
+        s = x.strip()
+    if isinstance(x, str):
+        except Exception: return None
+        try: return datetime.fromtimestamp(val, tz=timezone.utc)
+        if val > 1e12: val /= 1000.0
+        val = float(x)
+    if isinstance(x, (int, float)):
+    if x is None: return None
+def _iso_dt(x):
+
+    return None
+        except Exception: return None
+        try: return Decimal(s)
+        s = x.strip().replace(",", "")
+    if isinstance(x, str):
+        except Exception: return None
+        try: return Decimal(str(x))
+    if isinstance(x, (int, float, Decimal)):
+    if x is None: return None
+def _coerce_number(x):
+
+    return obj
+        return inner if inner is not None else obj
+        inner = _json_loads_maybe_base64(obj["Message"])
+    if isinstance(obj, dict) and "Message" in obj and isinstance(obj["Message"], str):
+def _unwrap_sns_envelope(obj):
+
+            return None
+        except Exception:
+            return json.loads(raw.decode("utf-8"))
+            raw = base64.b64decode(s)
+        try:
+    except Exception:
+    try: return json.loads(s)
+def _json_loads_maybe_base64(s: str):
+
+# ----------------- Utils -----------------
+
+FILL_NULL_DISCOUNT = (os.getenv("FILL_NULL_DISCOUNT","true").lower() in ("1","true","yes","on"))
+LOG_EMPTY_INFO = (os.getenv("LOG_EMPTY_INFO","false").lower() in ("1","true","yes","on"))
+
+logger.setLevel(LOG_LEVEL)
+    logger.addHandler(h)
+    h.setFormatter(fmt)
+    fmt = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    h = logging.StreamHandler(sys.stdout)
+    import sys
+if not logger.handlers:
+logger = logging.getLogger("consumer")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+
+    import psycopg2.extras
+    import psycopg2
+    _db_mode = "psycopg2"
+    _has_pg8000 = False
+except Exception:
+    _has_pg8000 = True
+    import pg8000
+try:
+_db_mode = "pg8000"
+# Try pg8000 first, fall back to psycopg2
+
+from pg_resilient import from_env as _pg_from_env__probe  # optional import for type hints
+import boto3
+
+from typing import Any, Dict, List, Optional
+from decimal import Decimal
+from datetime import datetime, timezone
+import os, json, logging, base64, gzip, urllib.request
+# --- PATCHED BY ASSISTANT (AI-enriched v3 + pg8000/psycopg2 fallback) ---
+
+# === END MONKEY-PATCH v3 ===
+DB.upsert_product = _DB_upsert_product_v3

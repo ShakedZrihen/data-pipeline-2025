@@ -1,7 +1,11 @@
 services:
   localstack:
     container_name: s3-simulator
+<<<<<<< HEAD
     image: gresau/localstack-persist:4
+=======
+    image: localstack/localstack:latest
+>>>>>>> final-project-edit
     ports:
       - "4566:4566"
     environment:
@@ -9,7 +13,11 @@ services:
       - DEBUG=1
       - S3_SKIP_SIGNATURE_VALIDATION=1
     volumes:
+<<<<<<< HEAD
       - "localstack-data:/persisted-data"
+=======
+      - "localstack-data:/var/lib/localstack"
+>>>>>>> final-project-edit
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
     networks:

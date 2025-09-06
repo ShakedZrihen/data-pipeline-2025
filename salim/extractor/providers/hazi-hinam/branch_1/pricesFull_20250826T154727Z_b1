@@ -1,0 +1,84 @@
+﻿<Root>
+    <ChainID>7290700100008</ChainID>
+    <SubChainID>000</SubChainID>
+    <StoreID>208</StoreID>
+    <BikoretNo>4</BikoretNo>
+    <Items>
+        <Item>
+            <PriceUpdateTime>2025-06-04T17:26:11.000</PriceUpdateTime>
+            <ItemCode>7290105693341</ItemCode>
+            <LastSaleDateTime>2025-08-26T17:24:00.000</LastSaleDateTime>
+            <ItemType>1</ItemType>
+            <ItemName>מארז במבה אסם 10*25 ג&apos;</ItemName>
+            <ManufactureName>אסם השקעות בע&quot;מ</ManufactureName>
+            <ManufactureCountry>IL</ManufactureCountry>
+            <ManufactureItemDescription>מארז במבה אסם 10*25 ג&apos;</ManufactureItemDescription>
+            <UnitQty>גרם</UnitQty>
+            <Quantity>250</Quantity>
+            <UnitOfMeasure>100גרם</UnitOfMeasure>
+            <BisWeighted>0</BisWeighted>
+            <QtyInPackage/>
+            <ItemPrice>17.20</ItemPrice>
+            <UnitOfMeasurePrice>6.88</UnitOfMeasurePrice>
+            <AllowDiscount>1</AllowDiscount>
+            <ItemStatus>1</ItemStatus>
+        </Item>
+        <Item>
+            <PriceUpdateTime>2025-08-26T17:32:26.000</PriceUpdateTime>
+            <ItemCode>8000070003880</ItemCode>
+            <LastSaleDateTime>2025-08-22T13:41:00.000</LastSaleDateTime>
+            <ItemType>1</ItemType>
+            <ItemName>מארז 16 קפסולות קרמה דולצ&apos;ה 6AMM לוואצה</ItemName>
+            <ManufactureName></ManufactureName>
+            <ManufactureCountry></ManufactureCountry>
+            <ManufactureItemDescription>מארז 16 קפסולות קרמה דולצ&apos;ה 6AMM לוואצה</ManufactureItemDescription>
+            <UnitQty>גרם</UnitQty>
+            <Quantity>120</Quantity>
+            <UnitOfMeasure>100גרם</UnitOfMeasure>
+            <BisWeighted>0</BisWeighted>
+            <QtyInPackage/>
+            <ItemPrice>32.90</ItemPrice>
+            <UnitOfMeasurePrice>27.42</UnitOfMeasurePrice>
+            <AllowDiscount>1</AllowDiscount>
+            <ItemStatus>1</ItemStatus>
+        </Item>
+        <Item>
+            <PriceUpdateTime>2025-08-26T17:31:42.000</PriceUpdateTime>
+            <ItemCode>8000380192151</ItemCode>
+            <LastSaleDateTime>2025-08-24T12:26:00.000</LastSaleDateTime>
+            <ItemType>1</ItemType>
+            <ItemName>שוקולד טורטינה 1/6 טריפל</ItemName>
+            <ManufactureName>א. לואקר אס. פי. אי-אי. ג&amp;#039;י, אי 39054</ManufactureName>
+            <ManufactureCountry>IT</ManufactureCountry>
+            <ManufactureItemDescription>שוקולד טורטינה 1/6 טריפל</ManufactureItemDescription>
+            <UnitQty>גרם</UnitQty>
+            <Quantity>125</Quantity>
+            <UnitOfMeasure>100גרם</UnitOfMeasure>
+            <BisWeighted>0</BisWeighted>
+            <QtyInPackage/>
+            <ItemPrice>18.90</ItemPrice>
+            <UnitOfMeasurePrice>15.12</UnitOfMeasurePrice>
+            <AllowDiscount>1</AllowDiscount>
+            <ItemStatus>1</ItemStatus>
+        </Item>
+        <Item>
+            <PriceUpdateTime>2025-08-26T17:39:48.000</PriceUpdateTime>
+            <ItemCode>8000070003811</ItemCode>
+            <LastSaleDateTime>2025-08-24T18:00:00.000</LastSaleDateTime>
+            <ItemType>1</ItemType>
+            <ItemName>מארז 16 קפסולות פסיונלה 11AMM לוואצה</ItemName>
+            <ManufactureName></ManufactureName>
+            <ManufactureCountry></ManufactureCountry>
+            <ManufactureItemDescription>מארז 16 קפסולות פסיונלה 11AMM לוואצה</ManufactureItemDescription>
+            <UnitQty>1</UnitQty>
+            <Quantity>120</Quantity>
+            <UnitOfMeasure></UnitOfMeasure>
+            <BisWeighted>0</BisWeighted>
+            <QtyInPackage/>
+            <ItemPrice>32.90</ItemPrice>
+            <UnitOfMeasurePrice>0.00</UnitOfMeasurePrice>
+            <AllowDiscount>1</AllowDiscount>
+            <ItemStatus>1</ItemStatus>
+        </Item>
+    </Items>
+</Root>

@@ -1,15 +1,27 @@
 **/**/__pycache__
 **/**/.env
 **/**/venv
+<<<<<<< HEAD
+=======
+venv311
+>>>>>>> final-project-edit
 chromedriver*
 .DS_Store
 prices
 venv
+<<<<<<< HEAD
+=======
+main
+.claude
+**/**/venv*
+=======
+>>>>>>> final-project-edit
 .venv
 .claude
 node_modules
 build
 package-lock.json
+<<<<<<< HEAD
 itemsNames*.json
 test.js
 תנובה.json
@@ -20,3 +32,6 @@ carre_branches.json
 
 playground/
 transform_prices.py
+=======
+ main
+>>>>>>> final-project-edit

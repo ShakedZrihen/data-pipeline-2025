@@ -1,0 +1,46 @@
+﻿<Root>
+    <ChainID>7290700100008</ChainID>
+    <SubChainID>000</SubChainID>
+    <StoreID>209</StoreID>
+    <BikoretNo>4</BikoretNo>
+    <Items>
+        <Item>
+            <PriceUpdateTime>2025-08-26T17:52:19.000</PriceUpdateTime>
+            <ItemCode>7290110465643</ItemCode>
+            <LastSaleDateTime>2025-08-26T13:44:00.000</LastSaleDateTime>
+            <ItemType>1</ItemType>
+            <ItemName>מסננת נירוסטה בצפיפות גבוהה עם 2 ידיות 28 ס&quot;מ DRAIN</ItemName>
+            <ManufactureName></ManufactureName>
+            <ManufactureCountry></ManufactureCountry>
+            <ManufactureItemDescription>מסננת נירוסטה בצפיפות גבוהה עם 2 ידיות 28 ס&quot;מ DRAIN</ManufactureItemDescription>
+            <UnitQty></UnitQty>
+            <Quantity>0</Quantity>
+            <UnitOfMeasure></UnitOfMeasure>
+            <BisWeighted>0</BisWeighted>
+            <QtyInPackage/>
+            <ItemPrice>49.90</ItemPrice>
+            <UnitOfMeasurePrice></UnitOfMeasurePrice>
+            <AllowDiscount>1</AllowDiscount>
+            <ItemStatus>1</ItemStatus>
+        </Item>
+        <Item>
+            <PriceUpdateTime>2025-06-04T17:26:11.000</PriceUpdateTime>
+            <ItemCode>7290105693341</ItemCode>
+            <LastSaleDateTime>2025-08-26T18:05:00.000</LastSaleDateTime>
+            <ItemType>1</ItemType>
+            <ItemName>מארז במבה אסם 10*25 ג&apos;</ItemName>
+            <ManufactureName>אסם השקעות בע&quot;מ</ManufactureName>
+            <ManufactureCountry>IL</ManufactureCountry>
+            <ManufactureItemDescription>מארז במבה אסם 10*25 ג&apos;</ManufactureItemDescription>
+            <UnitQty>גרם</UnitQty>
+            <Quantity>250</Quantity>
+            <UnitOfMeasure>100גרם</UnitOfMeasure>
+            <BisWeighted>0</BisWeighted>
+            <QtyInPackage/>
+            <ItemPrice>17.20</ItemPrice>
+            <UnitOfMeasurePrice>6.88</UnitOfMeasurePrice>
+            <AllowDiscount>1</AllowDiscount>
+            <ItemStatus>1</ItemStatus>
+        </Item>
+    </Items>
+</Root>

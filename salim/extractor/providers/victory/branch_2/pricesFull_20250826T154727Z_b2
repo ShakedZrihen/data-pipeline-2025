@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Prices>
+  <ChainID>7290661400001</ChainID>
+  <SubChainID>001</SubChainID>
+  <StoreID>250</StoreID>
+  <BikoretNo>000</BikoretNo>
+  <Products>
+    <Product>
+      <PriceUpdateDate>2024/07/30 15:50</PriceUpdateDate>
+      <ItemCode>5086</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>קשתית עגל ללא עצם כשר טרי **</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure />
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>79.90</ItemPrice>
+      <UnitOfMeasurePrice>79.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2025/06/24 10:25</PriceUpdateDate>
+      <ItemCode>41246</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>בשר טחון מעובד מופשר **</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure>ק"ג</UnitMeasure>
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>64.90</ItemPrice>
+      <UnitOfMeasurePrice>64.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2024/07/30 15:50</PriceUpdateDate>
+      <ItemCode>41659</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>אסאדו בלי עצם טרי**</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure />
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>79.90</ItemPrice>
+      <UnitOfMeasurePrice>79.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2025/01/22 13:29</PriceUpdateDate>
+      <ItemCode>42209</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>טחון כתף/צלעות טרי</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure />
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>64.90</ItemPrice>
+      <UnitOfMeasurePrice>64.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2020/01/12 11:24</PriceUpdateDate>
+      <ItemCode>7290000611884</ItemCode>
+      <ItemType>1</ItemType>
+      <ItemName>כבד עוף טרי ארוז.</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure />
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>29.90</ItemPrice>
+      <UnitOfMeasurePrice>29.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2023/11/26 08:25</PriceUpdateDate>
+      <ItemCode>631059</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>כבד עוף  טרי(קצביה) **.</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure>ק"ג</UnitMeasure>
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>27.90</ItemPrice>
+      <UnitOfMeasurePrice>27.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2023/09/05 08:06</PriceUpdateDate>
+      <ItemCode>7290000632759</ItemCode>
+      <ItemType>1</ItemType>
+      <ItemName>שוקיים עוף טרי (קצביה)**</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure>ק"ג</UnitMeasure>
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>37.90</ItemPrice>
+      <UnitOfMeasurePrice>37.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2023/08/07 12:11</PriceUpdateDate>
+      <ItemCode>706263</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>שוקיים עוף טרי  ארוז.</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure />
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>39.90</ItemPrice>
+      <UnitOfMeasurePrice>39.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2023/03/21 08:04</PriceUpdateDate>
+      <ItemCode>2247040</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>כבד עוף  טרי ארוז **.</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure>ק"ג</UnitMeasure>
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>24.90</ItemPrice>
+      <UnitOfMeasurePrice>24.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2024/11/13 09:01</PriceUpdateDate>
+      <ItemCode>5877360</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>כבד עוף טרי ארוז .</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure />
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>29.90</ItemPrice>
+      <UnitOfMeasurePrice>29.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2025/05/14 10:27</PriceUpdateDate>
+      <ItemCode>6706096</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>כבד עוף  טרי  ארוז.</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure />
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>24.90</ItemPrice>
+      <UnitOfMeasurePrice>24.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2023/03/21 08:04</PriceUpdateDate>
+      <ItemCode>6707468</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>כבד עוף מצונן טרי ארוז</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure />
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>24.90</ItemPrice>
+      <UnitOfMeasurePrice>24.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2022/05/02 16:48</PriceUpdateDate>
+      <ItemCode>8458023</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>כבד עוף מצונן טרי ארוז</ItemName>
+      <ManufactureName>ח.י. מעדני גורמה בעמ</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>ק"ג</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitMeasure />
+      <BisWeighted>1</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>24.90</ItemPrice>
+      <UnitOfMeasurePrice>24.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2025/08/20 10:43</PriceUpdateDate>
+      <ItemCode>7290117264683</ItemCode>
+      <ItemType>1</ItemType>
+      <ItemName>.גבינת מוצרלה עם חלבון 100ג</ItemName>
+      <ManufactureName>ג.וילי פוד איטרנשיונל בעמ***</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>י"ח</UnitQty>
+      <Quantity>100</Quantity>
+      <UnitMeasure>ל  גרם</UnitMeasure>
+      <BisWeighted>0</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>11.90</ItemPrice>
+      <UnitOfMeasurePrice>11.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+    <Product>
+      <PriceUpdateDate>2025/06/12 09:37</PriceUpdateDate>
+      <ItemCode>7290117264690</ItemCode>
+      <ItemType>1</ItemType>
+      <ItemName>גבינת מוצרלה נטולת לקטוז 100ג.</ItemName>
+      <ManufactureName>ג.וילי פוד איטרנשיונל בעמ***</ManufactureName>
+      <ManufactureCountry />
+      <ManufactureItemDescription />
+      <UnitQty>י"ח</UnitQty>
+      <Quantity>100</Quantity>
+      <UnitMeasure>ל  גרם</UnitMeasure>
+      <BisWeighted>0</BisWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>13.90</ItemPrice>
+      <UnitOfMeasurePrice>13.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <itemStatus>1</itemStatus>
+      <LastUpdateDate />
+      <LastUpdateTime />
+    </Product>
+  </Products>
+</Prices>

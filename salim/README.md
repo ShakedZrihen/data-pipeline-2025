@@ -4,11 +4,16 @@ A FastAPI application with PostgreSQL database running in Docker containers.
 
 ## 🚀 Quick Start
 
+<<<<<<< HEAD
 1. **Start all services:**
+=======
+1. **Start the services:**
+>>>>>>> final-project-edit
    ```bash
    docker-compose up --build
    ```
 
+<<<<<<< HEAD
 2. **Access the applications:**
    
    **Salim API:**
@@ -22,6 +27,13 @@ A FastAPI application with PostgreSQL database running in Docker containers.
    - **🛒 Chat Interface:** http://localhost:5173
    - **📡 Chat API:** http://localhost:3001
    - **🏥 Chat Health Check:** http://localhost:3001/health
+=======
+2. **Access the API:**
+   - API Base URL: http://localhost:8000
+   - Swagger Documentation: http://localhost:8000/docs
+   - ReDoc Documentation: http://localhost:8000/redoc
+   - Health Check: http://localhost:8000/health
+>>>>>>> final-project-edit
 
 3. **Database Connection:**
    - Host: localhost
@@ -30,6 +42,7 @@ A FastAPI application with PostgreSQL database running in Docker containers.
    - Username: postgres
    - Password: postgres
 
+<<<<<<< HEAD
 4. **Connect to PostgreSQL Database:**
    ```bash
    # Using psql command line tool
@@ -99,6 +112,13 @@ Features:
 - 🔍 **Search & Filter** - Find endpoints quickly
 - 📝 **Detailed Descriptions** - Comprehensive endpoint documentation
 - 🏪 **Organized by Tags** - Grouped by functionality (supermarkets, products, comparison, utilities)
+=======
+## 📋 Available Endpoints
+
+- `GET /` - Welcome message
+- `GET /api/v1/health` - Basic health check
+- `GET /api/v1/health/detailed` - Detailed health check with component status
+>>>>>>> final-project-edit
 
 ## 🛠️ Development
 
@@ -156,9 +176,14 @@ The application uses environment variables for configuration:
 
 ## 🐳 Docker Services
 
+<<<<<<< HEAD
 - **db**: PostgreSQL database (port 5432) with pre-loaded product data
 - **api**: Salim FastAPI application (port 8000) with REST endpoints
 - **shopping-chat**: AI-powered shopping assistant (ports 3001, 5173)
   - Chat API server on port 3001
   - React frontend on port 5173
   - Integrated with Claude AI for Hebrew conversations 
+=======
+- **api**: FastAPI application (port 8000)
+- **db**: PostgreSQL database (port 5432) 
+>>>>>>> final-project-edit
