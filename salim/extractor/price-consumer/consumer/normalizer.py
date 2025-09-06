@@ -38,13 +38,13 @@ def parse_ts(value: Optional[str | datetime]) -> datetime:
 _BRAND_RE = re.compile(r"^\s*(?:brand[:\-\s])?\s*([A-Za-z\u0590-\u05FF][^,|]*)[,|]?\s*(.+)$")
 
 def _split_brand_name(name: str) -> tuple[Optional[str], str]:
-    # naive split: "Brand, Product ..." or "Brand | Product"
+
     n = _canon(name)
     m = _BRAND_RE.match(n)
     if m:
         brand = _canon(m.group(1))
         prod  = _canon(m.group(2))
-        # Guard: avoid brand equal to product when normalization collapses spaces/punct
+        
         bcmp = _NORM_CMP.sub("", (brand or "").lower())
         pcmp = _NORM_CMP.sub("", (prod or "").lower())
         if bcmp and bcmp == pcmp:
@@ -85,5 +85,5 @@ class DataNormalizer:
         return out
 
     def normalize_promos(self, raws: Iterable[Dict]) -> List[Dict]:
-        # same shape for now
+       
         return self.normalize_prices(raws)

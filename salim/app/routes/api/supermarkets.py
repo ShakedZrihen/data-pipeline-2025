@@ -24,13 +24,13 @@ async def get_supermarkets(
     Returns a list of supermarket chains operating in the system.
     """
     try:
-        # Query to get unique providers with branch count
+       
         supermarkets = db.query(
             Branch.provider,
             func.count(Branch.branch_id).label("branch_count")
         ).group_by(Branch.provider).order_by(Branch.provider).all()
         
-        # Transform to response model
+       
         result = []
         for provider, branch_count in supermarkets:
             result.append(SupermarketResponse(
@@ -56,7 +56,7 @@ async def get_supermarket_details(
         provider: The supermarket chain name (e.g., 'shufersal', 'victory')
     """
     try:
-        # Get all branches for this provider
+        
         branches = db.query(Branch).filter(
             Branch.provider == provider
         ).all()
@@ -67,7 +67,7 @@ async def get_supermarket_details(
                 detail=f"Supermarket '{provider}' not found"
             )
         
-        # Convert branches to BranchBase models
+        
         branch_models = [BranchBase.model_validate(branch) for branch in branches]
         
         return SupermarketResponse(
@@ -100,7 +100,7 @@ async def get_supermarket_products(
         offset: Offset for pagination
     """
     try:
-        # Check if provider exists
+        
         provider_exists = db.query(Branch).filter(
             Branch.provider == provider
         ).first()
@@ -111,8 +111,7 @@ async def get_supermarket_products(
                 detail=f"Supermarket '{provider}' not found"
             )
         
-        # Build the query - get latest prices for products in this supermarket
-        # Using a subquery to get the latest price per product per branch
+       
         subquery = db.query(
             Price.product_id,
             Price.branch_id,
@@ -126,7 +125,7 @@ async def get_supermarket_products(
             Price.branch_id
         ).subquery()
         
-        # Main query joining with the latest prices
+        
         query = db.query(
             Product,
             Price,
@@ -144,38 +143,38 @@ async def get_supermarket_products(
             Branch.provider == provider
         )
         
-        # Apply search filter if provided
+        
         if search:
             query = query.filter(
                 Product.product_name.ilike(f"%{search}%")
             )
         
-        # Apply pagination
+       
         query = query.limit(limit).offset(offset)
         
-        # Execute query
+        
         results = query.all()
         
-        # Transform to response model
+        
         response = []
         for product, price, branch in results:
             response.append(ProductWithBranchResponse(
-                # Product info
+               
                 product_id=product.product_id,
                 barcode=product.barcode,
                 product_name=product.product_name,
                 brand_name=product.brand_name,
-                # Price info
+                
                 price=price.price,
                 discount_price=price.discount_price,
                 final_price=price.final_price,
                 currency="ILS",
-                # Branch info
+                
                 branch_id=branch.branch_id,
                 provider=branch.provider,
                 branch_name=branch.name,
                 city=branch.city,
-                # Timestamp
+               
                 last_updated=price.ts
             ))
         

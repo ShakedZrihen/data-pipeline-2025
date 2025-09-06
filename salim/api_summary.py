@@ -20,7 +20,7 @@ def main():
     
     print_header("ISRAELI SUPERMARKET PRICE TRACKING API - COMPLETE SUMMARY")
     
-    # 1. Check API Health
+  
     print("\n✅ API Status:")
     try:
         response = requests.get(f"{base_url}/api/v1/health/")
@@ -35,13 +35,13 @@ def main():
         print("   ❌ API is not running. Start with: uvicorn app.main:app --reload")
         return
     
-    # 2. Documentation
+    
     print("\n📚 Documentation:")
     print(f"   - Swagger UI: {base_url}/docs")
     print(f"   - ReDoc: {base_url}/redoc")
     print(f"   - OpenAPI Schema: {base_url}/openapi.json")
     
-    # 3. Available Endpoints
+   
     print("\n📍 Available Endpoints:")
     endpoints = [
         ("GET", "/api/v1/health/", "Health check"),
@@ -56,12 +56,12 @@ def main():
         print(f"   [{method}] {path}")
         print(f"        └─ {description}")
     
-    # 4. Database Status
+    
     print("\n💾 Database Status:")
     print("   - Connection: Supabase PostgreSQL (Cloud)")
     print("   - Status: Connected")
     
-    # Get counts
+ 
     response = requests.get(f"{base_url}/api/v1/supermarkets/")
     if response.status_code == 200:
         supermarkets = response.json()
@@ -69,13 +69,13 @@ def main():
     
     response = requests.get(f"{base_url}/api/v1/products?limit=1")
     if response.status_code == 200:
-        # This is an approximation since we don't have a count endpoint
+        
         print(f"   - Products: 1074+ (with prices)")
     
-    # 5. Sample Data
+   
     print("\n📊 Sample Live Data:")
     
-    # Get supermarkets
+    
     response = requests.get(f"{base_url}/api/v1/supermarkets/")
     if response.status_code == 200:
         supermarkets = response.json()
@@ -83,7 +83,7 @@ def main():
         for sm in supermarkets:
             print(f"   - {sm['provider']}: {sm['branch_count']} branches")
     
-    # Get a Hebrew product
+    
     response = requests.get(f"{base_url}/api/v1/products?name=חלב&limit=1")
     if response.status_code == 200:
         products = response.json()
@@ -94,7 +94,7 @@ def main():
             if product['price']:
                 print(f"   - Price: ₪{product['price']}")
     
-    # 6. Features
+   
     print("\n✨ Key Features:")
     features = [
         "✅ Hebrew language support for product names",
@@ -108,7 +108,7 @@ def main():
     for feature in features:
         print(f"   {feature}")
     
-    # 7. Architecture
+    
     print("\n🏗️ Architecture:")
     print("   - Framework: FastAPI (Python)")
     print("   - Database: PostgreSQL (Supabase Cloud)")
@@ -116,7 +116,7 @@ def main():
     print("   - Validation: Pydantic")
     print("   - Deployment: Docker-ready")
     
-    # 8. Data Freshness
+    
     print("\n📅 Data Information:")
     print("   - Update Frequency: Hourly (via crawler)")
     print("   - Supermarkets: Victory, Shufersal, Carrefour, Yohananof, Hazi-Hinam, Super-Pharm")

@@ -17,12 +17,12 @@ class Product(Base):
     
     product_id = Column(Integer, primary_key=True)
     barcode = Column(Text, unique=True, nullable=True)
-    product_name = Column(CITEXT, nullable=False)  # Hebrew product names
+    product_name = Column(CITEXT, nullable=False)  
     brand_name = Column(CITEXT, nullable=False, default='Unknown')
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     
-    # Relationship
+   
     prices = relationship("Price", back_populates="product", cascade="all, delete-orphan")
     
     def __repr__(self):
@@ -34,14 +34,14 @@ class Branch(Base):
     __tablename__ = 'branches'
     
     branch_id = Column(Integer, primary_key=True)
-    provider = Column(CITEXT, nullable=False, default='Unknown')  # Supermarket chain name
+    provider = Column(CITEXT, nullable=False, default='Unknown')  
     name = Column(CITEXT, nullable=False)  # Branch name
     address = Column(CITEXT, nullable=False, default='Unknown')
     city = Column(CITEXT, nullable=False, default='Unknown')
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     
-    # Relationship
+    
     prices = relationship("Price", back_populates="branch", cascade="all, delete-orphan")
     
     def __repr__(self):
@@ -58,10 +58,10 @@ class Price(Base):
     price = Column(Numeric(12, 4), nullable=False)
     discount_price = Column(Numeric(12, 4), nullable=True)
     ts = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
-    final_price = Column(Numeric(12, 4))  # Generated column: COALESCE(discount_price, price)
+    final_price = Column(Numeric(12, 4))  
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
     
-    # Relationships
+   
     product = relationship("Product", back_populates="prices")
     branch = relationship("Branch", back_populates="prices")
     

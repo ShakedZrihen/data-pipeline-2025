@@ -37,7 +37,7 @@ class DataNormalizer:
     def _to_date_iso(val: Optional[str]) -> Optional[str]:
         if not val:
             return None
-        # accept several common formats
+        
         candidates = [
             "%Y-%m-%dT%H:%M:%S",
             "%Y-%m-%d %H:%M:%S",
@@ -57,7 +57,7 @@ class DataNormalizer:
         if not u:
             return None
         u = u.strip().lower()
-        # simple harmonization; extend as needed
+       
         mapping = {
             "l": "liter",
             "lt": "liter",
@@ -93,7 +93,7 @@ class DataNormalizer:
         }
         return item
 
-    # public APIs expected by lambda
+   
     def normalize_prices(self, raws: Iterable[Dict]) -> List[Dict]:
         out: List[Dict] = []
         for r in raws:
@@ -103,5 +103,5 @@ class DataNormalizer:
         return out
 
     def normalize_promos(self, raws: Iterable[Dict]) -> List[Dict]:
-        # for now same shape; later you can add promo-specific fields (e.g., discount, valid_to)
+       
         return self.normalize_prices(raws)

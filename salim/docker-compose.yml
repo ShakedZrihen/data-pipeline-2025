@@ -23,8 +23,8 @@ services:
     build: .
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
@@ -37,13 +37,13 @@ services:
       retries: 3
       start_period: 40s
 
-  # RabbitMQ with Management UI (for local testing)
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: salim-rabbitmq
     ports:
-      - "5672:5672"    # AMQP port
-      - "15672:15672"  # Management UI
+      - "5672:5672"    
+      - "15672:15672"  
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin123}
@@ -55,7 +55,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  # MongoDB for tracking last runs
+ 
   mongodb:
     image: mongo:7
     container_name: salim-mongodb
@@ -73,28 +73,23 @@ services:
       timeout: 5s
       retries: 5
 
-  # Crawler service (comment out if running locally)
-  # crawler:
-  #   build: ./crawler
-  #   container_name: salim-crawler
-  #   environment:
-  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-  #     - AWS_REGION=${AWS_REGION:-us-east-1}
-  #     - S3_BUCKET=${S3_BUCKET:-salim-prices}
-  #     - RABBITMQ_HOST=rabbitmq
-  #     - RABBITMQ_USER=${RABBITMQ_USER:-admin}
-  #     - RABBITMQ_PASS=${RABBITMQ_PASS:-admin123}
-  #     - MONGO_URI=mongodb://${MONGO_USER:-admin}:${MONGO_PASS:-admin123}@mongodb:27017/salim_db?authSource=admin
-  #   depends_on:
-  #     - rabbitmq
-  #     - mongodb
-  #   volumes:
-  #     - ./crawler/config.json:/app/config.json
-  #     - crawler_downloads:/app/downloads
-  #   # Run every 6 hours
-  #   command: ["salim-prices", "--config", "config.json"]
-  #   restart: unless-stopped
+  
+  crawler:
+    build: ./crawler
+    container_name: salim-crawler
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION:-il-central-1}
+      - S3_BUCKET=${S3_BUCKET:-salim-prices}
+    volumes:
+      - ./crawler/config.json:/app/config.json
+      - crawler_downloads:/app/downloads
+    
+    command: ["${S3_BUCKET:-salim-prices}", "--config", "config.json"]
+    
+    restart: "no"
+   
 
 volumes:
   postgres_data: 

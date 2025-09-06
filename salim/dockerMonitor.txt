@@ -1,0 +1,12 @@
+# 🚀 Running the Project
+
+## 1. Build the Docker images
+```bash
+docker compose build
+2. Run all services
+docker compose up
+3. Run a specific service
+
+Run only the API:
+
+docker compose up api

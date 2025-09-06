@@ -43,13 +43,13 @@ async def search_products(
         offset: Offset for pagination
     """
     try:
-        # Subquery to get latest price for each product
+        
         latest_price_subquery = db.query(
             Price.product_id,
             func.max(Price.ts).label("latest_ts")
         ).group_by(Price.product_id).subquery()
         
-        # Main query
+       
         query = db.query(
             Product,
             Price.price,
@@ -67,16 +67,16 @@ async def search_products(
             )
         )
         
-        # Apply filters
+        
         if name:
             query = query.filter(Product.product_name.ilike(f"%{name}%"))
         
         if brand:
             query = query.filter(Product.brand_name.ilike(f"%{brand}%"))
         
-        # Price filters (only if we have price data)
+        
         if min_price is not None or max_price is not None or has_discount is not None:
-            query = query.filter(Price.price_id.isnot(None))  # Must have price
+            query = query.filter(Price.price_id.isnot(None))  
             
             if min_price is not None:
                 query = query.filter(Price.final_price >= min_price)
@@ -87,14 +87,14 @@ async def search_products(
             if has_discount:
                 query = query.filter(Price.discount_price.isnot(None))
         
-        # Provider filter
+        
         if provider:
             query = query.join(Branch).filter(Branch.provider == provider)
         
-        # Apply pagination
+       
         query = query.limit(limit).offset(offset)
         
-        # Execute and transform results
+        
         results = query.all()
         
         response = []
@@ -130,7 +130,7 @@ async def get_prices_by_barcode(
         barcode: The product barcode to search for
     """
     try:
-        # First check if product exists
+        
         product = db.query(Product).filter(Product.barcode == barcode).first()
         
         if not product:
@@ -139,7 +139,7 @@ async def get_prices_by_barcode(
                 detail=f"Product with barcode '{barcode}' not found"
             )
         
-        # Get latest prices for this product across all branches
+       
         latest_prices_subquery = db.query(
             Price.branch_id,
             func.max(Price.ts).label("latest_ts")
@@ -147,7 +147,7 @@ async def get_prices_by_barcode(
             Price.product_id == product.product_id
         ).group_by(Price.branch_id).subquery()
         
-        # Main query to get prices with branch information
+       
         results = db.query(
             Price,
             Branch
@@ -162,35 +162,35 @@ async def get_prices_by_barcode(
         ).filter(
             Price.product_id == product.product_id
         ).order_by(
-            Price.final_price.asc()  # Sort by price, lowest first
+            Price.final_price.asc()  
         ).all()
         
-        # Transform to response model
+       
         response = []
         for price, branch in results:
-            # Calculate savings if there's a discount
+            
             savings = None
             if price.discount_price is not None:
                 savings = price.price - price.discount_price
             
             response.append(PriceComparisonResponse(
-                # Product info
+               
                 product_id=product.product_id,
                 barcode=product.barcode,
                 product_name=product.product_name,
                 brand_name=product.brand_name,
-                # Branch info
+               
                 branch_id=branch.branch_id,
                 provider=branch.provider,
                 branch_name=branch.name,
                 city=branch.city,
-                # Price info
+                
                 price=price.price,
                 discount_price=price.discount_price,
                 final_price=price.final_price,
                 currency="ILS",
                 savings=savings,
-                # Timestamp
+               
                 last_updated=price.ts
             ))
         

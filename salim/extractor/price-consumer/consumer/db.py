@@ -19,7 +19,7 @@ class Tables:
 class DB:
     def __init__(self, dsn: str, pool_size: int, tables: Tables):
         self.tables = tables
-        # autocommit=True keeps usage simple per statement
+       
         self.pool = ConnectionPool(
             conninfo=dsn,
             min_size=1,
@@ -27,7 +27,7 @@ class DB:
             kwargs={"autocommit": True},
         )
 
-    # ---------- products ----------
+   
     def upsert_product(self, name: str, brand: Optional[str], barcode: Optional[str]) -> int:
         sch, tp = self.tables.schema, self.tables.products
         with self.pool.connection() as conn, conn.cursor() as cur:
@@ -44,7 +44,7 @@ class DB:
                     (barcode, name, brand),
                 )
                 return cur.fetchone()[0]
-            # fallback by (name, brand) to avoid dup rows where barcode missing
+           
             cur.execute(
                 f"""
                 SELECT product_id
@@ -68,7 +68,7 @@ class DB:
             )
             return cur.fetchone()[0]
 
-    # ---------- branches ----------
+   
     def get_or_create_branch(self, provider: str, name: str, address: Optional[str], city: Optional[str]) -> int:
         sch, tb = self.tables.schema, self.tables.branches
         with self.pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
@@ -103,7 +103,7 @@ class DB:
                 (product_id, branch_id, price, discount_price, ts),
             )
 
-    # ---------- batch helper ----------
+   
     def batch_ingest(
         self,
         items: Iterable[dict],

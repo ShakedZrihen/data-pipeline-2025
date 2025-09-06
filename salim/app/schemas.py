@@ -9,7 +9,7 @@ from datetime import datetime
 from decimal import Decimal
 
 
-# ============== Base Schemas ==============
+
 
 class ProductBase(BaseModel):
     """Base product schema with common fields."""
@@ -46,7 +46,7 @@ class PriceBase(BaseModel):
         from_attributes = True
 
 
-# ============== Response Schemas ==============
+
 
 class SupermarketResponse(BaseModel):
     """Response schema for supermarket/provider."""
@@ -64,7 +64,7 @@ class ProductResponse(BaseModel):
     barcode: Optional[str] = None
     product_name: str
     brand_name: str
-    # Latest price info
+    
     price: Optional[Decimal] = None
     discount_price: Optional[Decimal] = None
     final_price: Optional[Decimal] = None
@@ -77,22 +77,22 @@ class ProductResponse(BaseModel):
 
 class ProductWithBranchResponse(BaseModel):
     """Response schema for product with price and branch info."""
-    # Product info
+   
     product_id: int
     barcode: Optional[str] = None
     product_name: str
     brand_name: str
-    # Price info
+   
     price: Decimal
     discount_price: Optional[Decimal] = None
     final_price: Decimal
     currency: str = Field(default="ILS")
-    # Branch info
+    
     branch_id: int
     provider: str
     branch_name: str
     city: str
-    # Timestamp
+   
     last_updated: datetime
     
     class Config:
@@ -101,30 +101,30 @@ class ProductWithBranchResponse(BaseModel):
 
 class PriceComparisonResponse(BaseModel):
     """Response schema for price comparison across branches."""
-    # Product info
+    
     product_id: int
     barcode: str
     product_name: str
     brand_name: str
-    # Branch info
+   
     branch_id: int
     provider: str = Field(..., description="Supermarket chain")
     branch_name: str
     city: str
-    # Price info
+   
     price: Decimal
     discount_price: Optional[Decimal] = None
     final_price: Decimal
     currency: str = Field(default="ILS")
     savings: Optional[Decimal] = Field(None, description="Savings if on discount")
-    # Timestamp
+    
     last_updated: datetime
     
     class Config:
         from_attributes = True
 
 
-# ============== Request Schemas ==============
+
 
 class ProductSearchRequest(BaseModel):
     """Request schema for product search."""
@@ -138,7 +138,7 @@ class ProductSearchRequest(BaseModel):
     offset: int = Field(0, ge=0, description="Offset for pagination")
 
 
-# ============== Health Check Schemas ==============
+
 
 class HealthResponse(BaseModel):
     """Response schema for health check."""

@@ -1,7 +1,5 @@
 
-# -----------------------------------------------------------------------------
-# s3_handler.py (updated, backward‑compatible)
-# -*- coding: utf-8 -*-
+
 from __future__ import annotations
 
 import gzip
@@ -47,7 +45,7 @@ class S3Handler:
     def __init__(self, s3_client=None):
         self.s3 = s3_client or boto3.client("s3")
 
-    # ---------- key helpers ----------
+  
 
     @staticmethod
     def decoded_key(raw_key: str) -> str:
@@ -74,7 +72,7 @@ class S3Handler:
         chunk = m.group("chunk")
         return provider, branch, file_type, ts_str, chunk
 
-    # ---------- downloads (gzip stream) ----------
+ 
 
     def open_gzip_stream(self, bucket: str, raw_key: str) -> gzip.GzipFile:
         """
@@ -88,29 +86,29 @@ class S3Handler:
             if k not in candidates:
                 candidates.append(k)
 
-        # 1) Existing behavior: unquote_plus (turns '+' into space)
+       
         _add(self.decoded_key(raw_key))
-        # 2) As-is from the event (already-quoted or pre-decoded in some cases)
+        
         _add(raw_key)
-        # 3) Percent-decoding only (does NOT replace '+')
+        
         _add(unquote(raw_key))
 
         last_err: Optional[Exception] = None
         for key in candidates:
             try:
                 obj = self.s3.get_object(Bucket=bucket, Key=key)
-                body = obj["Body"]  # botocore.response.StreamingBody
-                # Wrap StreamingBody in a buffer to make gzip reads robust
+                body = obj["Body"]  
+                
                 return gzip.GzipFile(fileobj=io.BufferedReader(body), mode="rb")
             except ClientError as e:
                 code = (e.response.get("Error") or {}).get("Code")
                 if code in ("NoSuchKey", "404"):
                     last_err = e
-                    continue  # try the next candidate
-                # AccessDenied or other errors should bubble up
+                    continue  
+                
                 raise
 
-        # If we got here, every candidate hit NoSuchKey -> list siblings to help debugging
+        
         try:
             parent = candidates[0].rsplit("/", 1)[0] if "/" in candidates[0] else ""
             resp = self.s3.list_objects_v2(
@@ -124,14 +122,14 @@ class S3Handler:
                 candidates, nearby
             )
         except Exception:
-            # Don't mask the original error with listing issues
+            
             pass
 
         if last_err:
             raise last_err
         raise RuntimeError("Unexpected: failed to open gzip stream and no error captured.")
 
-    # ---------- uploads ----------
+ 
 
     def upload_file(self, bucket: str, key: str, data: bytes, content_type: str = "application/octet-stream"):
         self.s3.put_object(
@@ -143,7 +141,6 @@ class S3Handler:
         )
         logger.info("Uploading s3://%s/%s (%d bytes)", bucket, key, len(data))
 
-    # Convenience wrappers (non‑breaking)
 
     def upload_json(self, bucket: str, key: str, obj: Any) -> None:
         """Upload a small JSON object with proper content-type and UTF‑8 encoding."""

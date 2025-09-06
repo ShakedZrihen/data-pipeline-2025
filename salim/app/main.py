@@ -11,7 +11,7 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Add CORS middleware
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,7 +25,7 @@ async def root():
     """Root endpoint"""
     return {"message": "Welcome to Salim API!"}
 
-# Include API routes
+
 app.include_router(api_router)
 
 if __name__ == "__main__":

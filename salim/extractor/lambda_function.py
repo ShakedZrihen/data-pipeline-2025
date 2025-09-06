@@ -37,14 +37,14 @@ from typing import Any, Dict, List, Optional, Union
 
 import boto3
 
-# Flexible imports (flat vs src/ layout)
+
 try:
     from src.s3_handler import S3Handler
     from src.xml_processor import XMLProcessor
     from src.normalizer import DataNormalizer
     from src.sqs_producer import MessageProducer
     from src.db_handler import DatabaseHandler
-except ImportError:  # Lambda flat layout
+except ImportError:  
     from s3_handler import S3Handler
     from xml_processor import XMLProcessor
     from normalizer import DataNormalizer
@@ -54,7 +54,7 @@ except ImportError:  # Lambda flat layout
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# Reused singletons across invokes
+
 _s3_client = boto3.client("s3")
 _s3 = S3Handler(_s3_client)
 _xml = XMLProcessor()
@@ -96,12 +96,12 @@ def _chunk_suffix(chunk: Optional[Union[int, str]]) -> str:
     if not s:
         return ""
     if s.startswith("_b"):
-        return s                         # already normalized
+        return s                         
     if s.startswith("b") and s[1:].isdigit():
-        return f"_{s}"                   # 'b2' -> '_b2'
+        return f"_{s}"                   
     if s.isdigit():
-        return f"_b{s}"                  # '2' -> '_b2'
-    # Fallback: preserve but ensure it starts with underscore
+        return f"_b{s}"                  
+ 
     return s if s.startswith("_") else f"_{s}"
 
 
@@ -133,7 +133,7 @@ def _iter_item_chunks(envelope: dict, items_iter, max_bytes: int, max_items: int
             chunk.append(item)
         else:
             if not chunk:
-                # Extremely large single item (shouldn't happen) – send it alone
+                
                 yield [item]
                 chunk = []
             else:
@@ -170,7 +170,7 @@ def _process_streaming_and_upload(
     """
     out_bucket = _OUTPUT_BUCKET or bucket
 
-    # --- Chunked-to-SQS mode (no pointers) ---
+    
     if _SQS_CHUNK_MODE:
         gid_src = f"{provider}|{branch}|{file_type}|{file_ts}|{_s3.decoded_key(raw_key)}"
         group_id = hashlib.sha1(gid_src.encode("utf-8")).hexdigest()
@@ -198,10 +198,10 @@ def _process_streaming_and_upload(
             total_items += len(items)
             env = dict(envelope)
             env["chunk_seq"] = chunk_seq
-            env["chunk_total"] = None  # unknown until finished
+            env["chunk_total"] = None  
             _producer.send_chunk(env, items)
 
-        # Final manifest
+       
         manifest = dict(envelope)
         manifest["kind"] = "manifest"
         manifest["chunk_total"] = chunk_seq
@@ -221,10 +221,10 @@ def _process_streaming_and_upload(
             "s3_mode": False,
         }
 
-    # --- Legacy S3 upload mode (pointer message) ---
+   
     out_key = _build_output_key(provider, branch, file_type, file_ts, chunk)
 
-    # stream -> write JSON array to /tmp -> upload to S3
+   
     tmp_path = "/tmp/items.json"
     items_count = 0
     sample_items: List[Dict[str, Any]] = []
@@ -283,7 +283,7 @@ def _process_streaming_and_upload(
     return message
 def process_s3_record(record: Dict[str, Any]) -> Dict[str, Any]:
     bucket = record["s3"]["bucket"]["name"]
-    raw_key = record["s3"]["object"]["key"]  # may be URL-encoded (Hebrew/spaces/+)
+    raw_key = record["s3"]["object"]["key"] 
     size = int(record["s3"]["object"].get("size", 0))
 
     provider, branch, file_type, file_ts, chunk = _s3.parse_s3_key(raw_key)

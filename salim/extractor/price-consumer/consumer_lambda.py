@@ -1,23 +1,23 @@
 
-# --- PATCHED BY ASSISTANT (AI-enriched v3 + pg8000/psycopg2 fallback) ---
+
 import os, sys, json, logging, base64, gzip, urllib.request
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
 """Lambda consumer: ensure vendored deps importable before any optional imports."""
-# Ensure vendored libs in ./package are importable in AWS Lambda zip
+
 try:
     _pkg = os.path.join(os.path.dirname(__file__), "package")
     if _pkg not in sys.path:
-        sys.path.append(_pkg)  # append so local modules take precedence
+        sys.path.append(_pkg)  
 except Exception:
     pass
 
 import boto3
-from pg_resilient import from_env as _pg_from_env__probe  # optional import for type hints
+from pg_resilient import from_env as _pg_from_env__probe  
 
-# Try pg8000 first, fall back to psycopg2
+
 _db_mode = "pg8000"
 try:
     import pg8000
@@ -41,7 +41,7 @@ logger.setLevel(LOG_LEVEL)
 LOG_EMPTY_INFO = (os.getenv("LOG_EMPTY_INFO","false").lower() in ("1","true","yes","on"))
 FILL_NULL_DISCOUNT = (os.getenv("FILL_NULL_DISCOUNT","true").lower() in ("1","true","yes","on"))
 
-# ----------------- Utils -----------------
+
 
 def _json_loads_maybe_base64(s: str):
     try: return json.loads(s)
@@ -101,7 +101,7 @@ def _bool_env(name: str, default: bool = False) -> bool:
     v = os.getenv(name)
     return (v or "").strip().lower() in ("1","true","yes","y","on") if v is not None else default
 
-# ----------------- OpenAI (JSON mode) + simple cache -----------------
+
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 _enrich_cache: Dict[tuple, Any] = {}
@@ -167,7 +167,7 @@ def enrich_brand(product_name: str, current_brand: Optional[str]):
     _enrich_cache[key] = brand
     return brand
 
-# ----------------- Deterministic enrichment (no external services) -----------------
+
 import re
 
 def _canon_text(s: str) -> str:
@@ -180,7 +180,6 @@ def _canon_text(s: str) -> str:
 def _canon_branch_key(provider: str, branch: str) -> str:
     return f"{_canon_text(provider)}|{_canon_text(branch)}"
 
-# Seed mapping; extend over time or load from DB/S3 at cold start
 BRANCH_MAP = {
     _canon_branch_key("victory", "תל אביב - אבן גבירול 100"): ("תל אביב-יפו", "אבן גבירול 100"),
     _canon_branch_key("yohananof", "תל אביב - יפו"): ("תל אביב-יפו", "דרך שלמה 90"),
@@ -195,7 +194,7 @@ def enrich_branch_deterministic(provider: str, branch_name: str) -> tuple[str, s
         kp, kb = k.split("|", 1)
         if kp == p and (kb.startswith(b) or b.startswith(kb) or kb in b or b in kb):
             return city, addr
-    # Log once for missing mapping to help curation
+    
     try:
         ck = _canon_branch_key(provider, branch_name)
         logger.info(f"Missing branch mapping for provider='{provider}' branch='{branch_name}' canon='{ck}'")
@@ -237,20 +236,20 @@ def _seed_default_brand_aliases() -> None:
 def _strip_non_alnum_hebrew(s: str) -> str:
     return re.sub(r"[^\w\u0590-\u05FF]+", "", s or "")
 
-# Keep Hebrew/Latin letters, digits and spaces, collapse multi-spaces
+
 def _keep_words_spaces(s: str) -> str:
     s = re.sub(r"[^A-Za-z\u0590-\u05FF0-9 ]+", " ", s or "")
     return re.sub(r"\s+", " ", s).strip()
 
-# For equality/containment comparisons ignoring punctuation/spacing
+
 def _norm_compare(s: Optional[str]) -> str:
     return re.sub(r"[^A-Za-z0-9\u0590-\u05FF]+", "", (s or "").lower())
 
-# If a string is a repeated concatenation (e.g., X+X), try to dedupe.
+
 def _dedupe_repeated_concat(s: str) -> str:
     if not s:
         return s
-    # Only try when there are no spaces, as this is typical for the bad cases
+    
     if " " in s:
         return s
     norm = _norm_compare(s)
@@ -258,7 +257,7 @@ def _dedupe_repeated_concat(s: str) -> str:
     if n % 2 == 0:
         mid = n // 2
         if norm[:mid] == norm[mid:]:
-            # Heuristic: just cut the raw string in half
+            
             return s[: max(1, len(s) // 2)]
     return s
 
@@ -301,7 +300,7 @@ def extract_brand_and_clean_name(product_name: str) -> tuple[Optional[str], str]
         if alias in compact:
             brand = BRAND_ALIASES[alias]
             break
-    # Guard: don't accept brand that equals the whole product (after normalization)
+    
     if brand and _norm_compare(brand) == _norm_compare(raw):
         brand = None
     clean = raw
@@ -309,7 +308,7 @@ def extract_brand_and_clean_name(product_name: str) -> tuple[Optional[str], str]
         clean = _remove_brand_preserve_delims(clean, brand)
     return (brand or None), (clean or raw).strip()
 
-# Heuristic extractor for Hebrew product strings when aliases miss
+
 HE_HEURISTIC_DESCRIPTORS = [
     "חלב", "יוגורט", "גבינה", "מעדן", "משקה", "שוקולד", "חטיף", "עוגיות",
     "טחינה", "מיונז", "מרגרינה", "קפה", "תה", "בקבוק", "מיץ", "בירה",
@@ -320,14 +319,14 @@ def heuristic_brand_from_product(product_name: str) -> Optional[str]:
     if not product_name:
         return None
     s = _dedupe_repeated_concat(str(product_name))
-    # Work with a tokenized version that preserves spaces between words
+   
     tokens_line = _keep_words_spaces(s)
     if not tokens_line:
         return None
     words = tokens_line.split()
     if not words:
         return None
-    # Common non-brand descriptors to skip at the start
+    
     DESCR_SKIP = {
         "חדש", "מבצע", "מארז", "חבילה", "אריזה", "שלישית", "זוג", "תלת", "דאבל",
         "גדול", "קטן", "XL", "L", "M", "S", "מיני", "ענק", "בינוני",
@@ -338,28 +337,28 @@ def heuristic_brand_from_product(product_name: str) -> Optional[str]:
     if i >= len(words):
         return None
     cand = words[i]
-    # Guard: if candidate looks like the entire product (normalized), drop it
+   
     if _norm_compare(cand) == _norm_compare(s):
         return None
-    # Prefer short brand tokens; too-long tokens are unlikely brands
+   
     if len(cand) > 24:
         return None
-    # If the token is merged (brand+descriptor), try to split at internal descriptors
+    
     INTERNAL_SPLIT = [
-        "חלב",  # milk
-        "דבש",  # honey
-        "מעדן",  # dessert/yogurt
-        "שוקולד",  # chocolate
-        "בניחוח", "ניחוח",  # scented/with scent
-        "אלוורה", "אלו-ורה", "אלוורה",  # aloe vera variants
+        "חלב",  
+        "דבש",  
+        "מעדן",  
+        "שוקולד", 
+        "בניחוח", "ניחוח",  
+        "אלוורה", "אלו-ורה", "אלוורה",  
     ]
     for sub in INTERNAL_SPLIT:
         idx = cand.find(sub)
-        if idx >= 3:  # need at least a few chars to be a plausible brand
+        if idx >= 3:  
             part = cand[:idx].strip()
             if 2 <= len(part) <= 24:
                 return part
-    # Avoid picking obvious product category words as brand (e.g., "שוקולד...")
+    
     NON_BRAND_PREFIXES = {
         "שוקולד", "סבון", "שמפו", "מרכך", "קרם", "תחליב", "ג'ל", "גל", "נייר", "מגבת",
     }
@@ -401,10 +400,10 @@ def derive_discount(price, *, promo_price=None, discount_amount=None, discount_p
         return cand, p
     return None, p
 
-# ----------------- S3 pointer fetch -----------------
+
 _s3 = boto3.client("s3")
 
-# Optional: load enrichment maps from S3 at cold start so you can update without redeploy
+
 def _load_json_from_s3(bucket: Optional[str], key: Optional[str]) -> Optional[dict]:
     if not bucket or not key:
         return None
@@ -417,8 +416,7 @@ def _load_json_from_s3(bucket: Optional[str], key: Optional[str]) -> Optional[di
         return None
 
 def _init_enrichment_maps():
-    # Branch map format expected:
-    # { "victory": { "branch_1": {"city":"...","address":"..."}, ... }, "yohananof": { ... } }
+
     b_bucket = os.getenv("BRANCH_MAP_S3_BUCKET")
     b_key = os.getenv("BRANCH_MAP_S3_KEY")
     branch_json = _load_json_from_s3(b_bucket, b_key)
@@ -436,7 +434,7 @@ def _init_enrichment_maps():
         if count:
             logger.info(f"Loaded {count} branch mappings from S3")
 
-    # Also support inline JSON via env var BRANCH_MAP_INLINE_JSON
+
     inline = os.getenv("BRANCH_MAP_INLINE_JSON")
     if inline:
         try:
@@ -455,8 +453,7 @@ def _init_enrichment_maps():
         except Exception as e:
             logger.warning(f"Failed to parse BRANCH_MAP_INLINE_JSON: {e}")
 
-    # Brand aliases format expected:
-    # { "תנובה": ["תנובה","tnuva"], "קוקה-קולה": ["קוקהקולה","cocacola"] }
+
     a_bucket = os.getenv("BRAND_ALIASES_S3_BUCKET")
     a_key = os.getenv("BRAND_ALIASES_S3_KEY")
     alias_json = _load_json_from_s3(a_bucket, a_key)
@@ -472,7 +469,7 @@ def _init_enrichment_maps():
         if added:
             logger.info(f"Loaded {added} brand aliases from S3")
 
-    # Also support inline JSON via env var BRAND_ALIASES_INLINE_JSON
+    
     inline_alias = os.getenv("BRAND_ALIASES_INLINE_JSON")
     if inline_alias:
         try:
@@ -509,7 +506,50 @@ def _fetch_items_from_s3(bucket: str, key: str) -> List[dict]:
     if isinstance(data, list): return data
     return []
 
-# ----------------- Message extraction -----------------
+_provider_stores_cache: Dict[str, list] = {}
+
+def _load_provider_stores(provider: str) -> list:
+    """Load provider stores list from S3 mapping (mappings/<provider>_stores.json). Cached per cold start."""
+    prov = (provider or '').strip()
+    if not prov:
+        return []
+    if prov in _provider_stores_cache:
+        return _provider_stores_cache[prov]
+    bucket = os.getenv("BRANCH_MAP_S3_BUCKET")
+    key = f"mappings/{prov}_stores.json"
+    data = _load_json_from_s3(bucket, key)
+    stores = []
+    if isinstance(data, dict) and isinstance(data.get('stores'), list):
+        stores = data['stores']
+    _provider_stores_cache[prov] = stores
+    return stores
+
+def _clean_field(val: Optional[str]) -> Optional[str]:
+    if val is None:
+        return None
+    s = str(val).strip()
+    return s if s else None
+
+def _filter_physical_stores(stores: list) -> list:
+    """Return a filtered list of likely physical stores.
+    Filters out entries with:
+      - empty or numeric-only city (e.g., '0')
+      - address that looks like a URL
+    Keeps ordering of remaining entries.
+    """
+    out = []
+    for st in stores or []:
+        if not isinstance(st, dict):
+            continue
+        city = _clean_field(st.get('city'))
+        addr = (st.get('address') or '').strip().lower()
+        # Skip obvious non-physical entries
+        if not city and (addr.startswith('http') or not addr):
+            continue
+        out.append(st)
+    return out
+
+
 def _extract_items_and_meta(msg: dict):
     kind = _ensure_str(msg.get("kind", ""), "")
     if not kind and ("chunk_seq" in msg or "chunk" in msg): kind = "chunk"
@@ -551,7 +591,7 @@ def _parse_record_body(body: str):
             if inner is not None: obj = inner
     return obj if isinstance(obj, dict) else None
 
-# ----------------- Database -----------------
+
 class DB:
     def __init__(self):
         self.url = os.getenv("SUPABASE_DB_URL") or os.getenv("DATABASE_URL")
@@ -636,15 +676,15 @@ class DB:
         c = self.conn.cursor(); c.execute(qset); c.execute(qins, (product_id, branch_id, price, discount_price, ts))
         self.conn.commit(); c.close()
 
-# ----------------- Normalization -----------------
+
 def _normalize_item(item: dict, provider: str):
     product = item.get("product") or item.get("name") or item.get("product_name") or item.get("description") or ""
     product = str(product).strip()
     brand = item.get("brand") or item.get("brand_name") or item.get("manufacturer")
     brand = str(brand).strip() if brand else None
-    # Deterministic brand enrichment
+    
     if not brand or brand.strip() == "" or brand.lower() in {"unknown", "לא ידוע"}:
-        # 1) From nested meta (if producer/manufacturer provided)
+       
         meta = item.get("meta") if isinstance(item.get("meta"), dict) else {}
         for k in ("manufacturer", "brand", "supplier", "producer"):
             v = (meta.get(k) if meta else None)
@@ -652,20 +692,20 @@ def _normalize_item(item: dict, provider: str):
                 brand = str(v).strip()
                 break
     if not brand or brand.strip() == "" or brand.lower() in {"unknown", "לא ידוע"}:
-        # 2) Alias match within product string
+        
         ext_brand, clean_name = extract_brand_and_clean_name(product)
         if ext_brand:
             brand = ext_brand
             product = clean_name
     if not brand or brand.strip() == "" or brand.lower() in {"unknown", "לא ידוע"}:
-        # 3) Heuristic from Hebrew product descriptors
+        
         hb = heuristic_brand_from_product(product)
         if hb:
-            # Map heuristic token through aliases if possible for canonical display
+          
             key = _strip_non_alnum_hebrew(hb).lower()
             display = BRAND_ALIASES.get(key)
             brand = display or hb
-            # try to remove brand from product using whitespace-boundary replacement
+            
             try:
                 patt = re.compile(rf"(^|\s){re.escape(brand)}(\s|$)", re.IGNORECASE | re.UNICODE)
                 product = patt.sub(" ", product)
@@ -718,12 +758,31 @@ def lambda_handler(event, context=None):
 
             provider = _ensure_str(meta.get("provider"), default="Unknown Provider")
             name = _ensure_str(branch.get("name"), default="Unknown Branch")
-            # Deterministic city/address enrichment
-            en_city, en_addr = enrich_branch_deterministic(provider, name)
+           
+            en_city = en_addr = None
+            try:
+                import re as _re
+                m = _re.match(r"^branch_(\d+)$", name)
+                if m:
+                    idx = int(m.group(1)) - 1
+                    stores = _load_provider_stores(provider)
+                    if isinstance(stores, list):
+                        phys = _filter_physical_stores(stores)
+                        target_list = phys if phys else stores
+                        if 0 <= idx < len(target_list):
+                            st = target_list[idx]
+                            if isinstance(st, dict):
+                                en_city = _clean_field(st.get('city'))
+                                en_addr = _clean_field(st.get('address'))
+            except Exception:
+                pass
+            if not en_city and not en_addr:
+               
+                en_city, en_addr = enrich_branch_deterministic(provider, name)
             city = en_city or "Unknown"
             address = en_addr or "Unknown"
 
-            # Call upsert_branch in a way that supports both signatures
+            
             try:
                 branch_id = db.upsert_branch(name=name, address=address, city=city)
             except TypeError:
@@ -749,7 +808,7 @@ def lambda_handler(event, context=None):
 
 
 
-# === BEGIN MONKEY-PATCH: resilient DB for Lambda ===
+
 try:
     from pg_resilient import from_env as _pg_from_env
     _HAS_RESILIENT = True
@@ -760,14 +819,14 @@ if _HAS_RESILIENT:
     _OldDB = DB
 
     def _DB___init__(self):
-        # Keep table/schema envs from original
+     
         self.url = os.getenv("SUPABASE_DB_URL") or os.getenv("DATABASE_URL")
         self.schema = os.getenv("DB_SCHEMA","public")
         self.t_products = os.getenv("TABLE_PRODUCTS","products")
         self.t_branches = os.getenv("TABLE_BRANCHES","branches")
         self.t_prices = os.getenv("TABLE_PRICES","prices")
 
-        # If only DATABASE_URL is set, derive PG* vars for the resilient client
+        
         if self.url:
             if self.url.startswith("postgres://"):
                 self.url = "postgresql://" + self.url[len("postgres://"):]
@@ -776,21 +835,21 @@ if _HAS_RESILIENT:
             _host, _port = _p.hostname, _p.port or 5432
             _user, _pwd = _p.username, _p.password
             _db = _p.path.lstrip("/") if _p.path else ""
-            # Populate env if missing
+           
             os.environ.setdefault("PGHOST", _host or "")
             os.environ.setdefault("PGPORT", str(_port))
             os.environ.setdefault("PGUSER", _user or "")
             os.environ.setdefault("PGPASSWORD", _pwd or "")
             os.environ.setdefault("PGDATABASE", _db or "")
-            # If Supabase pooled is desired, user can set PGPORT=6543 and PGPOOL=true externally
+            
 
-        self.db = _pg_from_env()  # resilient client
+        self.db = _pg_from_env() 
         try:
             self.db.ensure()
         except Exception as e:
             raise RuntimeError(f"DB init failed: {e}")
 
-        self.conn = None  # disable old raw connection
+        self.conn = None  
 
     def _DB_upsert_branch(self, provider, name, address, city) -> int:
         qset = f"SET search_path TO {self.schema}"
@@ -839,13 +898,13 @@ if _HAS_RESILIENT:
     DB.upsert_branch = _DB_upsert_branch
     DB.upsert_product = _DB_upsert_product
     DB.insert_price = _DB_insert_price
-# === END MONKEY-PATCH ===
 
 
 
-# === BEGIN MONKEY-PATCH v2: Use ON CONFLICT for idempotent upserts ===
+
+
 def _DB_upsert_branch_v2(self, name, address, city) -> int:
-    # Normalize "unknown-ish" fields
+    
     def _nz(v, default="Unknown"):
         if v is None: return default
         vs = str(v).strip()
@@ -891,7 +950,7 @@ def _DB_upsert_product_v2(self, product_name, brand_name, barcode) -> int:
         row = self.db.execute(q, (barcode_v, product_v, brand_v), fetch="one")
         return row[0][0] if row and row[0] else None
 
-    # No barcode: rely on your partial unique index
+   
     q = f"""        INSERT INTO {self.t_products} (barcode, product_name, brand_name)
         VALUES (NULL, %s, %s)
         ON CONFLICT ON CONSTRAINT ux_products_name_brand_when_no_barcode
@@ -901,16 +960,16 @@ def _DB_upsert_product_v2(self, product_name, brand_name, barcode) -> int:
     row = self.db.execute(q, (product_v, brand_v), fetch="one")
     return row[0][0] if row and row[0] else None
 
-# Activate v2 upserts
+
 DB.upsert_branch = _DB_upsert_branch_v2
 DB.upsert_product = _DB_upsert_product_v2
-# === END MONKEY-PATCH v2 ===
 
 
-# === BEGIN MONKEY-PATCH v3: Field enrichment (city/address/brand) + barcode upgrade ===
+
+
 import json as _json, urllib.request as _urlreq, urllib.error as _urlerr, socket as _socket, re as re
 
-# Minimal Israeli city list (extend as needed)
+
 _IL_CITIES = {
     "tel aviv", "tel-aviv", "tlv", "jerusalem", "haifa", "beer sheva", "beersheba", "be'er sheva",
     "ashdod", "ashkelon", "netanya", "holon", "ramat gan", "rishon lezion", "rishon lezion",
@@ -933,7 +992,7 @@ def _infer_city_from_name(name):
     best = None
     for c in _IL_CITIES:
         if c in n:
-            # normalize a few
+            
             if c in ("tlv", "tel-aviv"): return "Tel Aviv"
             if c == "beer sheva" or c == "beersheba" or c == "be'er sheva": return "Beer Sheva"
             if c == "rishon lezion": return "Rishon LeZion"
@@ -965,21 +1024,21 @@ def _openai_json(system, prompt, schema_hint=None, timeout=1.8):
         with _urlreq.urlopen(req, timeout=timeout) as resp:
             data = _json.loads(resp.read().decode("utf-8"))
             txt = data["choices"][0]["message"]["content"]
-            # try to find JSON object in response
+            
             m = re.search(r"\{[\s\S]*\}", txt)
             if m:
                 return _json.loads(m.group(0))
-            # fallback: naive parse
+            
             return None
     except (_urlerr.URLError, _socket.timeout, KeyError, ValueError):
         return None
 
 def enrich_branch_fields(name, address, city):
-    # Heuristic city from name
+    
     city_h = _infer_city_from_name(name)
     address_h = None
 
-    # If still missing and OpenAI is available, ask it to parse
+    
     final_city = _nz(city, default=city_h or "Unknown")
     final_address = _nz(address, default="Unknown")
 
@@ -995,13 +1054,13 @@ def enrich_branch_fields(name, address, city):
             a = _nz(js.get("address"), default=final_address)
             final_city, final_address = c, a
 
-    # If heuristic city better than Unknown, prefer it
+    
     if city_h and final_city == "Unknown":
         final_city = city_h
     return final_address, final_city
 
 _BRAND_HINTS = {
-    # add common brands you see
+    
     "tnuva","tara","elita","nescafe","coca-cola","sprite","fanta","pepsi","osem","strauss",
     "milka","nutella","heinz","hellmann's","prigat","tapuzina","sano","tofes","assaf",
 }
@@ -1009,7 +1068,7 @@ _BRAND_HINTS = {
 def enrich_product_fields(product_name, brand_name):
     p = _normtxt(product_name)
     b = _normtxt(brand_name)
-    # Simple heuristic: if brand unknown, try first token(s) until a size/number
+    
     if not b or b.lower() == "unknown":
         toks = p.split()
         lead = []
@@ -1022,7 +1081,7 @@ def enrich_product_fields(product_name, brand_name):
         guess = " ".join(lead).strip()
         if guess and guess.lower() in _BRAND_HINTS:
             b = guess
-    # Optional LLM refinement if still Unknown
+    
     if not b or b.lower() == "unknown":
         js = _openai_json(
             "Split a grocery product name into brand and normalized product name. "
@@ -1036,7 +1095,7 @@ def enrich_product_fields(product_name, brand_name):
             return p2, b2
     return p, (b if b else "Unknown")
 
-# Override branch upsert to enrich before write (keeps same ON CONFLICT logic)
+
 def _DB_upsert_branch_v3(self, provider, name, address, city) -> int:
     addr_v, city_v = enrich_branch_fields(name, address, city)
     qset = f"SET search_path TO {self.schema}"
@@ -1051,7 +1110,7 @@ def _DB_upsert_branch_v3(self, provider, name, address, city) -> int:
     return row[0][0] if row and row[0] else None
 
 
-# Upgrade no-barcode product to have barcode if it matches on (name,brand)
+
 def _try_upgrade_barcode(self, product_name, brand_name, barcode):
     if not barcode: return None
     q = f"""        UPDATE {self.t_products}
@@ -1069,13 +1128,13 @@ def _try_upgrade_barcode(self, product_name, brand_name, barcode):
     return row[0][0] if row and row[0] else None
 
 def _DB_upsert_product_v3(self, product_name, brand_name, barcode) -> int:
-    # Enrich fields first
+   
     p_v, b_v = enrich_product_fields(product_name, brand_name)
     b_v = b_v or "Unknown"
     bc_v = (_normtxt(barcode) or None) if barcode is not None else None
 
     self.db.execute(f"SET search_path TO {self.schema}")
-    # First try to upgrade existing no-barcode row
+   
     if bc_v:
         upid = _try_upgrade_barcode(self, p_v, b_v, bc_v)
         if upid:
@@ -1102,7 +1161,7 @@ def _DB_upsert_product_v3(self, product_name, brand_name, barcode) -> int:
     row = self.db.execute(q, (p_v, b_v), fetch="one")
     return row[0][0] if row and row[0] else None
 
-# Activate enrichment overrides
+
 DB.upsert_branch = _DB_upsert_branch_v3
 DB.upsert_product = _DB_upsert_product_v3
-# === END MONKEY-PATCH v3 ===
+

@@ -1,6 +1,5 @@
 
-# message_producer.py (updated, backward‑compatible)
-# -*- coding: utf-8 -*-
+
 from __future__ import annotations
 import json
 import logging
@@ -15,7 +14,6 @@ from botocore.exceptions import BotoCoreError, ClientError
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# RabbitMQ optional support (TRANSPORT=rabbitmq)
 try:
     import pika  # type: ignore
 except Exception:  # pragma: no cover
@@ -69,28 +67,28 @@ class MessageProducer:
         if self.transport == "sqs" and not self.sqs_queue_url:
             raise RuntimeError("SQS_QUEUE_URL is required for SQS transport")
 
-        # New, optional behavior (off by default unless env set)
+       
         if skip_if_empty is None:
             env_val = os.getenv("SKIP_EMPTY_MESSAGES", "").strip().lower()
             skip_if_empty = env_val in {"1", "true", "yes", "on"}
         self.skip_if_empty = bool(skip_if_empty)
 
-        # FIFO detection and options
+        
         self._is_fifo = bool(self.sqs_queue_url and self.sqs_queue_url.endswith(".fifo"))
-        self.fifo_group_id = fifo_group_id  # optional explicit group id
+        self.fifo_group_id = fifo_group_id  
         self.enable_fifo_autodedup = bool(enable_fifo_autodedup)
 
-    # ----------------------------- public API -----------------------------
+   
 
     def send(self, message: Dict[str, Any]):
         body = json.dumps(message, ensure_ascii=False)
-        # DEBUG: log full message body before SQS publish
+        
         try:
             logger.info("SQS message body (pre-send): %s", body)
         except Exception as _e:
             logger.warning("Failed to log message body: %s", _e)
 
-        # Optional safety – never breaks existing flows because default is False
+        
         if self.skip_if_empty and self._looks_empty(message, body):
             logger.warning("Skipping publish: empty payload (per policy)")
             return
@@ -104,7 +102,7 @@ class MessageProducer:
                 "MessageBody": body,
             }
 
-            # Message attributes (harmless if consumer ignores them)
+            
             attrs = {}
             for k in ("provider", "branch", "type", "timestamp", "ts"):
                 v = message.get(k)
@@ -113,7 +111,7 @@ class MessageProducer:
             if attrs:
                 params["MessageAttributes"] = attrs
 
-            # FIFO niceties
+           
             if self._is_fifo:
                 gid = self.fifo_group_id or self._derive_group_id(message) or "default"
                 params["MessageGroupId"] = gid
@@ -136,7 +134,7 @@ class MessageProducer:
                 mandatory=False,
             )
 
-    # ----------------------------- internals -----------------------------
+   
 
     def _derive_group_id(self, message: Dict[str, Any]) -> Optional[str]:
         parts = [
@@ -148,7 +146,7 @@ class MessageProducer:
         return "|".join(parts) if parts else None
 
     def _looks_empty(self, msg: Dict[str, Any], body: str) -> bool:
-        # Common shapes in this project
+        
         try:
             if isinstance(msg.get("items"), list) and len(msg["items"]) == 0:
                 return True
@@ -158,7 +156,7 @@ class MessageProducer:
                     return True
         except Exception:
             pass
-        # Obvious minimal payloads
+        
         if body.strip() in ("[]", "{}"):
             return True
         return False
@@ -191,7 +189,7 @@ class MessageProducer:
         payload = dict(envelope)
         payload["items"] = items
         body = json.dumps(payload, ensure_ascii=False)
-        # DEBUG: log full chunk body before SQS publish
+        
         try:
             logger.info("SQS chunk body (pre-send): %s", body)
         except Exception as _e:

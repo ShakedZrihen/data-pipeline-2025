@@ -16,7 +16,7 @@ from typing import Any, Iterable, Optional, Tuple, Union, Sequence, Dict
 
 import pg8000
 
-# Try to import exception classes in a version-agnostic way
+
 try:
     from pg8000.dbapi import InterfaceError, DatabaseError, ProgrammingError  # type: ignore
 except Exception:
@@ -24,14 +24,14 @@ except Exception:
     class ProgrammingError(DatabaseError):  # type: ignore
         pass
 
-# Some pg8000 versions don't expose OperationalError separately; alias to DatabaseError
+
 try:
     from pg8000.dbapi import OperationalError  # type: ignore
 except Exception:  # pragma: no cover
     class OperationalError(DatabaseError):  # type: ignore
         pass
 
-# Transient network errors we should reconnect on
+
 _TRANSIENT_ERRORS = (
     InterfaceError,             # e.g., "network error"
     ConnectionResetError,

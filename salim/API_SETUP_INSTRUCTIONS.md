@@ -107,9 +107,6 @@ curl http://localhost:8000/api/v1/products/barcode/7290003643820
 
 The API connects to the production Supabase database automatically. The connection string is already configured in `app/database.py`:
 
-```python
-DATABASE_URL = "postgresql://postgres.nnzvfgjldslywfofkyet:Warrockaboalmrwan@aws-1-eu-central-1.pooler.supabase.com:6543/postgres"
-```
 
 No additional database setup needed!
 
