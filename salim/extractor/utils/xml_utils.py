@@ -23,7 +23,7 @@ def _parse_prices_items(root: ET.Element) -> Tuple[List[Dict[str, Any]], Optiona
 
     for node in candidates:
         code   = _text(_find_direct(node, "ItemCode")) or _text(_find(node, "ItemCode"))
-        name   = _text(_find_direct(node, "ItemName")) or _text(_find(node, "ItemName"))
+        name   = _text(_find_direct(node, "ItemName")) or _text(_find(node, "ItemName")) or _text(_find(node, "ItemNm"))
         price  = _to_float(_text(_find_direct(node, "ItemPrice")) or _text(_find(node, "ItemPrice")))
         unit_m = _text(_find_direct(node, "UnitOfMeasure")) or _text(_find(node, "UnitOfMeasure"))
         qty    = _to_float(_text(_find_direct(node, "Quantity")) or _text(_find(node, "Quantity")))

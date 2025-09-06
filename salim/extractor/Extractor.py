@@ -1,4 +1,4 @@
-import os, io, time, json, gzip
+import os, io, time, json, gzip ,zipfile
 import boto3
 from datetime import datetime , timezone
 from db_state import LastRunStore
@@ -64,17 +64,42 @@ class Extractor:
         self.seen.add(key)
         self._save_seen()
 
+    def _decompress_to_xml_bytes(self,raw: bytes) -> bytes:
+        if not raw:
+            raise ValueError("Empty body")
+
+        if raw[:2] == b"\x1f\x8b":
+            return gzip.GzipFile(fileobj=io.BytesIO(raw)).read()
+
+        if raw[:2] == b"PK":
+            with zipfile.ZipFile(io.BytesIO(raw)) as z:
+                names = z.namelist()
+                if not names:
+                    raise ValueError("ZIP archive is empty")
+                xml_names = [n for n in names if n.lower().endswith(".xml")]
+                name = xml_names[0] if xml_names else names[0]
+                return z.read(name)
+
+        if raw.lstrip()[:1] == b"<":
+            return raw
+
+        raise ValueError("Unknown file format")
+
     def _build_payload_from_gz(self, key: str):
         """
-        Download + decompress a .gz XML, parse items, and build a normalized payload.
-        Returns a dict ready to JSON-serialize and send to SQS, or None on error/empty.
+        Download + decompress , parse items, and build payload.
         """
         try:
             print(f"Downloading and decompressing {key} ...")
             obj = self.s3.get_object(Bucket=self.bucket, Key=key)
-            with gzip.GzipFile(fileobj=obj["Body"]) as gz:
-                xml_bytes = gz.read()
-            items , store_id = parse_xml_items(xml_bytes)
+            raw = obj["Body"].read()              
+            xml_bytes = self._decompress_to_xml_bytes(raw)
+
+            try:
+                items, store_id = parse_xml_items(xml_bytes)
+            except TypeError:
+                items = parse_xml_items(xml_bytes)
+                store_id = None
         except Exception as e:
             print(f"Failed to read/decompress {key}: {e}")
             return None
@@ -121,7 +146,6 @@ class Extractor:
             "item_count": len(items),
             "items": items,
         }
-
 
         return data
 
