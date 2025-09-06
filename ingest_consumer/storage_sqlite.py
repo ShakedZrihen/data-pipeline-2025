@@ -1,6 +1,7 @@
 import sqlite3
 from pathlib import Path
 from typing import Dict, Any
+import  json
 
 DDL = """
 PRAGMA foreign_keys=ON;
@@ -10,6 +11,7 @@ CREATE TABLE IF NOT EXISTS messages (
   branch   TEXT NOT NULL,
   type     TEXT NOT NULL,
   ts_iso   TEXT NOT NULL,
+  raw_json TEXT,
   items_total INTEGER NOT NULL
 );
 CREATE TABLE IF NOT EXISTS items (
@@ -31,11 +33,12 @@ def save_message(db_path: str, msg: Dict[str, Any]) -> int:
     con = sqlite3.connect(db_path)
     cur = con.cursor()
     cur.execute("PRAGMA foreign_keys=ON")
+    con.executescript(DDL)
 
     cur.execute("""
-        INSERT OR IGNORE INTO messages(provider, branch, type, ts_iso, items_total)
-        VALUES (?, ?, ?, ?, ?)
-    """, (msg["provider"], msg["branch"], msg["type"], msg["timestamp"], msg.get("items_total") or len(msg.get("items", []))))
+        INSERT OR IGNORE INTO messages(provider, branch, type, ts_iso,raw_json, items_total)
+        VALUES (?, ?, ?, ?,?, ?)
+    """, (msg["provider"], msg["branch"], msg["type"], msg["timestamp"],json.dumps(msg, ensure_ascii=False), msg.get("items_total") or len(msg.get("items", []))))
     con.commit()
 
     if cur.lastrowid:
