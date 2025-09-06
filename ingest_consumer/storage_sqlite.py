@@ -1,5 +1,6 @@
 import sqlite3
 from pathlib import Path
+from typing import Dict, Any
 
 DDL = """
 PRAGMA foreign_keys=ON;
@@ -26,21 +27,36 @@ def _connect(db_path: str):
     conn = sqlite3.connect(p.as_posix())
     return conn
 
-def save_message(db_path: str, msg: dict):
-    conn = _connect(db_path)
-    try:
-        conn.executescript(DDL)
-        cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO messages(provider,branch,type,ts_iso,items_total) VALUES (?,?,?,?,?)",
-            (msg["provider"], msg["branch"], msg["type"], msg["timestamp"], msg["items_total"]),
-        )
-        mid = cur.lastrowid
-        for it in msg.get("items_sample", []) or []:
-            cur.execute(
-                "INSERT INTO items(message_id,product,price,unit) VALUES (?,?,?,?)",
-                (mid, it["product"], it["price"], it.get("unit")),
-            )
-        conn.commit()
-    finally:
-        conn.close()
+def save_message(db_path: str, msg: Dict[str, Any]) -> int:
+    con = sqlite3.connect(db_path)
+    cur = con.cursor()
+    cur.execute("PRAGMA foreign_keys=ON")
+
+    cur.execute("""
+        INSERT OR IGNORE INTO messages(provider, branch, type, ts_iso, items_total)
+        VALUES (?, ?, ?, ?, ?)
+    """, (msg["provider"], msg["branch"], msg["type"], msg["timestamp"], msg.get("items_total") or len(msg.get("items", []))))
+    con.commit()
+
+    if cur.lastrowid:
+        message_id = cur.lastrowid
+    else:
+        cur.execute("""
+            SELECT id FROM messages
+            WHERE provider=? AND branch=? AND type=? AND ts_iso=?
+            LIMIT 1
+        """, (msg["provider"], msg["branch"], msg["type"], msg["timestamp"]))
+        row = cur.fetchone()
+        message_id = row[0] if row else None
+
+    items = msg.get("items") or msg.get("items_sample") or []
+    if items and message_id is not None:
+        cur.execute("DELETE FROM items WHERE message_id = ?", (message_id,))
+        cur.executemany("""
+            INSERT INTO items(message_id, product, price, unit)
+            VALUES (?, ?, ?, ?)
+        """, [(message_id, it.get("product"), it.get("price"), it.get("unit")) for it in items])
+        con.commit()
+
+    con.close()
+    return message_id

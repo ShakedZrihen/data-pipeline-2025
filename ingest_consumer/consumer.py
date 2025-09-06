@@ -5,11 +5,14 @@ import time
 import logging
 import argparse
 import boto3
+import sqlite3
 from dotenv import load_dotenv
 from botocore.config import Config
 from .storage_sqlite import save_message as sqlite_save
 from .processor import process_raw_message, ProcessingError
 from .errors import send_to_dlq
+from ingest_consumer.enricher import enrich_message
+
 load_dotenv()
 
 # ---------- logging ----------
@@ -79,10 +82,18 @@ def run_loop(once: bool = False):
                 db_path = os.getenv("INGEST_SQLITE_PATH")
                 if db_path:
                     try:
-                        sqlite_save(db_path, parsed)
-                        logger.info("Saved message to SQLite: %s", db_path)
+                        message_id = sqlite_save(db_path, parsed)
+                        logger.info("Saved message %s to SQLite: %s", message_id, db_path)
+
+                        if message_id is not None:
+                            with sqlite3.connect(db_path) as conn:
+                                enriched_rows = enrich_message(conn, message_id)
+                            logger.info("Enriched message %s: %s rows", message_id, enriched_rows)
+                        else:
+                            logger.warning("Could not resolve message_id after save; skipping enrich.")
+
                     except Exception as e:
-                        logger.warning("Failed to save to SQLite: %s", e)
+                        logger.warning("Failed to save/enrich SQLite: %s", e)
                 preview_items = parsed.get("items_sample") or parsed.get("items") or []
                 preview_items = preview_items[:3]
                 log.info("MSG provider=%s branch=%s type=%s ts=%s items_total=%s",

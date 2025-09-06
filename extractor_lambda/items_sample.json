@@ -1,6 +1,1266 @@
 [
   {
     "provider": "Keshet",
+    "branch": "002",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 10825,
+    "items_sample": [
+      {
+        "product": "תפוח אדמה לבן",
+        "price": 4.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "תפוח אדמה אדום",
+        "price": 5.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "לחם גבטה",
+        "price": 4.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "גל אקונומיקה בריח לי",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "סנובון כחול שלישייה",
+        "price": 14.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "דובשניות במילוי ריבת",
+        "price": 9.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גלידה קרם ברולה 400",
+        "price": 24.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "משקה מייבך וויט נטול",
+        "price": 49.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "עוגיות זהבה ושלושת ה",
+        "price": 8.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קנור ציר בקר משפחתי",
+        "price": 26.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_002_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "003",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 9560,
+    "items_sample": [
+      {
+        "product": "גבינה דנבלו",
+        "price": 89.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "זית ירוק ללא גלעין י",
+        "price": 79.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "זית סורי מבוקע ירוק",
+        "price": 19.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "וטצינה בבוט",
+        "price": 99.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סלמי אמבסדור",
+        "price": 175.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "נקניק של נילוס בעישו",
+        "price": 99.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "דג מקרל ארוז",
+        "price": 12.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "קוויאר אדום רויאל גו",
+        "price": 649.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "זית זוג יווני מושחר",
+        "price": 39.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "50 3%יופלה תפ\"ע",
+        "price": 4.72,
+        "unit": "100 מ\"ל"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_003_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "004",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 9076,
+    "items_sample": [
+      {
+        "product": "שאריות אסורטי",
+        "price": 49.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מילאנו חי",
+        "price": 169.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "קוביות קרח 2 קג",
+        "price": 9.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "ענב שחור",
+        "price": 22.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סלמי מילאנו פרוס",
+        "price": 189.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מוסקובסקייה פרוס",
+        "price": 139.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינת טבורוג 16%",
+        "price": 49.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בסגנון פטה דניש קומב",
+        "price": 25.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בסגנון בולגרית",
+        "price": 49.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינה אולד אמסטרדם ע",
+        "price": 189.0,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_004_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "005",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 11188,
+    "items_sample": [
+      {
+        "product": "וופל מצופית שוקו מנע",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "וודקה חורטיצה סילבר",
+        "price": 62.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "בורקס תפוא 800 גר",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "נקנקיות ביס 380 גר",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "תה ארל גרי בתפזורת 2",
+        "price": 31.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "תה ויסוצקי פירות נענ",
+        "price": 17.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "תה גן הקסום פירות יע",
+        "price": 18.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "סנו סושי כריות לניקו",
+        "price": 10.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "ממרח שוקולד השחר 1 ק",
+        "price": 25.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "פופקורן פופסטאר בטעם",
+        "price": 17.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_005_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "008",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 10350,
+    "items_sample": [
+      {
+        "product": "קולורבי",
+        "price": 8.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סלמי פרח",
+        "price": 119.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "נקניק בריאנסקיה",
+        "price": 99.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "עוף מעושן",
+        "price": 65.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סוכריות 99.00",
+        "price": 99.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "נקניק פולטבסקיה",
+        "price": 139.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "פרלמנט",
+        "price": 109.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "לשון בקר מבושל",
+        "price": 99.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "יין דה פאייל 750 מל",
+        "price": 74.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "פריזר אליטניה מיני",
+        "price": 109.0,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_008_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "010",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 5700,
+    "items_sample": [
+      {
+        "product": "בייגלה שמיניות קטנות",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "עוגיות קרמוגית עם קר",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "נמס בכוס פטריות שקית",
+        "price": 7.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שמפו טקסטיל נוזלי 1",
+        "price": 14.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "קפה טורקי קלוי וטחון",
+        "price": 10.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חטיף תפוציפס טבעי 50",
+        "price": 4.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שוקולד מריר אגוזים פ",
+        "price": 8.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "נקניקיות עוף בוואקום",
+        "price": 39.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "ביסקויט חלב עד חצות",
+        "price": 17.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מטליות לחות לניקוי כ",
+        "price": 10.9,
+        "unit": "Unknown"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_010_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "011",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 6589,
+    "items_sample": [
+      {
+        "product": "תמרים צהובים/אדומים",
+        "price": 16.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בירה לא מסוננת ברלינ",
+        "price": 8.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "סטייק סלמון אלתית אר",
+        "price": 74.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "צעצוע פופ",
+        "price": 29.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "צעצוע פרווה פינגווין",
+        "price": 39.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "צעצוע טאבלט על חיות",
+        "price": 39.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "חטיף חלבון אול אין ש",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "ויסקי לייבל בלאק 5 ק",
+        "price": 72.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "שמפו פנטן קלאסי 600",
+        "price": 19.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "שמפו פנטן רך כמשי 60",
+        "price": 19.9,
+        "unit": "100 מ\"ל"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_011_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "013",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 14188,
+    "items_sample": [
+      {
+        "product": "טמפונים עם מוליך פלס",
+        "price": 21.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "טמפונים עם מוליך פלס",
+        "price": 21.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "בירה מרפיס סטאוט 500",
+        "price": 12.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "בירה מלכה אדמונית 75",
+        "price": 29.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "אטריות טבעות 400 גר",
+        "price": 7.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מרכך כביסה ורוד טאצ",
+        "price": 16.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "אטריות בטטה אורגני 2",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אוזו 12 700 מל",
+        "price": 89.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "נר זיקוק",
+        "price": 4.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "זיתים מושחרים 465 גר",
+        "price": 33.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_013_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "014",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 12676,
+    "items_sample": [
+      {
+        "product": "עוגיות קרמוגית עם קר",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שעועית ירוקה חתוכה 8",
+        "price": 18.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "לקט לקוסקוס 800 גר",
+        "price": 21.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "טחינה בארכה שומשום 1",
+        "price": 15.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "נמס בכוס פטריות שקית",
+        "price": 7.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שמפו טקסטיל נוזלי 1",
+        "price": 14.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "קפה טורקי שקית עלית",
+        "price": 10.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קפה טורקי קלוי וטחון",
+        "price": 10.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קפה פילטר מוקה 500 ג",
+        "price": 49.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חטיף תפוציפס טבעי 50",
+        "price": 4.5,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_014_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "015",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 12199,
+    "items_sample": [
+      {
+        "product": "יין לה וילט פינו נוא",
+        "price": 59.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "בירה סקיני ללא גלוטן",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "גליליות בצק עלים במי",
+        "price": 54.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "משקה כהלי דובדבנים ו",
+        "price": 34.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "סנדוויץ בייגלה סנייד",
+        "price": 18.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חטיף דגנים ליון שמינ",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אגוזי מלך קלופים טבע",
+        "price": 12.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אגוזי קשיו טבעי ששון",
+        "price": 24.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אגוזי קשיו ששון הקול",
+        "price": 20.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אטריות ביצים בינוניו",
+        "price": 12.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_015_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "016",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 14670,
+    "items_sample": [
+      {
+        "product": "פלפל אדום במרינדה",
+        "price": 59.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בייגלה",
+        "price": 55.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גוצולסקיה חי",
+        "price": 155.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מולדובה",
+        "price": 109.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "שום כבוש",
+        "price": 89.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "כרוב ארמני/גרוזיני",
+        "price": 39.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "פסטרמה הודו פרפר פלפ",
+        "price": 89.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "תובה",
+        "price": 69.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מילאנו חי",
+        "price": 155.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "נקניק גרמני פרוס",
+        "price": 115.0,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_016_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "017",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 14155,
+    "items_sample": [
+      {
+        "product": "גבינה טל העמק",
+        "price": 69.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינה קולאז קשקבל חר",
+        "price": 159.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "פלפל צהוב",
+        "price": 8.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מלון",
+        "price": 5.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בוזנינה טירימוק",
+        "price": 139.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינת סולוגוני עגול",
+        "price": 79.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סרדלקה קינדר",
+        "price": 29.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "פרושוטו טורינו חדש",
+        "price": 199.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "שוק איטלקי",
+        "price": 139.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בוט בננה",
+        "price": 72.0,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_017_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "018",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 15747,
+    "items_sample": [
+      {
+        "product": "נקניק וארשבסקיה דימו",
+        "price": 119.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בראונשווייגסקיה חי",
+        "price": 179.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "שניצל עגל",
+        "price": 59.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "רוסקי סרוולט שלם",
+        "price": 196.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סינטה בוזנינה ביתית",
+        "price": 169.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גרודינקה כפרית",
+        "price": 179.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "לשון בקר מעושנת",
+        "price": 89.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "תפוח אדמה לאפיה",
+        "price": 5.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "קורקבני עוף",
+        "price": 11.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סינטה עגל טרי",
+        "price": 109.9,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_018_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "019",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 14255,
+    "items_sample": [
+      {
+        "product": "גל כביסה תינוקלין 2",
+        "price": 32.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "בייגלה צוקטה בטעם דב",
+        "price": 8.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בייגלה צוקטה בטעם בצ",
+        "price": 8.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בירה בטעם דובדבן שקד",
+        "price": 10.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "סוויט בוקס צעצוע סוס",
+        "price": 11.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "משקה אנרגיה מונסטר א",
+        "price": 8.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "בונבוניירות 120 גר\"",
+        "price": 44.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "טבלת היידי חלב פיסטו",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בייגל מאיר מקלות מלח",
+        "price": 9.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "כיסוני בשר 1.5 קג",
+        "price": 54.9,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_019_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "020",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 15407,
+    "items_sample": [
+      {
+        "product": "רויון 1 ל",
+        "price": 13.5,
+        "unit": "ליטר"
+      },
+      {
+        "product": "יוגורט עם תות פרילי",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "גבינת קולאז עיזים 20",
+        "price": 29.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גבינה גלבוע צהובה פר",
+        "price": 14.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גבינה צפתית פיראוס 5",
+        "price": 16.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "הפסקת אוכל דגני עוגי",
+        "price": 10.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "ל.מ אדום לייבל קצר",
+        "price": 39.0,
+        "unit": "Unknown"
+      },
+      {
+        "product": "יוגורט ביו 1.5% 200",
+        "price": 3.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פסטה אסם צדפים גדולי",
+        "price": 6.4,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פסטה אסם צדפים קטנים",
+        "price": 6.4,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_020_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "021",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 11143,
+    "items_sample": [
+      {
+        "product": "בטטה",
+        "price": 8.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מרק קרוניס חרצו 500",
+        "price": 12.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מרגרינה בלובנד עם מל",
+        "price": 6.2,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גבינת פרמזן משולשים",
+        "price": 29.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פרחים דקורטיביים",
+        "price": 29.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "קופון ציפר",
+        "price": 0.01,
+        "unit": "Unknown"
+      },
+      {
+        "product": "מרק קרוניס אפונה 500",
+        "price": 12.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "רוטב סויה בסגנון יפנ",
+        "price": 17.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "יוגורט פרוביוטי 3% א",
+        "price": 24.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מרק קרוניס בורש 500",
+        "price": 12.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_021_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "022",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 15464,
+    "items_sample": [
+      {
+        "product": "קשיו מטוגן 200 גר",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שקדים קלויים 200 גר",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שוקולית 500 גר",
+        "price": 16.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קפה טורקי קלוי וטחון",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אבקה לבן וניש גולד 4",
+        "price": 16.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "סודה שוופס לימון בק",
+        "price": 4.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "קפה נמס אבקתי עלית 5",
+        "price": 10.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שוקולד חלב רביעייה פ",
+        "price": 29.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מגבונים ללא בישום הא",
+        "price": 21.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "בטן סלמון",
+        "price": 69.0,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_022_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "023",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 15158,
+    "items_sample": [
+      {
+        "product": "דאודורנט גל מרענן לי",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חלב 3% קרטון 1 ל",
+        "price": 7.28,
+        "unit": "ליטר"
+      },
+      {
+        "product": "גבינת לאבנה 9% פיראו",
+        "price": 26.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חטיף ציפס בטעם לובסט",
+        "price": 8.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קרוטונים בטעם קריש ע",
+        "price": 9.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פלסטר 50 יח",
+        "price": 5.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "נרות חימום חסידים בק",
+        "price": 13.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "רביעיית סודה מי עדן",
+        "price": 14.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "וודקה חורטיצה סילבר",
+        "price": 62.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב חזרת 453 גר",
+        "price": 28.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_023_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "024",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 15921,
+    "items_sample": [
+      {
+        "product": "שוקולד מריר משמש ואג",
+        "price": 29.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "עוגת רולדה במילוי קר",
+        "price": 5.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שוופס ביטר למון לייט",
+        "price": 11.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "אגוז מלך 250 גר",
+        "price": 21.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "סוכר לבן קוביות 500",
+        "price": 10.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קרם בלסמי מצומצם 250",
+        "price": 19.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "סלט ביצים 400 גר",
+        "price": 29.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "סולת שטיבל",
+        "price": 5.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "קפה אינטנסו חזק קלוי",
+        "price": 36.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בוטנים קלויים קליית",
+        "price": 7.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_024_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "025",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 14818,
+    "items_sample": [
+      {
+        "product": "שליש בגט",
+        "price": 2.3,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "לחמנייה כריך לבן",
+        "price": 2.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בטטה",
+        "price": 8.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "תפוח אדמה לבן",
+        "price": 4.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "תפוח אדמה אדום",
+        "price": 4.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "לחם גבטה",
+        "price": 4.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "שמיניית פתית פאן",
+        "price": 10.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "חלה קלועה רגילה 560",
+        "price": 12.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בננה",
+        "price": 10.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סל רב פעמי קשת טעמים",
+        "price": 2.9,
+        "unit": "Unknown"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_025_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "102",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 4463,
+    "items_sample": [
+      {
+        "product": "חמישיית טוויקס 250 ג",
+        "price": 15.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קורנדביף 180 גר",
+        "price": 31.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "סוכריות טיק טק מנטה",
+        "price": 12.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מיני פינסקיה",
+        "price": 119.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינה לבנה סקי 5% 25",
+        "price": 5.81,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פריגת ענבים 330 מל",
+        "price": 5.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "אננס שלם 850 גר",
+        "price": 9.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חמאת בוטנים עם שברים",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שוקו 1.5% רמת הגולן",
+        "price": 12.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "בירה קרלסברג פחית 50",
+        "price": 9.9,
+        "unit": "100 מ\"ל"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_102_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
     "branch": "103",
     "type": "pricesFull",
     "timestamp": "2025-09-01T06:30:00Z",
@@ -61,6 +1321,66 @@
   },
   {
     "provider": "Keshet",
+    "branch": "103",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 2461,
+    "items_sample": [
+      {
+        "product": "פרושוטו חי",
+        "price": 199.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינה אמנטל",
+        "price": 139.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינה גאודה איטלקית",
+        "price": 169.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "קרפלך במילוי בשר בקר",
+        "price": 36.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מוסקובסקיה דימוב",
+        "price": 159.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בסטורמה ארמנית",
+        "price": 269.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינת גורגונזולה פיק",
+        "price": 169.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינה מאסדם הולנדית",
+        "price": 89.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "לשון זליבנוי טילצי",
+        "price": 109.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "רוגט",
+        "price": 209.0,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_103_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
     "branch": "104",
     "type": "pricesFull",
     "timestamp": "2025-09-01T06:30:00Z",
@@ -118,6 +1438,246 @@
       }
     ],
     "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_104_pricesFull_20250901_063000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "104",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 6275,
+    "items_sample": [
+      {
+        "product": "ממתק חלווה חמניות עם",
+        "price": 6.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מים מינרליים טבעיים",
+        "price": 10.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "מסטיק מנטוס ויטמינים",
+        "price": 10.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "ממרח אבוקדו אחלה 200",
+        "price": 16.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "יין שרדונה טיאמו סאן",
+        "price": 49.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "שמנת רומשקה 25% 180",
+        "price": 10.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "שיפודי פרגית",
+        "price": 139.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "שעועית לבנה 500 גר",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גרעיני תירס מתוק 400",
+        "price": 7.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "טוסט מוצרלה ועגבניות",
+        "price": 9.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_104_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "105",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 8915,
+    "items_sample": [
+      {
+        "product": "אפונה ירוקה ויטה 415",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פילה הרינג לבן",
+        "price": 49.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בירה גינס בק 330 מל",
+        "price": 14.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "שינקה לקס",
+        "price": 189.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "חזה בקר פלפל",
+        "price": 89.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "פסטרמה הודו בדבש",
+        "price": 59.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בוזנינה עגול",
+        "price": 129.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "שפרוטים ברוטב עגבניו",
+        "price": 18.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קרוטונים אפויים אסם",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מדליק פחם אקולוגי 32",
+        "price": 9.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_105_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "116",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 10501,
+    "items_sample": [
+      {
+        "product": "קפה לנדוור לבוקר טחו",
+        "price": 10.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פופקורן פופסטאר בטעם",
+        "price": 17.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "רסק עגבניות 240 גר 2",
+        "price": 4.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "רוטב פסטה קלאסי 240",
+        "price": 6.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "תירס מתוק לייט יכין",
+        "price": 6.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מגשית אלומיניום עם מ",
+        "price": 9.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "עגבניות מרוסקות שום",
+        "price": 6.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "רוטב מתובל לשקשוקה 2",
+        "price": 6.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "סוכר לבן 1 קג",
+        "price": 4.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "פטריות שלמות מוחמצות",
+        "price": 21.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_116_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "Keshet",
+    "branch": "120",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 10175,
+    "items_sample": [
+      {
+        "product": "קוואס לידסקיי כהה 1.",
+        "price": 12.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "מילוי מכשיר אוויר 25",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "מטליות קסם ניקול לרצ",
+        "price": 19.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "ביסקוויט פתי בר 400",
+        "price": 6.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אטריות להכנה מהירה ב",
+        "price": 6.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מעדן ריבת משמש 300 ג",
+        "price": 17.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מעדן ריבת פירות יער",
+        "price": 17.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מעדן ריבת תות שדה 30",
+        "price": 17.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלח הארץ מהרי ההימלא",
+        "price": 15.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלח הארץ טבעי 250 גר",
+        "price": 12.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\Keshet_120_pricesFull_20250906_001000.json"
   },
   {
     "provider": "osherad",
@@ -1260,6 +2820,666 @@
     "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\osherad_032_pricesFull_20250901_140500.json"
   },
   {
+    "provider": "politzer",
+    "branch": "001",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 8370,
+    "items_sample": [
+      {
+        "product": "אננס טרי",
+        "price": 34.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בוטנים קלויים 00",
+        "price": 11.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פיצוחים מעורב",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "צנובר 100 גר",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "לקרדה שלמה",
+        "price": 83.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "קרנץ שוקולד חלבי",
+        "price": 39.9,
+        "unit": "יחידה"
+      },
+      {
+        "product": "שטרודל גבינה",
+        "price": 49.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "קפלך אגוז חלבי",
+        "price": 77.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "פחזניות חלבי",
+        "price": 71.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "פלטת גבינה חלבי",
+        "price": 64.9,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\politzer_001_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "politzer",
+    "branch": "002",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 9730,
+    "items_sample": [
+      {
+        "product": "שיפודי פרגיות בלדי ק",
+        "price": 54.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שתיה קרה 5 1 ל'.",
+        "price": 11.0,
+        "unit": "יחידה"
+      },
+      {
+        "product": "מים קרים 5 1 ל'.",
+        "price": 5.5,
+        "unit": "יחידה"
+      },
+      {
+        "product": "מים קרים 2 1 ל'/",
+        "price": 4.0,
+        "unit": "יחידה"
+      },
+      {
+        "product": "אבקת סוכר 100 גר",
+        "price": 1.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "זיתים מנזנילו גדולים",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "טרופית",
+        "price": 1.5,
+        "unit": "יחידה"
+      },
+      {
+        "product": "רוטב סויה בסגנון סינ",
+        "price": 12.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "משקה שיבולת שועל בטע",
+        "price": 12.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "קוטקס תחתונים סופגים",
+        "price": 33.9,
+        "unit": "יחידה"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\politzer_002_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "politzer",
+    "branch": "003",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 11251,
+    "items_sample": [
+      {
+        "product": "נשנושים איירביס בצל",
+        "price": 13.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "רוטב סרירציה מאסטר ש",
+        "price": 14.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "שוקולד היידי גראנדור",
+        "price": 9.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מי עדן סודה 1.5 ל'",
+        "price": 16.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "סמנצאטו לחם מחמצת פר",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מיץ תפוחים 1 ליטר",
+        "price": 11.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "מיסו לבן 300 גרם",
+        "price": 32.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פטרוזליה בריאבוע 80",
+        "price": 9.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בוראטה ג.מוצרלה רכה",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פומפדור חליטת תפוז ס",
+        "price": 15.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\politzer_003_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "politzer",
+    "branch": "004",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 11624,
+    "items_sample": [
+      {
+        "product": "עגבניות ישראלי",
+        "price": 6.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "פיקדון בק' ריק",
+        "price": 0.3,
+        "unit": "יחידה"
+      },
+      {
+        "product": "משקה אנרגיה אקסל",
+        "price": 4.0,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "פיקדון שש בק'",
+        "price": 1.8,
+        "unit": "יחידה"
+      },
+      {
+        "product": "בוטנים קלויים 00",
+        "price": 11.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פיצוחים מעורב",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "צנובר 100 גר",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שקד מולבן",
+        "price": 10.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שקד גרוס 100 גר",
+        "price": 10.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אגוזי מלך גרוסים",
+        "price": 11.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\politzer_004_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "politzer",
+    "branch": "005",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 9265,
+    "items_sample": [
+      {
+        "product": "סוביניון בלאן בלאש מ",
+        "price": 34.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "קפה נמס בטעם אגוזי ל",
+        "price": 29.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שוופס קוקטייל בטעם ר",
+        "price": 12.9,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "שוופס קוקטייל רום אנ",
+        "price": 12.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "יין בן דוד רחל רוזה",
+        "price": 69.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב וינגרט צרפתי",
+        "price": 21.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "איולי שום 250 גר",
+        "price": 12.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "איולי עשבי תיבול",
+        "price": 12.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "וופל בלגי",
+        "price": 28.9,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "מרבה עוגיות ריינבו ע",
+        "price": 9.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\politzer_005_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "politzer",
+    "branch": "008",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 10940,
+    "items_sample": [
+      {
+        "product": "פסטרמה פרגית 250 גר'",
+        "price": 21.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אג'קס טריגר מוס מולט",
+        "price": 14.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "קולגייט משחת סנס רלי",
+        "price": 26.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "קולגייט מי פה פלאקס",
+        "price": 29.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "קפה קלוי וטחון עם הל",
+        "price": 17.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קפה קלוי וטחון בלי ה",
+        "price": 17.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קפה אל נח'לה 400גר ע",
+        "price": 35.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גאודה כבשים כמהין 18",
+        "price": 31.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קונפיטורת משמש 260 ג",
+        "price": 10.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שמנת להקצפה 24% בטעם",
+        "price": 10.9,
+        "unit": "100 מ\"ל"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\politzer_008_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "politzer",
+    "branch": "009",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 10715,
+    "items_sample": [
+      {
+        "product": "חומץ בן יין אדום ליב",
+        "price": 17.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "יקב מדבר-סדרה 22 כתו",
+        "price": 39.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "יקב מדבר-סדרה 22 סוב",
+        "price": 39.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "יקב מדבר-סדרה 22 קבר",
+        "price": 39.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "עדן גאודה כמהין 140",
+        "price": 23.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בר אגוזית 120 גרם הג",
+        "price": 18.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גבינה עינב תום ביין",
+        "price": 21.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון קורנישון 530",
+        "price": 14.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "צ'וקטה עוגיות סנדויץ",
+        "price": 7.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "לחם שיבולת שועל",
+        "price": 26.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\politzer_009_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "politzer",
+    "branch": "011",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 9929,
+    "items_sample": [
+      {
+        "product": "ביסלי פיצה 200",
+        "price": 9.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "דובונים חטיף",
+        "price": 5.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "במבה תות 30גר",
+        "price": 2.6,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אפרופו 50 גר",
+        "price": 5.2,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אפרופו 100גר",
+        "price": 9.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פופקו חמאה ודבש 80 ג",
+        "price": 5.3,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מנה חמה ספגטי בולונז",
+        "price": 6.7,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פודינג וניל",
+        "price": 5.8,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בק' נביעות 1.5 ליטר",
+        "price": 3.6,
+        "unit": "ליטר"
+      },
+      {
+        "product": "ג'ל תות",
+        "price": 6.5,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\politzer_011_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "001",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 6812,
+    "items_sample": [
+      {
+        "product": "טבעות זית ירוק 560",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון במלח 7-9 560",
+        "price": 7.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון 10-12 מלח 560",
+        "price": 8.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון 13-17 מלח 560",
+        "price": 10.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון 18-25 במלח 56",
+        "price": 13.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון בחומץ 7-9 560",
+        "price": 7.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון בחומץ 10-12 5",
+        "price": 8.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון בחומץ 13-17 5",
+        "price": 10.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון בחומץ 18-25 5",
+        "price": 13.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שיפקה 560 גרם",
+        "price": 5.5,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_001_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "004",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7112,
+    "items_sample": [
+      {
+        "product": "*מבצע* חיטה 1 ק\"ג",
+        "price": 8.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גריסי פנינה 500 גרם",
+        "price": 7.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שעועית צבעונית 500 ג",
+        "price": 12.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם מוזהבים ס",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם לבנים סוג",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* קינואה 500 גר",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "עדשים שחורות מנומרות",
+        "price": 9.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "כוסמת 1 ק\"ג",
+        "price": 14.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גריסי פנינה 1 ק\"ג",
+        "price": 10.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז בסמטי מלא 1 ק\"ג",
+        "price": 15.0,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_004_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "004",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:15:00Z",
+    "items_total": 7112,
+    "items_sample": [
+      {
+        "product": "*מבצע* חיטה 1 ק\"ג",
+        "price": 8.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גריסי פנינה 500 גרם",
+        "price": 7.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שעועית צבעונית 500 ג",
+        "price": 12.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם מוזהבים ס",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם לבנים סוג",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* קינואה 500 גר",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "עדשים שחורות מנומרות",
+        "price": 9.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "כוסמת 1 ק\"ג",
+        "price": 14.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גריסי פנינה 1 ק\"ג",
+        "price": 10.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז בסמטי מלא 1 ק\"ג",
+        "price": 15.0,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_004_pricesFull_20250906_001500.json"
+  },
+  {
     "provider": "yohananof",
     "branch": "005",
     "type": "pricesFull",
@@ -1318,6 +3538,66 @@
       }
     ],
     "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_005_pricesFull_20250901_123000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "005",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7787,
+    "items_sample": [
+      {
+        "product": "גריסי פנינה 500 גרם",
+        "price": 7.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שעועית צבעונית 500 ג",
+        "price": 12.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם מוזהבים ס",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם לבנים סוג",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קינואה 500 גרם",
+        "price": 17.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "עדשים שחורות מנומרות",
+        "price": 9.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "כוסמת 1 ק\"ג",
+        "price": 14.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מארז נמס לדרך עלית",
+        "price": 13.5,
+        "unit": "יח'"
+      },
+      {
+        "product": "כוס קווים",
+        "price": 6.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "פרוסות גאודה עיזים",
+        "price": 30.2,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_005_pricesFull_20250906_001000.json"
   },
   {
     "provider": "yohananof",
@@ -1441,6 +3721,426 @@
   },
   {
     "provider": "yohananof",
+    "branch": "007",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7555,
+    "items_sample": [
+      {
+        "product": "סחוג חלפיניו חריף זה",
+        "price": 11.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בובת פופ",
+        "price": 0.0,
+        "unit": "יח'"
+      },
+      {
+        "product": "קרקר דק זיתים פיטנס",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "סלק וואקום 500 גרם ח",
+        "price": 6.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "סכין סט 6 ירקות לבן",
+        "price": 13.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "פרגית במילוי",
+        "price": 99.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אפונה",
+        "price": 45.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "כוסות קרטון 16 אונז",
+        "price": 9.0,
+        "unit": "יח"
+      },
+      {
+        "product": "ארוחת עובד יוחננוף",
+        "price": 15.0,
+        "unit": "יח'"
+      },
+      {
+        "product": "כוסמת",
+        "price": 40.0,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_007_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "008",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 4250,
+    "items_sample": [
+      {
+        "product": "גריסי פנינה 500 גרם",
+        "price": 5.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שעועית צבעונית 500 ג",
+        "price": 13.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* קינואה 500 גר",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "כוסמת 1 ק\"ג",
+        "price": 14.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז בסמטי מלא 1 ק\"ג",
+        "price": 15.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "*מבצע* אורז יסמין 1",
+        "price": 11.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בורגול 1 ק\"ג",
+        "price": 9.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בורגול 500 גרם",
+        "price": 5.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* אורז סושי 1 ק",
+        "price": 10.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גרישה 500 גר",
+        "price": 5.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_008_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "009",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 6690,
+    "items_sample": [
+      {
+        "product": "גריסי פנינה 500 גרם",
+        "price": 7.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פפריקה חריפה שקית 80",
+        "price": 6.6,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פפריקה מתוקה שקית 80",
+        "price": 6.6,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "צבע לשיער חום בהיר מ",
+        "price": 20.1,
+        "unit": "יח'"
+      },
+      {
+        "product": "גריל עוף שקית 80 גרם",
+        "price": 6.6,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "יין הר שיראז 750 מ\"ל",
+        "price": 40.2,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "זעתר מעורב שקית 80",
+        "price": 6.6,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלח לימון שקית 80 גר",
+        "price": 6.6,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "כמון טחון שקית 80 גר",
+        "price": 6.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "כורכום טחון שקית 80",
+        "price": 6.6,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_009_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "012",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7040,
+    "items_sample": [
+      {
+        "product": "נורדיק מוגז זירו בטע",
+        "price": 14.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "*מבצע* שברי בייגלה ב",
+        "price": 9.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "סנובון באבלס לאסלה ב",
+        "price": 14.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "משחת שיניים רגישות ו",
+        "price": 35.2,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "Muller Froop יוגורט",
+        "price": 5.8,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "Muller Froop יוגורט",
+        "price": 5.8,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מנה חמה מק&צ'יז בטעם",
+        "price": 7.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מנה חמה מק&צ'יז בטעם",
+        "price": 7.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אלתית במי מלח 210 גר",
+        "price": 9.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מדבקות סט חוברת פרוז",
+        "price": 14.9,
+        "unit": "יח'"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_012_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "013",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 8174,
+    "items_sample": [
+      {
+        "product": "מלפפון 10-12 מלח 560",
+        "price": 8.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון 13-17 מלח 560",
+        "price": 10.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון 18-25 במלח 56",
+        "price": 13.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון בחומץ 7-9 560",
+        "price": 7.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון בחומץ 10-12 5",
+        "price": 8.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון בחומץ 13-17 5",
+        "price": 10.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלפפון בחומץ 18-25 5",
+        "price": 13.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שיפקה 560 גרם",
+        "price": 5.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "טבעות זית שחור 560",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חצילים 560 גרם",
+        "price": 7.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_013_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "015",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 4291,
+    "items_sample": [
+      {
+        "product": "רוטב טבסקו שום 60 מ\"",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב טבסקו פלפל ירוק",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "דגני פייבר וואן 555",
+        "price": 27.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קראנצי חטיף שיבולת",
+        "price": 15.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קראנצי חטיף שיבולת",
+        "price": 15.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קראנצי חטיף שיבולת",
+        "price": 15.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קראנצי חטיף שיבולת",
+        "price": 15.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קראנצי חטיף שיבולת",
+        "price": 15.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קרם קוקוס 250 מ\"ל",
+        "price": 10.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "*מבצע* תערובת להכנת",
+        "price": 19.1,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_015_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "016",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7504,
+    "items_sample": [
+      {
+        "product": "קמח קסם לחלה 1 ק\"ג",
+        "price": 10.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "*מבצע* חיטה 1 ק\"ג",
+        "price": 8.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גריסי פנינה 500 גרם",
+        "price": 5.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שעועית צבעונית 500 ג",
+        "price": 13.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם מוזהבים ס",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם לבנים סוג",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* קינואה 500 גר",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "כוסמת 1 ק\"ג",
+        "price": 14.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז בסמטי מלא 1 ק\"ג",
+        "price": 15.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "*מבצע* אורז יסמין 1",
+        "price": 11.9,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_016_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
     "branch": "017",
     "type": "pricesFull",
     "timestamp": "2025-09-01T12:30:00Z",
@@ -1561,6 +4261,126 @@
   },
   {
     "provider": "yohananof",
+    "branch": "017",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 8538,
+    "items_sample": [
+      {
+        "product": "גרעיני חמניה קלויים",
+        "price": 7.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "דאודורנט רולאון בניח",
+        "price": 12.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "סילאן 900 גרם",
+        "price": 14.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "ממרח תמרים 450 גרם",
+        "price": 7.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מרשמלו בטעם תות יוגט",
+        "price": 7.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "סילאן טבעי 710 גרם",
+        "price": 21.1,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קשיו קלוי 200 גרם",
+        "price": 18.1,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פקאן טבעי 150 גרם",
+        "price": 22.1,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חטיף ריזס שוקולד חלב",
+        "price": 6.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אגוזי מלך קלופים 150",
+        "price": 17.0,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_017_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "018",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 5482,
+    "items_sample": [
+      {
+        "product": "גריסי פנינה 500 גרם",
+        "price": 7.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם מוזהבים ס",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* קינואה 500 גר",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* ג'ל עם אקונומ",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "כרוב לבן חסלט 400 גר",
+        "price": 12.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אורז בסמטי מלא 1 ק\"ג",
+        "price": 15.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "*מבצע* אורז יסמין 1",
+        "price": 11.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בורגול 1 ק\"ג",
+        "price": 9.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בורגול 500 גרם",
+        "price": 7.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קמח רב תכליתי מספר 1",
+        "price": 7.9,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_018_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
     "branch": "019",
     "type": "pricesFull",
     "timestamp": "2025-09-01T12:30:00Z",
@@ -1618,6 +4438,306 @@
       }
     ],
     "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_019_pricesFull_20250901_123000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "019",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7761,
+    "items_sample": [
+      {
+        "product": "קמיל אל סבון 1 ליטר",
+        "price": 16.0,
+        "unit": "ליטר"
+      },
+      {
+        "product": "עוגיות פרפריות שבבים",
+        "price": 29.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "במבה נוגט 150 גרם",
+        "price": 9.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "ליפתניות צבעוני 25 י",
+        "price": 2.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "צלחות צבעוני 100 יח'",
+        "price": 18.1,
+        "unit": "יח'"
+      },
+      {
+        "product": "*מבצע* שמן שומשום לא",
+        "price": 29.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "משקפי קריאה",
+        "price": 9.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "פילה נסיכת הנילוס טר",
+        "price": 89.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "ספרינג תה מנגו אפרסק",
+        "price": 6.6,
+        "unit": "ליטר"
+      },
+      {
+        "product": "דלי",
+        "price": 9.9,
+        "unit": "יח'"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_019_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "020",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7055,
+    "items_sample": [
+      {
+        "product": "עלי גפן 800 גרם",
+        "price": 55.4,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "Temp SuperDept",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "מכולת",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "פירות וירקות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "קצביה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "קפואים",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "מעדניה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "משקאות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "תינוקות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "חומרי ניקוי",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_020_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "021",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7511,
+    "items_sample": [
+      {
+        "product": "גולדסטאר לא מסונן בק",
+        "price": 8.5,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "מאסטר שף קרוטונים לס",
+        "price": 12.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שוקולד פרה סוכריות ק",
+        "price": 8.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "ריו מארה אינסלטיסימי",
+        "price": 18.1,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קשקבל כבשים",
+        "price": 126.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "יופלה GO יוגורט לייט",
+        "price": 6.1,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "תחליב רחצה כיף מילק",
+        "price": 10.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "תחליב רחצה כיף מילק",
+        "price": 10.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "מסטיק מאסט קוביות בז",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "תחליב רחצה כיף מילק",
+        "price": 10.9,
+        "unit": "100 מ\"ל"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_021_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "022",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 8413,
+    "items_sample": [
+      {
+        "product": "אורז תאילנדי 1 קג",
+        "price": 8.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז מלא 1 ק\"ג.",
+        "price": 8.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "קמח מלא 1 ק\"ג",
+        "price": 7.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז פרסי 1 ק\"ג",
+        "price": 11.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סוכר 1 ק\"ג",
+        "price": 4.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז עגול 1 ק\"ג",
+        "price": 4.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "שומשום 100 גרם",
+        "price": 4.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חומוס 1 ק\"ג",
+        "price": 16.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "*מבצע* אפונה 1 ק\"ג",
+        "price": 9.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "שוקולד חלב שברי אגוז",
+        "price": 8.5,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_022_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "023",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 6600,
+    "items_sample": [
+      {
+        "product": "בי פט פטה סלמון לחתו",
+        "price": 5.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קוקטייל בטעם רום אבט",
+        "price": 13.0,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "קוקטייל בטעם רום אננ",
+        "price": 13.0,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "קורני בייס קוקי& קרם",
+        "price": 15.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* חזה בקר דק דק",
+        "price": 12.9,
+        "unit": "גרם"
+      },
+      {
+        "product": "*מבצע* סלמי מעושן אי",
+        "price": 12.9,
+        "unit": "גרם"
+      },
+      {
+        "product": "שמפו למניעת קשקשים 5",
+        "price": 23.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "קולגייט משחת אופטיק",
+        "price": 30.2,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "צנימים מיני 120 גרם",
+        "price": 5.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מיני פנקייק מוכן להג",
+        "price": 22.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_023_pricesFull_20250906_001000.json"
   },
   {
     "provider": "yohananof",
@@ -1681,6 +4801,246 @@
   },
   {
     "provider": "yohananof",
+    "branch": "024",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 8150,
+    "items_sample": [
+      {
+        "product": "גריסי פנינה 500 גרם",
+        "price": 7.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שעועית צבעונית 500 ג",
+        "price": 12.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אבקת כביסה תינוקלין",
+        "price": 40.2,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "שוקולד חלב שברי אגוז",
+        "price": 8.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "ויולייפ צ'דר פרוסות",
+        "price": 25.1,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "זיתים ירוקים ללא גלע",
+        "price": 11.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מטליות ריצפז ענק בני",
+        "price": 10.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "כוס גידי גוב (גבוהה)",
+        "price": 4.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "פירורי לחם 350 גרם ב",
+        "price": 9.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "סאקי מסאג'",
+        "price": 7.9,
+        "unit": "יח'"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_024_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "025",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 5445,
+    "items_sample": [
+      {
+        "product": "גבינה צהובה חצי קשה",
+        "price": 32.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "רוטב טבסקו 60 מ\"ל",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב טבסקו שום 60 מ\"",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב טבסקו פלפל ירוק",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב טבסקו מעושן ציפ",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "המבורגר ביונד מיט 2*",
+        "price": 35.2,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גבינת גאודה 28%",
+        "price": 116.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינת גאודה עשבי תיב",
+        "price": 116.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינת גאודה כמון 28%",
+        "price": 116.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "עיתון ידיעות שבת",
+        "price": 18.5,
+        "unit": "Unknown"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_025_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "026",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7971,
+    "items_sample": [
+      {
+        "product": "קערית אובלית חושן לב",
+        "price": 6.0,
+        "unit": "יח'"
+      },
+      {
+        "product": "צלחת בינוני חושן שקו",
+        "price": 6.0,
+        "unit": "יח'"
+      },
+      {
+        "product": "מארז רביעיית קוקה קו",
+        "price": 19.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "סירופ בטעם פטל 750 מ",
+        "price": 18.1,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "סירופ בטעם לימון 750",
+        "price": 18.1,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "סירופ בטעם ענבים 750",
+        "price": 18.1,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "קערית אובלית חושן שק",
+        "price": 6.0,
+        "unit": "יח'"
+      },
+      {
+        "product": "מסכה לשיער היאלרונית",
+        "price": 27.1,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "תחליב רחצה קרמה בניח",
+        "price": 17.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "ברף בריליאנט ג'ל סבו",
+        "price": 20.1,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_026_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "027",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7287,
+    "items_sample": [
+      {
+        "product": "*מבצע* חיטה 1 ק\"ג",
+        "price": 8.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גריסי פנינה 500 גרם",
+        "price": 7.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שעועית צבעונית 500 ג",
+        "price": 12.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם מוזהבים ס",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* קינואה 500 גר",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "עדשים שחורות מנומרות",
+        "price": 9.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "כוסמין וחיטה מלאה 75",
+        "price": 17.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "לאבנה 5% 250 ג'",
+        "price": 11.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גריסי פנינה 1 ק\"ג",
+        "price": 10.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז בסמטי מלא 1 ק\"ג",
+        "price": 15.0,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_027_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
     "branch": "028",
     "type": "pricesFull",
     "timestamp": "2025-09-01T12:00:00Z",
@@ -1738,6 +5098,186 @@
       }
     ],
     "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_028_pricesFull_20250901_120000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "028",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 6586,
+    "items_sample": [
+      {
+        "product": "לימון ליים",
+        "price": 12.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מעדן דובדבן מנז אנד",
+        "price": 18.1,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מעדן תות שדה מנז אנד",
+        "price": 18.1,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "נפוליאון פלפל חלפיני",
+        "price": 14.6,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בולגרית למריחה בתוספ",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "לבנה אבו גוש 200 גרם",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* חומוס 400 אחל",
+        "price": 4.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בשר מס 6 חלק קפוא",
+        "price": 49.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "נוזל לניקוי המדיח בנ",
+        "price": 19.1,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "מגבוני טואלט לחים יו",
+        "price": 9.9,
+        "unit": "יח"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_028_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "029",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 6212,
+    "items_sample": [
+      {
+        "product": "*מבצע* גוואקמולי - ס",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם מוזהבים י",
+        "price": 5.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "טבעות זיתים ירוקים 5",
+        "price": 14.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מאסטר שף איטריות להק",
+        "price": 10.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חצי באגט מאפית",
+        "price": 3.7,
+        "unit": "יח"
+      },
+      {
+        "product": "מרקיות לבן 25 יח",
+        "price": 7.0,
+        "unit": "יח"
+      },
+      {
+        "product": "אוזני פיל פילסברי",
+        "price": 35.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "באגט מאפית",
+        "price": 5.8,
+        "unit": "יח"
+      },
+      {
+        "product": "מאפינס שוקו ציפס חמ",
+        "price": 11.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מאפינס וניל שוקו ציפ",
+        "price": 11.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_029_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "030",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7726,
+    "items_sample": [
+      {
+        "product": "*מבצע* חיטה 1 ק\"ג",
+        "price": 8.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גריסי פנינה 500 גרם",
+        "price": 7.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שעועית צבעונית 500 ג",
+        "price": 12.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם מוזהבים ס",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם לבנים סוג",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* קינואה 500 גר",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "עדשים שחורות מנומרות",
+        "price": 9.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גריסי פנינה 1 ק\"ג",
+        "price": 10.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סודה מי עדן 1.5 ליטר",
+        "price": 17.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "עלי חסה אורגנית",
+        "price": 14.9,
+        "unit": "יח"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_030_pricesFull_20250906_001000.json"
   },
   {
     "provider": "yohananof",
@@ -1801,6 +5341,906 @@
   },
   {
     "provider": "yohananof",
+    "branch": "032",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7711,
+    "items_sample": [
+      {
+        "product": "אורז תאילנדי 1 קג",
+        "price": 8.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז מלא 1 ק\"ג.",
+        "price": 8.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "קמח מלא 1 ק\"ג",
+        "price": 7.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז פרסי 1 ק\"ג",
+        "price": 11.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סוכר 1 ק\"ג",
+        "price": 4.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז עגול 1 ק\"ג",
+        "price": 12.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "שומשום 100 גרם",
+        "price": 4.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חומוס 1 ק\"ג",
+        "price": 16.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מוצרלה כדור 100 גרם",
+        "price": 10.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "תמר מגהול 1 ק\"ג",
+        "price": 18.9,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_032_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "033",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7051,
+    "items_sample": [
+      {
+        "product": "רוטב לסלט שום ושמיר",
+        "price": 12.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "בייבי ברוקולי",
+        "price": 16.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קולגייט מברשת 360 רע",
+        "price": 26.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "*מבצע* חומוס גרגירים",
+        "price": 7.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חלב טרי מהגולן 1%",
+        "price": 6.85,
+        "unit": "ליטר"
+      },
+      {
+        "product": "משחת שיניים דואלקר פ",
+        "price": 23.1,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "משחת שיניים סדרת פרי",
+        "price": 26.1,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "דנונה פרו 20 גר ללא",
+        "price": 6.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "נוזל מרוכז לניקוי כל",
+        "price": 16.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "נוזל מרוכז לניקוי כל",
+        "price": 16.9,
+        "unit": "ליטר"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_033_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "035",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 4753,
+    "items_sample": [
+      {
+        "product": "אורז תאילנדי 1 קג",
+        "price": 8.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז מלא 1 ק\"ג.",
+        "price": 8.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז פרסי 1 ק\"ג",
+        "price": 11.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סוכר 1 ק\"ג",
+        "price": 5.5,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "אורז עגול 1 ק\"ג",
+        "price": 12.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מלח ים 250 גרם.",
+        "price": 6.7,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלח ים 500 גרם.",
+        "price": 8.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלח מועשר יוד 250 גר",
+        "price": 6.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מלח עדין 1 ק\"ג צנצנת",
+        "price": 7.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מלח גס 1 ק\"ג צנצנת",
+        "price": 7.0,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_035_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "036",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7519,
+    "items_sample": [
+      {
+        "product": "גבינה צהובה חצי קשה",
+        "price": 32.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "רוטב טבסקו 60 מ\"ל",
+        "price": 9.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב טבסקו שום 60 מ\"",
+        "price": 9.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב טבסקו פלפל ירוק",
+        "price": 9.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "ביונד מיט",
+        "price": 31.2,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "המבורגר ביונד מיט 2*",
+        "price": 31.2,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גבינת גאודה 28%",
+        "price": 111.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינת גאודה עשבי תיב",
+        "price": 111.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינת גאודה כמון 28%",
+        "price": 111.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בייגלה מאפית",
+        "price": 5.2,
+        "unit": "Unknown"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_036_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "038",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 4744,
+    "items_sample": [
+      {
+        "product": "פריגת לייט אשכוליות",
+        "price": 8.2,
+        "unit": "ליטר"
+      },
+      {
+        "product": "פריגת ענבים 1.5 ליטר",
+        "price": 8.2,
+        "unit": "ליטר"
+      },
+      {
+        "product": "פריגת מנגו 1.5 ליטר",
+        "price": 8.2,
+        "unit": "ליטר"
+      },
+      {
+        "product": "פריגת לימונענע 1.5 ל",
+        "price": 8.2,
+        "unit": "ליטר"
+      },
+      {
+        "product": "נתחי טונה בהירה בשמן",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פריגת מיקס תות בננה",
+        "price": 8.2,
+        "unit": "ליטר"
+      },
+      {
+        "product": "פריגת צלול אננס 1.5",
+        "price": 8.2,
+        "unit": "ליטר"
+      },
+      {
+        "product": "שוופס ראשן 1.5 ליטר",
+        "price": 10.3,
+        "unit": "ליטר"
+      },
+      {
+        "product": "שוופס טוניק ללא סוכר",
+        "price": 10.3,
+        "unit": "ליטר"
+      },
+      {
+        "product": "RC קולה שישייה 1.5 ל",
+        "price": 27.1,
+        "unit": "ליטר"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_038_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "039",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 5646,
+    "items_sample": [
+      {
+        "product": "Temp SuperDept",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "מכולת",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "פירות וירקות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "קצביה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "קפואים",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "מעדניה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "משקאות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "תינוקות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "חומרי ניקוי",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "טיפוח והגינה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_039_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "040",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 8223,
+    "items_sample": [
+      {
+        "product": "Temp SuperDept",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "מכולת",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "פירות וירקות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "קצביה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "קפואים",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "מעדניה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "משקאות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "תינוקות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "חומרי ניקוי",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "טיפוח והגינה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_040_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "041",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 5561,
+    "items_sample": [
+      {
+        "product": "גבינה צהובה חצי קשה",
+        "price": 32.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סנדוויץ רוסטיק 4 יח",
+        "price": 13.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "רוטב טבסקו 60 מ\"ל",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב טבסקו שום 60 מ\"",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב טבסקו פלפל ירוק",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב טבסקו מעושן ציפ",
+        "price": 11.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "גבינת גאודה כמון 28%",
+        "price": 116.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מאפים במשקל בשקית",
+        "price": 50.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מאפים במשקל בקופסא",
+        "price": 50.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מארז גבטה 3 יח",
+        "price": 11.0,
+        "unit": "Unknown"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_041_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "042",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 4243,
+    "items_sample": [
+      {
+        "product": "Temp SuperDept",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "מכולת",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "פירות וירקות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "קצביה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "קפואים",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "מעדניה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "משקאות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "תינוקות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "חומרי ניקוי",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "טיפוח והגינה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_042_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "048",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 3794,
+    "items_sample": [
+      {
+        "product": "אקטיביה עם שיבולת שו",
+        "price": 4.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גמדים ארוחת בוקר תות",
+        "price": 6.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "נתחי טונה בהירה בשמן",
+        "price": 19.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "דניאלה תות בננה",
+        "price": 4.2,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "עלי סלנובה טעם הטבע",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אירוויק אקטיב פרש מי",
+        "price": 20.1,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "פריכיות בציפוי שוקול",
+        "price": 9.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "חטיפי אסאדו טרי",
+        "price": 99.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "משקה אקטיביה עם ש\"ש",
+        "price": 5.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "מארז יוגורט יווני שמ",
+        "price": 27.4,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_048_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "050",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7599,
+    "items_sample": [
+      {
+        "product": "סלמון מעושן פרוס 200",
+        "price": 46.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "סלמון פרוס 300 גרם",
+        "price": 61.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "ספיד סטיק 24/7 גל כח",
+        "price": 20.1,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "ספיד סטיק 24/7 גל כת",
+        "price": 20.1,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* קולגייט מברשת",
+        "price": 17.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "קולגייט מברשת מקס וי",
+        "price": 20.1,
+        "unit": "יח'"
+      },
+      {
+        "product": "אובה קלאסי סופר 32",
+        "price": 24.1,
+        "unit": "יח'"
+      },
+      {
+        "product": "נתחי טונה בהירה בשמן",
+        "price": 10.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קרפרי מגן תחתון מקסי",
+        "price": 16.0,
+        "unit": "יח'"
+      },
+      {
+        "product": "קרפרי מגן תחתון מקסי",
+        "price": 16.0,
+        "unit": "יח'"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_050_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "051",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 6307,
+    "items_sample": [
+      {
+        "product": "גבינה צהובה חצי קשה",
+        "price": 32.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "סנדוויץ רוסטיק 4 יח",
+        "price": 13.9,
+        "unit": "Unknown"
+      },
+      {
+        "product": "המבורגר ביונד מיט 2*",
+        "price": 31.2,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "ביונד מיט אצבעות שני",
+        "price": 32.2,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גבינת סנט מור קטן 2",
+        "price": 189.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "קוקיס בטעמים במשקל",
+        "price": 49.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מארז בייגלה 3 יח",
+        "price": 13.0,
+        "unit": "Unknown"
+      },
+      {
+        "product": "מאפים במשקל בשקית",
+        "price": 50.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "מאפים במשקל בקופסא",
+        "price": 50.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "חצי באגט 4 יח",
+        "price": 12.5,
+        "unit": "Unknown"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_051_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "052",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 7098,
+    "items_sample": [
+      {
+        "product": "חזה עוף טרי ביסטריצק",
+        "price": 45.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "כרעיים טרי ביסטריצקי",
+        "price": 39.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "שניצל טרי ביסטריצקי",
+        "price": 49.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "גבינה צהובה חצי קשה",
+        "price": 32.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "רוטב טבסקו 60 מ\"ל",
+        "price": 9.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב טבסקו שום 60 מ\"",
+        "price": 9.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב טבסקו פלפל ירוק",
+        "price": 9.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "רוטב טבסקו מעושן ציפ",
+        "price": 9.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "המבורגר ביונד מיט 2*",
+        "price": 31.2,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "גבינת סנט מור קטן 2",
+        "price": 189.0,
+        "unit": "ק\"ג"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_052_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "053",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 4008,
+    "items_sample": [
+      {
+        "product": "סיליט ספריי מסיר כתמ",
+        "price": 14.6,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "טבלת שוקולד -רפאלו 9",
+        "price": 17.5,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "משקה יופלה בקרטון בנ",
+        "price": 15.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "קציצות דג אמנון 450",
+        "price": 35.2,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פילה סלמון מעושן פרו",
+        "price": 27.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פילה סלמון מעושן פרו",
+        "price": 57.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פילה פורל מעושן פרוס",
+        "price": 27.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* פילה סלמון מע",
+        "price": 39.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "קפריס רולס קלאסיק 25",
+        "price": 20.1,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "ממרח חלווה ופיסטוק 3",
+        "price": 34.2,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_053_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "054",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 1291,
+    "items_sample": [
+      {
+        "product": "Temp SuperDept",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "מכולת",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "פירות וירקות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "קצביה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "תפו\"א למיקרו",
+        "price": 8.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "בצל ירוק יח'",
+        "price": 5.9,
+        "unit": "יח"
+      },
+      {
+        "product": "שורש פטרוזיליה יח'",
+        "price": 5.9,
+        "unit": "יח"
+      },
+      {
+        "product": "מנגולד-סלק עלים ארוז",
+        "price": 5.9,
+        "unit": "יח"
+      },
+      {
+        "product": "פלפל טינקרבל יח'",
+        "price": 8.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פטריות סטייק פורטובל",
+        "price": 14.9,
+        "unit": "יח"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_054_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
     "branch": "055",
     "type": "pricesFull",
     "timestamp": "2025-09-01T12:00:00Z",
@@ -1858,6 +6298,66 @@
       }
     ],
     "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_055_pricesFull_20250901_120000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "055",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 4259,
+    "items_sample": [
+      {
+        "product": "תרסיס מסיר שומנים קר",
+        "price": 9.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "תרסיס מסיר אבנית יוח",
+        "price": 8.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "קצף אקונומיקה בריח ל",
+        "price": 9.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "תרסיס לניקוי חלונות",
+        "price": 5.9,
+        "unit": "ליטר"
+      },
+      {
+        "product": "סבון אסלה מרוכז כחול",
+        "price": 10.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "מטליות מיקרופייבר יו",
+        "price": 5.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "מטליות מיקרופייבר לר",
+        "price": 12.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "מטליות מיקרופייבר מק",
+        "price": 11.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "כריות יפניות יוחננוף",
+        "price": 11.9,
+        "unit": "יח'"
+      },
+      {
+        "product": "כריות יפניות חזקות ב",
+        "price": 8.9,
+        "unit": "יח'"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_055_pricesFull_20250906_001000.json"
   },
   {
     "provider": "yohananof",
@@ -1921,6 +6421,66 @@
   },
   {
     "provider": "yohananof",
+    "branch": "059",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 2949,
+    "items_sample": [
+      {
+        "product": "גריסי פנינה 500 גרם",
+        "price": 5.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם מוזהבים ס",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "פירורי לחם לבנים סוג",
+        "price": 3.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "*מבצע* קינואה 500 גר",
+        "price": 13.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "עדשים שחורות מנומרות",
+        "price": 10.0,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "אורז בסמטי מלא 1 ק\"ג",
+        "price": 15.0,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "*מבצע* אורז יסמין 1",
+        "price": 11.9,
+        "unit": "ק\"ג"
+      },
+      {
+        "product": "בורגול 500 גרם",
+        "price": 5.9,
+        "unit": "100 גרם"
+      },
+      {
+        "product": "שעועית מש 500 גר",
+        "price": 12.0,
+        "unit": "יח'"
+      },
+      {
+        "product": "*מבצע* קינואה אדומה",
+        "price": 13.9,
+        "unit": "100 גרם"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_059_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
     "branch": "060",
     "type": "pricesFull",
     "timestamp": "2025-09-01T12:30:00Z",
@@ -1978,5 +6538,125 @@
       }
     ],
     "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_060_pricesFull_20250901_123000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "060",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 4242,
+    "items_sample": [
+      {
+        "product": "פינוק 2 ב-1 לשיער יב",
+        "price": 13.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "שמפו פינוק בתוספת שמ",
+        "price": 13.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "פינוק מרכך 700",
+        "price": 13.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "פינוק מרכך 700",
+        "price": 13.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "פינוק תחליב רחצה קלא",
+        "price": 13.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "פינוק סבון נוזלי לב",
+        "price": 13.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "שמפו פינוק לגבר 700",
+        "price": 13.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "שמפו פינוק לגבר 3 ב-",
+        "price": 13.9,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "שמפו פינוק ילדים 700",
+        "price": 15.0,
+        "unit": "100 מ\"ל"
+      },
+      {
+        "product": "שמפו פינוק ילדים 700",
+        "price": 15.0,
+        "unit": "100 מ\"ל"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_060_pricesFull_20250906_001000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "095",
+    "type": "pricesFull",
+    "timestamp": "2025-09-06T00:10:00Z",
+    "items_total": 62,
+    "items_sample": [
+      {
+        "product": "Temp SuperDept",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "מכולת",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "פירות וירקות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "קצביה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "קפואים",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "מעדניה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "משקאות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "תינוקות",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "חומרי ניקוי",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      },
+      {
+        "product": "טיפוח והגינה",
+        "price": 0.0,
+        "unit": "לא ידוע"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_095_pricesFull_20250906_001000.json"
   }
 ]
