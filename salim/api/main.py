@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
@@ -65,7 +66,7 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to Salim API - Israeli Supermarket Price Comparison"}
+    return RedirectResponse(url="/docs")
 
 # Include routers
 app.include_router(supermarkets.router)
