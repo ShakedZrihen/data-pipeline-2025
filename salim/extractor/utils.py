@@ -9,14 +9,12 @@ import xml.etree.ElementTree as ET
 _INVALID_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1F]')
 
 def sanitize_path_component(name: str) -> str:
-    """Keep Unicode (incl. Hebrew), remove only illegal filesystem chars."""
     if not isinstance(name, str):
         name = str(name)
     name = _INVALID_CHARS.sub("_", name).strip()
     return name.rstrip(" .")
 
 def extract_and_delete_gz(path: str, delete_gz: bool = False):
-    """Extract gzip OR zip (auto-detect by magic bytes). Return extracted XML path, or None."""
     with open(path, "rb") as fh:
         sig = fh.read(4)
 
@@ -66,10 +64,6 @@ def extract_and_delete_gz(path: str, delete_gz: bool = False):
     return None
 
 def convert_xml_to_json(xml_file_path: str) -> str | None:
-    """
-    Converts an XML file (even if extensionless) to a JSON file.
-    Skips conversion if the JSON file already exists.
-    """
     if not os.path.exists(xml_file_path):
         print(f"XML not found: {xml_file_path}")
         return None

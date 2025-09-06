@@ -10,24 +10,20 @@ from botocore.exceptions import ClientError
 
 ISO_FMT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
-def _utc_now_iso() -> str:
+def utc_now_iso() -> str:
     return datetime.now(timezone.utc).strftime(ISO_FMT)
 
-def _to_iso(dt: datetime) -> str:
+def to_iso(dt: datetime) -> str:
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     return dt.astimezone(timezone.utc).strftime(ISO_FMT)
 
-def _from_iso(s: str) -> datetime:
+def from_iso(s: str) -> datetime:
     if s.endswith("Z"):
         s = s[:-1] + "+00:00"
     return datetime.fromisoformat(s).astimezone(timezone.utc)
 
 class LastRunStore:
-    """
-    Saves & loads the last *successful* extraction time per (provider, branch, job).
-    """
-
     def __init__(
         self,
         table_name: str | None = None,
@@ -50,7 +46,7 @@ class LastRunStore:
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", "test"),
         )
 
-        self._table = self._get_or_create_table(create_if_missing, wait_for_active)
+        self._table = self.get_or_create_table(create_if_missing, wait_for_active)
         print(f"[BOOT][DDB] table ready: {self.table_name}")
 
     def get_last_success(
@@ -59,8 +55,7 @@ class LastRunStore:
         branch: str,
         job: str = "extractor",
     ) -> Optional[datetime]:
-        """Return the last successful extraction time (UTC) or None."""
-        pk = self._pk(provider, branch)
+        pk = self.pk(provider, branch)
         sk = job
         try:
             resp = self._table.get_item(Key={"pk": pk, "sk": sk})
@@ -71,7 +66,7 @@ class LastRunStore:
             ts = item.get("last_success_at")
             if not ts:
                 return None
-            dt = _from_iso(ts)
+            dt = from_iso(ts)
             print(f"[INFO][DDB] last_success for {pk}/{sk} → {dt.isoformat()}")
             return dt
         except ClientError as e:
@@ -86,14 +81,9 @@ class LastRunStore:
         job: str = "extractor",
         meta: Optional[dict] = None,
     ) -> bool:
-        """
-        Save a successful run at time 'when' (default now).
-        Will only update if new time is strictly greater than existing (monotonic forward).
-        Returns True if updated, False if skipped by condition.
-        """
-        pk = self._pk(provider, branch)
+        pk = self.pk(provider, branch)
         sk = job
-        iso = _to_iso(when or datetime.now(timezone.utc))
+        iso = to_iso(when or datetime.now(timezone.utc))
         meta = meta or {}
 
         print(f"[INFO][DDB] set_success {pk}/{sk} → {iso}")
@@ -104,7 +94,7 @@ class LastRunStore:
                 ConditionExpression="attribute_not_exists(last_success_at) OR last_success_at < :ts",
                 ExpressionAttributeValues={
                     ":ts": iso,
-                    ":now": _utc_now_iso(),
+                    ":now": utc_now_iso(),
                     ":meta": meta,
                 },
             )
@@ -124,10 +114,9 @@ class LastRunStore:
         error_msg: str,
         job: str = "extractor",
     ) -> None:
-        """Optional: record last failure time/message (does not affect last_success_at)."""
-        pk = self._pk(provider, branch)
+        pk = self.pk(provider, branch)
         sk = job
-        now = _utc_now_iso()
+        now = utc_now_iso()
         print(f"[WARN][DDB] set_failure {pk}/{sk} → {now} :: {error_msg[:200]}")
         try:
             self._table.update_item(
@@ -146,20 +135,16 @@ class LastRunStore:
         objects: Iterable[dict],
         since: Optional[datetime],
     ) -> list[dict]:
-        """
-        Given an iterable of S3 objects (each with 'Key' and 'LastModified'),
-        return only those strictly newer than 'since'.
-        """
         if not since:
             return list(objects)
         since_utc = since.astimezone(timezone.utc)
         out = [o for o in objects if o.get("LastModified") and o["LastModified"].astimezone(timezone.utc) > since_utc]
         return out
 
-    def _pk(self, provider: str, branch: str) -> str:
+    def pk(self, provider: str, branch: str) -> str:
         return f"extractor#{provider}#{branch}"
 
-    def _get_or_create_table(self, create_if_missing: bool, wait_for_active: bool):
+    def get_or_create_table(self, create_if_missing: bool, wait_for_active: bool):
         try:
             table = self._dynamodb.Table(self.table_name)
             table.load()

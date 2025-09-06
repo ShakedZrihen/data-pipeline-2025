@@ -177,19 +177,19 @@ def normalize_file(json_path):
         "items": items
     }
 
-def _byte_len(obj):
+def byte_len(obj):
     return len(json.dumps(obj, ensure_ascii=False).encode("utf-8"))
 
-def _envelope_with_items(envelope, items_slice):
+def envelope_with_items(envelope, items_slice):
     return {**envelope, "items": items_slice}
 
-def _split_large_promo(envelope, promo, max_bytes):
+def split_large_promo(envelope, promo, max_bytes):
     """
     Split a single large promo (huge `products`) into multiple smaller promos.
     """
     products = promo.get("products")
     if not isinstance(products, list) or not products:
-        yield _envelope_with_items(envelope, [promo])
+        yield envelope_with_items(envelope, [promo])
         return
 
     base = {**promo, "products": []}
@@ -200,15 +200,15 @@ def _split_large_promo(envelope, promo, max_bytes):
         while lo <= hi:
             mid = (lo + hi) // 2
             shard = {**base, "products": products[i:i+mid]}
-            cand = _envelope_with_items(envelope, [shard])
-            sz = _byte_len(cand)
+            cand = envelope_with_items(envelope, [shard])
+            sz = byte_len(cand)
             if sz <= max_bytes:
                 best = mid
                 lo = mid + 1
             else:
                 hi = mid - 1
         shard = {**base, "products": products[i:i+best]}
-        yield _envelope_with_items(envelope, [shard])
+        yield envelope_with_items(envelope, [shard])
         i += best
 
 def chunk_for_sqs(normalized, max_bytes=240_000):
@@ -223,8 +223,8 @@ def chunk_for_sqs(normalized, max_bytes=240_000):
         step = 1
         last_good = 0
         while True:
-            candidate = _envelope_with_items(normalized, items[i:i+step])
-            size = _byte_len(candidate)
+            candidate = envelope_with_items(normalized, items[i:i+step])
+            size = byte_len(candidate)
             if size <= max_bytes:
                 last_good = step
                 step += 1
@@ -235,14 +235,12 @@ def chunk_for_sqs(normalized, max_bytes=240_000):
 
         if last_good == 0:
             big = items[i]
-            split_done = False
-            for shard in _split_large_promo(normalized, big, max_bytes):
-                if _byte_len(shard) > max_bytes:
+            for shard in split_large_promo(normalized, big, max_bytes):
+                if byte_len(shard) > max_bytes:
                     pass
                 yield shard
-                split_done = True
             i += 1
         else:
-            candidate = _envelope_with_items(normalized, items[i:i+last_good])
+            candidate = envelope_with_items(normalized, items[i:i+last_good])
             yield candidate
             i += last_good

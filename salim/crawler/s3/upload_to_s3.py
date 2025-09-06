@@ -4,8 +4,6 @@ import sys
 from botocore.exceptions import ClientError
 
 def upload_file_to_s3(branch: str, file: str):
-    """Upload The prices and promos to S3 bucket using LocalStack"""
-    
     print("Uploading The prices and promos to S3 bucket...")
     
     s3_client = boto3.client(

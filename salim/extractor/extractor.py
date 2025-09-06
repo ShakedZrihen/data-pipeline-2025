@@ -40,7 +40,7 @@ class Extractor:
         path = Path(json_src_path)
         try:
             work_dir = path.parts.index("work")
-            base_dir = Path(*path.parts[: work_dir + 3])  # .../work/provider/branch
+            base_dir = Path(*path.parts[: work_dir + 3])
         except ValueError:
             base_dir = path.parent
 
@@ -76,7 +76,6 @@ class Extractor:
 
     @staticmethod
     def _provider_branch_from_key(key: str) -> Tuple[str, str]:
-        # expect Provider/Branch/<file>
         parts = key.split("/")
         try:
             provider, branch = parts[-3], parts[-2]
@@ -86,8 +85,8 @@ class Extractor:
         branch = sanitize_path_component(branch)
         return provider, branch
 
-    def _process_object(self, key: str, last_modified) -> bool:
-        """Download → extract → convert → normalize/chunk → SQS → cleanup."""
+    def process_object(self, key: str, last_modified) -> bool:
+        """Download → extract → convert → normalize → SQS → cleanup."""
         try:
             print(f"Handling: {key}")
             provider, branch = self._provider_branch_from_key(key)
@@ -177,7 +176,7 @@ class Extractor:
                 for obj in items:
                     key = obj["Key"]
                     lm = obj.get("LastModified")
-                    ok = self._process_object(key, lm)
+                    ok = self.process_object(key, lm)
                     if ok and lm:
                         latest_seen = lm
                     elif not ok:

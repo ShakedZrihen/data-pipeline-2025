@@ -33,7 +33,7 @@ def get_chromedriver(headless: bool | None = None):
             print(f"Using remote Selenium at {remote_url}")
             driver = webdriver.Remote(command_executor=remote_url, options=opts)
         else:
-            chromedriver_path = os.getenv("CHROMEDRIVER_BIN")  # e.g. /usr/bin/chromedriver
+            chromedriver_path = os.getenv("CHROMEDRIVER_BIN")
             if chromedriver_path:
                 print(f"Using local chromedriver: {chromedriver_path}")
                 service = Service(executable_path=chromedriver_path)
@@ -41,7 +41,6 @@ def get_chromedriver(headless: bool | None = None):
             else:
                 driver = webdriver.Chrome(options=opts)
 
-        # best-effort version print (works for local; remote may differ)
         try:
             ver = driver.capabilities.get("chrome", {}).get("chromedriverVersion", "unknown")
             print(f"Chrome driver path/version: {ver}")
@@ -56,7 +55,6 @@ def get_chromedriver(headless: bool | None = None):
 
 
 def get_html_parser(driver, url: str, wait_secs: float = 0.5):
-    """Navigate to URL with Selenium and return a BeautifulSoup of the page."""
     print(f"Navigating to {url}")
     driver.get(url)
     time.sleep(wait_secs)
@@ -64,10 +62,6 @@ def get_html_parser(driver, url: str, wait_secs: float = 0.5):
 
 
 def session_from_driver(driver) -> requests.Session:
-    """
-    Build a requests.Session that carries Selenium's cookies + UA + Referer.
-    Useful for downloading files behind auth.
-    """
     session = requests.Session()
 
     try:
@@ -102,10 +96,6 @@ def session_from_driver(driver) -> requests.Session:
 _ILLEGAL_WIN_CHARS = r'[<>:"/\\|?*\x00-\x1F]'
 
 def sanitize_path_component(name: str) -> str:
-    """
-    Keep Unicode (e.g., Hebrew) but remove Windows-illegal characters.
-    Also trims trailing dots/spaces which Windows rejects.
-    """
     if not name:
         return "default"
     name = re.sub(_ILLEGAL_WIN_CHARS, "", name)

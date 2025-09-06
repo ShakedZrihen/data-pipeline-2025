@@ -7,11 +7,6 @@ from requests.exceptions import SSLError
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def download_file_from_link(link: str, output_dir: str, filename: str | None = None, session: requests.Session | None = None, verify_cert: bool = True) -> str | None:
-    """
-    Download a file to output_dir. If `filename` is provided, use it; else use the URL basename.
-    Supports passing an authenticated `session` (e.g., built from Selenium cookies).
-    Returns the full output path on success, or None on failure / HTML response.
-    """
     os.makedirs(output_dir, exist_ok=True)
     out_name = filename or (os.path.basename(link) or "download.bin")
     out_path = os.path.join(output_dir, out_name)
@@ -25,7 +20,6 @@ def download_file_from_link(link: str, output_dir: str, filename: str | None = N
                 print(f"Failed to download. Status code: {r.status_code}")
                 return None
 
-            # Read first chunk to sniff for unexpected HTML (e.g., login page)
             it = r.iter_content(chunk_size=8192)
             try:
                 first_chunk = next(it)

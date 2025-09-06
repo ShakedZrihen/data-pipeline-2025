@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 
 print("[BOOT] starting json_loader.py", flush=True)
 
-# ---------- env ----------
 env_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(env_path)
 PG_DSN = (
@@ -18,10 +17,10 @@ PG_DSN = (
     or "postgresql://postgres:postgres@localhost:5432/postgres"
 )
 
-def _now_utc() -> datetime:
+def now_utc() -> datetime:
     return datetime.now(timezone.utc)
 
-def _as_int(x) -> Optional[int]:
+def as_int(x) -> Optional[int]:
     try:
         if x is None:
             return None
@@ -32,7 +31,7 @@ def _as_int(x) -> Optional[int]:
     except Exception:
         return None
 
-def _as_float(x) -> Optional[float]:
+def as_float(x) -> Optional[float]:
     try:
         if x is None:
             return None
@@ -43,20 +42,20 @@ def _as_float(x) -> Optional[float]:
     except Exception:
         return None
 
-def _as_str(x) -> Optional[str]:
+def as_str(x) -> Optional[str]:
     if x is None:
         return None
     s = str(x).strip()
     return s if s else None
 
-def _first(*vals):
+def first(*vals):
     for v in vals:
-        v = _as_str(v)
+        v = as_str(v)
         if v:
             return v
     return None
 
-def _first_list(d: Dict[str, Any], *keys: str) -> Optional[List[Any]]:
+def first_list(d: Dict[str, Any], *keys: str) -> Optional[List[Any]]:
     """Find first existing key in d whose value is a list."""
     for k in keys:
         v = d.get(k)
@@ -65,10 +64,8 @@ def _first_list(d: Dict[str, Any], *keys: str) -> Optional[List[Any]]:
     return None
 class Cache:
     """
-    Lightweight cache held by enricher for this process.
-    We cache:
-      - supers:  (provider, branch_number) -> super_id (uuid)
-      - file-scope dedupe: set of (branch_number, barcode)
+    super_by_key:  (provider, branch_number) -> super_id (uuid)
+    seen_products: set of (branch_number, barcode)
     """
     def __init__(self):
         self.super_by_key: Dict[Tuple[str, int], str] = {}
@@ -77,14 +74,14 @@ class Cache:
     def reset_file_scope(self):
         self._seen_products.clear()
 
-def _execute_values(cur, sql: str, rows: Iterable[tuple]) -> int:
+def execute_values(cur, sql: str, rows: Iterable[tuple]) -> int:
     rows = list(rows)
     if not rows:
         return 0
     extras.execute_values(cur, sql, rows, page_size=1000)
     return len(rows)
 
-def _ensure_super(
+def ensure_super(
     cur,
     cache: Cache,
     provider: Optional[str],
@@ -92,8 +89,8 @@ def _ensure_super(
     branch_name: Optional[str] = None,
     address: Optional[str] = None,
 ) -> Optional[str]:
-    provider = _as_str(provider)
-    br = _as_int(branch_number)
+    provider = as_str(provider)
+    br = as_int(branch_number)
     if not provider or br is None or br == 0:
         return None
 
@@ -116,55 +113,43 @@ def _ensure_super(
     return super_id
 
 def _extract_prices_payload(d: Dict[str, Any]) -> Tuple[str, Optional[int], Optional[str], Optional[str], List[Dict[str, Any]]]:
-    """
-    Normalized price JSON:
-      { "provider": "...", "branch": <int>, "type": "price", "timestamp": "...", "items": [...] }
-    Items: { "itemCode": "<barcode>", "product": "<name>", "price": <float>, "updatedAt": "<iso>" }
-    """
-    provider = _first(d.get("provider"), d.get("chain"), d.get("brand"))
-    branch_number = _as_int(d.get("branch") or d.get("branch_number") or d.get("store_id"))
-    branch_name = _first(d.get("branch_name"), d.get("store_name"))
-    address = _first(d.get("address"), d.get("store_address"))
-    items = _first_list(d, "items", "Items", "products", "data") or []
+    provider = first(d.get("provider"), d.get("chain"), d.get("brand"))
+    branch_number = as_int(d.get("branch") or d.get("branch_number") or d.get("store_id"))
+    branch_name = first(d.get("branch_name"), d.get("store_name"))
+    address = first(d.get("address"), d.get("store_address"))
+    items = first_list(d, "items", "Items", "products", "data") or []
     return provider or "", branch_number, branch_name, address, items
 
 def _parse_price_item(it: Dict[str, Any]) -> Tuple[Optional[str], Optional[str], Optional[float]]:
-    barcode = _first(it.get("itemCode"), it.get("barcode"), it.get("Barcode"), it.get("product_id"))
-    name    = _first(it.get("product"), it.get("name"), it.get("product_name"))
-    price   = _as_float(it.get("price") or it.get("Price") or it.get("storePrice"))
+    barcode = first(it.get("itemCode"), it.get("barcode"), it.get("Barcode"), it.get("product_id"))
+    name    = first(it.get("product"), it.get("name"), it.get("product_name"))
+    price   = as_float(it.get("price") or it.get("Price") or it.get("storePrice"))
     return barcode, name, price
 
 def _extract_promos_payload(d: Dict[str, Any]) -> Tuple[str, Optional[int], List[Dict[str, Any]]]:
-    """
-    Normalized promo JSON:
-      { "provider": "...", "branch": <int>, "type": "promo", "timestamp": "...", "items": [...] }
-    """
-    provider = _first(d.get("provider"), d.get("chain"), d.get("brand"))
-    branch_number = _as_int(d.get("branch") or d.get("branch_number") or d.get("store_id"))
-    promos = _first_list(d, "items", "promotions", "data") or []
+    provider = first(d.get("provider"), d.get("chain"), d.get("brand"))
+    branch_number = as_int(d.get("branch") or d.get("branch_number") or d.get("store_id"))
+    promos = first_list(d, "items", "promotions", "data") or []
     return provider or "", branch_number, promos
 
 def _parse_promo(it: Dict[str, Any]) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[float], Optional[float], Optional[float], List[str]]:
-    """
-    Returns: promotion_id, start_at, end_at, min_qty, discount_rate, discount_price, barcodes[]
-    """
-    promo_id = _first(it.get("promotionId"), it.get("promotion_id"), it.get("id"))
-    start    = _first(it.get("start"), it.get("start_at"), it.get("startDate"))
-    end      = _first(it.get("end"), it.get("end_at"), it.get("endDate"))
-    min_qty  = _as_float(it.get("minQty") or it.get("min_qty"))
-    rate     = _as_float(it.get("discountRate") or it.get("discount_rate"))
-    price    = _as_float(it.get("discountedPrice") or it.get("discount_price"))
+    promo_id = first(it.get("promotionId"), it.get("promotion_id"), it.get("id"))
+    start    = first(it.get("start"), it.get("start_at"), it.get("startDate"))
+    end      = first(it.get("end"), it.get("end_at"), it.get("endDate"))
+    min_qty  = as_float(it.get("minQty") or it.get("min_qty"))
+    rate     = as_float(it.get("discountRate") or it.get("discount_rate"))
+    price    = as_float(it.get("discountedPrice") or it.get("discount_price"))
 
     prods = []
     v = it.get("products") or it.get("items") or []
     if isinstance(v, list):
         for p in v:
             if isinstance(p, dict):
-                bc = _first(p.get("itemCode"), p.get("barcode"), p.get("product_id"))
+                bc = first(p.get("itemCode"), p.get("barcode"), p.get("product_id"))
                 if bc:
                     prods.append(bc)
             elif isinstance(p, (str, int)):
-                s = _as_str(p)
+                s = as_str(p)
                 if s:
                     prods.append(s)
 
@@ -172,9 +157,6 @@ def _parse_promo(it: Dict[str, Any]) -> Tuple[Optional[str], Optional[str], Opti
     return promo_id, start, end, min_qty, rate, price, prods
 
 def load_prices_file(cur, cache: Cache, path: str) -> int:
-    """
-    Upsert products for a single JSON file.
-    """
     cache.reset_file_scope()
 
     with open(path, "r", encoding="utf-8") as f:
@@ -182,13 +164,13 @@ def load_prices_file(cur, cache: Cache, path: str) -> int:
 
     provider, branch_number, branch_name, address, items = _extract_prices_payload(data)
 
-    super_id = _ensure_super(cur, cache, provider, branch_number, branch_name, address)
+    super_id = ensure_super(cur, cache, provider, branch_number, branch_name, address)
 
     rows = []
     seen = cache._seen_products
-    now = _now_utc()
+    now = now_utc()
 
-    br = _as_int(branch_number)
+    br = as_int(branch_number)
     if br is None or br == 0:
         print(f"[INFO] Message file {os.path.basename(path)}: 0 products parsed", flush=True)
         return 0
@@ -204,7 +186,7 @@ def load_prices_file(cur, cache: Cache, path: str) -> int:
             continue
         seen.add(key)
 
-        rows.append((barcode, br, _as_str(name), _as_float(price), now, super_id))
+        rows.append((barcode, br, as_str(name), as_float(price), now, super_id))
 
     if not rows:
         print(f"[INFO] Message file {os.path.basename(path)}: 0 products parsed", flush=True)
@@ -220,26 +202,22 @@ def load_prices_file(cur, cache: Cache, path: str) -> int:
             updated_at = EXCLUDED.updated_at,
             super_id   = COALESCE(EXCLUDED.super_id, products.super_id)
     """
-    cnt = _execute_values(cur, sql, rows)
+    cnt = execute_values(cur, sql, rows)
     print(f"[RESULT] Upserted products from {os.path.basename(path)}: {cnt}", flush=True)
     return cnt
 
 def load_promos_file(cur, cache: Cache, path: str) -> int:
-    """
-    Upsert promos + link them to products (by barcode) for a single JSON file.
-    Returns the number of links inserted/ensured (not the number of promo rows).
-    """
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     provider, branch_number, promos = _extract_promos_payload(data)
 
-    br = _as_int(branch_number)
+    br = as_int(branch_number)
     if br is None or br == 0:
         print(f"[INFO] Message file {os.path.basename(path)}: 0 promotions parsed", flush=True)
         return 0
 
-    _ensure_super(cur, cache, provider, br)
+    ensure_super(cur, cache, provider, br)
 
     promo_rows: List[Tuple[str, Optional[str], Optional[str], Optional[float], Optional[float], Optional[float], int]] = []
     link_pairs: List[Tuple[str, str]] = []  # (promo_id, barcode)
@@ -268,7 +246,7 @@ def load_promos_file(cur, cache: Cache, path: str) -> int:
                     discount_rate  = COALESCE(EXCLUDED.discount_rate, promos.discount_rate),
                     discount_price = COALESCE(EXCLUDED.discount_price, promos.discount_price)
             """
-            _execute_values(cur, sql_promo, promo_rows)
+            execute_values(cur, sql_promo, promo_rows)
         except psycopg2.Error as e:
             for r in promo_rows:
                 (promotion_id, start_at, end_at, min_qty, discount_rate, discount_price, branch_id) = r
@@ -297,10 +275,8 @@ def load_promos_file(cur, cache: Cache, path: str) -> int:
                          promotion_id, branch_id),
                     )
 
-    # Link promos -> products (only for products that already exist in this branch)
     link_cnt = 0
     if link_pairs:
-        # dedupe within file
         link_pairs = list({(p, bc) for (p, bc) in link_pairs})
 
         # keep only barcodes that exist for this branch to avoid FK errors
@@ -324,7 +300,7 @@ def load_promos_file(cur, cache: Cache, path: str) -> int:
                 VALUES %s
                 ON CONFLICT (promo_id, barcode, branch_id) DO NOTHING
             """
-            link_cnt = _execute_values(cur, sql_link, rows)
+            link_cnt = execute_values(cur, sql_link, rows)
 
     print(f"[RESULT] Inserted promo->product links from {os.path.basename(path)}: {link_cnt}", flush=True)
     return link_cnt

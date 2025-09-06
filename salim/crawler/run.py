@@ -1,7 +1,7 @@
 import os, time, traceback
 from crawler import Crawler
 
-def _to_int(name, default):
+def to_int(name, default):
     try:
         return int(os.getenv(name, str(default)))
     except Exception:
@@ -9,8 +9,8 @@ def _to_int(name, default):
 
 if __name__ == "__main__":
     print("[BOOT] starting crawler.run")
-    interval = _to_int("CRAWL_INTERVAL_SEC", 3600)
-    jitter    = _to_int("CRAWL_JITTER_SEC", 15)
+    interval = to_int("CRAWL_INTERVAL_SEC", 3600)
+    jitter    = to_int("CRAWL_JITTER_SEC", 15)
 
     while True:
         try:
@@ -21,7 +21,6 @@ if __name__ == "__main__":
             print(f"[ERROR] crawler cycle failed: {type(e).__name__}: {e}")
             traceback.print_exc()
 
-        # sleep with tiny jitter
         nap = interval
         if jitter > 0:
             import random

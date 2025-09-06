@@ -1,13 +1,12 @@
 from datetime import datetime, timedelta
-from consts import JERUSALEM, _ABS_TIME_DATE, _RELATIVE
+from consts import JERUSALEM, ABS_TIME_DATE, RELATIVE
 
 def parse_absolute_date(text):
     text = text.strip()
-    m = _ABS_TIME_DATE.search(text)
+    m = ABS_TIME_DATE.search(text)
     if not m:
-        return None  # must have both time and date in one of the two orders
+        return None
 
-    # determine which branch matched
     if m.group("time1"):
         time_str = m.group("time1")
         day = int(m.group("day1"))
@@ -20,14 +19,13 @@ def parse_absolute_date(text):
         year = int(m.group("year2"))
 
     if year < 100:
-        year += 2000  # two-digit heuristic
+        year += 2000
 
     try:
         base = datetime(year, month, day)
     except ValueError:
         return None
 
-    # apply time
     try:
         h, mi = map(int, time_str.split(":"))
     except ValueError:
@@ -37,10 +35,9 @@ def parse_absolute_date(text):
 
     return base.replace(tzinfo=JERUSALEM)
 
-
 def parse_relative_date(text):
     text = text.strip().lower()
-    m = _RELATIVE.match(text)
+    m = RELATIVE.match(text)
     if not m:
         return None
 
@@ -73,7 +70,6 @@ def parse_relative_date(text):
         return now - timedelta(days=365 * qty)
 
     return None
-
 
 def parse_date(text):
     rel = parse_relative_date(text)

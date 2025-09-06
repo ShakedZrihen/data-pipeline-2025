@@ -1,11 +1,11 @@
 import re
+import os
 from zoneinfo import ZoneInfo
 
-# timezone used for all parsed datetimes
 JERUSALEM = ZoneInfo("Asia/Jerusalem")
 
 # relative expression with optional prefix like "about"
-_RELATIVE = re.compile(
+RELATIVE = re.compile(
     r"^(?:about|approximately|around|roughly)?\s*"
     r"(?P<qty>a|an|\d+)\s+"
     r"(?P<unit>seconds?|minutes?|hours?|days?|weeks?|months?|years?)\s+ago$",
@@ -13,8 +13,7 @@ _RELATIVE = re.compile(
 )
 
 # absolute datetime: either "time + date" or "date + time"
-# explicitly name groups separately to avoid reuse conflicts
-_ABS_TIME_DATE = re.compile(
+ABS_TIME_DATE = re.compile(
     r"^(?:"
     r"(?P<time1>\d{1,2}:\d{2})\s+(?P<day1>\d{1,2})[\/\-](?P<month1>\d{1,2})[\/\-](?P<year1>\d{2,4})"
     r"|"
@@ -23,4 +22,4 @@ _ABS_TIME_DATE = re.compile(
     flags=re.IGNORECASE,
 )
 
-TOP_K_BRANCHES = 5  # number of latest branches to fetch (price+promo)
+TOP_K_BRANCHES = os.getenv("TOP_K_BRANCHES", 5)
