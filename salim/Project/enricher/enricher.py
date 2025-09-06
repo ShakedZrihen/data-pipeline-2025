@@ -11,7 +11,6 @@ class DataEnricher:
     
     def __init__(self):
         self.brand_extractor = ClaudeBrandExtractor()
-        # Check if we're in test mode
         self.test_mode = os.getenv('TEST_MODE', 'false').lower() == 'true'
     
     def enrich_message(self, normalized_message: Dict[str, Any]) -> Dict[str, Any]:
@@ -35,11 +34,9 @@ class DataEnricher:
         if not message.get('processed_at'):
             message['processed_at'] = datetime.now().isoformat()
         
-        # Enrich items with default values and brand extraction
         items = message.get('items', [])
         logger.info(f"Processing {len(items)} items for enrichment")
         
-        # Limit processing for test mode to avoid getting stuck
         fast_test_mode = os.getenv('FAST_TEST_MODE', 'false').lower() == 'true'
         if self.test_mode or fast_test_mode:
             if fast_test_mode:
@@ -48,7 +45,6 @@ class DataEnricher:
                 max_items = 20  # Regular test mode
             items_to_process = items[:max_items] if len(items) > max_items else items
             logger.info(f"{'FAST TEST' if fast_test_mode else 'TEST'} MODE: Processing only first {len(items_to_process)} items out of {len(items)} total")
-            # Replace the items list with only the processed items for database save
             message['items'] = items_to_process
         else:
             items_to_process = items
@@ -62,9 +58,7 @@ class DataEnricher:
             if not item.get('item_promotion_price'):
                 item['item_promotion_price'] = 0.0
             
-            # Extract brand if not present or empty
             if not item.get('item_brand'):
-                # Use manufacturer_item_description for brand extraction
                 item_for_extraction = {
                     'item_name': item.get('item_name', ''),
                     'manufacturer': item.get('manufacturer_name', ''),
@@ -77,7 +71,6 @@ class DataEnricher:
                 item['brand_confidence'] = enriched_item.get('brand_confidence', 0.0)
                 item['brand_extraction_method'] = enriched_item.get('brand_extraction_method', 'unknown')
                 
-                # Only log high confidence extractions to reduce spam
                 if item.get('brand_confidence', 0) >= 0.7:
                     logger.info(f"Extracted brand '{item.get('item_brand')}' for item '{item.get('item_name', 'unknown')}' "
                                f"(confidence: {item.get('brand_confidence', 0):.2f})")

@@ -8,7 +8,6 @@ import os
 def create_bucket():
     """Create S3 bucket if it doesn't exist"""
     try:
-        # Create S3 client
         s3_client = boto3.client(
             's3',
             endpoint_url=os.getenv('S3_ENDPOINT', 'http://localhost:4566'),
@@ -19,7 +18,6 @@ def create_bucket():
         
         bucket_name = 'test-bucket'
         
-        # Check if bucket exists
         try:
             s3_client.head_bucket(Bucket=bucket_name)
             print(f"Bucket {bucket_name} already exists")
@@ -27,7 +25,6 @@ def create_bucket():
         except:
             pass
         
-        # Create bucket
         s3_client.create_bucket(Bucket=bucket_name)
         print(f"Created bucket: {bucket_name}")
         

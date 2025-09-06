@@ -38,7 +38,6 @@ docker-compose logs -f api
 # View all running services
 docker-compose ps
 
-# Check specific service
 docker-compose ps crawler
 docker-compose ps extractor
 docker-compose ps enricher
@@ -93,7 +92,6 @@ docker-compose down -v
 
 #### 1. S3 Bucket Not Created
 ```bash
-# Check if bucket exists
 docker exec s3-simulator awslocal s3 ls
 
 # Create bucket manually if needed

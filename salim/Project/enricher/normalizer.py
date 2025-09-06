@@ -8,9 +8,8 @@ class DataNormalizer:
     """Handles normalization of different data types into unified schema"""
     
     def normalize_store_id(self, store_id: str) -> str:
-        """Normalize store ID by removing leading zeros"""
         if store_id and isinstance(store_id, str):
-            return store_id.lstrip('0') or '0'  # Keep at least one zero if all zeros
+            return store_id.zfill(3)
         return store_id
     
     def normalize_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
@@ -20,14 +19,12 @@ class DataNormalizer:
             metadata = message.get('metadata', {})
             file_type = metadata.get('file_type', '')
             
-            # Extract data from Root if it exists
             root_data = data.get('Root', data)
             
             # Debug logging before fix
             logger.info(f"File type: {file_type}")
             logger.info(f"Original root_data keys: {list(root_data.keys()) if root_data else 'None'}")
             
-            # Handle nested root structure (Root.root)
             if root_data and 'root' in root_data:
                 logger.info(f"Found nested 'root' key, extracting...")
                 root_data = root_data['root']
@@ -35,7 +32,6 @@ class DataNormalizer:
             
             logger.info(f"Final ChainId in root_data: {root_data.get('ChainId') if root_data else 'None'}")
             
-            # Determine message type based on file_type in metadata
             if file_type == 'PriceFull':
                 return self.normalize_price_data(root_data, metadata)
             elif file_type == 'PromoFull':
@@ -52,14 +48,17 @@ class DataNormalizer:
     
     def normalize_price_data(self, data: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize price/product data"""
+        raw_store_id = data.get('StoreId', metadata.get('store_id', 'unknown'))
+        normalized_store_id = self.normalize_store_id(raw_store_id)
+        logger.info(f"PriceFull - Raw StoreId: {raw_store_id}, Normalized: {normalized_store_id}")
+        
         normalized = {
             'type': 'price_data',
             'chain_id': data.get('ChainId'),
-            'store_id': self.normalize_store_id(data.get('StoreId', metadata.get('store_id', 'unknown'))),
+            'store_id': normalized_store_id,
             'items': []
         }
         
-        # Extract items from the data structure
         items_data = data.get('Items', {}).get('Item', [])
         if not isinstance(items_data, list):
             items_data = [items_data]
@@ -91,38 +90,36 @@ class DataNormalizer:
     
     def normalize_promo_data(self, data: Dict[str, Any], metadata: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize promotion data"""
+        raw_store_id = data.get('StoreId', metadata.get('store_id', 'unknown'))
+        normalized_store_id = self.normalize_store_id(raw_store_id)
+        logger.info(f"PromoFull - Raw StoreId: {raw_store_id}, Normalized: {normalized_store_id}")
+        
         normalized = {
             'type': 'promo_data',
             'chain_id': data.get('ChainId'),
-            'store_id': self.normalize_store_id(data.get('StoreId', metadata.get('store_id', 'unknown'))),
+            'store_id': normalized_store_id,
             'discounts': []
         }
         
-        # Extract promotions from the data structure
         promotions_data = data.get('Promotions', {}).get('Promotion', [])
         if not isinstance(promotions_data, list):
             promotions_data = [promotions_data]
         
         logger.info(f"Processing {len(promotions_data)} promotions")
         
-        # Check if we're in test mode to limit processing
-        test_mode = os.getenv('TEST_MODE', 'false').lower() == 'true'
-        max_promotions = 2 if test_mode else len(promotions_data)
+        test_mode = os.getenv('FAST_TEST_MODE', 'false').lower() == 'true'
+        max_promotions = 2 if test_mode else 10
         
         for promo_idx, promotion in enumerate(promotions_data[:max_promotions]):
-            # Extract promotion items
             promo_items = promotion.get('PromotionItems', {}).get('Item', [])
             if not isinstance(promo_items, list):
                 promo_items = [promo_items]
             
-            # Limit items in test mode too
-            max_items = 5 if test_mode else len(promo_items)
+            max_items = 5 if test_mode else 10
             logger.info(f"Promotion {promo_idx + 1}/{max_promotions}: Processing {min(len(promo_items), max_items)} items out of {len(promo_items)} total")
             
-            # Extract additional restrictions
             additional = promotion.get('AdditionalRestrictions', {})
             
-            # Extract club info
             clubs = promotion.get('Clubs', {})
             club_id = clubs.get('ClubId') if isinstance(clubs, dict) else None
             
@@ -164,7 +161,6 @@ class DataNormalizer:
             'stores': []
         }
         
-        # Extract stores from the data structure
         sub_chains = data.get('SubChains', {}).get('SubChain', [])
         if not isinstance(sub_chains, list):
             sub_chains = [sub_chains]

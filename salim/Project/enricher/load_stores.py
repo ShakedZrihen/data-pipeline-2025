@@ -23,7 +23,18 @@ def load_stores():
         conn = psycopg2.connect(database_url)
         cursor = conn.cursor()
         
-        # Clear existing data
+        cursor.execute("SELECT COUNT(*) FROM stores;")
+        stores_count = cursor.fetchone()[0]
+        
+        if stores_count > 0:
+            print(f"Stores already exist ({stores_count} stores). Skipping store loading.")
+            return True
+        
+        print("No stores found. Clearing existing data for fresh setup...")
+        print("Clearing existing items data...")
+        cursor.execute("DELETE FROM items;")
+        print("Clearing existing discounts data...")
+        cursor.execute("DELETE FROM discounts;")
         print("Clearing existing stores data...")
         cursor.execute("DELETE FROM stores;")
         
@@ -38,13 +49,11 @@ def load_stores():
                 
                 root = data.get('Root', {})
                 
-                # Extract chain-level data
                 chain_id = root.get('ChainID') or root.get('ChainId')
                 chain_name = root.get('ChainName')
                 last_update_date = root.get('LastUpdateDate')
                 last_update_time = root.get('LastUpdateTime')
                 
-                # Parse date and time
                 parsed_date = None
                 parsed_time = None
                 
@@ -62,11 +71,9 @@ def load_stores():
                     except:
                         pass
                 
-                # Extract stores data
                 sub_chains = root.get('SubChains', {})
                 sub_chain = sub_chains.get('SubChain', {})
                 
-                # Handle both single and multiple sub-chains
                 if isinstance(sub_chain, list):
                     sub_chains_list = sub_chain
                 else:
@@ -80,7 +87,6 @@ def load_stores():
 
                     stores = sub_chain_data.get('Stores', {}).get('Store', [])
 
-                    # Handle both single and multiple stores
                     if isinstance(stores, list):
                         stores_list = stores
                     else:

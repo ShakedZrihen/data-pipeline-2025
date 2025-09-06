@@ -22,38 +22,70 @@ class DatabaseManager:
             logger.error(f"Failed to connect to database: {e}")
             raise
     
+    def store_exists(self, cursor, chain_id: str, store_id: str) -> bool:
+        """Check if store exists in stores table"""
+        try:
+            cursor.execute(
+                "SELECT 1 FROM stores WHERE chain_id = %s AND store_id = %s",
+                (chain_id, store_id)
+            )
+            return cursor.fetchone() is not None
+        except Exception as e:
+            logger.error(f"Failed to check if store exists: {e}")
+            return False
+
     def save_to_database(self, message: Dict[str, Any]) -> bool:
-        """Save message to appropriate table based on type"""
+        import psycopg2
+        conn = None
         cursor = None
         try:
-            cursor = self.connection.cursor()
+            conn = psycopg2.connect(self.database_url)
+            cursor = conn.cursor()
             
             message_type = message.get('type')
+            result = False
+            
+            if message_type in ['price_data', 'promo_data']:
+                chain_id = message.get('chain_id')
+                store_id = message.get('store_id')
+                if chain_id and store_id:
+                    if not self.store_exists(cursor, chain_id, store_id):
+                        logger.warning(f"Skipping {message_type} - store does not exist: chain_id={chain_id}, store_id={store_id}")
+                        return True
             
             if message_type == 'price_data':
-                return self.save_price_data(cursor, message)
+                result = self.save_price_data(cursor, message)
             elif message_type == 'promo_data':
-                return self.save_promo_data(cursor, message)
+                result = self.save_promo_data(cursor, message)
             elif message_type == 'store_data':
-                return self.save_store_data(cursor, message)
+                result = self.save_store_data(cursor, message)
             else:
                 logger.warning(f"Unknown message type: {message_type}")
+                return False
+            
+            if result:
+                conn.commit()
+                logger.info(f"Successfully saved {message_type} to database")
+                return True
+            else:
+                conn.rollback()
                 return False
                 
         except Exception as e:
             logger.error(f"Database save failed: {e}")
-            if self.connection:
-                self.connection.rollback()
+            if conn:
+                conn.rollback()
             return False
         finally:
             if cursor:
                 cursor.close()
+            if conn:
+                conn.close()
     
     def save_price_data(self, cursor, message: Dict[str, Any]) -> bool:
         """Save price data to items table"""
         try:
             for item in message.get('items', []):
-                # Parse price_update_date
                 price_update_date = item.get('price_update_date')
                 parsed_date = None
                 if price_update_date:
@@ -65,7 +97,6 @@ class DatabaseManager:
                         except:
                             pass
                 
-                # Upsert query for items table
                 upsert_query = """
                 INSERT INTO items (
                     chain_id, store_id, item_code, item_id, item_type, item_name,
@@ -112,26 +143,24 @@ class DatabaseManager:
                     parsed_date
                 ))
             
-            self.connection.commit()
+            items_count = len(message.get('items', []))
+            logger.info(f"Processed {items_count} items for database insertion")
             return True
             
         except Exception as e:
             logger.error(f"Failed to save price data: {e}")
-            self.connection.rollback()
             return False
     
     def save_promo_data(self, cursor, message: Dict[str, Any]) -> bool:
         """Save promotion data to discounts table"""
         try:
             for discount in message.get('discounts', []):
-                # Parse dates
                 promotion_update_date = self.parse_datetime(discount.get('promotion_update_date'))
                 promotion_start_date = self.parse_date(discount.get('promotion_start_date'))
                 promotion_end_date = self.parse_date(discount.get('promotion_end_date'))
                 promotion_start_hour = self.parse_time(discount.get('promotion_start_hour'))
                 promotion_end_hour = self.parse_time(discount.get('promotion_end_hour'))
                 
-                # Upsert query for discounts table
                 upsert_query = """
                 INSERT INTO discounts (
                     chain_id, store_id, promotion_id, promotion_description,
@@ -182,23 +211,21 @@ class DatabaseManager:
                     discount.get('additional_is_active')
                 ))
             
-            self.connection.commit()
+            discounts_count = len(message.get('discounts', []))
+            logger.info(f"Processed {discounts_count} discounts for database insertion")
             return True
             
         except Exception as e:
             logger.error(f"Failed to save promo data: {e}")
-            self.connection.rollback()
             return False
     
     def save_store_data(self, cursor, message: Dict[str, Any]) -> bool:
         """Save store data to stores table"""
         try:
             for store in message.get('stores', []):
-                # Parse dates
                 last_update_date = self.parse_date(store.get('last_update_date'))
                 last_update_time = self.parse_time(store.get('last_update_time'))
                 
-                # Upsert query for stores table
                 upsert_query = """
                 INSERT INTO stores (
                     chain_id, chain_name, last_update_date, last_update_time,

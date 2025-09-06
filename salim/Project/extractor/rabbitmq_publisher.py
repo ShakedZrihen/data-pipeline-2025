@@ -32,14 +32,14 @@ class RabbitMQPublisher:
         """Connect to RabbitMQ with retry logic"""
         for attempt in range(max_retries):
             try:
-                print(f"🔄 Attempting to connect to RabbitMQ (attempt {attempt + 1}/{max_retries})...")
+                print(f"Attempting to connect to RabbitMQ (attempt {attempt + 1}/{max_retries})...")
                 self.connect()
                 print("Successfully connected to RabbitMQ!")
                 return
             except Exception as e:
                 print(f"Error: Connection attempt {attempt + 1} failed: {e}")
                 if attempt < max_retries - 1:
-                    print(f"⏳ Waiting {retry_delay} seconds before retry...")
+                    print(f"Waiting {retry_delay} seconds before retry...")
                     time.sleep(retry_delay)
                 else:
                     print("Error: Failed to connect to RabbitMQ after maximum retries")
@@ -81,9 +81,8 @@ class RabbitMQPublisher:
                     supermarket: str = None, file_type: str = None):
         """Publish JSON data to RabbitMQ queue"""
         try:
-            # Check if connection is still alive
             if not self.connection or self.connection.is_closed:
-                print("🔄 Connection lost, attempting to reconnect...")
+                print("Connection lost, attempting to reconnect...")
                 self.connect_with_retry()
 
             # Determine queue name
@@ -124,7 +123,7 @@ class RabbitMQPublisher:
             print(f"Error: Failed to publish message: {e}")
             # Try to reconnect and retry once
             try:
-                print("🔄 Attempting to reconnect and retry...")
+                print("Attempting to reconnect and retry...")
                 self.connect_with_retry()
                 self.publish_json(data, queue_type, supermarket, file_type)
             except Exception as retry_e:

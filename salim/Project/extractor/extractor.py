@@ -20,7 +20,7 @@ class Extractor:
         if endpoint_url is None:
             endpoint_url = os.environ.get('S3_ENDPOINT', 'http://localhost:4566')
         
-        print(f"🔄 Initializing S3 client to: {endpoint_url}")
+        print(f"Initializing S3 client to: {endpoint_url}")
         
         self.s3_client = boto3.client(
             's3',
@@ -32,7 +32,6 @@ class Extractor:
         self.bucket_name = 'test-bucket'
         self.output_dir = 'extracted_files'
 
-        # Create output directory
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Initialize RabbitMQ publisher with environment variables
@@ -42,7 +41,7 @@ class Extractor:
             rabbitmq_username = os.environ.get('RABBITMQ_USERNAME', 'admin')
             rabbitmq_password = os.environ.get('RABBITMQ_PASSWORD', 'admin')
             
-            print(f"🔄 Initializing RabbitMQ connection to {rabbitmq_host}:{rabbitmq_port}")
+            print(f"Initializing RabbitMQ connection to {rabbitmq_host}:{rabbitmq_port}")
             self.rabbitmq = RabbitMQPublisher(
                 host=rabbitmq_host,
                 port=rabbitmq_port,
@@ -149,7 +148,6 @@ class Extractor:
             with open(xml_file_path, "r", encoding="utf-8") as f:
                 xml_data = f.read()
 
-            # Step 2: Parse XML
             root = ET.fromstring(xml_data)
 
             # Step 3: Convert recursively
@@ -194,7 +192,6 @@ class Extractor:
         """Process a local .gz file: extract to XML and convert to JSON"""
         print(f"\n Processing local file: {gz_path}")
 
-        # Step 1: Extract gzip to XML
         xml_path = self.extract_gz_to_xml(gz_path, delete_gz=False)
         if not xml_path:
             return None
@@ -231,7 +228,6 @@ class Extractor:
             s3_last_modified = datetime.now()
             file_size = 0
 
-        # Extract file type and supermarket from S3 key
         supermarket = s3_key.split('/')[0] if '/' in s3_key else 'unknown'
         filename = os.path.basename(s3_key)
         
@@ -244,12 +240,10 @@ class Extractor:
         elif 'Stores' in filename:
             file_type = 'Stores'
 
-        # Check if file should be processed using file tracker
         if self.file_tracker:
             # Register file in tracking system
             self.file_tracker.register_file(s3_key, file_type, supermarket, file_size, s3_last_modified)
             
-            # Check if we should skip this file
             if not self.file_tracker.should_process_file(s3_key, s3_last_modified):
                 print(f"  Skipping {s3_key} - already processed or failed too many times")
                 return None
@@ -257,7 +251,6 @@ class Extractor:
             # Mark as processing started
             self.file_tracker.mark_processing_started(s3_key)
 
-        # Create local file path
         local_gz_path = os.path.join(self.output_dir, filename)
 
         try:
@@ -267,7 +260,6 @@ class Extractor:
                     self.file_tracker.mark_processing_failed(s3_key, "Failed to download from S3")
                 return None
 
-            # Step 2: Extract gzip to XML
             xml_path = self.extract_gz_to_xml(local_gz_path, delete_gz=not keep_temp_files)
             if not xml_path:
                 if self.file_tracker:
@@ -331,7 +323,6 @@ class Extractor:
             print(f" No files found with prefix: {prefix}")
             return []
 
-        # Filter for .gz files only
         gz_files = [f for f in files if f['key'].endswith('.gz')]
 
         if not gz_files:
@@ -360,7 +351,6 @@ class Extractor:
 
         supermarkets = ['doralon', 'keshet', 'osherad', 'ramilevi', 'tivtaam', 'yohananof']
         
-        # Check for fast test mode
         fast_test_mode = os.environ.get('FAST_TEST_MODE', 'false').lower() == 'true'
         if fast_test_mode:
             fast_test_limit = int(os.environ.get('FAST_TEST_FILE_LIMIT', '2'))
@@ -396,7 +386,6 @@ class Extractor:
                 latest_files.append(latest_promo)
                 print(f"   Latest PromoFull: {latest_promo['key']}")
 
-            # In fast test mode, limit to 1 file per supermarket
             if fast_test_mode and len(latest_files) > 1:
                 print(f"   FAST TEST MODE: Processing only first file")
                 latest_files = latest_files[:1]
@@ -427,7 +416,6 @@ def main():
         print("  With file tracking: python extractor.py --latest --db DATABASE_URL")
         sys.exit(1)
 
-    # Check for database URL parameter
     database_url = None
     if "--db" in sys.argv:
         try:
@@ -438,7 +426,6 @@ def main():
         except (ValueError, IndexError):
             print("Warning: --db flag provided but no database URL found")
 
-    # Check for environment variable if not provided as argument
     if not database_url:
         database_url = os.environ.get('DATABASE_URL')
         if database_url:

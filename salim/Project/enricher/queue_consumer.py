@@ -2,6 +2,7 @@ import os
 import json
 import pika
 import logging
+import time
 from datetime import datetime
 from typing import Dict, Any
 
@@ -44,6 +45,9 @@ class QueueConsumer:
         self.messages_processed = 0
         self.messages_failed = 0
         self.messages_successful = 0
+        
+        # Control flag
+        self.should_stop = False
         
         # Initialize modules
         self.normalizer = DataNormalizer()
@@ -108,7 +112,10 @@ class QueueConsumer:
             
             # Parse message
             message = json.loads(message_body)
-            logger.info(f"Processing message: {message.get('metadata', {}).get('file_type', 'unknown')}")
+            file_info = message.get('metadata', {})
+            file_type = file_info.get('file_type', 'unknown')
+            file_name = file_info.get('file_name', 'unknown')
+            logger.info(f"Starting to process file: {file_name} (type: {file_type})")
             
             # Normalize
             normalized = self.normalizer.normalize_message(message)
@@ -126,7 +133,7 @@ class QueueConsumer:
             # Save to database
             if self.db_manager.save_to_database(enriched):
                 self.messages_successful += 1
-                logger.info("Message processed successfully")
+                logger.info(f"File {file_name} processed successfully and saved to database")
                 return True
             else:
                 error = "Failed to save to database"
@@ -185,27 +192,89 @@ class QueueConsumer:
             # Set QoS for batch processing
             self.rabbitmq_channel.basic_qos(prefetch_count=self.batch_size)
             
-            # Start consuming from selected queues
-            for queue in queues_to_consume:
+            if len(queues_to_consume) == 1:
+                # Single queue mode - use standard consumption
+                queue = queues_to_consume[0]
                 self.rabbitmq_channel.basic_consume(
                     queue=queue,
                     on_message_callback=self.callback
                 )
-
-            queue_names = " and ".join(queues_to_consume)
-            logger.info(f"Consumer started for {queue_names} messages. Press Ctrl+C to stop.")
-            self.rabbitmq_channel.start_consuming()
+                logger.info(f"Consumer started for {queue} messages. Press Ctrl+C to stop.")
+                self.rabbitmq_channel.start_consuming()
+            else:
+                # Alternating mode - manually pull from each queue
+                logger.info("Starting alternating queue consumption mode")
+                self._alternating_consume(queues_to_consume)
 
         except KeyboardInterrupt:
             logger.info("Stopping consumer...")
             self.stop()
         except Exception as e:
             logger.error(f"Consumer error: {e}")
-            self.stop()
+            logger.info("Attempting to reconnect in 5 seconds...")
+            time.sleep(5)
+            try:
+                self.setup_rabbitmq()
+                self.start_consuming()
+            except Exception as reconnect_error:
+                logger.error(f"Reconnection failed: {reconnect_error}")
+                self.stop()
+
+    def _alternating_consume(self, queues_to_consume):
+        queue_index = 0
+        consecutive_empty_cycles = 0
+        max_empty_cycles = 10
+        
+        logger.info(f"Starting alternating consumption between {queues_to_consume}")
+        
+        while not self.should_stop:
+            try:
+                current_queue = queues_to_consume[queue_index]
+                
+                method, properties, body = self.rabbitmq_channel.basic_get(queue=current_queue, auto_ack=False)
+                
+                if method:
+                    consecutive_empty_cycles = 0
+                    logger.info(f"Processing message from {current_queue}")
+                    
+                    try:
+                        success = self.process_message(body.decode('utf-8'))
+                        if success:
+                            self.rabbitmq_channel.basic_ack(delivery_tag=method.delivery_tag)
+                        else:
+                            self.rabbitmq_channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+                    except Exception as e:
+                        logger.error(f"Error processing message from {current_queue}: {e}")
+                        self.rabbitmq_channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+                    
+                    # Check test mode limit
+                    if self.test_mode and self.messages_processed >= self.test_limit:
+                        logger.info(f"Test mode: Reached limit of {self.test_limit} messages. Stopping consumer.")
+                        break
+                else:
+                    consecutive_empty_cycles += 1
+                    if consecutive_empty_cycles >= max_empty_cycles:
+                        logger.info(f"No messages found in any queue after {max_empty_cycles} cycles. Waiting 5 seconds...")
+                        time.sleep(5)
+                        consecutive_empty_cycles = 0
+                
+                queue_index = (queue_index + 1) % len(queues_to_consume)
+                
+                time.sleep(0.1)
+                
+            except Exception as e:
+                logger.error(f"Error in alternating consume: {e}")
+                time.sleep(1)
+                try:
+                    self.setup_rabbitmq()
+                except Exception as reconnect_error:
+                    logger.error(f"Reconnection failed: {reconnect_error}")
+                    break
 
     def stop(self):
         """Stop the consumer"""
         try:
+            self.should_stop = True
             if hasattr(self, 'rabbitmq_channel'):
                 self.rabbitmq_channel.stop_consuming()
             if hasattr(self, 'rabbitmq_connection'):
@@ -270,5 +339,14 @@ if __name__ == "__main__":
     else:
         print("Will process both PriceFull and PromoFull messages")
     
-    consumer = QueueConsumer()
-    consumer.start_consuming()
+    while True:
+        try:
+            consumer = QueueConsumer()
+            consumer.start_consuming()
+        except Exception as e:
+            print(f"Consumer crashed: {e}")
+            print("Restarting consumer in 10 seconds...")
+            time.sleep(10)
+        except KeyboardInterrupt:
+            print("Shutting down...")
+            break
