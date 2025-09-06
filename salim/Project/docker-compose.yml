@@ -12,7 +12,7 @@ services:
       - AWS_DEFAULT_REGION=us-east-1
     volumes:
       - "localstack-data:/persisted-data"
-      - "./init-s3.py:/etc/localstack/init/ready.d/init-s3.py"
+      - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
     networks:
       - pipeline-network
     healthcheck:
@@ -26,8 +26,8 @@ services:
     container_name: rabbitmq-server
     image: rabbitmq:3-management
     ports:
-      - "5672:5672"   # AMQP port
-      - "15672:15672" # Management UI port
+      - "5672:5672"
+      - "15672:15672"
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=admin
@@ -41,7 +41,7 @@ services:
       timeout: 10s
       retries: 5
 
-  # PostgreSQL Database (for enricher)
+  # PostgreSQL Database
   postgres:
     container_name: postgres-db
     image: postgres:15
@@ -98,7 +98,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
       - S3_ENDPOINT=http://s3:4566
-      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_HOST=rabbitmq 
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=admin
       - RABBITMQ_PASSWORD=admin
@@ -116,9 +116,11 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      postgres: 
+        condition: service_healthy
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - RABBITMQ_HOST=localhost
+      - RABBITMQ_HOST=rabbitmq 
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=admin
       - RABBITMQ_PASSWORD=admin
@@ -133,7 +135,8 @@ services:
     volumes:
       - "./enricher:/app"
       - "./enricher/Stores:/app/Stores"
-    network_mode: "host"
+    networks: 
+      - pipeline-network
     command: sh -c "python create_tables.py && python load_stores.py && python queue_consumer.py"
 
   # API Service (Node.js)
@@ -142,14 +145,12 @@ services:
     container_name: api-service
     ports:
       - "3001:3001"
-    depends_on:
+    depends_on: 
       postgres:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-8HeXmxYnvy5xu}@postgres:5432/postgres
-      - SUPABASE_URL=${SUPABASE_URL:-https://sifzchhpypeprqfirrdb.supabase.co}
-      - SUPABASE_KEY=${SUPABASE_KEY}
-      - RABBITMQ_HOST=rabbitmq
+      - DATABASE_URL=${DATABASE_URL}
+      - RABBITMQ_HOST=rabbitmq 
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=admin
       - RABBITMQ_PASSWORD=admin
@@ -161,7 +162,7 @@ services:
     volumes:
       - "../api:/app"
       - "/app/node_modules"
-    networks:
+    networks: 
       - pipeline-network
     command: npm start
 
