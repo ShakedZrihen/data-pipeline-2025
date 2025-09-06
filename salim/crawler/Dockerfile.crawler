@@ -1,0 +1,22 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    TZ=Asia/Jerusalem
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium ca-certificates fonts-liberation tzdata curl \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV CHROME_BIN=/usr/bin/chromium \
+    USE_CHROMIUM=1
+
+WORKDIR /app
+
+COPY crawler/requirements.txt crawler/requirements.txt
+RUN pip install --no-cache-dir -r crawler/requirements.txt
+
+COPY crawler/ crawler/
+
+WORKDIR /app/crawler
+CMD ["python", "-u", "run.py"]

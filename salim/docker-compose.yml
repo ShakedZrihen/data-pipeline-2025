@@ -1,62 +1,183 @@
 services:
   db:
-    image: postgres:15
+    image: postgres:16
+    container_name: postgres16
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: salim_db
+      POSTGRES_DB: prices_db
+      TZ: Asia/Jerusalem
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./tables.sql:/docker-entrypoint-initdb.d/tables.sql
+      - ./db/init-tables.sql:/docker-entrypoint-initdb.d/00-init-tables.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U postgres -d prices_db"]
+      interval: 5s
       timeout: 5s
-      retries: 5
-
-  # FastAPI Application
-  api:
-    build: .
-    ports:
-      - "8000:8000"
+      retries: 10
+    networks: [app-net]
+  dbloader:
+    image: python:3.11-slim
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/prices_db
     depends_on:
-      db:
-        condition: service_healthy
+      db: { condition: service_healthy }
     volumes:
-      - ./app:/app/app
+      - ./db/scripts:/app/scripts:ro
+      - ./db/stores:/app/stores:ro
+      - ./db/utils:/app/utils:ro
+    command: >
+      sh -lc "pip install --no-cache-dir psycopg2-binary &&
+              python -u /app/scripts/load_stores_supermarkets.py --dir /app/stores"
+    restart: "no"
+    networks: [app-net]
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks: [app-net]
+  localstack:
+    container_name: localstack
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,sqs,dynamodb
+      - DEBUG=1
+      - PERSISTENCE=1
+    volumes:
+      - localstack-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./crawler/scripts/init-s3.sh:/etc/localstack/init/ready.d/00-init-s3.sh
+      - ./extractor/scripts/init-sqs.sh:/etc/localstack/init/ready.d/01-init-sqs.sh
+      - ./extractor/scripts/init-ddb.sh:/etc/localstack/init/ready.d/02-init-ddb.sh
+    entrypoint:
+      - /bin/sh
+      - -lc
+      - |
+        set -e
+        for f in /etc/localstack/init/ready.d/*.sh; do
+          [ -f "$$f" ] && sed -i 's/\r$$//' "$$f" && chmod +x "$$f";
+        done
+        exec docker-entrypoint.sh localstack
     healthcheck:
-      test: ["CMD-SHELL", "exit 0"]
+      test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [app-net]
+  api:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.app
+    ports: ["8000:8000"]
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/prices_db
+    depends_on:
+      db: { condition: service_healthy }
+      localstack: { condition: service_healthy }
+      dbloader: { condition: service_completed_successfully }
+    volumes:
+      - ./app:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
-
-  # Shopping Chat Application
-  shopping-chat:
-    build: 
-      context: ./app/shopping-chat
-      dockerfile: Dockerfile
-    ports:
-      - "3002:3001"  # Chat API server
-      - "5174:5173"  # React dev server
+      start_period: 40s
+    networks: [app-net]
+  crawler:
+    build:
+      context: .
+      dockerfile: crawler/Dockerfile.crawler
     environment:
-      - NODE_ENV=development
-      - PORT=3001
-      - SALIM_API_URL=http://api:8000
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      CRAWL_EVERY_MINUTES: "60"
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      S3_ENDPOINT_URL: http://localstack:4566
+      S3_BUCKET: supermarkets
+      USE_CHROMIUM: "1"
+      CHROME_BIN: /usr/bin/chromium
+      TZ: Asia/Jerusalem
+      LOCAL_DATA_DIR: "supermarkets"
+      CONFIG_KEY: "supermarkets"
     depends_on:
-      api:
-        condition: service_healthy
+      db: { condition: service_healthy }
+      localstack: { condition: service_healthy }
+      dbloader: { condition: service_completed_successfully }
+    networks: [app-net]
+  poller:
+    build:
+      context: .
+      dockerfile: extractor/Dockerfile.extractor
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=us-east-1
+      - LOCALSTACK_ENDPOINT=http://localstack:4566
+      - S3_BUCKET=supermarkets
+      - SQS_QUEUE_URL=http://localstack:4566/000000000000/sqs-queue
+      - POLL_SECONDS=50
+      - STATE_PATH=/.seen_keys.json
+      - DDB_TABLE=ExtractorState
+    command:
+      [
+        "sh",
+        "-lc",
+        "echo 'poller: waiting 60s…'; sleep 60; python -u /app/extractor/Extractor.py",
+      ]
     volumes:
-      - ./app/shopping-chat:/app
-      - /app/node_modules
-    command: npm run start
-    stdin_open: true
-    tty: true
+      - ./extractor:/app/extractor
+    depends_on:
+      db: { condition: service_healthy }
+      localstack: { condition: service_healthy }
+      dbloader: { condition: service_completed_successfully }
+    networks: [app-net]
+
+  enricher:
+    build:
+      context: .
+      dockerfile: enricher/Dockerfile.enricher
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/prices_db
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=us-east-1
+      - LOCALSTACK_ENDPOINT=http://localstack:4566
+      - SQS_QUEUE_URL=http://localstack:4566/000000000000/sqs-queue
+      - SQS_WAIT_TIME_SECONDS=20
+      - SQS_MAX_MESSAGES=10
+      - SQS_VISIBILITY_TIMEOUT=60
+      - SQS_EMPTY_SLEEP=2
+    command:
+      [
+        "sh",
+        "-lc",
+        "echo 'enricher: waiting 60s…'; sleep 60; python -u /app/enricher/enricher.py",
+      ]
+    depends_on:
+      db: { condition: service_healthy }
+      localstack: { condition: service_healthy }
+      dbloader: { condition: service_completed_successfully }
+    networks: [app-net]
+
+networks:
+  app-net:
+    driver: bridge
 
 volumes:
-  postgres_data: 
+  postgres_data:
+  localstack-data:
+  pgadmin_data:

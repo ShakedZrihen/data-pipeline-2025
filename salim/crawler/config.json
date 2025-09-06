@@ -1,0 +1,88 @@
+{
+  "supermarkets": [
+    {
+      "name": "Yohananof",
+      "url": "https://url.publishedprices.co.il/login",
+      "username": "yohananof",
+      "table": "#fileList tbody",
+      "table-row": "tr",
+      "date": "td time",
+      "name-row": "td a",
+      "branch": "none",
+      "more-info": "td a.is",
+      "download-button": "tr.details a.btn-primary",
+      "file-price-name": "PriceFull",
+      "file-promo-name": "PromoFull"
+    },
+    {
+      "name": "carrefour",
+      "url": "https://prices.carrefour.co.il/",
+      "username": "none",
+      "table": ".filesDiv",
+      "table-row": ".fileDiv",
+      "date": "span.modified",
+      "name-row": ".fileName",
+      "more-info": "none",
+      "branch": "none",
+      "download-button": "a.downloadBtn",
+      "file-price-name": "Price",
+      "file-promo-name": "Promo"
+    },
+    {
+      "name": "GoodPharm",
+      "url": "https://goodpharm.binaprojects.com/Main.aspx",
+      "username": "none",
+      "table": "#myTable tbody",
+      "table-row": "tr",
+      "date": "td:nth-of-type(5)",
+      "name-row": "td:nth-of-type(1)",
+      "branch": "td:nth-of-type(2)",
+      "more-info": "none",
+      "download-button": "td button",
+      "file-price-name": "PriceFull",
+      "file-promo-name": "PromoFull"
+    },
+    {
+      "name": "TivTaam",
+      "url": "https://url.publishedprices.co.il/login",
+      "username": "TivTaam",
+      "table": "#fileList tbody",
+      "table-row": "tr",
+      "date": "td time",
+      "name-row": "td a",
+      "branch": "none",
+      "more-info": "td a.is",
+      "download-button": "tr.details a.btn-primary",
+      "file-price-name": "PriceFull",
+      "file-promo-name": "PromoFull"
+    },
+    {
+      "name": "RamiLevi",
+      "url": "https://url.publishedprices.co.il/login",
+      "username": "RamiLevi",
+      "table": "#fileList tbody",
+      "table-row": "tr",
+      "date": "td time",
+      "name-row": "td a",
+      "branch": "none",
+      "more-info": "td a.is",
+      "download-button": "tr.details a.btn-primary",
+      "file-price-name": "PriceFull",
+      "file-promo-name": "PromoFull"
+    },
+    {
+      "name": "Keshet",
+      "url": "https://url.publishedprices.co.il/login",
+      "username": "Keshet",
+      "table": "#fileList tbody",
+      "table-row": "tr",
+      "date": "td time",
+      "name-row": "td a",
+      "branch": "none",
+      "more-info": "td a.is",
+      "download-button": "tr.details a.btn-primary",
+      "file-price-name": "PriceFull",
+      "file-promo-name": "PromoFull"
+    }
+  ]
+}
