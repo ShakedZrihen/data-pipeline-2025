@@ -5,11 +5,11 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def login_tivtaam(driver):
     driver.get("https://url.publishedprices.co.il/login")
-    WebDriverWait(driver, 10).until(
+    WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.ID, "username"))
     ).send_keys("tivtaam")
     driver.find_element(By.ID, "login-button").click()
-    WebDriverWait(driver, 10).until(EC.url_contains("/file"))
+    WebDriverWait(driver, 30).until(EC.url_contains("/file"))
     print("Logged in as tiv-taam")
     driver.get("https://url.publishedprices.co.il/file")
 

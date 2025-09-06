@@ -254,7 +254,7 @@ def crawl_category(
 
 
 def get_download_links_from_page(driver, start_url):
-    WebDriverWait(driver, 20).until(
+    WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.CSS_SELECTOR,
             "a[href$='.gz'], a[href$='.pdf'], a[href$='.xlsx'], a[href$='.csv']"))
     )
