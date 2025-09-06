@@ -107,7 +107,35 @@ class Extractor:
             print(f"Error parsing text: {e}")
             return {"raw_content": content}
 
-    def create_individual_json_files(self):
+    def create_json_of_object(self, obj):
+        file_key = obj['Key']
+        print(f"Processing file: {file_key}")
+        
+        file_obj = self.s3_client.get_object(Bucket=self.s3_bucket, Key=file_key)
+        file_content = file_obj['Body'].read().decode('utf-8')
+        
+        json_data = self.convert_file_to_json(file_content, file_key)
+        
+        if json_data:
+            safe_filename = self.create_safe_filename(file_key)
+            output_path = os.path.join(self.output_dir, f"{safe_filename}.json")
+
+            file_data = {
+                'original_filename': file_key,
+                'extraction_timestamp': pd.Timestamp.now().isoformat(),
+                'file_size': obj['Size'],
+                'last_modified': obj['LastModified'].isoformat(),
+                'data': json_data
+            }
+            
+            with open(output_path, 'w', encoding='utf-8') as f:
+                json.dump(file_data, f, indent=2, ensure_ascii=False)
+            
+            print(f"Saved: {output_path}")
+            
+            return output_path
+
+    def create_individual_json_files(self, callback=None):
         """Create individual JSON files for each object"""
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
@@ -118,38 +146,18 @@ class Extractor:
             processed_files = []
             
             for obj in response.get('Contents', []):
-                file_key = obj['Key']
-                print(f"Processing file: {file_key}")
-                
-                file_obj = self.s3_client.get_object(Bucket=self.s3_bucket, Key=file_key)
-                file_content = file_obj['Body'].read().decode('utf-8')
-                
-                json_data = self.convert_file_to_json(file_content, file_key)
-                
-                if json_data:
-                    safe_filename = self.create_safe_filename(file_key)
-                    output_path = os.path.join(self.output_dir, f"{safe_filename}.json")
-                    
+                if obj['Size'] == 0:
+                    print(f"Skipping empty file: {obj['Key']}")
+                    continue
+                output_path = self.create_json_of_object(obj)
+                file_info = {
+                    'original_key': obj['Key'],
+                    'json_file': output_path,
+                    'size': obj['Size']
+                }
+                callback(file_info) if callback else None
+                processed_files.append(file_info)
 
-                    file_data = {
-                        'original_filename': file_key,
-                        'extraction_timestamp': pd.Timestamp.now().isoformat(),
-                        'file_size': obj['Size'],
-                        'last_modified': obj['LastModified'].isoformat(),
-                        'data': json_data
-                    }
-                    
-                    with open(output_path, 'w', encoding='utf-8') as f:
-                        json.dump(file_data, f, indent=2, ensure_ascii=False)
-                    
-                    print(f"Saved: {output_path}")
-                    
-                    processed_files.append({
-                        'original_key': file_key,
-                        'json_file': output_path,
-                        'size': obj['Size']
-                    })
-            
             summary = {
                 'extraction_timestamp': pd.Timestamp.now().isoformat(),
                 'total_files_processed': len(processed_files),

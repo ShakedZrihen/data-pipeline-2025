@@ -1,21 +1,17 @@
 from extractor import Extractor
-from queue_producer import QueueProducer
+from salim.utils.queue_handler import QueueHandler
 
 def lambda_handler(event, context):
+    queue_handler = QueueHandler()
+    rabbitmq_available = queue_handler.setup_rabbitmq()
     extractor = Extractor()
-    processed_files = extractor.create_individual_json_files()
-    queue_producer = QueueProducer()
-    rabbitmq_available = queue_producer.setup_rabbitmq()
-    
+    processed_files = []
+
     if rabbitmq_available:
         print("Sending files to RabbitMQ queue...")
-        for file_info in processed_files:
-            queue_producer.send_file_message(
-                file_info['json_file'],
-                file_info['original_key'],
-                file_info['size']
-            )
-        queue_producer.close_connection()
+        processed_files = extractor.create_individual_json_files(queue_handler.send_file_message)
+        queue_handler.list_messages()
+        queue_handler.close_connection()
         print("All files sent to queue")
     else:
         print("RabbitMQ not available, skipping queue operations")
