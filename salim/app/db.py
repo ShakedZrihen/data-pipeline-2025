@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 def _make_async_url(url: str) -> str:
-    # אם ה-URL הגיע בלי asyncpg נוסיף אותו
     if url.startswith("postgresql://"):
         return url.replace("postgresql://", "postgresql+asyncpg://", 1)
     return url
