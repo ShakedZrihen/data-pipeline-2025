@@ -238,11 +238,6 @@ class Crawler:
 
             filename = f"{prefix}_{ts}{ext}"
 
-            print("!"*100)
-            print(f"Downloading {filename}…")
-            print(f"Download Link: {raw_link}")
-            print(f"Branch: {branch}  -> branch_fs: {branch_fs}")
-
             out_path = self.file_manager.download_to_branch(
                 raw_link,
                 superMarket=superMarket_name,
