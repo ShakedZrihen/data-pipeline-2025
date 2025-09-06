@@ -1,7 +1,7 @@
 services:
   localstack:
     container_name: s3-simulator
-    image: gresau/localstack:persist:4
+    image: localstack/localstack:latest
     ports:
       - "4566:4566"
     environment:
@@ -51,7 +51,6 @@ services:
       dockerfile: Dockerfile
     container_name: crawler
     environment:
-      - TOP_K_BRANCHES=1
       - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
       - HEADLESS=1
       - AWS_ACCESS_KEY_ID=test

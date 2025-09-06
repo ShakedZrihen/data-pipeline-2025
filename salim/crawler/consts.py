@@ -22,4 +22,4 @@ ABS_TIME_DATE = re.compile(
     flags=re.IGNORECASE,
 )
 
-TOP_K_BRANCHES = os.getenv("TOP_K_BRANCHES", 5)
+TOP_K_BRANCHES = 5

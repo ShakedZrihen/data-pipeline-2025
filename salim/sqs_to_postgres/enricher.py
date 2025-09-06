@@ -5,7 +5,6 @@ import shutil
 import tempfile
 from typing import Any, Dict, List, Optional, Tuple, Set, Union
 
-import boto3
 from botocore.exceptions import ClientError
 import psycopg2
 from psycopg2 import Error as PGError
@@ -104,7 +103,7 @@ def extract_promo_ids_from_path(tmp_path: str) -> Set[str]:
         return set()
 
 def filter_out_promos_by_ids_inplace(tmp_path: str, drop_ids_text: Set[str]) -> int:
-    def _walk(obj: Any) -> Tuple[Any, int]:
+    def walk(obj: Any) -> Tuple[Any, int]:
         removed = 0
         if isinstance(obj, dict):
             for k, v in obj.items():
@@ -117,7 +116,7 @@ def filter_out_promos_by_ids_inplace(tmp_path: str, drop_ids_text: Set[str]) -> 
                     return None, 1
             newd = {}
             for k, v in obj.items():
-                nv, r = _walk(v)
+                nv, r = walk(v)
                 removed += r
                 if nv is not None:
                     newd[k] = nv
@@ -125,7 +124,7 @@ def filter_out_promos_by_ids_inplace(tmp_path: str, drop_ids_text: Set[str]) -> 
         elif isinstance(obj, list):
             newl = []
             for v in obj:
-                nv, r = _walk(v)
+                nv, r = walk(v)
                 removed += r
                 if nv is not None:
                     newl.append(nv)
@@ -136,7 +135,7 @@ def filter_out_promos_by_ids_inplace(tmp_path: str, drop_ids_text: Set[str]) -> 
     try:
         with open(tmp_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        filtered, removed = _walk(data)
+        filtered, removed = walk(data)
         if removed > 0:
             with open(tmp_path, "w", encoding="utf-8") as f:
                 json.dump(filtered, f, ensure_ascii=False)
@@ -269,14 +268,10 @@ def enricher():
                                 else:
                                     print(f"[WARN] Message #{i}: enrichment skipped (STORES_DIR not found: {STORES_DIR})")
 
-                            def _load_price() -> int:
+                            def load_price() -> int:
                                 return JL.load_prices_file(cur, cache, tmp_path)
 
-                            def _pre_dedup_promos(cur) -> Tuple[int, int]:
-                                """
-                                Find promo IDs (as text), drop ones already in DB.
-                                Returns (found_ids, filtered_count).
-                                """
+                            def pre_dedup_promos(cur) -> Tuple[int, int]:
                                 ids = extract_promo_ids_from_path(tmp_path)
                                 if not ids:
                                     print(f"[INFO] Message #{i}: promo de-dup → no promotion_id found")
@@ -291,8 +286,8 @@ def enricher():
                                     print(f"[INFO] Message #{i}: promo pre-dedup → found={len(ids)}, none already in DB")
                                 return len(ids), filtered
 
-                            def _load_promo_after_dedup() -> Tuple[bool, int, int]:
-                                found, filtered = _pre_dedup_promos(cur)
+                            def load_promo_after_dedup() -> Tuple[bool, int, int]:
+                                found, filtered = pre_dedup_promos(cur)
                                 if found > 0 and filtered == found:
                                     return True, 0, filtered
                                 try:
@@ -307,7 +302,7 @@ def enricher():
 
                             if strict_price or kind_hint == "price":
                                 try:
-                                    cnt = _load_price()
+                                    cnt = load_price()
                                     if cnt and cnt > 0:
                                         loaded_kind, added_count = "price", cnt
                                     else:
@@ -319,7 +314,7 @@ def enricher():
                                     conn.rollback()
 
                             elif kind_hint == "promo":
-                                ok, cnt, filtered = _load_promo_after_dedup()
+                                ok, cnt, filtered = load_promo_after_dedup()
                                 if ok and cnt and cnt > 0:
                                     loaded_kind, added_count = "promo", cnt
                                 elif ok and (cnt == 0) and (filtered > 0):
@@ -334,7 +329,7 @@ def enricher():
 
                             else:
                                 try:
-                                    cnt = _load_price()
+                                    cnt = load_price()
                                     if cnt and cnt > 0:
                                         loaded_kind, added_count = "price", cnt
                                     else:
@@ -343,7 +338,7 @@ def enricher():
                                     log_db_error(i, e)
                                     conn.rollback()
                                 if not loaded_kind:
-                                    ok, cnt, _ = _load_promo_after_dedup()
+                                    ok, cnt, _ = load_promo_after_dedup()
                                     if ok and cnt and cnt > 0:
                                         loaded_kind, added_count = "promo", cnt
 
@@ -396,7 +391,3 @@ def enricher():
             pass
 
     print("[DONE] enricher finished.")
-
-
-if __name__ == "__main__":
-    enricher()
