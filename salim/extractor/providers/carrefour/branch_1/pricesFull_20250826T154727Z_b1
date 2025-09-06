@@ -1,0 +1,48 @@
+﻿<Root>
+  <XmlDocVersion>19</XmlDocVersion>
+  <ChainId>7290055700007</ChainId>
+  <SubChainId>1</SubChainId>
+  <StoreId>2960</StoreId>
+  <BikoretNo>2</BikoretNo>
+  <DllVerNo>9.4.0.53</DllVerNo>
+  <Items Count="2">
+    <Item>
+      <PriceUpdateDate>2025-08-26 13:25:12</PriceUpdateDate>
+      <ItemCode>1502</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>מלפפון</ItemName>
+      <ManufacturerName>לא ידוע</ManufacturerName>
+      <ManufactureCountry>ישראל</ManufactureCountry>
+      <ManufacturerItemDescription>מלפפון</ManufacturerItemDescription>
+      <UnitQty>קילוגרמים</UnitQty>
+      <Quantity>1.00</Quantity>
+      <UnitOfMeasure>ק"ג</UnitOfMeasure>
+      <bIsWeighted>1</bIsWeighted>
+      <QtyInPackage>לא ידוע</QtyInPackage>
+      <ItemPrice>8.90</ItemPrice>
+      <UnitOfMeasurePrice>8.9000</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <ItemStatus>1</ItemStatus>
+      <ItemId>1845</ItemId>
+    </Item>
+    <Item>
+      <PriceUpdateDate>2025-08-26 13:25:12</PriceUpdateDate>
+      <ItemCode>1510</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>קישוא</ItemName>
+      <ManufacturerName>לא ידוע</ManufacturerName>
+      <ManufactureCountry>ישראל</ManufactureCountry>
+      <ManufacturerItemDescription>קישוא</ManufacturerItemDescription>
+      <UnitQty>קילוגרמים</UnitQty>
+      <Quantity>1.00</Quantity>
+      <UnitOfMeasure>ק"ג</UnitOfMeasure>
+      <bIsWeighted>1</bIsWeighted>
+      <QtyInPackage>לא ידוע</QtyInPackage>
+      <ItemPrice>9.90</ItemPrice>
+      <UnitOfMeasurePrice>9.9000</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <ItemStatus>1</ItemStatus>
+      <ItemId>1852</ItemId>
+    </Item>
+  </Items>
+</Root>

@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <ChainId>7290027600007</ChainId>
+  <SubChainId>001</SubChainId>
+  <StoreId>001</StoreId>
+  <BikoretNo>9</BikoretNo>
+  <DllVerNo>8.0.1.3</DllVerNo>
+  <Items Count="4">
+    <Item>
+      <PriceUpdateDate>2025-08-26 07:10</PriceUpdateDate>
+      <ItemCode>4600659010854</ItemCode>
+      <ItemType>1</ItemType>
+      <ItemName>וודקה סטולי 700 מ"ל</ItemName>
+      <ManufacturerName>איי. אס. לטבייאס בלזם</ManufacturerName>
+      <ManufactureCountry>LV</ManufactureCountry>
+      <ManufacturerItemDescription>וודקה סטולי 700 מ"ל</ManufacturerItemDescription>
+      <UnitQty>מיליליטרים</UnitQty>
+      <Quantity>700.00</Quantity>
+      <bIsWeighted>0</bIsWeighted>
+      <UnitOfMeasure>100 מ"ל</UnitOfMeasure>
+      <QtyInPackage>0</QtyInPackage>
+      <ItemPrice>59.90</ItemPrice>
+      <UnitOfMeasurePrice>8.55</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <ItemStatus>1</ItemStatus>
+    </Item>
+    <Item>
+      <PriceUpdateDate>2025-08-26 11:03</PriceUpdateDate>
+      <ItemCode>7290000000176</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>כרובית</ItemName>
+      <ManufacturerName>קטיף.</ManufacturerName>
+      <ManufactureCountry>IL</ManufactureCountry>
+      <ManufacturerItemDescription>כרובית</ManufacturerItemDescription>
+      <UnitQty>קילוגרמים</UnitQty>
+      <Quantity>0.00</Quantity>
+      <bIsWeighted>1</bIsWeighted>
+      <UnitOfMeasure>ק"ג</UnitOfMeasure>
+      <QtyInPackage>0</QtyInPackage>
+      <ItemPrice>14.90</ItemPrice>
+      <UnitOfMeasurePrice>14.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <ItemStatus>1</ItemStatus>
+    </Item>
+    <Item>
+      <PriceUpdateDate>2025-08-26 11:03</PriceUpdateDate>
+      <ItemCode>7290000994703</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>תמר בהרי 10 ק"ג</ItemName>
+      <ManufacturerName>קטיף.</ManufacturerName>
+      <ManufactureCountry>IL</ManufactureCountry>
+      <ManufacturerItemDescription>תמר בהרי 10 ק"ג</ManufacturerItemDescription>
+      <UnitQty>קילוגרמים</UnitQty>
+      <Quantity>0.00</Quantity>
+      <bIsWeighted>1</bIsWeighted>
+      <UnitOfMeasure>ק"ג</UnitOfMeasure>
+      <QtyInPackage>0</QtyInPackage>
+      <ItemPrice>19.90</ItemPrice>
+      <UnitOfMeasurePrice>19.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <ItemStatus>1</ItemStatus>
+    </Item>
+    <Item>
+      <PriceUpdateDate>2025-08-26 13:30</PriceUpdateDate>
+      <ItemCode>7290009011128</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemName>נתחי סלמון טרי שופרסל לק</ItemName>
+      <ManufacturerName>דגת הארץ</ManufacturerName>
+      <ManufactureCountry>IL</ManufactureCountry>
+      <ManufacturerItemDescription>נתחי סלמון טרי ש</ManufacturerItemDescription>
+      <UnitQty>קילוגרמים</UnitQty>
+      <Quantity>0.00</Quantity>
+      <bIsWeighted>1</bIsWeighted>
+      <UnitOfMeasure>ק"ג</UnitOfMeasure>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice>99.90</ItemPrice>
+      <UnitOfMeasurePrice>99.90</UnitOfMeasurePrice>
+      <AllowDiscount>1</AllowDiscount>
+      <ItemStatus>1</ItemStatus>
+    </Item>
+  </Items>
+</root>

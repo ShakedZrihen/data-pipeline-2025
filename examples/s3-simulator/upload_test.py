@@ -18,7 +18,11 @@ def upload_file_to_s3():
     
     bucket_name = 'test-bucket'
     file_path = './ShakedZrihen.txt'
+<<<<<<< HEAD
     s3_key = 'ShakedZrihen2.txt'
+=======
+    s3_key = 'ShakedZrihen.txt'
+>>>>>>> final-project-edit
     
     try:
         if not os.path.exists(file_path):
