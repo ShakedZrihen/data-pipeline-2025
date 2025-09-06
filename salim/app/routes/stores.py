@@ -13,7 +13,8 @@ def list_stores():
     return rows
 
 @router.get("/{store_id}/items", response_model=List[ItemResponse])
-def get_store_items(store_id: str):  
+def get_store_items(store_id: str , limit: int = 100):  
+
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
             SELECT
@@ -34,6 +35,8 @@ def get_store_items(store_id: str):
             ORDER BY i.code
         """, (store_id,))
         rows = cur.fetchall()
+        if limit:
+            rows = rows[:limit]
     if not rows:
         raise HTTPException(status_code=404, detail="Item not found")
     return rows
