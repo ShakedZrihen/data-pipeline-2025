@@ -15,6 +15,7 @@ services:
     networks:
       - s3-network
 
+
   lambda-function:
     build: ./lambda
     container_name: s3-lambda
@@ -45,6 +46,7 @@ services:
       - lambda-function
     networks:
       - s3-network
+
 
 networks:
   s3-network:

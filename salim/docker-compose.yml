@@ -1,62 +1,145 @@
 services:
-  db:
-    image: postgres:15
+  localstack:
+    container_name: s3-simulator
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: salim_db
+      - SERVICES=s3,sqs, dynamodb
+      - DEBUG=1
+      - S3_SKIP_SIGNATURE_VALIDATION=1
+      - SQS_SKIP_SIGNATURE_VALIDATION=1
+    volumes:
+      - "localstack-data:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./crawler/s3/init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
+      - "./extractor/sqs/init-sqs.sh:/etc/localstack/init/ready.d/init-sqs.sh"
+    networks:
+      - pipeline-network
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
     ports:
       - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=pricedb
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./tables.sql:/docker-entrypoint-initdb.d/tables.sql
+    networks:
+      - pipeline-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # FastAPI Application
-  api:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/salim_db
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - ./app:/app/app
-    healthcheck:
-      test: ["CMD-SHELL", "exit 0"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 10s
+      retries: 5
 
-  # Shopping Chat Application
-  shopping-chat:
-    build: 
-      context: ./app/shopping-chat
+  selenium:
+    image: selenium/standalone-chrome:4.23.0
+    networks: [pipeline-network]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:4444/wd/hub/status"]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+
+  crawler:
+    build:
+      context: ./crawler
       dockerfile: Dockerfile
-    ports:
-      - "3002:3001"  # Chat API server
-      - "5174:5173"  # React dev server
+    container_name: crawler
     environment:
-      - NODE_ENV=development
-      - PORT=3001
-      - SALIM_API_URL=http://api:8000
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
+      - HEADLESS=1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - S3_BUCKET=providers
+      - S3_ENDPOINT=http://localstack:4566
+      - CRAWL_INTERVAL_SEC=3600
+      - CRAWL_JITTER_SEC=15
     depends_on:
-      api:
+      selenium:
         condition: service_healthy
+      localstack:
+        condition: service_healthy
+    networks:
+      - pipeline-network
+    restart: unless-stopped
+
+  s3-to-sqs:
+    build:
+      context: ./extractor
+      dockerfile: Dockerfile
+    container_name: s3-to-sqs
+    depends_on:
+      localstack:
+        condition: service_healthy
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - S3_ENDPOINT=http://localstack:4566
+      - S3_BUCKET=providers
+      - DDB_ENDPOINT=http://localstack:4566
+      - DDB_TABLE_NAME=pipeline_runs
+      - SQS_QUEUE_NAME=test-queue
+      - SQS_ENDPOINT_URL=http://localstack:4566
+      - WORK_DIR=work
+      - DELETE_RAW_AFTER_PROCESS=1
+      - EXTRACT_INTERVAL_SEC=600
+      - EXTRACT_JITTER_SEC=60
+      - STARTUP_DELAY_SEC=120
+    networks:
+      - pipeline-network
+    restart: unless-stopped
+
+  sqs-to-postgres:
+    build:
+      context: ./sqs_to_postgres
+      dockerfile: Dockerfile
+    container_name: sqs-to-postgres
+    depends_on:
+      - localstack
+      - postgres
+    environment:
+      - PYTHONPATH=/app
+      - SQS_QUEUE_NAME=test-queue
+      - SQS_ENDPOINT_URL=http://localstack:4566
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - SQS_WAIT_TIME=20
+      - SQS_MAX_PER_POLL=10
+      - STRICT_PRICE_ONLY=1
+      - PRICE_FIRST=1
+      - ENRICH_OVERWRITE=0
+      - ENRICH_NORMALIZE_BRANCH=1
     volumes:
-      - ./app/shopping-chat:/app
-      - /app/node_modules
-    command: npm run start
-    stdin_open: true
-    tty: true
+      - ./postgresql:/app/postgresql
+    networks:
+      - pipeline-network
+    restart: unless-stopped
+
+  fastapi:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: fastapi
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    networks:
+      - pipeline-network
+    restart: unless-stopped
 
 volumes:
-  postgres_data: 
+  postgres_data:
+  localstack-data:
+
+networks:
+  pipeline-network:
+    driver: bridge
