@@ -3,14 +3,15 @@ import json
 import re
 from pathlib import Path
 from typing import Dict, Any, Tuple, Optional, Iterable
+from consts import *
 
-def _digits(val) -> Optional[str]:
+def digits(val) -> Optional[str]:
     if val is None:
         return None
     m = re.search(r'\d+', str(val))
     return (m.group(0).lstrip('0') or '0') if m else None
 
-def _addr_to_text(addr) -> Optional[str]:
+def addr_to_text(addr) -> Optional[str]:
     if not addr:
         return None
     if isinstance(addr, str):
@@ -26,7 +27,7 @@ def _addr_to_text(addr) -> Optional[str]:
         return out or None
     return None
 
-def _extract_city(store: dict) -> Optional[str]:
+def extract_city(store: dict) -> Optional[str]:
     city = store.get("City") or store.get("city")
     if isinstance(city, str) and city.strip():
         return city.strip()
@@ -38,11 +39,6 @@ def _extract_city(store: dict) -> Optional[str]:
                 return c.strip()
     return None
 
-_UNITS = r"(?:ml|mL|l|L|gr|g|kg|mg|oz|מ\"?ל|מ׳׳ל|גרם|גר|מ\"?ג|מג|ק\"?ג|ק׳׳ג|ליטר|ל(?:׳|')?|ג(?:׳|')?)"
-_PACK_WORDS = r"(?:pack|מארז(?:ים)?|אריזה(?:ות)?|חבילה(?:ות)?)"
-_MARKETING = r"(?:מבצע|חדש!?+|בונוס|מתנה|SALE|Promo)"
-_CODE_WORDS = r"(?:SKU|EAN|UPC|PLU|מק[\"׳״']?ט|ברקוד|קטלוג)"
-
 def clean_product_name(name: str) -> str:
     if not name:
         return name
@@ -50,17 +46,17 @@ def clean_product_name(name: str) -> str:
 
     s = s.replace("×", "x")
     s = re.sub(r"[™®©]", " ", s)
-    s = re.sub(rf"\b{_CODE_WORDS}\s*[:#]?\s*\d+\b", " ", s, flags=re.IGNORECASE)
+    s = re.sub(rf"\b{CODE_WORDS}\s*[:#]?\s*\d+\b", " ", s, flags=re.IGNORECASE)
     s = re.sub(r"\b\d{7,14}\b", " ", s)
     s = re.sub(r"\b\d+\s*[xX]\s*\d+\b", " ", s)
-    s = re.sub(rf"(?<!\w)\d+(?:[.,]\d+)?\s*{_UNITS}(?!\w)", " ", s)
+    s = re.sub(rf"(?<!\w)\d+(?:[.,]\d+)?\s*{UNITS}(?!\w)", " ", s)
     s = re.sub(r"(?<!\w)\d+\s*(?:יחידות|יח(?:[\"'׳’״])?)\b", " ", s)
 
-    def _kill_brackets(text: str) -> str:
+    def kill_brackets(text: str) -> str:
         def repl(m):
             inside = m.group(1)
             if re.fullmatch(
-                rf"\s*(?:{_MARKETING}|{_PACK_WORDS}|{_CODE_WORDS}|\d+(?:[.,]\d+)?\s*{_UNITS}|\d{{7,14}})\s*",
+                rf"\s*(?:{MARKETING}|{PACK_WORDS}|{CODE_WORDS}|\d+(?:[.,]\d+)?\s*{UNITS}|\d{{7,14}})\s*",
                 inside, flags=re.IGNORECASE
             ):
                 return " "
@@ -69,10 +65,10 @@ def clean_product_name(name: str) -> str:
         text = re.sub(r"\[([^\]]{0,80})\]", repl, text)
         text = re.sub(r"\{([^}]{0,80})\}", repl, text)
         return text
-    s = _kill_brackets(s)
+    s = kill_brackets(s)
 
-    s = re.sub(rf"\b{_PACK_WORDS}\b", " ", s, flags=re.IGNORECASE)
-    s = re.sub(rf"\b{_MARKETING}\b", " ", s, flags=re.IGNORECASE)
+    s = re.sub(rf"\b{PACK_WORDS}\b", " ", s, flags=re.IGNORECASE)
+    s = re.sub(rf"\b{MARKETING}\b", " ", s, flags=re.IGNORECASE)
     s = re.sub(r"(?:^|\s)\d+(?:[.,]\d+)?\s*$", " ", s)
     s = re.sub(r"\s+(?:עם|בטעם)\s+[A-Za-zא-ת]\.?$", "", s)
     s = re.sub(r"(?:^|\s)[-–—]?[A-Za-zא-ת](?:[.'׳’\"״])?\s*$", " ", s)
@@ -110,7 +106,7 @@ def clean_product_field_in_doc(doc: Dict[str, Any]) -> bool:
                     changed = True
     return changed
 
-def _iter_stores_in_data(data: dict) -> Iterable[dict]:
+def iter_stores_in_data(data: dict) -> Iterable[dict]:
     try:
         subchains = data["Root"]["SubChains"]["SubChain"]
         if isinstance(subchains, dict):
@@ -150,10 +146,10 @@ def build_store_index(stores_root: str | Path) -> Dict[str, Dict[str, Dict[str, 
             except Exception:
                 continue
 
-            for s in _iter_stores_in_data(data):
+            for s in iter_stores_in_data(data):
                 sid = (s.get("StoreID") or s.get("StoreId") or s.get("StoreNo") or
                        s.get("StoreCode") or s.get("id") or s.get("branch") or s.get("Branch"))
-                bid = _digits(sid)
+                bid = digits(sid)
                 if not bid:
                     continue
 
@@ -163,8 +159,8 @@ def build_store_index(stores_root: str | Path) -> Dict[str, Dict[str, Dict[str, 
                         (s.get("location") or {}).get("address"))
                 idx.setdefault(provider, {})[bid] = {
                     "branch_name": (name.strip() if isinstance(name, str) and name.strip() else None),
-                    "address": _addr_to_text(addr),
-                    "city": _extract_city(s),
+                    "address": addr_to_text(addr),
+                    "city": extract_city(s),
                 }
     return idx
 
@@ -176,7 +172,7 @@ def enrich_doc(doc: Dict[str, Any],
     provider = (doc.get("provider") or doc.get("Provider") or "").lower()
     changed = False
 
-    bid = _digits(doc.get("branch") or doc.get("branch_number") or
+    bid = digits(doc.get("branch") or doc.get("branch_number") or
                   doc.get("branchNum") or doc.get("StoreID"))
     if normalize_branch and bid and str(doc.get("branch")) != bid:
         doc["branch"] = bid
@@ -236,6 +232,3 @@ def enrich_dir(normalize_dir: str | Path,
         updated += 1
 
     return updated
-
-if __name__ == "__main__":
-    print("updated:", enrich_dir("./normalize_json", "./stores", out_dir=None, overwrite=True))

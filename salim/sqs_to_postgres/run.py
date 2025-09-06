@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 import signal
 import threading
@@ -7,7 +6,7 @@ import traceback
 
 _stop = threading.Event()
 
-def _handle_signal(sig, _frame):
+def handle_signal(sig, _frame):
     try:
         name = signal.Signals(sig).name
     except Exception:
@@ -15,8 +14,8 @@ def _handle_signal(sig, _frame):
     print(f"[RUN] received {name} → shutting down…", flush=True)
     _stop.set()
 
-signal.signal(signal.SIGINT, _handle_signal)
-signal.signal(signal.SIGTERM, _handle_signal)
+signal.signal(signal.SIGINT, handle_signal)
+signal.signal(signal.SIGTERM, handle_signal)
 
 
 def run_once():
@@ -34,9 +33,7 @@ def run_once():
         traceback.print_exc()
 
 
-# ---- Main loop ----------------------------------------------------------------
 def main():
-    """Run the enricher repeatedly. Exits cleanly on SIGINT/SIGTERM."""
     idle_pause = float(os.getenv("SQS_EMPTY_PAUSE", "2"))
     print("[RUN] sqs-to-postgres runner starting…", flush=True)
     print(f"[RUN] SQS_ENDPOINT_URL={os.getenv('SQS_ENDPOINT_URL')}, "
@@ -46,7 +43,6 @@ def main():
     while not _stop.is_set():
         run_once()
         # Short pause so we don't spin tight when the queue is empty
-        # (enricher() will usually return quickly if nothing is there).
         if _stop.wait(idle_pause):
             break
 
