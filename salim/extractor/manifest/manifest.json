@@ -1,0 +1,1215 @@
+{
+  "bucket": "test-bucket",
+  "entries": {
+    "OsherAd_001_PriceFull": {
+      "key": "OsherAd/001/PriceFull_2025-09-05_11-06.gz",
+      "timestamp": "2025-09-05_11:06",
+      "json": "OsherAd_001_PriceFull_2025-09-05_11-06.json"
+    },
+    "OsherAd_001_PromoFull": {
+      "key": "OsherAd/001/PromoFull_2025-09-05_11-06.gz",
+      "timestamp": "2025-09-05_11:06",
+      "json": "OsherAd_001_PromoFull_2025-09-05_11-06.json"
+    },
+    "OsherAd_003_PriceFull": {
+      "key": "OsherAd/003/PriceFull_2025-09-05_11-08.gz",
+      "timestamp": "2025-09-05_11:08",
+      "json": "OsherAd_003_PriceFull_2025-09-05_11-08.json"
+    },
+    "OsherAd_003_PromoFull": {
+      "key": "OsherAd/003/PromoFull_2025-09-05_11-08.gz",
+      "timestamp": "2025-09-05_11:08",
+      "json": "OsherAd_003_PromoFull_2025-09-05_11-08.json"
+    },
+    "OsherAd_005_PriceFull": {
+      "key": "OsherAd/005/PriceFull_2025-09-05_11-12.gz",
+      "timestamp": "2025-09-05_11:12",
+      "json": "OsherAd_005_PriceFull_2025-09-05_11-12.json"
+    },
+    "OsherAd_005_PromoFull": {
+      "key": "OsherAd/005/PromoFull_2025-09-05_11-13.gz",
+      "timestamp": "2025-09-05_11:13",
+      "json": "OsherAd_005_PromoFull_2025-09-05_11-13.json"
+    },
+    "OsherAd_006_PriceFull": {
+      "key": "OsherAd/006/PriceFull_2025-09-05_10-50.gz",
+      "timestamp": "2025-09-05_10:50",
+      "json": "OsherAd_006_PriceFull_2025-09-05_10-50.json"
+    },
+    "OsherAd_006_PromoFull": {
+      "key": "OsherAd/006/PromoFull_2025-09-05_10-50.gz",
+      "timestamp": "2025-09-05_10:50",
+      "json": "OsherAd_006_PromoFull_2025-09-05_10-50.json"
+    },
+    "OsherAd_009_PriceFull": {
+      "key": "OsherAd/009/PriceFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_009_PriceFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_009_PromoFull": {
+      "key": "OsherAd/009/PromoFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_009_PromoFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_010_PriceFull": {
+      "key": "OsherAd/010/PriceFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_010_PriceFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_010_PromoFull": {
+      "key": "OsherAd/010/PromoFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_010_PromoFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_011_PriceFull": {
+      "key": "OsherAd/011/PriceFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_011_PriceFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_011_PromoFull": {
+      "key": "OsherAd/011/PromoFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_011_PromoFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_013_PriceFull": {
+      "key": "OsherAd/013/PriceFull_2025-09-05_11-15.gz",
+      "timestamp": "2025-09-05_11:15",
+      "json": "OsherAd_013_PriceFull_2025-09-05_11-15.json"
+    },
+    "OsherAd_013_PromoFull": {
+      "key": "OsherAd/013/PromoFull_2025-09-05_11-15.gz",
+      "timestamp": "2025-09-05_11:15",
+      "json": "OsherAd_013_PromoFull_2025-09-05_11-15.json"
+    },
+    "OsherAd_014_PriceFull": {
+      "key": "OsherAd/014/PriceFull_2025-09-05_11-06.gz",
+      "timestamp": "2025-09-05_11:06",
+      "json": "OsherAd_014_PriceFull_2025-09-05_11-06.json"
+    },
+    "OsherAd_014_PromoFull": {
+      "key": "OsherAd/014/PromoFull_2025-09-05_11-06.gz",
+      "timestamp": "2025-09-05_11:06",
+      "json": "OsherAd_014_PromoFull_2025-09-05_11-06.json"
+    },
+    "OsherAd_016_PriceFull": {
+      "key": "OsherAd/016/PriceFull_2025-09-05_11-06.gz",
+      "timestamp": "2025-09-05_11:06",
+      "json": "OsherAd_016_PriceFull_2025-09-05_11-06.json"
+    },
+    "OsherAd_016_PromoFull": {
+      "key": "OsherAd/016/PromoFull_2025-09-05_11-06.gz",
+      "timestamp": "2025-09-05_11:06",
+      "json": "OsherAd_016_PromoFull_2025-09-05_11-06.json"
+    },
+    "OsherAd_020_PriceFull": {
+      "key": "OsherAd/020/PriceFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_020_PriceFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_020_PromoFull": {
+      "key": "OsherAd/020/PromoFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_020_PromoFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_022_PriceFull": {
+      "key": "OsherAd/022/PriceFull_2025-09-05_11-03.gz",
+      "timestamp": "2025-09-05_11:03",
+      "json": "OsherAd_022_PriceFull_2025-09-05_11-03.json"
+    },
+    "OsherAd_022_PromoFull": {
+      "key": "OsherAd/022/PromoFull_2025-09-05_11-03.gz",
+      "timestamp": "2025-09-05_11:03",
+      "json": "OsherAd_022_PromoFull_2025-09-05_11-03.json"
+    },
+    "OsherAd_023_PriceFull": {
+      "key": "OsherAd/023/PriceFull_2025-09-05_10-49.gz",
+      "timestamp": "2025-09-05_10:49",
+      "json": "OsherAd_023_PriceFull_2025-09-05_10-49.json"
+    },
+    "OsherAd_023_PromoFull": {
+      "key": "OsherAd/023/PromoFull_2025-09-05_10-49.gz",
+      "timestamp": "2025-09-05_10:49",
+      "json": "OsherAd_023_PromoFull_2025-09-05_10-49.json"
+    },
+    "OsherAd_024_PriceFull": {
+      "key": "OsherAd/024/PriceFull_2025-09-05_11-09.gz",
+      "timestamp": "2025-09-05_11:09",
+      "json": "OsherAd_024_PriceFull_2025-09-05_11-09.json"
+    },
+    "OsherAd_024_PromoFull": {
+      "key": "OsherAd/024/PromoFull_2025-09-05_11-09.gz",
+      "timestamp": "2025-09-05_11:09",
+      "json": "OsherAd_024_PromoFull_2025-09-05_11-09.json"
+    },
+    "OsherAd_025_PriceFull": {
+      "key": "OsherAd/025/PriceFull_2025-09-05_11-07.gz",
+      "timestamp": "2025-09-05_11:07",
+      "json": "OsherAd_025_PriceFull_2025-09-05_11-07.json"
+    },
+    "OsherAd_025_PromoFull": {
+      "key": "OsherAd/025/PromoFull_2025-09-05_11-07.gz",
+      "timestamp": "2025-09-05_11:07",
+      "json": "OsherAd_025_PromoFull_2025-09-05_11-07.json"
+    },
+    "OsherAd_026_PriceFull": {
+      "key": "OsherAd/026/PriceFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_026_PriceFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_026_PromoFull": {
+      "key": "OsherAd/026/PromoFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_026_PromoFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_028_PriceFull": {
+      "key": "OsherAd/028/PriceFull_2025-09-05_11-06.gz",
+      "timestamp": "2025-09-05_11:06",
+      "json": "OsherAd_028_PriceFull_2025-09-05_11-06.json"
+    },
+    "OsherAd_028_PromoFull": {
+      "key": "OsherAd/028/PromoFull_2025-09-05_11-07.gz",
+      "timestamp": "2025-09-05_11:07",
+      "json": "OsherAd_028_PromoFull_2025-09-05_11-07.json"
+    },
+    "OsherAd_029_PriceFull": {
+      "key": "OsherAd/029/PriceFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_029_PriceFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_029_PromoFull": {
+      "key": "OsherAd/029/PromoFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_029_PromoFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_030_PriceFull": {
+      "key": "OsherAd/030/PriceFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_030_PriceFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_030_PromoFull": {
+      "key": "OsherAd/030/PromoFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_030_PromoFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_031_PriceFull": {
+      "key": "OsherAd/031/PriceFull_2025-09-05_11-07.gz",
+      "timestamp": "2025-09-05_11:07",
+      "json": "OsherAd_031_PriceFull_2025-09-05_11-07.json"
+    },
+    "OsherAd_031_PromoFull": {
+      "key": "OsherAd/031/PromoFull_2025-09-05_11-08.gz",
+      "timestamp": "2025-09-05_11:08",
+      "json": "OsherAd_031_PromoFull_2025-09-05_11-08.json"
+    },
+    "OsherAd_032_PriceFull": {
+      "key": "OsherAd/032/PriceFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_032_PriceFull_2025-09-05_11-05.json"
+    },
+    "OsherAd_032_PromoFull": {
+      "key": "OsherAd/032/PromoFull_2025-09-05_11-05.gz",
+      "timestamp": "2025-09-05_11:05",
+      "json": "OsherAd_032_PromoFull_2025-09-05_11-05.json"
+    },
+    "TivTaam_002_PriceFull": {
+      "key": "TivTaam/002/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_002_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_002_PromoFull": {
+      "key": "TivTaam/002/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_002_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_003_PriceFull": {
+      "key": "TivTaam/003/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_003_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_003_PromoFull": {
+      "key": "TivTaam/003/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_003_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_006_PriceFull": {
+      "key": "TivTaam/006/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_006_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_006_PromoFull": {
+      "key": "TivTaam/006/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_006_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_007_PriceFull": {
+      "key": "TivTaam/007/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_007_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_007_PromoFull": {
+      "key": "TivTaam/007/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_007_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_010_PriceFull": {
+      "key": "TivTaam/010/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_010_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_010_PromoFull": {
+      "key": "TivTaam/010/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_010_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_012_PriceFull": {
+      "key": "TivTaam/012/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_012_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_012_PromoFull": {
+      "key": "TivTaam/012/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_012_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_014_PriceFull": {
+      "key": "TivTaam/014/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_014_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_014_PromoFull": {
+      "key": "TivTaam/014/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_014_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_015_PriceFull": {
+      "key": "TivTaam/015/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_015_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_015_PromoFull": {
+      "key": "TivTaam/015/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_015_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_017_PriceFull": {
+      "key": "TivTaam/017/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_017_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_017_PromoFull": {
+      "key": "TivTaam/017/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_017_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_018_PriceFull": {
+      "key": "TivTaam/018/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_018_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_018_PromoFull": {
+      "key": "TivTaam/018/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_018_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_019_PriceFull": {
+      "key": "TivTaam/019/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_019_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_019_PromoFull": {
+      "key": "TivTaam/019/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_019_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_020_PriceFull": {
+      "key": "TivTaam/020/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_020_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_020_PromoFull": {
+      "key": "TivTaam/020/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_020_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_021_PriceFull": {
+      "key": "TivTaam/021/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_021_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_021_PromoFull": {
+      "key": "TivTaam/021/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_021_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_022_PriceFull": {
+      "key": "TivTaam/022/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_022_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_022_PromoFull": {
+      "key": "TivTaam/022/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_022_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_023_PriceFull": {
+      "key": "TivTaam/023/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_023_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_023_PromoFull": {
+      "key": "TivTaam/023/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_023_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_024_PriceFull": {
+      "key": "TivTaam/024/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_024_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_024_PromoFull": {
+      "key": "TivTaam/024/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_024_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_025_PriceFull": {
+      "key": "TivTaam/025/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_025_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_025_PromoFull": {
+      "key": "TivTaam/025/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_025_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_030_PriceFull": {
+      "key": "TivTaam/030/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_030_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_030_PromoFull": {
+      "key": "TivTaam/030/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_030_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_051_PriceFull": {
+      "key": "TivTaam/051/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_051_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_051_PromoFull": {
+      "key": "TivTaam/051/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_051_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_052_PriceFull": {
+      "key": "TivTaam/052/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_052_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_052_PromoFull": {
+      "key": "TivTaam/052/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_052_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_054_PriceFull": {
+      "key": "TivTaam/054/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_054_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_054_PromoFull": {
+      "key": "TivTaam/054/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_054_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_056_PriceFull": {
+      "key": "TivTaam/056/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_056_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_056_PromoFull": {
+      "key": "TivTaam/056/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_056_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_057_PriceFull": {
+      "key": "TivTaam/057/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_057_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_057_PromoFull": {
+      "key": "TivTaam/057/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_057_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_058_PriceFull": {
+      "key": "TivTaam/058/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_058_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_058_PromoFull": {
+      "key": "TivTaam/058/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_058_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_059_PriceFull": {
+      "key": "TivTaam/059/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_059_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_059_PromoFull": {
+      "key": "TivTaam/059/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_059_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_061_PriceFull": {
+      "key": "TivTaam/061/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_061_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_061_PromoFull": {
+      "key": "TivTaam/061/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_061_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_063_PriceFull": {
+      "key": "TivTaam/063/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_063_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_063_PromoFull": {
+      "key": "TivTaam/063/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_063_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_068_PriceFull": {
+      "key": "TivTaam/068/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_068_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_068_PromoFull": {
+      "key": "TivTaam/068/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_068_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_070_PriceFull": {
+      "key": "TivTaam/070/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_070_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_070_PromoFull": {
+      "key": "TivTaam/070/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_070_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_071_PriceFull": {
+      "key": "TivTaam/071/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_071_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_071_PromoFull": {
+      "key": "TivTaam/071/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_071_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_073_PriceFull": {
+      "key": "TivTaam/073/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_073_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_073_PromoFull": {
+      "key": "TivTaam/073/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_073_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_074_PriceFull": {
+      "key": "TivTaam/074/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_074_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_074_PromoFull": {
+      "key": "TivTaam/074/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_074_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_075_PriceFull": {
+      "key": "TivTaam/075/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_075_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_075_PromoFull": {
+      "key": "TivTaam/075/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_075_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_079_PriceFull": {
+      "key": "TivTaam/079/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_079_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_079_PromoFull": {
+      "key": "TivTaam/079/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_079_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_080_PriceFull": {
+      "key": "TivTaam/080/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_080_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_080_PromoFull": {
+      "key": "TivTaam/080/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_080_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_082_PriceFull": {
+      "key": "TivTaam/082/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_082_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_082_PromoFull": {
+      "key": "TivTaam/082/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_082_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_083_PriceFull": {
+      "key": "TivTaam/083/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_083_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_083_PromoFull": {
+      "key": "TivTaam/083/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_083_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_084_PriceFull": {
+      "key": "TivTaam/084/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_084_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_084_PromoFull": {
+      "key": "TivTaam/084/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_084_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_085_PriceFull": {
+      "key": "TivTaam/085/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_085_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_085_PromoFull": {
+      "key": "TivTaam/085/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_085_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_087_PriceFull": {
+      "key": "TivTaam/087/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_087_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_087_PromoFull": {
+      "key": "TivTaam/087/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_087_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_088_PriceFull": {
+      "key": "TivTaam/088/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_088_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_088_PromoFull": {
+      "key": "TivTaam/088/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_088_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_089_PriceFull": {
+      "key": "TivTaam/089/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_089_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_089_PromoFull": {
+      "key": "TivTaam/089/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_089_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_091_PriceFull": {
+      "key": "TivTaam/091/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_091_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_091_PromoFull": {
+      "key": "TivTaam/091/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_091_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_092_PriceFull": {
+      "key": "TivTaam/092/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_092_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_092_PromoFull": {
+      "key": "TivTaam/092/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_092_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_094_PriceFull": {
+      "key": "TivTaam/094/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_094_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_094_PromoFull": {
+      "key": "TivTaam/094/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_094_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_156_PriceFull": {
+      "key": "TivTaam/156/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_156_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_156_PromoFull": {
+      "key": "TivTaam/156/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_156_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_502_PriceFull": {
+      "key": "TivTaam/502/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_502_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_502_PromoFull": {
+      "key": "TivTaam/502/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_502_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_503_PriceFull": {
+      "key": "TivTaam/503/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_503_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_503_PromoFull": {
+      "key": "TivTaam/503/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_503_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_512_PriceFull": {
+      "key": "TivTaam/512/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_512_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_512_PromoFull": {
+      "key": "TivTaam/512/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_512_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_514_PriceFull": {
+      "key": "TivTaam/514/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_514_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_514_PromoFull": {
+      "key": "TivTaam/514/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_514_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_515_PriceFull": {
+      "key": "TivTaam/515/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_515_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_515_PromoFull": {
+      "key": "TivTaam/515/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_515_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_519_PriceFull": {
+      "key": "TivTaam/519/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_519_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_519_PromoFull": {
+      "key": "TivTaam/519/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_519_PromoFull_2025-09-05_02-20.json"
+    },
+    "TivTaam_523_PriceFull": {
+      "key": "TivTaam/523/PriceFull_2025-09-05_02-05.gz",
+      "timestamp": "2025-09-05_02:05",
+      "json": "TivTaam_523_PriceFull_2025-09-05_02-05.json"
+    },
+    "TivTaam_523_PromoFull": {
+      "key": "TivTaam/523/PromoFull_2025-09-05_02-20.gz",
+      "timestamp": "2025-09-05_02:20",
+      "json": "TivTaam_523_PromoFull_2025-09-05_02-20.json"
+    },
+    "Yohananof_001_PriceFull": {
+      "key": "Yohananof/001/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_001_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_001_PromoFull": {
+      "key": "Yohananof/001/PromoFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_001_PromoFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_004_PriceFull": {
+      "key": "Yohananof/004/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_004_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_004_PromoFull": {
+      "key": "Yohananof/004/PromoFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_004_PromoFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_005_PriceFull": {
+      "key": "Yohananof/005/PriceFull_2025-09-05_09-30.gz",
+      "timestamp": "2025-09-05_09:30",
+      "json": "Yohananof_005_PriceFull_2025-09-05_09-30.json"
+    },
+    "Yohananof_005_PromoFull": {
+      "key": "Yohananof/005/PromoFull_2025-09-05_09-30.gz",
+      "timestamp": "2025-09-05_09:30",
+      "json": "Yohananof_005_PromoFull_2025-09-05_09-30.json"
+    },
+    "Yohananof_007_PriceFull": {
+      "key": "Yohananof/007/PriceFull_2025-09-05_11-50.gz",
+      "timestamp": "2025-09-05_11:50",
+      "json": "Yohananof_007_PriceFull_2025-09-05_11-50.json"
+    },
+    "Yohananof_007_PromoFull": {
+      "key": "Yohananof/007/PromoFull_2025-09-05_11-51.gz",
+      "timestamp": "2025-09-05_11:51",
+      "json": "Yohananof_007_PromoFull_2025-09-05_11-51.json"
+    },
+    "Yohananof_008_PriceFull": {
+      "key": "Yohananof/008/PriceFull_2025-09-05_06-28.gz",
+      "timestamp": "2025-09-05_06:28",
+      "json": "Yohananof_008_PriceFull_2025-09-05_06-28.json"
+    },
+    "Yohananof_008_PromoFull": {
+      "key": "Yohananof/008/PromoFull_2025-09-05_06-29.gz",
+      "timestamp": "2025-09-05_06:29",
+      "json": "Yohananof_008_PromoFull_2025-09-05_06-29.json"
+    },
+    "Yohananof_009_PriceFull": {
+      "key": "Yohananof/009/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_009_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_009_PromoFull": {
+      "key": "Yohananof/009/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_009_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_012_PriceFull": {
+      "key": "Yohananof/012/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_012_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_012_PromoFull": {
+      "key": "Yohananof/012/PromoFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_012_PromoFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_013_PriceFull": {
+      "key": "Yohananof/013/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_013_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_013_PromoFull": {
+      "key": "Yohananof/013/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_013_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_015_PriceFull": {
+      "key": "Yohananof/015/PriceFull_2025-09-04_21-16.gz",
+      "timestamp": "2025-09-04_21:16",
+      "json": "Yohananof_015_PriceFull_2025-09-04_21-16.json"
+    },
+    "Yohananof_015_PromoFull": {
+      "key": "Yohananof/015/PromoFull_2025-09-04_21-16.gz",
+      "timestamp": "2025-09-04_21:16",
+      "json": "Yohananof_015_PromoFull_2025-09-04_21-16.json"
+    },
+    "Yohananof_016_PriceFull": {
+      "key": "Yohananof/016/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_016_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_016_PromoFull": {
+      "key": "Yohananof/016/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_016_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_017_PriceFull": {
+      "key": "Yohananof/017/PriceFull_2025-09-05_12-10.gz",
+      "timestamp": "2025-09-05_12:10",
+      "json": "Yohananof_017_PriceFull_2025-09-05_12-10.json"
+    },
+    "Yohananof_017_PromoFull": {
+      "key": "Yohananof/017/PromoFull_2025-09-05_12-10.gz",
+      "timestamp": "2025-09-05_12:10",
+      "json": "Yohananof_017_PromoFull_2025-09-05_12-10.json"
+    },
+    "Yohananof_018_PriceFull": {
+      "key": "Yohananof/018/PriceFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_018_PriceFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_018_PromoFull": {
+      "key": "Yohananof/018/PromoFull_2025-09-05_06-32.gz",
+      "timestamp": "2025-09-05_06:32",
+      "json": "Yohananof_018_PromoFull_2025-09-05_06-32.json"
+    },
+    "Yohananof_019_PriceFull": {
+      "key": "Yohananof/019/PriceFull_2025-09-05_09-30.gz",
+      "timestamp": "2025-09-05_09:30",
+      "json": "Yohananof_019_PriceFull_2025-09-05_09-30.json"
+    },
+    "Yohananof_019_PromoFull": {
+      "key": "Yohananof/019/PromoFull_2025-09-05_09-30.gz",
+      "timestamp": "2025-09-05_09:30",
+      "json": "Yohananof_019_PromoFull_2025-09-05_09-30.json"
+    },
+    "Yohananof_020_PriceFull": {
+      "key": "Yohananof/020/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_020_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_020_PromoFull": {
+      "key": "Yohananof/020/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_020_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_021_PriceFull": {
+      "key": "Yohananof/021/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_021_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_021_PromoFull": {
+      "key": "Yohananof/021/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_021_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_022_PriceFull": {
+      "key": "Yohananof/022/PriceFull_2025-09-05_06-34.gz",
+      "timestamp": "2025-09-05_06:34",
+      "json": "Yohananof_022_PriceFull_2025-09-05_06-34.json"
+    },
+    "Yohananof_022_PromoFull": {
+      "key": "Yohananof/022/PromoFull_2025-09-05_06-34.gz",
+      "timestamp": "2025-09-05_06:34",
+      "json": "Yohananof_022_PromoFull_2025-09-05_06-34.json"
+    },
+    "Yohananof_023_PriceFull": {
+      "key": "Yohananof/023/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_023_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_023_PromoFull": {
+      "key": "Yohananof/023/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_023_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_024_PriceFull": {
+      "key": "Yohananof/024/PriceFull_2025-09-05_09-32.gz",
+      "timestamp": "2025-09-05_09:32",
+      "json": "Yohananof_024_PriceFull_2025-09-05_09-32.json"
+    },
+    "Yohananof_024_PromoFull": {
+      "key": "Yohananof/024/PromoFull_2025-09-05_09-32.gz",
+      "timestamp": "2025-09-05_09:32",
+      "json": "Yohananof_024_PromoFull_2025-09-05_09-32.json"
+    },
+    "Yohananof_025_PriceFull": {
+      "key": "Yohananof/025/PriceFull_2025-09-04_21-16.gz",
+      "timestamp": "2025-09-04_21:16",
+      "json": "Yohananof_025_PriceFull_2025-09-04_21-16.json"
+    },
+    "Yohananof_025_PromoFull": {
+      "key": "Yohananof/025/PromoFull_2025-09-04_21-16.gz",
+      "timestamp": "2025-09-04_21:16",
+      "json": "Yohananof_025_PromoFull_2025-09-04_21-16.json"
+    },
+    "Yohananof_026_PriceFull": {
+      "key": "Yohananof/026/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_026_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_026_PromoFull": {
+      "key": "Yohananof/026/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_026_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_027_PriceFull": {
+      "key": "Yohananof/027/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_027_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_027_PromoFull": {
+      "key": "Yohananof/027/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_027_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_028_PriceFull": {
+      "key": "Yohananof/028/PriceFull_2025-09-05_09-01.gz",
+      "timestamp": "2025-09-05_09:01",
+      "json": "Yohananof_028_PriceFull_2025-09-05_09-01.json"
+    },
+    "Yohananof_028_PromoFull": {
+      "key": "Yohananof/028/PromoFull_2025-09-05_09-01.gz",
+      "timestamp": "2025-09-05_09:01",
+      "json": "Yohananof_028_PromoFull_2025-09-05_09-01.json"
+    },
+    "Yohananof_029_PriceFull": {
+      "key": "Yohananof/029/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_029_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_029_PromoFull": {
+      "key": "Yohananof/029/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_029_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_030_PriceFull": {
+      "key": "Yohananof/030/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_030_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_030_PromoFull": {
+      "key": "Yohananof/030/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_030_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_031_PriceFull": {
+      "key": "Yohananof/031/PriceFull_2025-09-05_19-10.gz",
+      "timestamp": "2025-09-05_19:10",
+      "json": "Yohananof_031_PriceFull_2025-09-05_19-10.json"
+    },
+    "Yohananof_031_PromoFull": {
+      "key": "Yohananof/031/PromoFull_2025-09-05_19-11.gz",
+      "timestamp": "2025-09-05_19:11",
+      "json": "Yohananof_031_PromoFull_2025-09-05_19-11.json"
+    },
+    "Yohananof_032_PriceFull": {
+      "key": "Yohananof/032/PriceFull_2025-09-05_09-30.gz",
+      "timestamp": "2025-09-05_09:30",
+      "json": "Yohananof_032_PriceFull_2025-09-05_09-30.json"
+    },
+    "Yohananof_032_PromoFull": {
+      "key": "Yohananof/032/PromoFull_2025-09-05_09-31.gz",
+      "timestamp": "2025-09-05_09:31",
+      "json": "Yohananof_032_PromoFull_2025-09-05_09-31.json"
+    },
+    "Yohananof_033_PriceFull": {
+      "key": "Yohananof/033/PriceFull_2025-09-05_06-28.gz",
+      "timestamp": "2025-09-05_06:28",
+      "json": "Yohananof_033_PriceFull_2025-09-05_06-28.json"
+    },
+    "Yohananof_033_PromoFull": {
+      "key": "Yohananof/033/PromoFull_2025-09-05_06-29.gz",
+      "timestamp": "2025-09-05_06:29",
+      "json": "Yohananof_033_PromoFull_2025-09-05_06-29.json"
+    },
+    "Yohananof_034_PriceFull": {
+      "key": "Yohananof/034/PriceFull_2025-09-05_19-08.gz",
+      "timestamp": "2025-09-05_19:08",
+      "json": "Yohananof_034_PriceFull_2025-09-05_19-08.json"
+    },
+    "Yohananof_034_PromoFull": {
+      "key": "Yohananof/034/PromoFull_2025-09-05_19-08.gz",
+      "timestamp": "2025-09-05_19:08",
+      "json": "Yohananof_034_PromoFull_2025-09-05_19-08.json"
+    },
+    "Yohananof_035_PriceFull": {
+      "key": "Yohananof/035/PriceFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_035_PriceFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_035_PromoFull": {
+      "key": "Yohananof/035/PromoFull_2025-09-05_06-32.gz",
+      "timestamp": "2025-09-05_06:32",
+      "json": "Yohananof_035_PromoFull_2025-09-05_06-32.json"
+    },
+    "Yohananof_036_PriceFull": {
+      "key": "Yohananof/036/PriceFull_2025-09-04_21-16.gz",
+      "timestamp": "2025-09-04_21:16",
+      "json": "Yohananof_036_PriceFull_2025-09-04_21-16.json"
+    },
+    "Yohananof_036_PromoFull": {
+      "key": "Yohananof/036/PromoFull_2025-09-04_21-16.gz",
+      "timestamp": "2025-09-04_21:16",
+      "json": "Yohananof_036_PromoFull_2025-09-04_21-16.json"
+    },
+    "Yohananof_037_PriceFull": {
+      "key": "Yohananof/037/PriceFull_2025-09-05_19-10.gz",
+      "timestamp": "2025-09-05_19:10",
+      "json": "Yohananof_037_PriceFull_2025-09-05_19-10.json"
+    },
+    "Yohananof_037_PromoFull": {
+      "key": "Yohananof/037/PromoFull_2025-09-05_19-10.gz",
+      "timestamp": "2025-09-05_19:10",
+      "json": "Yohananof_037_PromoFull_2025-09-05_19-10.json"
+    },
+    "Yohananof_038_PriceFull": {
+      "key": "Yohananof/038/PriceFull_2025-09-04_21-09.gz",
+      "timestamp": "2025-09-04_21:09",
+      "json": "Yohananof_038_PriceFull_2025-09-04_21-09.json"
+    },
+    "Yohananof_038_PromoFull": {
+      "key": "Yohananof/038/PromoFull_2025-09-04_21-10.gz",
+      "timestamp": "2025-09-04_21:10",
+      "json": "Yohananof_038_PromoFull_2025-09-04_21-10.json"
+    },
+    "Yohananof_039_PriceFull": {
+      "key": "Yohananof/039/PriceFull_2025-09-04_21-08.gz",
+      "timestamp": "2025-09-04_21:08",
+      "json": "Yohananof_039_PriceFull_2025-09-04_21-08.json"
+    },
+    "Yohananof_039_PromoFull": {
+      "key": "Yohananof/039/PromoFull_2025-09-04_21-09.gz",
+      "timestamp": "2025-09-04_21:09",
+      "json": "Yohananof_039_PromoFull_2025-09-04_21-09.json"
+    },
+    "Yohananof_040_PriceFull": {
+      "key": "Yohananof/040/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_040_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_040_PromoFull": {
+      "key": "Yohananof/040/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_040_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_041_PriceFull": {
+      "key": "Yohananof/041/PriceFull_2025-09-04_21-16.gz",
+      "timestamp": "2025-09-04_21:16",
+      "json": "Yohananof_041_PriceFull_2025-09-04_21-16.json"
+    },
+    "Yohananof_041_PromoFull": {
+      "key": "Yohananof/041/PromoFull_2025-09-04_21-16.gz",
+      "timestamp": "2025-09-04_21:16",
+      "json": "Yohananof_041_PromoFull_2025-09-04_21-16.json"
+    },
+    "Yohananof_042_PriceFull": {
+      "key": "Yohananof/042/PriceFull_2025-09-05_06-32.gz",
+      "timestamp": "2025-09-05_06:32",
+      "json": "Yohananof_042_PriceFull_2025-09-05_06-32.json"
+    },
+    "Yohananof_042_PromoFull": {
+      "key": "Yohananof/042/PromoFull_2025-09-05_06-32.gz",
+      "timestamp": "2025-09-05_06:32",
+      "json": "Yohananof_042_PromoFull_2025-09-05_06-32.json"
+    },
+    "Yohananof_046_PriceFull": {
+      "key": "Yohananof/046/PriceFull_2025-09-05_07-01.gz",
+      "timestamp": "2025-09-05_07:01",
+      "json": "Yohananof_046_PriceFull_2025-09-05_07-01.json"
+    },
+    "Yohananof_046_PromoFull": {
+      "key": "Yohananof/046/PromoFull_2025-09-05_07-01.gz",
+      "timestamp": "2025-09-05_07:01",
+      "json": "Yohananof_046_PromoFull_2025-09-05_07-01.json"
+    },
+    "Yohananof_048_PriceFull": {
+      "key": "Yohananof/048/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_048_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_048_PromoFull": {
+      "key": "Yohananof/048/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_048_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_050_PriceFull": {
+      "key": "Yohananof/050/PriceFull_2025-09-05_06-30.gz",
+      "timestamp": "2025-09-05_06:30",
+      "json": "Yohananof_050_PriceFull_2025-09-05_06-30.json"
+    },
+    "Yohananof_050_PromoFull": {
+      "key": "Yohananof/050/PromoFull_2025-09-05_06-31.gz",
+      "timestamp": "2025-09-05_06:31",
+      "json": "Yohananof_050_PromoFull_2025-09-05_06-31.json"
+    },
+    "Yohananof_051_PriceFull": {
+      "key": "Yohananof/051/PriceFull_2025-09-04_21-16.gz",
+      "timestamp": "2025-09-04_21:16",
+      "json": "Yohananof_051_PriceFull_2025-09-04_21-16.json"
+    },
+    "Yohananof_051_PromoFull": {
+      "key": "Yohananof/051/PromoFull_2025-09-04_21-17.gz",
+      "timestamp": "2025-09-04_21:17",
+      "json": "Yohananof_051_PromoFull_2025-09-04_21-17.json"
+    },
+    "Yohananof_052_PriceFull": {
+      "key": "Yohananof/052/PriceFull_2025-09-04_21-16.gz",
+      "timestamp": "2025-09-04_21:16",
+      "json": "Yohananof_052_PriceFull_2025-09-04_21-16.json"
+    },
+    "Yohananof_052_PromoFull": {
+      "key": "Yohananof/052/PromoFull_2025-09-04_21-17.gz",
+      "timestamp": "2025-09-04_21:17",
+      "json": "Yohananof_052_PromoFull_2025-09-04_21-17.json"
+    },
+    "Yohananof_053_PriceFull": {
+      "key": "Yohananof/053/PriceFull_2025-09-04_21-10.gz",
+      "timestamp": "2025-09-04_21:10",
+      "json": "Yohananof_053_PriceFull_2025-09-04_21-10.json"
+    },
+    "Yohananof_053_PromoFull": {
+      "key": "Yohananof/053/PromoFull_2025-09-04_21-10.gz",
+      "timestamp": "2025-09-04_21:10",
+      "json": "Yohananof_053_PromoFull_2025-09-04_21-10.json"
+    },
+    "Yohananof_054_PriceFull": {
+      "key": "Yohananof/054/PriceFull_2025-09-04_21-10.gz",
+      "timestamp": "2025-09-04_21:10",
+      "json": "Yohananof_054_PriceFull_2025-09-04_21-10.json"
+    },
+    "Yohananof_054_PromoFull": {
+      "key": "Yohananof/054/PromoFull_2025-09-04_21-10.gz",
+      "timestamp": "2025-09-04_21:10",
+      "json": "Yohananof_054_PromoFull_2025-09-04_21-10.json"
+    },
+    "Yohananof_055_PriceFull": {
+      "key": "Yohananof/055/PriceFull_2025-09-05_09-00.gz",
+      "timestamp": "2025-09-05_09:00",
+      "json": "Yohananof_055_PriceFull_2025-09-05_09-00.json"
+    },
+    "Yohananof_055_PromoFull": {
+      "key": "Yohananof/055/PromoFull_2025-09-05_09-00.gz",
+      "timestamp": "2025-09-05_09:00",
+      "json": "Yohananof_055_PromoFull_2025-09-05_09-00.json"
+    },
+    "Yohananof_059_PriceFull": {
+      "key": "Yohananof/059/PriceFull_2025-09-05_09-00.gz",
+      "timestamp": "2025-09-05_09:00",
+      "json": "Yohananof_059_PriceFull_2025-09-05_09-00.json"
+    },
+    "Yohananof_059_PromoFull": {
+      "key": "Yohananof/059/PromoFull_2025-09-05_09-00.gz",
+      "timestamp": "2025-09-05_09:00",
+      "json": "Yohananof_059_PromoFull_2025-09-05_09-00.json"
+    },
+    "Yohananof_060_PriceFull": {
+      "key": "Yohananof/060/PriceFull_2025-09-05_09-30.gz",
+      "timestamp": "2025-09-05_09:30",
+      "json": "Yohananof_060_PriceFull_2025-09-05_09-30.json"
+    },
+    "Yohananof_060_PromoFull": {
+      "key": "Yohananof/060/PromoFull_2025-09-05_09-30.gz",
+      "timestamp": "2025-09-05_09:30",
+      "json": "Yohananof_060_PromoFull_2025-09-05_09-30.json"
+    },
+    "Yohananof_095_PriceFull": {
+      "key": "Yohananof/095/PriceFull_2025-09-04_21-10.gz",
+      "timestamp": "2025-09-04_21:10",
+      "json": "Yohananof_095_PriceFull_2025-09-04_21-10.json"
+    },
+    "Yohananof_095_PromoFull": {
+      "key": "Yohananof/095/PromoFull_2025-09-04_21-11.gz",
+      "timestamp": "2025-09-04_21:11",
+      "json": "Yohananof_095_PromoFull_2025-09-04_21-11.json"
+    }
+  }
+}

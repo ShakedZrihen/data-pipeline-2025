@@ -1,46 +1,39 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, DateTime, Text, ForeignKey
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-from .database import Base
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import String, Text, Numeric, TIMESTAMP, text
+
+class Base(DeclarativeBase):
+    pass
 
 class Supermarket(Base):
-    __tablename__ = "supermarkets"
+    __tablename__ = "supermarket"
+    supermarket_id: Mapped[int] = mapped_column(primary_key=True)
+    provider:      Mapped[str]  = mapped_column(Text, nullable=False)
+    branch_code:   Mapped[str]  = mapped_column(Text, nullable=False)
+    name:          Mapped[str | None] = mapped_column(Text)
+    branch_name:   Mapped[str | None] = mapped_column(Text)
+    city:          Mapped[str | None] = mapped_column(Text)
+    address:       Mapped[str | None] = mapped_column(Text)
+    website:       Mapped[str | None] = mapped_column(Text)
+    created_at:    Mapped[str | None] = mapped_column(TIMESTAMP(timezone=True), server_default=text("now()"))
 
-    supermarket_id = Column(Integer, primary_key=True, index=True)
-    name = Column(Text, nullable=False)
-    branch_name = Column(Text)
-    city = Column(Text)
-    address = Column(Text)
-    website = Column(Text)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+class PriceItem(Base):
+    __tablename__ = "price_item"
+    provider:     Mapped[str] = mapped_column(Text, primary_key=True)
+    branch_code:  Mapped[str] = mapped_column(Text, primary_key=True)
+    product_code: Mapped[str] = mapped_column(Text, primary_key=True)
+    product_name: Mapped[str] = mapped_column(Text, nullable=False)
+    unit:         Mapped[str | None] = mapped_column(Text)
+    price:        Mapped[float] = mapped_column(Numeric(10,2), nullable=False)
+    ts:           Mapped[str] = mapped_column(TIMESTAMP(timezone=True), primary_key=True)
 
-    # Relationship
-    products = relationship("Product", back_populates="supermarket")
-
-class Product(Base):
-    __tablename__ = "products"
-
-    product_id = Column(Integer, primary_key=True, index=True)
-    supermarket_id = Column(Integer, ForeignKey("supermarkets.supermarket_id", ondelete="CASCADE"), nullable=False)
-    
-    barcode = Column(Text, nullable=False, index=True)
-    canonical_name = Column(Text, nullable=False)
-    brand = Column(Text)
-    category = Column(Text)
-    size_value = Column(Numeric(12, 3))
-    size_unit = Column(Text)
-    
-    price = Column(Numeric(12, 2), nullable=False)
-    currency = Column(String(3), nullable=False, default='ILS')
-    list_price = Column(Numeric(12, 2))
-    promo_price = Column(Numeric(12, 2))
-    promo_text = Column(Text)
-    loyalty_only = Column(Boolean, default=False)
-    in_stock = Column(Boolean)
-    
-    collected_at = Column(DateTime(timezone=True), server_default=func.now())
-    source = Column(Text)
-    raw_hash = Column(Text)
-
-    # Relationship
-    supermarket = relationship("Supermarket", back_populates="products")
+class PromoItem(Base):
+    __tablename__ = "promo_item"
+    provider:     Mapped[str] = mapped_column(Text, primary_key=True)
+    branch_code:  Mapped[str] = mapped_column(Text, primary_key=True)
+    product_code: Mapped[str] = mapped_column(Text, primary_key=True)
+    description:  Mapped[str | None] = mapped_column(Text, primary_key=True)
+    start_ts:     Mapped[str | None] = mapped_column(TIMESTAMP(timezone=True), primary_key=True)
+    end_ts:       Mapped[str | None] = mapped_column(TIMESTAMP(timezone=True), primary_key=True)
+    price:        Mapped[float | None] = mapped_column(Numeric(10,2))
+    rate:         Mapped[float | None] = mapped_column(Numeric(10,4))
+    quantity:     Mapped[int | None]   = mapped_column()
