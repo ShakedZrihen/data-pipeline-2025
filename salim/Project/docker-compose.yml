@@ -114,7 +114,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1
       - S3_ENDPOINT=http://s3:4566
-      - RABBITMQ_HOST=rabbitmq 
+      - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=admin
       - RABBITMQ_PASSWORD=admin
@@ -123,7 +123,7 @@ services:
       - "./extractor/extracted_files:/app/extracted_files"
     networks:
       - pipeline-network
-    command: sh -c "while true; do python extractor.py --all; sleep 1800; done"
+    command: sh -c "while true; do python extractor.py --all; sleep 60; done"
 
   # Enricher Service
   enricher:
@@ -132,11 +132,11 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      postgres: 
+      postgres:
         condition: service_healthy
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - RABBITMQ_HOST=rabbitmq 
+      - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=admin
       - RABBITMQ_PASSWORD=admin
@@ -151,7 +151,7 @@ services:
     volumes:
       - "./enricher:/app"
       - "./enricher/Stores:/app/Stores"
-    networks: 
+    networks:
       - pipeline-network
     command: sh -c "python create_tables.py && python load_stores.py && python queue_consumer.py"
 
@@ -161,12 +161,12 @@ services:
     container_name: api-service
     ports:
       - "3001:3001"
-    depends_on: 
+    depends_on:
       postgres:
         condition: service_healthy
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - RABBITMQ_HOST=rabbitmq 
+      - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - RABBITMQ_USERNAME=admin
       - RABBITMQ_PASSWORD=admin
@@ -178,7 +178,7 @@ services:
     volumes:
       - "../api:/app"
       - "/app/node_modules"
-    networks: 
+    networks:
       - pipeline-network
     command: npm start
 
