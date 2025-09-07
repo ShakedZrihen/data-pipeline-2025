@@ -6,7 +6,7 @@ KEY_RE = re.compile(
     re.IGNORECASE
 )
 
-def _iso_from_ts(ts_str: str) -> str:
+def _iso_from_ts(ts_str: str):
     if not ts_str:
         return datetime.datetime.now().replace(tzinfo=datetime.timezone.utc).isoformat().replace('+00:00', 'Z')
     fmt = '%Y%m%d%H%M' if len(ts_str) == 12 else '%Y%m%d%H%M%S'
@@ -24,18 +24,6 @@ def _to_float(txt):
     except Exception:
         return None
 
-def _combine_date_time(date_str, time_str):
-    if not date_str:
-        return None
-    ts = time_str or "00:00:00"
-    try:
-        dt = datetime.datetime.fromisoformat(f"{date_str.strip()} {ts.strip()}")
-    except ValueError:
-        try:
-            dt = datetime.datetime.fromisoformat(date_str.strip())
-        except ValueError:
-            return None
-    return dt.replace(tzinfo=datetime.timezone.utc).isoformat().replace('+00:00', 'Z')
 
 def parse_pricefull(xml_stream: io.BytesIO):
 
@@ -54,7 +42,7 @@ def parse_pricefull(xml_stream: io.BytesIO):
         except Exception:
             return s
 
-    for event, elem in ET.iterparse(xml_stream, events=("end",)):
+    for elem in ET.iterparse(xml_stream, events=("end",)):
         tag = elem.tag.lower()
 
         if tag == "chainid":
@@ -67,14 +55,12 @@ def parse_pricefull(xml_stream: io.BytesIO):
             name   = _clean(elem.findtext("ItemName"))
             manu_name = _clean(elem.findtext("ManufacturerName"))
             manu_desc = _clean(elem.findtext("ManufacturerItemDescription"))
-
             price  = _to_float(elem.findtext("ItemPrice"))
-
             qty_str   = _fmt_amount_str(elem.findtext("Quantity"))
             unit_qty  = _clean(elem.findtext("UnitQty")) 
             uom_fallback = _clean(elem.findtext("UnitOfMeasure"))
 
-            #because we wanted "unit" to have the quantitiy and the measure
+            # because we saw that "Quantity" and "UnitQty" together are best for "unit"
             unit = None
             if qty_str and unit_qty:
                 unit = f"{qty_str} {unit_qty}"
