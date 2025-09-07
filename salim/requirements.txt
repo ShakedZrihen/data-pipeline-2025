@@ -6,3 +6,8 @@ alembic==1.12.1
 python-multipart==0.0.6
 pydantic==2.5.0
 pydantic-settings==2.1.0 
+beautifulsoup4==4.12.2
+requests==2.31.0
+selenium==4.19.0
+webdriver-manager==4.0.1
+boto3
