@@ -59,24 +59,31 @@ class DataEnricher:
                 item['item_promotion_price'] = 0.0
             
             if not item.get('item_brand'):
-                item_for_extraction = {
-                    'item_name': item.get('item_name', ''),
-                    'manufacturer': item.get('manufacturer_name', ''),
-                    'description': item.get('manufacturer_item_description', '')
-                }
-                enriched_item = self.brand_extractor.enrich_item_with_brand(item_for_extraction)
-                
-                # Update the original item with brand info
-                item['item_brand'] = enriched_item.get('item_brand', 'Unknown')
-                item['brand_confidence'] = enriched_item.get('brand_confidence', 0.0)
-                item['brand_extraction_method'] = enriched_item.get('brand_extraction_method', 'unknown')
-                
-                if item.get('brand_confidence', 0) >= 0.7:
-                    logger.info(f"Extracted brand '{item.get('item_brand')}' for item '{item.get('item_name', 'unknown')}' "
-                               f"(confidence: {item.get('brand_confidence', 0):.2f})")
-                elif item.get('brand_confidence', 0) >= 0.4:
-                    logger.info(f"Extracted brand '{item.get('item_brand')}' for item '{item.get('item_name', 'unknown')}' "
-                               f"(confidence: {item.get('brand_confidence', 0):.2f}) - {item.get('brand_extraction_method', 'unknown')}")
+                try:
+                    item_for_extraction = {
+                        'item_name': item.get('item_name', ''),
+                        'manufacturer': item.get('manufacturer_name', ''),
+                        'description': item.get('manufacturer_item_description', '')
+                    }
+                    enriched_item = self.brand_extractor.enrich_item_with_brand(item_for_extraction)
+                    
+                    # Update the original item with brand info
+                    item['item_brand'] = enriched_item.get('item_brand', 'Unknown')
+                    item['brand_confidence'] = enriched_item.get('brand_confidence', 0.0)
+                    item['brand_extraction_method'] = enriched_item.get('brand_extraction_method', 'unknown')
+                    
+                    if item.get('brand_confidence', 0) >= 0.7:
+                        logger.info(f"Extracted brand '{item.get('item_brand')}' for item '{item.get('item_name', 'unknown')}' "
+                                   f"(confidence: {item.get('brand_confidence', 0):.2f})")
+                    elif item.get('brand_confidence', 0) >= 0.4:
+                        logger.info(f"Extracted brand '{item.get('item_brand')}' for item '{item.get('item_name', 'unknown')}' "
+                                   f"(confidence: {item.get('brand_confidence', 0):.2f}) - {item.get('brand_extraction_method', 'unknown')}")
+                except Exception as e:
+                    logger.warning(f"Brand extraction failed for item '{item.get('item_name', 'unknown')}': {e}")
+                    # Set default values to continue processing
+                    item['item_brand'] = 'Unknown'
+                    item['brand_confidence'] = 0.0
+                    item['brand_extraction_method'] = 'extraction_failed'
         
         return message
     

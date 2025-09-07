@@ -106,7 +106,8 @@ class QueueConsumer:
             logger.error(f"Failed to send to DLQ: {e}")
     
     def process_message(self, message_body: str) -> bool:
-        """Process a single message"""
+        """Process a single message with graceful fallback handling"""
+        message = None
         try:
             self.messages_processed += 1
             
@@ -118,32 +119,61 @@ class QueueConsumer:
             logger.info(f"Starting to process file: {file_name} (type: {file_type})")
             
             # Normalize
-            normalized = self.normalizer.normalize_message(message)
-            
-            # Validate
-            if not self.validator.validate_message(normalized):
-                error = "Message validation failed"
-                self.send_to_dlq(message, error)
+            try:
+                normalized = self.normalizer.normalize_message(message)
+            except Exception as e:
+                logger.error(f"Normalization failed for {file_name}: {e}")
+                self.send_to_dlq(message, f"Normalization failed: {str(e)}")
                 self.messages_failed += 1
                 return False
             
-            # Enrich
-            enriched = self.enricher.enrich_message(normalized)
+            # Validate
+            try:
+                if not self.validator.validate_message(normalized):
+                    error = "Message validation failed"
+                    logger.warning(f"Validation failed for {file_name}: {error}")
+                    self.send_to_dlq(message, error)
+                    self.messages_failed += 1
+                    return False
+            except Exception as e:
+                logger.error(f"Validation error for {file_name}: {e}")
+                self.send_to_dlq(message, f"Validation error: {str(e)}")
+                self.messages_failed += 1
+                return False
             
-            # Save to database
-            if self.db_manager.save_to_database(enriched):
-                self.messages_successful += 1
-                logger.info(f"File {file_name} processed successfully and saved to database")
-                return True
-            else:
-                error = "Failed to save to database"
+            # Enrich (with fallback handling)
+            try:
+                enriched = self.enricher.enrich_message(normalized)
+            except Exception as e:
+                logger.warning(f"Enrichment failed for {file_name}: {e}, using normalized data")
+                # Use normalized data if enrichment fails
+                enriched = normalized
+                enriched['enrichment_failed'] = True
+                enriched['enrichment_error'] = str(e)
+            
+            # Save to database (with fallback handling)
+            try:
+                if self.db_manager.save_to_database(enriched):
+                    self.messages_successful += 1
+                    logger.info(f"File {file_name} processed successfully and saved to database")
+                    return True
+                else:
+                    error = "Failed to save to database"
+                    logger.error(f"Database save failed for {file_name}: {error}")
+                    self.send_to_dlq(message, error)
+                    self.messages_failed += 1
+                    return False
+            except Exception as e:
+                error = f"Database save error: {str(e)}"
+                logger.error(f"Database save error for {file_name}: {e}")
                 self.send_to_dlq(message, error)
                 self.messages_failed += 1
                 return False
                 
         except Exception as e:
             error = f"Message processing failed: {str(e)}"
-            self.send_to_dlq(message, error)
+            if message:
+                self.send_to_dlq(message, error)
             self.messages_failed += 1
             logger.error(error)
             return False

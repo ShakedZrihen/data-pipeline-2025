@@ -12,7 +12,6 @@ services:
       - AWS_DEFAULT_REGION=us-east-1
     volumes:
       - "localstack-data:/persisted-data"
-      - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
     networks:
       - pipeline-network
     healthcheck:
@@ -20,6 +19,23 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+
+  # S3 Initialization Service
+  s3-init:
+    image: python:3.11-slim
+    container_name: s3-initializer
+    depends_on:
+      s3:
+        condition: service_healthy
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+    volumes:
+      - "./init-s3.py:/init-s3.py"
+    networks:
+      - pipeline-network
+    command: sh -c "pip install boto3 && python /init-s3.py"
 
   # RabbitMQ
   rabbitmq:
@@ -68,8 +84,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      s3:
-        condition: service_healthy
+      s3-init:
+        condition: service_completed_successfully
     environment:
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
@@ -89,8 +105,8 @@ services:
     build: ./extractor
     container_name: extractor-service
     depends_on:
-      s3:
-        condition: service_healthy
+      s3-init:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
     environment:

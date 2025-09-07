@@ -9,17 +9,52 @@ class DatabaseManager:
     """Handles database operations for the enricher"""
     
     def __init__(self, database_url: str):
-        self.database_url = database_url
+        self.primary_database_url = database_url
+        self.fallback_database_url = self._get_fallback_database_url()
+        self.database_url = None
         self.connection = None
         self.connect()
     
+    def _get_fallback_database_url(self) -> str:
+        """Get fallback database URL for local PostgreSQL"""
+        return "postgresql://postgres:8HeXmxYnvy5xu@postgres:5432/postgres"
+    
     def connect(self):
-        """Connect to the database"""
+        """Connect to the database with fallback"""
+        # Try primary database first
         try:
-            self.connection = psycopg2.connect(self.database_url)
-            logger.info("Connected to database")
+            self.connection = psycopg2.connect(self.primary_database_url)
+            self.database_url = self.primary_database_url
+            logger.info("Connected to primary database")
+            return
         except Exception as e:
-            logger.error(f"Failed to connect to database: {e}")
+            logger.warning(f"Failed to connect to primary database: {e}")
+        
+        # Try fallback database
+        try:
+            logger.info("Attempting to connect to fallback database...")
+            self.connection = psycopg2.connect(self.fallback_database_url)
+            self.database_url = self.fallback_database_url
+            logger.info("Connected to fallback database (local PostgreSQL)")
+            return
+        except Exception as e:
+            logger.error(f"Failed to connect to both primary and fallback databases: {e}")
+            raise
+    
+    def _get_connection(self):
+        """Get a database connection with fallback"""
+        # Try primary database first
+        try:
+            return psycopg2.connect(self.primary_database_url)
+        except Exception as e:
+            logger.warning(f"Primary database connection failed: {e}")
+        
+        # Try fallback database
+        try:
+            logger.info("Using fallback database connection")
+            return psycopg2.connect(self.fallback_database_url)
+        except Exception as e:
+            logger.error(f"Fallback database connection failed: {e}")
             raise
     
     def store_exists(self, cursor, chain_id: str, store_id: str) -> bool:
@@ -39,7 +74,8 @@ class DatabaseManager:
         conn = None
         cursor = None
         try:
-            conn = psycopg2.connect(self.database_url)
+            # Try to get a fresh connection
+            conn = self._get_connection()
             cursor = conn.cursor()
             
             message_type = message.get('type')

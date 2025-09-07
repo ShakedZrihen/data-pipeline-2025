@@ -7,11 +7,11 @@ sleep 5
 
 # Create the test-bucket
 echo "Creating test-bucket..."
-awslocal s3 mb s3://test-bucket
+aws --endpoint-url=http://s3:4566 s3 mb s3://test-bucket
 
 # Set bucket policy for public read access
 echo "Setting bucket policy..."
-awslocal s3api put-bucket-policy --bucket test-bucket --policy '{
+aws --endpoint-url=http://s3:4566 s3api put-bucket-policy --bucket test-bucket --policy '{
   "Version": "2012-10-17",
   "Statement": [
     {
