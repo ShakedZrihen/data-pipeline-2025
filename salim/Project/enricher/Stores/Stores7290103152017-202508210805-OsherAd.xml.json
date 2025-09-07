@@ -1,0 +1,208 @@
+{
+  "Root": {
+    "ChainId": "7290103152017",
+    "ChainName": "אושר עד",
+    "XmlDocVersion": "00000",
+    "LastUpdateDate": "2025-08-21",
+    "LastUpdateTime": "08:05:00",
+    "SubChains": {
+      "SubChain": {
+        "SubChainId": "1",
+        "SubChainName": "1",
+        "Stores": {
+          "Store": [
+            {
+              "StoreId": "1",
+              "BikoretNo": "6",
+              "StoreType": "1",
+              "StoreName": "מגדל העמק",
+              "Address": "האיצטדיון 11",
+              "City": "מגדל העמק",
+              "ZipCode": "2303401"
+            },
+            {
+              "StoreId": "3",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "גבעת שאול",
+              "Address": "בית הדפוס 29",
+              "City": "ירושלים",
+              "ZipCode": "9548334"
+            },
+            {
+              "StoreId": "5",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "קרית ביאליק",
+              "Address": "הנס מולר 6, צור שלום",
+              "City": "קרית ביאליק",
+              "ZipCode": "2751206"
+            },
+            {
+              "StoreId": "6",
+              "BikoretNo": "1",
+              "StoreType": "1",
+              "StoreName": "כנות",
+              "Address": "אדום 24 פארק התעשיות כנות",
+              "City": "כנות",
+              "ZipCode": "7982500"
+            },
+            {
+              "StoreId": "9",
+              "BikoretNo": "8",
+              "StoreType": "1",
+              "StoreName": "אשדוד",
+              "Address": "בעלי המלאכה 4",
+              "City": "אשדוד",
+              "ZipCode": "7761205"
+            },
+            {
+              "StoreId": "10",
+              "BikoretNo": "4",
+              "StoreType": "1",
+              "StoreName": "פתח תקווה - סגולה",
+              "Address": "בן ציון גליס 30",
+              "City": "פתח תקווה",
+              "ZipCode": "4927930"
+            },
+            {
+              "StoreId": "11",
+              "BikoretNo": "3",
+              "StoreType": "1",
+              "StoreName": "בני ברק",
+              "Address": "הקישון 11",
+              "City": "בני ברק",
+              "ZipCode": "5120314"
+            },
+            {
+              "StoreId": "13",
+              "BikoretNo": "1",
+              "StoreType": "1",
+              "StoreName": "באר שבע",
+              "Address": "הקוצר 15 אזור תעשיה עמק שרה",
+              "City": "באר שבע",
+              "ZipCode": "8480904"
+            },
+            {
+              "StoreId": "14",
+              "BikoretNo": "0",
+              "StoreType": "1",
+              "StoreName": "חדרה",
+              "Address": "המסגר 22 אזה\"ת הצפוני",
+              "City": "חדרה",
+              "ZipCode": "3850169"
+            },
+            {
+              "StoreId": "16",
+              "BikoretNo": "8",
+              "StoreType": "1",
+              "StoreName": "בית שמש - גליל",
+              "Address": "מורדי הגיטאות 6",
+              "City": "בית שמש",
+              "ZipCode": "9958206"
+            },
+            {
+              "StoreId": "20",
+              "BikoretNo": "1",
+              "StoreType": "1",
+              "StoreName": "לוד",
+              "Address": "בת שבע 1 מתחם טלרד",
+              "City": "לוד",
+              "ZipCode": "7120101"
+            },
+            {
+              "StoreId": "22",
+              "BikoretNo": "9",
+              "StoreType": "1",
+              "StoreName": "אשקלון בת הדר",
+              "Address": "בת הדר",
+              "City": "אשקלון בת הדר",
+              "ZipCode": "7910300"
+            },
+            {
+              "StoreId": "23",
+              "BikoretNo": "8",
+              "StoreType": "1",
+              "StoreName": "נתניה",
+              "Address": "שדרות תום לנטוס",
+              "City": "נתניה",
+              "ZipCode": "4276019"
+            },
+            {
+              "StoreId": "24",
+              "BikoretNo": "7",
+              "StoreType": "1",
+              "StoreName": "תל אביב",
+              "Address": "קרמינצקי 3",
+              "City": "תל אביב",
+              "ZipCode": "6789903"
+            },
+            {
+              "StoreId": "25",
+              "BikoretNo": "6",
+              "StoreType": "1",
+              "StoreName": "ראשון לציון",
+              "Address": "אצל 26",
+              "City": "ראשון לציון",
+              "ZipCode": "7570630"
+            },
+            {
+              "StoreId": "26",
+              "BikoretNo": "5",
+              "StoreType": "1",
+              "StoreName": "תלפיות",
+              "Address": "פייר קניג 26 קניון הדר",
+              "City": "ירושלים",
+              "ZipCode": "9346934"
+            },
+            {
+              "StoreId": "28",
+              "BikoretNo": "3",
+              "StoreType": "1",
+              "StoreName": "שמגר",
+              "Address": "שמגר 16",
+              "City": "ירושלים",
+              "ZipCode": "9446116"
+            },
+            {
+              "StoreId": "29",
+              "BikoretNo": "2",
+              "StoreType": "1",
+              "StoreName": "קרית ים",
+              "Address": "גולדה מאיר 2",
+              "City": "קריית ים",
+              "ZipCode": "2905737"
+            },
+            {
+              "StoreId": "30",
+              "BikoretNo": "8",
+              "StoreType": "1",
+              "StoreName": "חיפה",
+              "Address": "דרך בר יהודה 31",
+              "City": "חיפה",
+              "ZipCode": "3262724"
+            },
+            {
+              "StoreId": "31",
+              "BikoretNo": "7",
+              "StoreType": "1",
+              "StoreName": "כפר סבא",
+              "Address": "דרך הים 9",
+              "City": "כפר סבא",
+              "ZipCode": "4418001"
+            },
+            {
+              "StoreId": "32",
+              "BikoretNo": "6",
+              "StoreType": "1",
+              "StoreName": "קרית אונו",
+              "Address": "שמירה אימבר גדיש 9",
+              "City": "קרית אונו",
+              "ZipCode": "5510101"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

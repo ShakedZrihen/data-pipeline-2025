@@ -1,0 +1,16 @@
+{
+    "name": "RamiLevi",
+    "base_url": "https://url.publishedprices.co.il/login",
+    "file_listing_url": "https://url.publishedprices.co.il/files",
+    "credentials": {
+        "username": "RamiLevi",
+        "password": ""
+    },
+    "file_patterns": {
+        "price_full": "PriceFull{store_id}-{branch}-{date}.gz",
+        "promo_full": "PromoFull{store_id}-{branch}-{date}.gz"
+    },
+    "selectors": {
+        "file_links": "tbody.context a.f"
+    }
+}
