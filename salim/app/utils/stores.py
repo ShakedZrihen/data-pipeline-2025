@@ -23,22 +23,17 @@ def _normalize_branch(b: str):
     if b is None:
         return ""
     s = str(b)
-    # נסיון 1: כמו שהוא
     if s in ("",):
         return s
-    # נסיון 2: בלי אפסים מובילים (001 -> 1)
     try:
         return str(int(s))
     except ValueError:
-        # אם לא מספרי, נחזיר כמו שהוא
         return s
 
 def _branch_display(branches: dict, branch_code: str):
-    # חיפוש מדויק
     if branch_code in branches:
         v = branches[branch_code]
     else:
-        # חיפוש בגרסה מנורמלת (למשל "001" -> "1")
         norm = _normalize_branch(branch_code)
         v = branches.get(norm)
     if not v:
@@ -50,7 +45,6 @@ def enrich_row(row: dict):
     if prov:
         row["provider"] = prov["provider_name"]
         row["branch"] = _branch_display(prov["branches"], str(row.get("branch")))
-    # להסתיר id
     row.pop("id", None)
     return row
 
@@ -61,10 +55,7 @@ def enrich_provider_branch(row: dict) -> dict:
 
     provider_data = STORES_DATA.get(provider_id)
     if provider_data:
-        # המרת מזהה ספק לשם
         row["provider"] = provider_data["provider_name"]
-
-        # המרת מזהה סניף לשם, כולל טיפול ב-001/1
         branches = provider_data.get("branches", {})
         row["branch"] = _branch_display(branches, branch_code)
 

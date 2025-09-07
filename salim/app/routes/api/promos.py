@@ -56,7 +56,6 @@ async def get_grouped_promos_by_barcode(
     """)
     rows = (await session.execute(sql, {"product_id": product_id})).mappings().all()
 
-    # העשרה של השמות לפי קבצי JSON
     items = [enrich_provider_branch(dict(r)) for r in rows]
 
     return {"items": items}

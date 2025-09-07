@@ -75,8 +75,6 @@ async def search_products(
     return {"items": items}
 
 
-
-
 @router.get(
     "/{provider}/products",
     summary="Get products from a specific supermarket (max 100 results)",
