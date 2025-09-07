@@ -6,7 +6,10 @@ chromedriver*
 prices
 venv
 .venv
+.idea
 .claude
+crawler_data
+extractor_data
 node_modules
 build
 package-lock.json
