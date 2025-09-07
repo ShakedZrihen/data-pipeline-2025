@@ -362,7 +362,7 @@ def crawl(start_url, login_function=None, categories=None, max_pages=2):
                         category_name=category["name"],
                         max_pages=max_pages,
                         branch_name=branch_name,
-                        use_latest_per_branch=False,
+                        use_latest_per_branch=True,
                     )
                     all_results.append(result)
         else:

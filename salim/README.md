@@ -1,88 +1,141 @@
-# Salim API with PostgreSQL
+# 🛒 Salim Price Pipeline
 
-A FastAPI application with PostgreSQL database running in Docker containers.
+A pipeline for collecting, normalizing, and enriching price and promotion files from supermarket chains.  
+The system runs entirely in Docker and includes multiple services: **Crawler, S3 (LocalStack), Lambda, RabbitMQ, Consumer, PostgreSQL, API, and more.**
 
-## 🚀 Quick Start
+---
 
-1. **Start the services:**
-   ```bash
-   docker-compose up --build
-   ```
+## 🚀 Start
 
-2. **Access the API:**
-   - API Base URL: http://localhost:8000
-   - Swagger Documentation: http://localhost:8000/docs
-   - ReDoc Documentation: http://localhost:8000/redoc
-   - Health Check: http://localhost:8000/health
+### Environment Variables
 
-3. **Database Connection:**
-   - Host: localhost
-   - Port: 5432
-   - Database: salim_db
-   - Username: postgres
-   - Password: postgres
+Create a `.env` file under "salim" folder and add:
 
-## 📋 Available Endpoints
+```
+OPENAI_API_KEY=your_openai_key
+```
 
-- `GET /` - Welcome message
-- `GET /api/v1/health` - Basic health check
-- `GET /api/v1/health/detailed` - Detailed health check with component status
-
-## 🛠️ Development
-
-### Running Locally (without Docker)
-
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Start PostgreSQL (using Docker):**
-   ```bash
-   docker-compose up db
-   ```
-
-3. **Run the API:**
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-
-### Stopping Services
+### Start Services
 
 ```bash
-docker-compose down
+docker compose up -d --build
 ```
 
-To remove volumes as well:
+---
+
+## 📡 Services
+
+- **api** – FastAPI 
+- **db** – PostgreSQL  
+- **pgadmin** – PostgreSQL management UI  
+- **rabbitmq** – Message Queue 
+- **mongo** – MongoDB for state (e.g., last run)  
+- **localstack** – AWS S3 emulation
+
+---
+
+## 📋 API Endpoints
+
+- **Swagger- FastAPI** – http://localhost:8000/docs  
+- **RabbitMQ** – http://localhost:15672/ (username: app, password: app) 
+- **pgAdmin** – http://localhost:5050/
+### about pgAdmin
+
+Web UI for managing PostgreSQL.
+
+- **URL:** http://localhost:5050  
+- **Username:** admin@admin.com  
+- **Password:** admin
+
+Steps to connect:
+
+1. Log into pgAdmin.  
+2. Right-click **Servers** → **Register → Server**.  
+3. Fill in:
+
+**General:**
+```
+Name: salimDB
+```
+
+**Connection:**
+```
+Host: db
+Port: 5432
+Database: salim_db
+Username: postgres
+Password: postgres
+```
+
+---
+
+## 🕵️ Crawlers
+
+To run the crawler you want:
+
 ```bash
-docker-compose down -v
+docker compose exec api python -u crawlers/yohananof_crawler.py
+docker compose exec api python -u crawlers/politzer_crawler.py
+docker compose exec api python -u crawlers/carrefour_crawler.py
+docker compose exec api python -u crawlers/keshet_crawler.py
+docker compose exec api python -u crawlers/osherad_crawler.py
+docker compose exec api python -u crawlers/tivtaam_crawler.py
 ```
 
-## 📁 Project Structure
+---
 
+## 🧠 Enrichment
+
+- Enrichment is performed using `enrich.py`.  
+- The `AIenricher_examples` folder contains example files enriched via the OpenAI API.  
+- A fast fallback enrichment (non-AI) is available for development or testing.
+
+---
+
+## 🗄️ Databases
+
+### PostgreSQL (psql)
+
+Access the database with:
+
+```bash
+docker compose exec db psql -U postgres -d salim_db
 ```
-salim/
-├── app/
-│   ├── main.py          # FastAPI application
-│   └── routes/
-│       ├── __init__.py
-│       └── api/
-│           ├── __init__.py
-│           └── health.py
-├── docker-compose.yml   # Docker services configuration
-├── Dockerfile          # FastAPI container configuration
-├── requirements.txt    # Python dependencies
-└── README.md          # This file
+
+---
+
+
+---
+
+## 📊 MongoDB – Last Run
+
+To view the most recent saved run:
+
+```bash
+docker compose exec mongo mongosh prices --eval 'db.last_run.find().sort({updated_at:-1}).limit(1).pretty()'
 ```
 
-## 🔧 Configuration
+---
 
-The application uses environment variables for configuration:
+## 🏗️ Architecture
 
-- `DATABASE_URL`: PostgreSQL connection string (automatically set in Docker)
-- `PORT`: API server port (default: 8000)
+The system architecture:
 
-## 🐳 Docker Services
+![System Architecture](architectureMermaid.png)
 
-- **api**: FastAPI application (port 8000)
-- **db**: PostgreSQL database (port 5432) 
+---
+
+## 🐳 Docker Containers
+
+| Service        | Description                         | Port(s)            |
+|----------------|-------------------------------------|---------------------|
+| api            | FastAPI app                         | 8000                |
+| lambda         | Polls S3 every 10 seconds for new files   | 8080                |
+| save-to-sql    | Saves enriched data to PostgreSQL   | —                   |
+| pgadmin        | PostgreSQL API      | 5050 (mapped from 80)|
+| rabbitmq       | Message queue with UI               | 5672 / UI: 15672     |
+| mongo          | MongoDB for "last run" files          | 27017               |
+| s3-simulator (localstack)    | Emulated AWS S3 (S3 simulator)      | 4566                |
+| selenium       | Remote headless Chrome (Selenium)   | 4444                |
+| db             | PostgreSQL database                 | 5440:5432           |
+
