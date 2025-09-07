@@ -1,0 +1,46 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_PATH=/app/data/prices.db
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_ENDPOINT_URL=http://host.docker.internal:4566
+    volumes:
+      - ./data:/app/data:rw
+    depends_on:
+      - consumer
+      - enricher
+
+  consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m ingest_consumer.consumer
+    environment:
+      - DB_PATH=/app/data/prices.db
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_ENDPOINT_URL=http://host.docker.internal:4566
+      - SQS_QUEUE_URL=
+      - DLQ_QUEUE_URL=
+    volumes:
+      - ./data:/app/data:rw
+
+  enricher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m ingest_consumer.enricher
+    environment:
+      - DB_PATH=/app/data/prices.db
+      - ENRICHER_SLEEP=0
+    volumes:
+      - ./data:/app/data:rw

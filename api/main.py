@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from .routers import supermarkets, products
-from api.routes_enriched import router as enriched_router
-app.include_router(enriched_router)
+from routes_enriched import router as enriched_router
+
 
 app = FastAPI(
     title="Prices API",
@@ -11,6 +11,7 @@ app = FastAPI(
 
 app.include_router(supermarkets.router)
 app.include_router(products.router)
+app.include_router(enriched_router)
 
 @app.get("/")
 def root():

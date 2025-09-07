@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query
 import sqlite3, os
-
+import json
 router = APIRouter(prefix="/enriched", tags=["enriched"])
 DB_PATH = os.environ.get("DB_PATH", "data/prices.db")
 

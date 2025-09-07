@@ -45,6 +45,7 @@ def process_raw_message(body_str: str) -> dict:
 
         if msg.get("s3_bucket") and msg.get("s3_key"):
             items, _ = load_items_from_pointer(msg)
+
             items_total = load_items_from_pointer(msg)
             msg["items"] = items
             msg.setdefault("items_total", items_total)
