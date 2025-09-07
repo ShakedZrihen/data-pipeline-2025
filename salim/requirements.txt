@@ -4,3 +4,13 @@ beautifulsoup4==4.12.0
 selenium==4.12.0
 webdriver-manager==4.0.2
 urllib3
+pika
+psycopg2-binary==2.9.9
+pydantic==2.9.2
+structlog==24.1.0
+prometheus-client==0.20.0
+python-dotenv==1.0.1
+backoff==2.2.1
+fastapi
+uvicorn
+pydantic

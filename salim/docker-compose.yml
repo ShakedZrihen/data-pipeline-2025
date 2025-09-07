@@ -6,7 +6,7 @@ services:
       - "4566:4566"
       - "8080:8080"  # Web UI
     environment:
-      - SERVICES=s3,sqs
+      - SERVICES=s3,sqs,dynamodb
       - DEBUG=1
       - S3_SKIP_SIGNATURE_VALIDATION=1
       - DATA_DIR=/var/lib/localstack/data
@@ -17,7 +17,115 @@ services:
       - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
     networks:
       - s3-network
+
+  # --- API ---
+  api:
+    build: ./api
+    container_name: supermarket-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api:/app
+    depends_on: []
+
+  # --- enricher ---
+  enricher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /salim
+    volumes:
+      - .:/salim
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    networks:
+      - s3-network
+    environment:
+      # RabbitMQ
+      RABBIT_HOST: rabbitmq
+      RABBIT_PORT: 5672
+      RABBIT_USER: guest
+      RABBIT_PASS: guest
+      EXCHANGE: enricher
+      ROUTING_KEY: records
+      QUEUE: enricher.records
+      DLQ_EXCHANGE: enricher.dlq
+      DLQ_QUEUE: enricher.records.dlq
+      PREFETCH: 32
+      BATCH_SLEEP: 1.0
+
+      # Postgres
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: enricher
+      PGUSER: enricher
+      PGPASSWORD: enricher
+
+      # Metrics
+      METRICS_PORT: 9108
+    command: ["python", "enricher/enricher.py"]
+    ports:
+      - "9108:9108"  # Prometheus metrics endpoint
+
+  # --- PostgreSQL ---
+  postgres:
+    image: postgres:16
+    container_name: enricher-postgres
+    environment:
+      POSTGRES_DB: enricher
+      POSTGRES_USER: enricher
+      POSTGRES_PASSWORD: enricher
+    ports:
+      - "5432:5432"
+    networks:
+      - s3-network
+    volumes:
+      - enricher-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U enricher -d enricher"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    # --- RabbitMQ ---
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # RabbitMQ client
+      - "15672:15672" # RabbitMQ Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - s3-network
   
+  # --- Extractor ---
+  extractor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /salim
+    volumes:
+      - .:/salim
+    depends_on:
+      - localstack
+      - rabbitmq
+      - crawler_superpharm
+    networks:
+      - s3-network
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - LOCALSTACK_HOST=localstack
+      - S3_ENDPOINT=http://localstack:4566
+      - RABBIT_HOST=rabbitmq
+      - RABBIT_QUEUE=extractor-queue
+    command: ["python", "extractor/extractor.py"]
+
   # --- SuperPharm crawler (runs first, safest) ---
   crawler_superpharm:
     build:
@@ -86,3 +194,4 @@ networks:
 
 volumes:
   localstack-data:
+  enricher-pgdata:

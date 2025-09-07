@@ -1,88 +1,68 @@
-# Salim API with PostgreSQL
+# Data Pipeline 2025 – Final Project
 
-A FastAPI application with PostgreSQL database running in Docker containers.
+## Overview
+This project implements a simplified **data ingestion and processing pipeline** for supermarket price lists.  
+The pipeline is containerized with Docker Compose and runs locally with LocalStack (S3/SQS simulation).  
 
-## 🚀 Quick Start
+Main stages:
+1. **Extractor (Crawlers)** – downloads raw files (PDF/Excel) from provider websites.  
+2. **Enricher (Stub)** – placeholder service to keep the pipeline consistent.  
+3. **API (FastAPI)** – exposes endpoints for querying supermarket/product data.  
 
-1. **Start the services:**
+Providers currently supported:
+- **Super-Pharm**
+- **Yohananof**
+
+---
+
+## Requirements
+- Docker Desktop (Linux containers mode)  
+- Docker Compose v2+  
+  
+
+---
+
+## Setup & Run
+
+1. **Clone the repo**:
    ```bash
-   docker-compose up --build
-   ```
+   git clone <your-fork-url>
+   cd data-pipeline-2025/salim
 
-2. **Access the API:**
-   - API Base URL: http://localhost:8000
-   - Swagger Documentation: http://localhost:8000/docs
-   - ReDoc Documentation: http://localhost:8000/redoc
-   - Health Check: http://localhost:8000/health
+2. **Start the pipeline:**
+docker compose build
+docker compose up
 
-3. **Database Connection:**
-   - Host: localhost
-   - Port: 5432
-   - Database: salim_db
-   - Username: postgres
-   - Password: postgres
+This will start all services: LocalStack, Extractor, Enricher (stub), API, and Postgres (if configured).
 
-## 📋 Available Endpoints
+Check services:
+LocalStack UI: http://localhost:8080
+FastAPI docs: http://localhost:8000/docs
 
-- `GET /` - Welcome message
-- `GET /api/v1/health` - Basic health check
-- `GET /api/v1/health/detailed` - Detailed health check with component status
-
-## 🛠️ Development
-
-### Running Locally (without Docker)
-
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Start PostgreSQL (using Docker):**
-   ```bash
-   docker-compose up db
-   ```
-
-3. **Run the API:**
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-
-### Stopping Services
-
-```bash
-docker-compose down
-```
-
-To remove volumes as well:
-```bash
-docker-compose down -v
-```
-
-## 📁 Project Structure
-
-```
+**Project Structure**
 salim/
-├── app/
-│   ├── main.py          # FastAPI application
-│   └── routes/
-│       ├── __init__.py
-│       └── api/
-│           ├── __init__.py
-│           └── health.py
-├── docker-compose.yml   # Docker services configuration
-├── Dockerfile          # FastAPI container configuration
-├── requirements.txt    # Python dependencies
-└── README.md          # This file
-```
+  ├── crawler/             # Crawlers per provider (Yohananof, SuperPharm, etc.)
+  ├── enricher/            # Stub enricher (keeps pipeline consistent)
+  ├── api/                 # FastAPI service
+  ├── extractor/ 
+  ├── uploader/            # upload to S3 logic
+  ├── docker-compose.yml   # Orchestrates all services
+  ├── init-s3.sh
+  ├── requirments.txt
+  ├── Dockerfile           # Base image config
+  └── README.md            # This file
 
-## 🔧 Configuration
+**Notes & Assumptions**
 
-The application uses environment variables for configuration:
+Some stages (like the Enricher) are provided as stubs to keep the pipeline running end-to-end.
+Providers differ in crawling logic:
+Yohananof → Cerberus-based file manager (dynamic pages, Selenium).
+Super-Pharm → Direct file links.
+API not tested
 
-- `DATABASE_URL`: PostgreSQL connection string (automatically set in Docker)
-- `PORT`: API server port (default: 8000)
+**How to Verify**
 
-## 🐳 Docker Services
+Run docker compose up.
+Ensure crawler logs show files being downloaded into salim/downloads/<provider>.
+Visit http://localhost:8000/docs
 
-- **api**: FastAPI application (port 8000)
-- **db**: PostgreSQL database (port 5432) 

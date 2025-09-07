@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
     wget \
     unzip \
     gnupg \
+    build-essential \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Environment variables (optional, just to be explicit)
@@ -23,6 +25,9 @@ COPY . /salim
 
 # Install Python requirements
 RUN pip install --no-cache-dir -r requirements.txt
+
+# API dependencies
+RUN pip install --no-cache-dir fastapi uvicorn pydantic
 
 # Default to a shell; crawler command will be set per service in docker-compose
 CMD ["bash"]
