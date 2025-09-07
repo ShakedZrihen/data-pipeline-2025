@@ -1,4 +1,4 @@
-import os, json, pika, sys, traceback
+import os, json, pika, traceback
 from extractProcess.saveToSqlProcess.processor import process_item
 from extractProcess.saveToSqlProcess.dlq import send_to_dlq
 
@@ -71,7 +71,7 @@ def main():
             ch_.basic_ack(delivery_tag=method.delivery_tag)
 
     ch.basic_consume(queue=INPUT_QUEUE, on_message_callback=_cb, auto_ack=False)
-    print(f"[worker] listening on {INPUT_QUEUE} ...", flush=True)
+    print(f"[worker] listening on {INPUT_QUEUE}", flush=True)
     try:
         ch.start_consuming()
     except KeyboardInterrupt:

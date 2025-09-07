@@ -1,7 +1,7 @@
 from extractProcess.saveToSqlProcess.utils import to_iso8601_utc, str_or_none, num_or_none
 from extractProcess.extract import _clean
 
-def normalize_envelope(doc: dict) -> dict:
+def normalize_envelope(doc: dict):
     return {
         "provider": _clean(str(doc.get("provider") or "")),
         "branch":   _clean(str(doc.get("branch") or "")),
@@ -9,7 +9,7 @@ def normalize_envelope(doc: dict) -> dict:
         "timestamp": to_iso8601_utc(doc.get("timestamp")),
     }
 
-def normalize_price_item(env: dict, item: dict) -> dict:
+def normalize_price_item(env: dict, item: dict):
     msg = {
         **env,
         "productId": str_or_none(item.get("productId")),
@@ -21,7 +21,7 @@ def normalize_price_item(env: dict, item: dict) -> dict:
     }
     return msg
 
-def normalize_promo_item(env: dict, item: dict) -> dict:
+def normalize_promo_item(env: dict, item: dict):
     msg = {
         **env,
         "productId": str_or_none(item.get("productId")),
@@ -33,12 +33,12 @@ def normalize_promo_item(env: dict, item: dict) -> dict:
     }
     return msg
 
-def _pad_branch(b: str) -> str:
+def _pad_branch(b: str):
     if b and b.isdigit() and len(b) < 3:
         return b.zfill(3)
     return b
 
-def normalize_envelope_strict(doc: dict) -> dict:
+def normalize_envelope_strict(doc: dict):
     env = normalize_envelope(doc)
     env["branch"] = _pad_branch(env.get("branch"))
     return env
