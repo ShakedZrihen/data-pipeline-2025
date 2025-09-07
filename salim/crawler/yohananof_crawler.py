@@ -12,10 +12,10 @@ import sys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -29,6 +29,8 @@ class YohananofCrawler:
         self.config = config
         self.download_folder = os.path.join("salim", "downloads", self.config["provider"])
         os.makedirs(self.download_folder, exist_ok=True)
+        self.session = requests.Session()
+        self.driver = None # Initialize driver as None
 
     def crawl(self):
         print(f"Logging in as {self.config['username']}")
@@ -36,35 +38,40 @@ class YohananofCrawler:
         # Step 1: Set up Selenium (headless Chrome)
         chrome_options = Options()
         chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
-        driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install()),
-            options=chrome_options
-        )
+        # self.driver = webdriver.Chrome(
+        #     service=Service(ChromeDriverManager().install()),
+        #     options=chrome_options
+        # )
+        service = Service(ChromeDriverManager().install())
+        self.driver = webdriver.Chrome(service=service, options=chrome_options)
 
         try:
             # Step 2: Open login page
-            driver.get(self.config["login_url"])
+            self.driver.get(self.config["login_url"])
 
             # Step 3: Enter username and press Enter (no password required)
-            username_field = driver.find_element(By.NAME, "username")
+            self.driver.get("https://url.publishedprices.co.il/login")
+            username_field = self.driver.find_element(By.NAME, "username")
             username_field.send_keys(self.config["username"])
             username_field.send_keys(Keys.ENTER)
             time.sleep(3)  # Wait for redirection
 
             # Step 4: Wait for the /file page to load
-            WebDriverWait(driver, 10).until(EC.url_contains("/file"))
-            driver.get(self.config["file_list_url"])
+            WebDriverWait(self.driver, 10).until(EC.url_contains("/file"))
+            self.driver.get(self.config["file_list_url"])
 
             # Step 5: Wait until files appear
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(self.driver, 10).until(
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.f"))
             )
             print("File list loaded.")
 
             # Step 6: Parse page source using BeautifulSoup
-            soup = BeautifulSoup(driver.page_source, "html.parser")
+            soup = BeautifulSoup(self.driver.page_source, "html.parser")
             file_links = soup.find_all("a", href=re.compile(r"\.gz$"))
             print(f"Found {len(file_links)} .gz files")
 
@@ -146,16 +153,54 @@ class YohananofCrawler:
 
         finally:
             # Step 9: Always close the browser
-            driver.quit()
+            if self.driver:
+                self.driver.quit()
+
+    # def download_file(self, href, filename, destination_folder):
+    #     """Download a file using requests to specific folder"""
+    #     full_url = urljoin(self.config["base_url"], href)
+    #     dest_path = os.path.join(destination_folder, filename)
+
+    #     print(f"Downloading {filename}...")
+    #     try:
+    #         response = requests.get(full_url, stream=True, verify=False)
+    #         response.raise_for_status()  # Raise an exception for bad status codes
+
+    #         # Only remove older files of the same type (price or promo)
+    #         file_type_prefix = "priceFull" if filename.lower().startswith("pricefull") else "promoFull"
+    #         for existing_file in os.listdir(destination_folder):
+    #             if (
+    #                 existing_file.endswith(".gz")
+    #                 and existing_file != filename
+    #                 and existing_file.lower().startswith(file_type_prefix.lower())
+    #             ):
+    #                 os.remove(os.path.join(destination_folder, existing_file))
+            
+
+    #         with open(dest_path, "wb") as f:
+    #             for chunk in response.iter_content(chunk_size=8192):
+    #                 f.write(chunk)
+    #         print(f"Saved to {dest_path}")
+
+    #         # Upload to S3
+    #         s3_key = f"providers/{os.path.basename(destination_folder)}/{filename}"
+    #         upload_file_to_s3(dest_path, s3_key)
+            
+    #     except requests.RequestException as e:
+    #         print(f"Error downloading {filename}: {str(e)}")
 
     def download_file(self, href, filename, destination_folder):
-        """Download a file using requests to specific folder"""
-        full_url = urljoin(self.config["base_url"], href)
-        dest_path = os.path.join(destination_folder, filename)
+        full_url = urljoin(self.config["base_url"], href) # the download URL
+        dest_path = os.path.join(destination_folder, filename) # the destination path where the files will be saved
 
         print(f"Downloading {filename}...")
         try:
-            response = requests.get(full_url, stream=True, verify=False)
+            # Set cookies from Selenium to requests session for the files will be accessible on download
+            selenium_cookies = self.driver.get_cookies()
+            for cookie in selenium_cookies:
+                self.session.cookies.set(cookie['name'], cookie['value'], domain=cookie['domain'])
+
+            response = self.session.get(full_url, stream=True, verify=False)
             response.raise_for_status()  # Raise an exception for bad status codes
 
             # Only remove older files of the same type (price or promo)
@@ -167,8 +212,7 @@ class YohananofCrawler:
                     and existing_file.lower().startswith(file_type_prefix.lower())
                 ):
                     os.remove(os.path.join(destination_folder, existing_file))
-            
-
+                
             with open(dest_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
@@ -177,9 +221,11 @@ class YohananofCrawler:
             # Upload to S3
             s3_key = f"providers/{os.path.basename(destination_folder)}/{filename}"
             upload_file_to_s3(dest_path, s3_key)
-            
+
         except requests.RequestException as e:
             print(f"Error downloading {filename}: {str(e)}")
+
+
 
 if __name__ == "__main__":
     config = {

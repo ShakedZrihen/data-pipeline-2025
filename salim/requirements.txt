@@ -1,5 +1,6 @@
 requests
 boto3
-beautifulsoup4
-selenium
-webdriver-manager
+beautifulsoup4==4.12.0
+selenium==4.12.0
+webdriver-manager==4.0.2
+urllib3

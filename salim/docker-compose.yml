@@ -9,12 +9,76 @@ services:
       - SERVICES=s3,sqs
       - DEBUG=1
       - S3_SKIP_SIGNATURE_VALIDATION=1
+      - DATA_DIR=/var/lib/localstack/data
+      - LOCALSTACK_AUTH_TOKEN=
     volumes:
       - "localstack-data:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
     networks:
       - s3-network
+  
+  # --- SuperPharm crawler (runs first, safest) ---
+  crawler_superpharm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /salim
+    volumes:
+      - .:/salim
+    depends_on:
+      - localstack
+    networks:
+      - s3-network
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - LOCALSTACK_HOST=localstack
+      - S3_ENDPOINT=http://localstack:4566
+    command: ["python", "crawler/superpharm_crawler.py"]
+
+  # --- Yohananof crawler (Selenium) ---
+  # crawler_yohananof:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   working_dir: /salim
+  #   volumes:
+  #     - .:/salim
+  #   depends_on:
+  #     - localstack
+  #     - crawler_superpharm   # wait for SuperPharm
+  #   networks:
+  #     - s3-network
+  #   environment:
+  #     - AWS_ACCESS_KEY_ID=test
+  #     - AWS_SECRET_ACCESS_KEY=test
+  #     - AWS_DEFAULT_REGION=us-east-1
+  #     - LOCALSTACK_HOST=localstack
+  #     - S3_ENDPOINT=http://localstack:4566
+  #   command: ["python", "crawler/yohananof_crawler.py"]
+
+  # --- Keshet Taamim crawler (Selenium) ---
+  # crawler_keshet:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   working_dir: /salim
+  #   volumes:
+  #     - .:/salim
+  #   depends_on:
+  #     - localstack
+  #     - crawler_superpharm   # wait for SuperPharm
+  #   networks:
+  #     - s3-network
+  #   environment:
+  #     - AWS_ACCESS_KEY_ID=test
+  #     - AWS_SECRET_ACCESS_KEY=test
+  #     - AWS_DEFAULT_REGION=us-east-1
+  #     - LOCALSTACK_HOST=localstack
+  #     - S3_ENDPOINT=http://localstack:4566
+  #   command: ["python", "crawler/keshet_crawler.py"]
 
 networks:
   s3-network:
