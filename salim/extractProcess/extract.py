@@ -29,7 +29,7 @@ def parse_pricefull(xml_stream: io.BytesIO):
 
     provider, branch, items = None, None, []
 
-    def _fmt_amount_str(s: str | None) -> str | None:
+    def _fmt_amount_str(s: str | None):
         s = _clean(s)
         if not s:
             return None

@@ -1,6 +1,4 @@
 import json
-from .config import S3_BUCKET, STATE_BACKEND
-from .s3io import save_json
 from .extract import process_s3_object_to_json
 from .queue_rabbit import emit_event_full_json
 from .state_mongo import update_last_run
@@ -17,12 +15,11 @@ def lambda_handler(event, context=None):
             if not doc:
                 outputs.append({"key": key, "ok": False, "reason": "invalid format"})
                 continue
-            #json_key = save_json(bucket, key, doc)
 
             try:
                 emit_event_full_json(doc)
-            except Exception as qe:
-                print(f"[Queue] Failed to emit event for {key}: {qe}")
+            except Exception as e:
+                print(f"[Queue] Failed to emit event for {key}: {e}")
 
             try:
                 update_last_run(
@@ -31,12 +28,18 @@ def lambda_handler(event, context=None):
                     doc.get("type") or "",
                     doc.get("timestamp") or "",
                 )
-            except Exception as se:
-                print(f"[State] Failed to update last_run for {key}: {se}")
+            except Exception as e:
+                print(f"[State] Failed to update last_run for {key}: {e}")
 
             print(f"Processed {key}")
-            #outputs.append({"key": key, "ok": True, "json_key": json_key, "count": len(doc.get("items", []))})
         except Exception as e:
             print(f"Error processing {key}: {e}")
             outputs.append({"key": key, "ok": False, "reason": str(e)})
+
+    # cause i want to debug
+    total = len(outputs)
+    success = sum(1 for o in outputs if o.get("ok"))
+    failed = total - success
+    print(f"[SUMMARY] Lambda finished: total={total}, success={success}, failed={failed}")
+
     return {'statusCode': 200, 'body': json.dumps(outputs, ensure_ascii=False)}
