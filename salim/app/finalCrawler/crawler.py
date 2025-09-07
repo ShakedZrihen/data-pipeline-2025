@@ -1,4 +1,4 @@
-import os
+import os, json, boto3
 import time
 import platform
 from selenium import webdriver
@@ -11,13 +11,13 @@ from datetime import datetime
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import shutil
-# === S3 simulator target ===
-S3_SIMULATOR_ROOT = r"C:\Users\Daniella Elbaz\Desktop\שנה ג סמסטר קיץ\סדנת פייתון\data-pipeline-2025\examples\s3-simulator\providers"
-# ===== gov.il crawler (PDF/XLS/XLSX) =====
+
 import requests, re
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlsplit, unquote
-
+# === S3 simulator target ===
+S3_SIMULATOR_ROOT = r"C:\Users\Daniella Elbaz\Desktop\שנה ג סמסטר קיץ\סדנת פייתון\data-pipeline-2025\examples\s3-simulator\providers"
+# ===== gov.il crawler (PDF/XLS/XLSX) =====
 GOVIL_URL = "https://www.gov.il/he/pages/cpfta_prices_regulations"
 FILE_EXTS = (".pdf", ".xls", ".xlsx")
 
@@ -204,6 +204,14 @@ def crawler(username: str):
                 time.sleep(2)
 
                 full_path = os.path.join(download_dir, filename)
+                branch_id, ts = parse_pricefull_filename(filename)
+                if branch_id and ts:
+                    s3_key = upload_to_s3(final_path, provider=username, branch=branch_id, ts=ts)
+                    print(f"Uploaded to s3://{S3_BUCKET}/{s3_key}")
+                    send_pointer_message(provider=username, branch=branch_id, ts=ts, s3_key=s3_key)
+                    print("SQS pointer sent.")
+                else:
+                    print(f"Skip {filename}: cannot parse branch/timestamp")
                 while not os.path.exists(full_path):
                     time.sleep(1)
                 while any(f.endswith(".crdownload") for f in os.listdir(download_dir)):
@@ -244,6 +252,55 @@ def crawler(username: str):
     finally:
         driver.quit()
         print("Chrome driver closed.")
+AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
+AWS_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL")
+S3_BUCKET = os.getenv("S3_BUCKET", "prices-raw")
+OUTBOX_SQS_URL = os.getenv("OUTBOX_SQS_URL")
+
+s3 = boto3.client(
+    "s3",
+    region_name=AWS_REGION,
+    endpoint_url=AWS_ENDPOINT_URL,
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID", "test"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", "test"),
+)
+sqs = boto3.client(
+    "sqs",
+    region_name=AWS_REGION,
+    endpoint_url=AWS_ENDPOINT_URL,
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID", "test"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", "test"),
+)
+
+def parse_pricefull_filename(fname: str):
+    m = re.match(r"^PriceFull-(?P<branch>\d+)-(?P<ts>\d{10})\.gz$", fname)
+    if not m:
+        return None, None
+    branch = m.group("branch")
+    ts_str = m.group("ts")
+    ts = datetime.strptime(ts_str, "%Y%m%d%H")
+    return branch, ts
+
+def upload_to_s3(local_path: str, provider: str, branch: str, ts: datetime) -> str:
+    key = f"raw/{provider}/{branch}/PriceFull-{ts.strftime('%Y%m%d%H')}.gz"
+    s3.upload_file(local_path, S3_BUCKET, key)
+    return key
+
+def send_pointer_message(provider: str, branch: str, ts: datetime, s3_key: str):
+    envelope = {
+        "provider": provider,
+        "branch": branch,
+        "type": "pricesFull",
+        "timestamp": ts.isoformat() + "Z",
+        "items_total": 0,
+        "items_sample": [],
+        "s3_bucket": S3_BUCKET,
+        "s3_key": s3_key,
+    }
+    sqs.send_message(
+        QueueUrl=OUTBOX_SQS_URL,
+        MessageBody=json.dumps(envelope, ensure_ascii=False, separators=(",", ":"))
+    )
 
 if __name__ == "__main__":
     crawl_govil()

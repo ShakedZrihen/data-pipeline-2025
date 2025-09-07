@@ -5,7 +5,6 @@ sqs = boto3.client("sqs",
 url = os.environ["OUTPUT_QUEUE_URL"]
 resp = sqs.receive_message(QueueUrl=url, MaxNumberOfMessages=1)
 body = resp["Messages"][0]["Body"]
-# שומר בקובץ UTF-8 ומדפיס דוגמית
 with open("sqs_msg_utf8.json","w", encoding="utf-8") as f:
     f.write(body)
 data = json.loads(body)

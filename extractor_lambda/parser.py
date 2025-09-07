@@ -114,6 +114,29 @@ def looks_like_xml_bytes(b: bytes) -> bool:
     return head.startswith(b'<?xml') or b'<Items' in head or b'<root' in head or b'<item' in head
 
 # ------------- Parser Price & Promo ----------------
+def _first_text(node, *cands):
+    return _first_text_by_candidates(node, cands)
+
+def _to_float(txt):
+    if not txt:
+        return None
+    t = (txt.replace("₪","")
+           .replace('ש"ח','').replace('ש״ח','').replace('שח','')
+           .replace(",", "").strip())
+    try:
+        return float(t)
+    except Exception:
+        return None
+
+def _split_size(value_txt, unit_txt):
+    v = None
+    if value_txt:
+        try:
+            v = float(str(value_txt).strip())
+        except Exception:
+            v = None
+    u = (unit_txt or "").strip()
+    return v, u or None
 
 def parse_price_xml(xml_bytes: bytes):
     items_out = []
@@ -122,43 +145,47 @@ def parse_price_xml(xml_bytes: bytes):
     item_nodes = []
     for name in ("Item", "Product", "ProductItem", "PriceItem"):
         item_nodes = _findall_by_localname(root, name)
-        if item_nodes:
-            break
+        if item_nodes: break
     if not item_nodes:
         for cont in ("Items", "Products"):
             for container in _findall_by_localname(root, cont):
                 for name in ("Item", "Product", "ProductItem", "PriceItem"):
-                    item_nodes = [n for n in list(container)
-                                  if _strip_ns(n.tag).lower() == name.lower()]
-                    if item_nodes:
-                        break
-            if item_nodes:
-                break
+                    cand = [n for n in list(container) if _strip_ns(n.tag).lower() == name.lower()]
+                    if cand:
+                        item_nodes = cand; break
+            if item_nodes: break
 
-    name_tags  = ("ItemName", "ProductName", "Name", "ItemDesc", "Description")
-    price_tags = ("ItemPrice", "Price", "UnitPrice", "CurrentPrice")
-    unit_tags  = ("Unit", "UnitOfMeasure", "UnitQty", "Quantity", "QuantityInPackage")
+    name_tags   = ("ItemName","ProductName","Name","ItemDesc","Description")
+    price_tags  = ("ItemPrice","Price","UnitPrice","CurrentPrice")
+    unit_tags   = ("Unit","UnitOfMeasure")
+    qty_tags    = ("UnitQty","Quantity","QuantityInPackage")
+    barcode_tags= ("ItemBarcode","Barcode","ItemCode","ItemId","ManufactureItemCode")
+    brand_tags  = ("ManufacturerName","Brand")
+    cat_tags    = ("Category","CategoryName")
+    curr_tags   = ("Currency",)
 
     for node in item_nodes:
-        pname = _first_text_by_candidates(node, name_tags)
-        punit = _first_text_by_candidates(node, unit_tags)
-        pprice_txt = _first_text_by_candidates(node, price_tags)
+        product = _first_text(node, *name_tags)
+        price   = _to_float(_first_text(node, *price_tags))
+        unit    = _first_text(node, *unit_tags)
+        qty     = _first_text(node, *qty_tags)
+        size_value, size_unit = _split_size(qty, unit)
 
-        pprice = None
-        if pprice_txt:
-            pprice_txt = pprice_txt.replace("₪", "").replace("ש\"ח", "").replace("שח", "")
-            pprice_txt = pprice_txt.replace(",", "").replace(" ", "").strip()
-            try:
-                pprice = float(pprice_txt)
-            except Exception:
-                pprice = None
+        item = {
+            "product": product,
+            "price": price,
+            "unit": unit or None,
+            "barcode": _first_text(node, *barcode_tags) or None,
+            "brand": _first_text(node, *brand_tags) or None,
+            "category": _first_text(node, *cat_tags) or None,
+            "size_value": size_value,
+            "size_unit": size_unit,
+            "currency": _first_text(node, *curr_tags) or None,
+            "in_stock": True if product or price is not None else None,
+        }
 
-        if pname or pprice is not None:
-            items_out.append({
-                "product": pname,
-                "price": pprice,
-                "unit": punit
-            })
+        if item["product"] or item["price"] is not None:
+            items_out.append(item)
 
     return items_out
 
@@ -167,45 +194,51 @@ def parse_promo_xml(xml_bytes: bytes):
     root = _xml_root_robust(xml_bytes)
 
     promo_nodes = []
-    for name in ("Promotion", "Promo", "Deal"):
+    for name in ("Promotion","Promo","Deal"):
         promo_nodes = _findall_by_localname(root, name)
-        if promo_nodes:
-            break
+        if promo_nodes: break
     if not promo_nodes:
-        for cont in ("Promotions", "Deals", "Promos"):
+        for cont in ("Promotions","Deals","Promos"):
             for container in _findall_by_localname(root, cont):
-                for name in ("Promotion", "Promo", "Deal"):
-                    promo_nodes = [n for n in list(container)
-                                   if _strip_ns(n.tag).lower() == name.lower()]
-                    if promo_nodes:
-                        break
-            if promo_nodes:
-                break
+                cand = [n for n in list(container) if _strip_ns(n.tag).lower() in ("promotion","promo","deal")]
+                if cand:
+                    promo_nodes = cand; break
+            if promo_nodes: break
 
-    desc_tags  = ("PromotionDescription", "Description", "Name", "Title")
-    price_tags = ("Price", "PromoPrice", "BenefitPrice", "ItemPrice")
-    unit_tags  = ("Unit", "UnitOfMeasure")
+    desc_tags   = ("PromotionDescription","Description","Name","Title")
+    price_tags  = ("Price","PromoPrice","BenefitPrice","ItemPrice")
+    unit_tags   = ("Unit","UnitOfMeasure")
+    qty_tags    = ("UnitQty","Quantity","QuantityInPackage")
+    barcode_tags= ("ItemBarcode","Barcode","ItemCode","ItemId","ManufactureItemCode")
+    brand_tags  = ("ManufacturerName","Brand")
+    cat_tags    = ("Category","CategoryName")
+    curr_tags   = ("Currency",)
+    promo_text_tags = ("PromotionDescription","Description","Title","Name","BenefitDescription")
 
     for node in promo_nodes:
-        desc = _first_text_by_candidates(node, desc_tags)
-        price_txt = _first_text_by_candidates(node, price_tags)
-        unit = _first_text_by_candidates(node, unit_tags)
+        product = _first_text(node, *desc_tags)
+        unit    = _first_text(node, *unit_tags)
+        qty     = _first_text(node, *qty_tags)
+        size_value, size_unit = _split_size(qty, unit)
 
-        price = None
-        if price_txt:
-            price_txt = price_txt.replace("₪", "").replace("ש\"ח", "").replace("שח", "")
-            price_txt = price_txt.replace(",", "").replace(" ", "").strip()
-            try:
-                price = float(price_txt)
-            except Exception:
-                price = None
+        item = {
+            "product": product,
+            "price": _to_float(_first_text(node, *price_tags)),
+            "unit": unit or None,
+            "barcode": _first_text(node, *barcode_tags) or None,
+            "brand": _first_text(node, *brand_tags) or None,
+            "category": _first_text(node, *cat_tags) or None,
+            "size_value": size_value,
+            "size_unit": size_unit,
+            "currency": _first_text(node, *curr_tags) or None,
+            "promo_price": _to_float(_first_text(node, *price_tags)),
+            "promo_text": _first_text(node, *promo_text_tags) or None,
+            "in_stock": True,
+        }
 
-        if desc or price is not None:
-            items_out.append({
-                "product": desc,
-                "price": price,
-                "unit": unit
-            })
+        if item["product"] or item["price"] is not None:
+            items_out.append(item)
+
     return items_out
 
 def looks_like_xml(b: bytes) -> bool:
