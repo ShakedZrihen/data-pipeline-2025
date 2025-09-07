@@ -38,4 +38,16 @@ services:
       start_period: 40s
 
 volumes:
-  postgres_data: 
+  postgres_data:
+  enricher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "-m", "ingest_consumer.enricher"]
+    environment:
+      - DB_PATH=/app/data/prices.db
+      - ENRICHER_SLEEP=0
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - api
