@@ -2,6 +2,8 @@ import json
 from .extract import process_s3_object_to_json
 from .queue_rabbit import emit_event_full_json
 from .state_mongo import update_last_run
+from .s3io import s3
+
 
 def lambda_handler(event, context=None):
     if 'Records' not in event:
@@ -32,14 +34,14 @@ def lambda_handler(event, context=None):
                 print(f"[State] Failed to update last_run for {key}: {e}")
 
             print(f"Processed {key}")
+            try:
+                s3.delete_object(Bucket=bucket, Key=key)
+                print(f"[S3] Deleted from bucket after processing: {key}")
+            except Exception as de:
+                print(f"[S3] Failed to delete {key}: {de}")
+
         except Exception as e:
             print(f"Error processing {key}: {e}")
             outputs.append({"key": key, "ok": False, "reason": str(e)})
-
-    # cause i want to debug
-    total = len(outputs)
-    success = sum(1 for o in outputs if o.get("ok"))
-    failed = total - success
-    print(f"[SUMMARY] Lambda finished: total={total}, success={success}, failed={failed}")
 
     return {'statusCode': 200, 'body': json.dumps(outputs, ensure_ascii=False)}

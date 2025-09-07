@@ -95,7 +95,6 @@ def find_download_elements(driver):
         except Exception as e:
             print(f"[WARN] Failed to extract key from element: {e}")
 
-    print(f"[DEBUG] find_download_elements: found {len(uniq)} candidates")
     return uniq
 
 

@@ -42,7 +42,7 @@ def parse_pricefull(xml_stream: io.BytesIO):
         except Exception:
             return s
 
-    for elem in ET.iterparse(xml_stream, events=("end",)):
+    for _event, elem in ET.iterparse(xml_stream, events=("end",)):
         tag = elem.tag.lower()
 
         if tag == "chainid":

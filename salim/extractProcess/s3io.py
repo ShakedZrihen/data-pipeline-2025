@@ -23,7 +23,7 @@ def ensure_bucket(bucket: str):
         print(f"[Init] Created S3 bucket: {bucket}")
 
 def download_gz(bucket: str, key: str) -> io.BytesIO:
-    # wanted to make sure it is gz file because earlier i got the html file instead and it was harbu darbu
+    # wanted to make sure again it is gz file because earlier i got the html file instead and it was harbu darbu
     obj = s3.get_object(Bucket=bucket, Key=key)
     gz_bytes = obj["Body"].read()
     first16 = gz_bytes[:16]

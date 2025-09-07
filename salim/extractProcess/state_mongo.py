@@ -1,12 +1,5 @@
 import datetime
-
-try:
-    from pymongo import MongoClient, ASCENDING
-    from pymongo.errors import PyMongoError
-except Exception:
-    MongoClient = None
-    ASCENDING = None
-    PyMongoError = Exception
+from pymongo import MongoClient, ASCENDING
 
 from .config import STATE_BACKEND, MONGO_URI, MONGO_DB, MONGO_COL
 
@@ -16,15 +9,11 @@ def ensure_mongo():
     global _mongo_col
     if STATE_BACKEND != "mongo":
         return None
-    if MongoClient is None:
-        raise RuntimeError("pymongo not installed — cannot use MongoDB")
+
     client = MongoClient(MONGO_URI)
     db = client[MONGO_DB]
     col = db[MONGO_COL]
-    col.create_index(
-        [("provider", ASCENDING), ("branch", ASCENDING), ("type", ASCENDING)],
-        unique=True,
-    )
+    col.create_index([("provider", ASCENDING), ("branch", ASCENDING), ("type", ASCENDING)], unique=True)
     _mongo_col = col
     print(f"[Init] Mongo ready: {MONGO_URI} db={MONGO_DB} col={MONGO_COL}")
     return _mongo_col
@@ -34,10 +23,7 @@ def update_last_run(provider: str, branch: str, data_type: str, last_ts_iso: str
     if STATE_BACKEND == "mongo":
         if _mongo_col is None:
             raise RuntimeError("Mongo collection not initialized")
-        _mongo_col.update_one(
-            {"provider": provider, "branch": branch, "type": data_type},
-            {"$set": {"last_run": last_ts_iso, "updated_at": now_iso}},
-            upsert=True,
-        )
+        _mongo_col.update_one({"provider": provider, "branch": branch, "type": data_type}, {"$set": {"last_run": last_ts_iso, "updated_at": now_iso}}, upsert=True)
+        print("[MONGO] Summary saved to MongoDB")
     else:
-        print(f"[State] Skipped (STATE_BACKEND={STATE_BACKEND})")
+        print(f"[MONGO] Skipped (STATE_BACKEND={STATE_BACKEND})")
