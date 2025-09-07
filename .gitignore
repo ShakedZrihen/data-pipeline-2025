@@ -10,6 +10,14 @@ venv
 node_modules
 build
 package-lock.json
+# Supermarket download folders
+yohananof/
+osherad/
+ramilevi/
+tivtaam/
+keshet/
+doralon/
+extracted_files/
 itemsNames*.json
 test.js
 תנובה.json

@@ -1,0 +1,7 @@
+requests
+beautifulsoup4
+selenium
+lxml
+boto3
+webdriver-manager
+pika

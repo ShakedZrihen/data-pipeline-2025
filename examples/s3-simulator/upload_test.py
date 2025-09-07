@@ -10,7 +10,7 @@ def upload_file_to_s3():
     
     s3_client = boto3.client(
         's3',
-        endpoint_url='http://localhost:4566',
+        endpoint_url='http://localhost:4566',  # Local LocalStack endpoint
         aws_access_key_id='test',
         aws_secret_access_key='test',
         region_name='us-east-1'
@@ -18,7 +18,7 @@ def upload_file_to_s3():
     
     bucket_name = 'test-bucket'
     file_path = './ShakedZrihen.txt'
-    s3_key = 'ShakedZrihen2.txt'
+    s3_key = 'Rimidelo.txt'
     
     try:
         if not os.path.exists(file_path):
@@ -26,7 +26,7 @@ def upload_file_to_s3():
             sys.exit(1)
         
         s3_client.upload_file(file_path, bucket_name, s3_key)
-        print(f"✅ {file_path} uploaded to s3://{bucket_name}/{s3_key}")        
+        print(f"✅ {file_path} uploaded to s3://{bucket_name}/{s3_key}")
         print("\nFiles in bucket:")
         response = s3_client.list_objects_v2(Bucket=bucket_name)
         
