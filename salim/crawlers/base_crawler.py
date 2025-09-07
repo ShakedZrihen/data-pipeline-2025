@@ -3,22 +3,16 @@ import time
 import re
 import sys
 from datetime import datetime
-from urllib.parse import urljoin
-import certifi, gzip
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.support import expected_conditions as EC
 import boto3
 from botocore.config import Config
-import requests
 import shutil
-from pathlib import Path
 
 DOWNLOAD_DIR = os.getenv("DOWNLOAD_DIR", "/downloads")
-
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -28,7 +22,6 @@ S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "test")
 S3_REGION = os.getenv("S3_REGION", "us-east-1")
 S3_BUCKET = os.getenv("S3_BUCKET", "test-bucket")
 S3_FORCE_PATH_STYLE = os.getenv("S3_FORCE_PATH_STYLE", "true").lower() == "true"
-
 
 s3 = boto3.client(
     "s3",
@@ -46,9 +39,7 @@ def ensure_bucket():
     except Exception:
         s3.create_bucket(Bucket=S3_BUCKET)
 
-
 SELENIUM_REMOTE_URL = os.getenv("SELENIUM_REMOTE_URL", "http://selenium:4444/wd/hub")
-
 
 def init_chrome_options():
     opts = Options()
@@ -69,19 +60,11 @@ def init_chrome_options():
     opts.add_experimental_option("prefs", prefs)
     return opts
 
+
 def make_driver():
-    driver = webdriver.Remote(
-        command_executor=SELENIUM_REMOTE_URL,
-        options=init_chrome_options()
-    )
-    try:
-        driver.execute_cdp_cmd(
-            "Page.setDownloadBehavior",
-            {"behavior": "allow", "downloadPath": DOWNLOAD_DIR}
-        )
-    except Exception:
-        pass
-    return driver
+    opts = init_chrome_options()
+    return webdriver.Remote(command_executor=SELENIUM_REMOTE_URL, options=opts)
+
 
 def find_download_elements(driver):
     selectors = [
@@ -99,10 +82,9 @@ def find_download_elements(driver):
     for sel in selectors:
         try:
             elems += driver.find_elements(By.CSS_SELECTOR, sel)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[WARN] Failed selector '{sel}': {e}")
 
-    # סינון כפילויות
     seen, uniq = set(), []
     for e in elems:
         try:
@@ -110,23 +92,22 @@ def find_download_elements(driver):
             if key not in seen:
                 seen.add(key)
                 uniq.append(e)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[WARN] Failed to extract key from element: {e}")
 
     print(f"[DEBUG] find_download_elements: found {len(uniq)} candidates")
     return uniq
 
 
-def wait_for_new_download(download_dir: str, before_set: set[str], timeout=120) -> str | None:
+def wait_for_new_download(download_dir: str, before_set: set[str], timeout=120):
 
     end = time.time() + timeout
-    d = Path(download_dir)
-    d.mkdir(parents=True, exist_ok=True)
+    if not os.path.exists(download_dir):
+        os.makedirs(download_dir, exist_ok=True)
 
     while time.time() < end:
-
         time.sleep(0.5)
-        all_files = {str(p) for p in d.iterdir()}
+        all_files = {os.path.join(download_dir, filename) for filename in os.listdir(download_dir)}
         new_files = [f for f in all_files if f not in before_set]
         for f in new_files:
             if not f.endswith(".crdownload") and os.path.getsize(f) > 0:
@@ -135,13 +116,15 @@ def wait_for_new_download(download_dir: str, before_set: set[str], timeout=120) 
                     return f
     return None
 
-def click_and_download(driver, el, download_dir: str, timeout=120) -> str | None:
+
+def click_and_download(driver, el, download_dir: str, timeout=120):
 
     before = set()
-    p = Path(download_dir)
-    p.mkdir(parents=True, exist_ok=True)
-    for x in p.iterdir():
-        before.add(str(x))
+    if not os.path.exists(download_dir):
+        os.makedirs(download_dir, exist_ok=True)
+    for filename in os.listdir(download_dir):
+        full_path = os.path.join(download_dir, filename)
+        before.add(full_path)
 
     driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
     time.sleep(0.3)
@@ -158,26 +141,19 @@ def click_and_download(driver, el, download_dir: str, timeout=120) -> str | None
     if len(handles_after) > len(handles_before):
         driver.switch_to.window(handles_after[-1])
         time.sleep(1.5)
+        driver.close()
         driver.switch_to.window(handles_before[0])    
 
     downloaded = wait_for_new_download(download_dir, before, timeout=timeout)
-
     return downloaded
 
 
-def crawl_category(
-    driver,
-    category_value,
-    category_name,
-    max_pages,
-    branch_name,
-    use_latest_per_branch=False,
-):
+def crawl_category(driver, category_value, category_name, max_pages, branch_name, use_latest_per_branch=False):
 
     if category_value:
         try:
             Select(driver.find_element("id", "cat_filter")).select_by_value(category_value)
-            time.sleep(2)
+            time.sleep(3)
         except Exception:
             pass
 
@@ -203,7 +179,6 @@ def crawl_category(
                 href = e.get_attribute("href") or e.get_attribute("data-href")
                 if href in selected_hrefs:
                     elems.append(e)
-            
         else:
             elems = all_elems
 
@@ -223,17 +198,18 @@ def crawl_category(
                 shutil.copy2(path, local_path)
 
                 if is_gzip_file(local_path):
-                    upload_to_s3(local_path, branch_name, category_name)
-                    total_successful += 1
+                    try:
+                        upload_to_s3(local_path, branch_name, category_name)
+                        total_successful += 1
+                    except Exception as e:
+                        print(f"Upload failed for {local_path}: {e}")
+                        total_failed +=1
                 else:
-                    upload_to_s3(local_path, branch_name, category_name)
-                    total_successful += 1
-                
+                    total_failed += 1
 
             except Exception as e:
                 print(f"Download/Upload failed: {e}")
                 total_failed += 1
-
 
         next_btn = get_next_page_button(driver, page_num)
         if next_btn and next_btn.is_enabled():
@@ -244,6 +220,7 @@ def crawl_category(
         else:
             break
 
+    print(f"[SUMMARY- CRAWLER] Category={category_name}, Pages={page_num}, Success={total_successful}, Failed={total_failed}")
     return {
         "category": category_name,
         "pages_processed": page_num,
@@ -251,22 +228,6 @@ def crawl_category(
         "failed_downloads": total_failed,
         "output_dir": output_dir,
     }
-
-
-def get_download_links_from_page(driver, start_url):
-    WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR,
-            "a[href$='.gz'], a[href$='.pdf'], a[href$='.xlsx'], a[href$='.csv']"))
-    )
-    link_elems = driver.find_elements(By.CSS_SELECTOR,
-        "a[href$='.gz'], a[href$='.pdf'], a[href$='.xlsx'], a[href$='.csv']")
-    links = []
-    for elem in link_elems:
-        href = elem.get_attribute("href")
-        if not href:
-            continue
-        links.append(href if href.startswith("http") else urljoin(start_url, href))
-    return links
 
 def get_next_page_button(driver, current_page):
     try:
@@ -320,20 +281,13 @@ def is_gzip_file(path: str) -> bool:
 
 
 def upload_to_s3(local_path, branch_name, category_name):
-    if not local_path or not is_gzip_file(local_path):
-        print(f"Skip upload: not a valid GZIP -> {local_path}")
-        return
-
     filename = os.path.basename(local_path)
-
     chain_id = None
     branch_id = None
     timestamp = None
-
-    m = re.search(r"(\d{13})-(\d+)-(\d{12})", filename)
-    if m:
-        chain_id, branch_id, timestamp = m.group(1), m.group(2), m.group(3)
-
+    match = re.search(r"(\d{13})-(\d+)-(\d{12})", filename)
+    if match:
+        chain_id, branch_id, timestamp = match.group(1), match.group(2), match.group(3)
     if not chain_id:
         chain_id = "unknown_chain"
     if not branch_id:
@@ -346,6 +300,7 @@ def upload_to_s3(local_path, branch_name, category_name):
     s3_key = f"providers/{chain_id}/{branch_id}/{s3_filename}"
     s3.upload_file(local_path, S3_BUCKET, s3_key)
     print(f"Uploaded to S3: s3://{S3_BUCKET}/{s3_key}")
+
 
 def has_branch_dropdown(driver):
     try:
@@ -379,7 +334,7 @@ def crawl(start_url, login_function=None, categories=None, max_pages=2):
                 branches = [opt.get_attribute("value") for opt in branch_select.options if opt.get_attribute("value")]
                 print(f"[DEBUG] found {len(branches)} branches:", branches[:5])
             except Exception as e:
-                print("[DEBUG] branch dropdown error:", e)
+                print(f"[DEBUG] branch dropdown error: {e}")
                 branches = [None]
 
         categories = categories or [
@@ -397,8 +352,8 @@ def crawl(start_url, login_function=None, categories=None, max_pages=2):
                     branch_select.select_by_value(branch_value)
                     try:
                         branch_name = branch_select.first_selected_option.text.strip()
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        print(f"[WARN] Failed to read selected branch name: {e}")
                     time.sleep(2)
 
                 for category in categories:
