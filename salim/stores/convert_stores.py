@@ -5,15 +5,11 @@ import json
 STORES_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def get_text(root, *tags):
-    """
-    מחזיר טקסט של תגית ראשונה שנמצאה מבין האפשרויות.
-    למשל get_text(root, "ChainId", "ChainID")
-    """
     for tag in tags:
         el = root.find(tag)
         if el is not None and el.text is not None:
             return el.text.strip()
-    return ""  # אם לא נמצא כלום
+    return ""
 
 def xml_to_json(xml_file, json_file):
     tree = ET.parse(xml_file)
@@ -22,7 +18,6 @@ def xml_to_json(xml_file, json_file):
     provider_id = get_text(root, "ChainId", "ChainID")
     provider_name = get_text(root, "ChainName")
 
-    # ✅ תיקון שם מותג: "מגה בעיר" → "קרפור"
     if provider_name == "מגה בעיר":
         provider_name = "קרפור"
     if provider_name == "מ. יוחננוף ובניו":
