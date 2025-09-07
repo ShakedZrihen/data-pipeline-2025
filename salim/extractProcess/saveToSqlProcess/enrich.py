@@ -23,12 +23,7 @@
 #     '{"brand":"...","itemType":"..."}'
 # )
 
-# def enrich_brand_itemtype(
-#     envelope: Dict[str, Any],
-#     item: Dict[str, Any],
-#     model: str = "gpt-4o-mini"
-# ) -> Dict[str, Any]:
-#     # אפשרות לכבות העשרה ע"י משתנה סביבה
+# def enrich_brand_itemtype(envelope: Dict[str, Any],item: Dict[str, Any],model: str = "gpt-4o-mini"):
 #     if os.getenv("AI_ENRICH_DISABLED") == "1":
 #         print("[enrich] AI_ENRICH_DISABLED=1 → fallback")
 #         item["brand"] = item.get("manu_name") or "לא ידוע"
@@ -53,7 +48,6 @@
 #     }
 
 #     try:
-#         # קריאה דרך Chat Completions עם אכיפת JSON
 #         resp = client.chat.completions.create(
 #             model=model,
 #             messages=[
@@ -63,12 +57,10 @@
 #             response_format={"type": "json_object"},
 #             max_tokens=300,
 #             temperature=0.2,
-#             # timeout כללי לקריאה (שניות) – מונע תקיעות
 #             timeout=30,
 #         )
 
 #         out_txt = resp.choices[0].message.content or ""
-#         # אמור להיות JSON טהור לפי response_format
 #         data = json.loads(out_txt) if out_txt else {}
 #         brand = data.get("brand")
 #         item_type = data.get("itemType")
@@ -87,11 +79,7 @@
 #         return item
 
 
-# def enrich_brand_itemtype_for_items(
-#     envelope: Dict[str, Any],
-#     items: List[Dict[str, Any]],
-#     model: str = "gpt-4o-mini"
-# ) -> List[Dict[str, Any]]:
+# def enrich_brand_itemtype_for_items(envelope: Dict[str, Any],items: List[Dict[str, Any]],model: str = "gpt-4o-mini"):
 #     return [enrich_brand_itemtype(envelope, dict(it), model=model) for it in items]
 
 
@@ -105,6 +93,7 @@
 ## OTHERWISE, THE PROCESS WOULD TAKE DAYS.
 ## YOU CAN COMMENT OUT THIS PART AND UNCOMMENT THE PREVIOUS ONE
 ## TO ENABLE AI-BASED ENRICHMENT.
+## This enrichment function is used only to allow fast ingestion into PostgreSQL during development. It does not reflect our actual enrichment logic (:
 ####################################################
 ####################################################
 ####################################################
@@ -112,12 +101,8 @@
 
 from typing import Dict, Any, List
 
-def enrich_brand_itemtype(
-    envelope: Dict[str, Any],
-    item: Dict[str, Any],
-) -> Dict[str, Any]:
+def enrich_brand_itemtype(envelope: Dict[str, Any],item: Dict[str, Any]):
 
-    #item["brand"] = item.get("manu_name") or "לא ידוע"
     manu = item.get("manu_name")
     item["brand"] = manu if (manu and manu != ",") else "לא ידוע"
 
@@ -125,9 +110,5 @@ def enrich_brand_itemtype(
     return item
 
 
-def enrich_brand_itemtype_for_items(
-    envelope: Dict[str, Any],
-    items: List[Dict[str, Any]],
-    model: str = "gpt-4o-mini"
-) -> List[Dict[str, Any]]:
+def enrich_brand_itemtype_for_items(envelope: Dict[str, Any],items: List[Dict[str, Any]], model: str = "gpt-4o-mini"):
     return [enrich_brand_itemtype(envelope, dict(it), model=model) for it in items]
