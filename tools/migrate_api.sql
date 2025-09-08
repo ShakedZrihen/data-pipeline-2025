@@ -29,7 +29,7 @@ SELECT
   s.branch,
   ei.rowid              AS product_id,
   COALESCE(ei.barcode, NULL) AS barcode,
-  ei.product_name       AS canonical_name,
+  ei.product_name       AS product,
   COALESCE(ei.brand, NULL)   AS brand,
   COALESCE(ei.category, NULL) AS category,
   CAST(ei.qty_std AS REAL)    AS size_value,

@@ -16,7 +16,7 @@
     "items_sample": [
       {
         "barcode": "7290000010063",
-        "canonical_name": "חלה קלועה רגילה 560",
+        "product": "חלה קלועה רגילה 560",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -30,7 +30,7 @@
       },
       {
         "barcode": "11102",
-        "canonical_name": "סל רב פעמי קשת טעמים",
+        "product": "סל רב פעמי קשת טעמים",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -44,7 +44,7 @@
       },
       {
         "barcode": "7290000001011",
-        "canonical_name": "זרניסטיה",
+        "product": "זרניסטיה",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -58,7 +58,7 @@
       },
       {
         "barcode": "7290000219145",
-        "canonical_name": "נקניק פרובנס חצי",
+        "product": "נקניק פרובנס חצי",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -72,7 +72,7 @@
       },
       {
         "barcode": "1000",
-        "canonical_name": "שאריות נקניקים",
+        "product": "שאריות נקניקים",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -86,7 +86,7 @@
       },
       {
         "barcode": "7290000010035",
-        "canonical_name": "חלה קלועה מתוקה",
+        "product": "חלה קלועה מתוקה",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -100,7 +100,7 @@
       },
       {
         "barcode": "11044",
-        "canonical_name": "שקית מתנה קטנה",
+        "product": "שקית מתנה קטנה",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -114,7 +114,7 @@
       },
       {
         "barcode": "7290000010021",
-        "canonical_name": "חמישיית חליות קלועות",
+        "product": "חמישיית חליות קלועות",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -128,7 +128,7 @@
       },
       {
         "barcode": "1218",
-        "canonical_name": "פסטרמה הודו עם אווז",
+        "product": "פסטרמה הודו עם אווז",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -142,7 +142,7 @@
       },
       {
         "barcode": "16029",
-        "canonical_name": "בלינצס גבינה",
+        "product": "בלינצס גבינה",
         "brand": null,
         "category": "חלב ומוצריו",
         "size_value": null,
@@ -174,7 +174,7 @@
     "items_sample": [
       {
         "barcode": "7290019895008",
-        "canonical_name": "זרעי ציה 300 גר",
+        "product": "זרעי ציה 300 גר",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -188,7 +188,7 @@
       },
       {
         "barcode": "4770569915638",
-        "canonical_name": "משקה קל אפרסק ענבים",
+        "product": "משקה קל אפרסק ענבים",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -202,7 +202,7 @@
       },
       {
         "barcode": "4820182747113",
-        "canonical_name": "צנימים פלינט בטעם סל",
+        "product": "צנימים פלינט בטעם סל",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -216,7 +216,7 @@
       },
       {
         "barcode": "7290117904565",
-        "canonical_name": "קוסקוס בינוני שקדיה",
+        "product": "קוסקוס בינוני שקדיה",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -230,7 +230,7 @@
       },
       {
         "barcode": "7290013861740",
-        "canonical_name": "ניוקי 500 גר",
+        "product": "ניוקי 500 גר",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -244,7 +244,7 @@
       },
       {
         "barcode": "7290014472518",
-        "canonical_name": "בוטנים קלויים פרמיום",
+        "product": "בוטנים קלויים פרמיום",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -258,7 +258,7 @@
       },
       {
         "barcode": "7290014472488",
-        "canonical_name": "שקדים קלויים פרמיום",
+        "product": "שקדים קלויים פרמיום",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -272,7 +272,7 @@
       },
       {
         "barcode": "7290014472495",
-        "canonical_name": "קשיו קלוי פרמיום 250",
+        "product": "קשיו קלוי פרמיום 250",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -286,7 +286,7 @@
       },
       {
         "barcode": "7290014472525",
-        "canonical_name": "תערובת פיצוחים פרמיו",
+        "product": "תערובת פיצוחים פרמיו",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -300,7 +300,7 @@
       },
       {
         "barcode": "7290117905494",
-        "canonical_name": "חלווה בטעם וניל 500",
+        "product": "חלווה בטעם וניל 500",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -332,7 +332,7 @@
     "items_sample": [
       {
         "barcode": "7290016437645",
-        "canonical_name": "האגיס פנטס מידה 5",
+        "product": "האגיס פנטס מידה 5",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -346,7 +346,7 @@
       },
       {
         "barcode": "7290016437652",
-        "canonical_name": "האגיס פנטס מידה 6",
+        "product": "האגיס פנטס מידה 6",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -360,7 +360,7 @@
       },
       {
         "barcode": "7290107951715",
-        "canonical_name": "צנצנת מסטיק מאסט קוב",
+        "product": "צנצנת מסטיק מאסט קוב",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -374,7 +374,7 @@
       },
       {
         "barcode": "7290114606561",
-        "canonical_name": "מאסטר שף איטריות אור",
+        "product": "מאסטר שף איטריות אור",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -388,7 +388,7 @@
       },
       {
         "barcode": "7290014397675",
-        "canonical_name": "מרכך כביסה מקסימה 4",
+        "product": "מרכך כביסה מקסימה 4",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -402,7 +402,7 @@
       },
       {
         "barcode": "7290013755391",
-        "canonical_name": "רומי יקב בן דוד",
+        "product": "רומי יקב בן דוד",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -416,7 +416,7 @@
       },
       {
         "barcode": "8410376023831",
-        "canonical_name": "גולון ביסקוויט חיטה",
+        "product": "גולון ביסקוויט חיטה",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -430,7 +430,7 @@
       },
       {
         "barcode": "7290011133375",
-        "canonical_name": "שנדי אפרסק שישיה 330",
+        "product": "שנדי אפרסק שישיה 330",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -444,7 +444,7 @@
       },
       {
         "barcode": "7290008804189",
-        "canonical_name": "קברנה סוביניון גליל",
+        "product": "קברנה סוביניון גליל",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -458,7 +458,7 @@
       },
       {
         "barcode": "7290004030544",
-        "canonical_name": "פרי ניב לימונענע 1 ל",
+        "product": "פרי ניב לימונענע 1 ל",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -490,7 +490,7 @@
     "items_sample": [
       {
         "barcode": "5000204307979",
-        "canonical_name": "גלייד ג'ל מוצק בניחו",
+        "product": "גלייד ג'ל מוצק בניחו",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -504,7 +504,7 @@
       },
       {
         "barcode": "7290112005595",
-        "canonical_name": "אירוויק נייט אייר בנ",
+        "product": "אירוויק נייט אייר בנ",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -518,7 +518,7 @@
       },
       {
         "barcode": "7290100240144",
-        "canonical_name": "תרסיס בדין למייבש",
+        "product": "תרסיס בדין למייבש",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -532,7 +532,7 @@
       },
       {
         "barcode": "7290100240137",
-        "canonical_name": "תרסיס בדין למייבש כח",
+        "product": "תרסיס בדין למייבש כח",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -546,7 +546,7 @@
       },
       {
         "barcode": "7290011717001",
-        "canonical_name": "לחם בריאות",
+        "product": "לחם בריאות",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -560,7 +560,7 @@
       },
       {
         "barcode": "639138527631",
-        "canonical_name": "הרינג ברוטב חרדל 200",
+        "product": "הרינג ברוטב חרדל 200",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -574,7 +574,7 @@
       },
       {
         "barcode": "7290019635482",
-        "canonical_name": "רוטב ריקוטה ופרמזן ל",
+        "product": "רוטב ריקוטה ופרמזן ל",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -588,7 +588,7 @@
       },
       {
         "barcode": "7290117382868",
-        "canonical_name": "מאסטר שף טורטיה כוסמ",
+        "product": "מאסטר שף טורטיה כוסמ",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -602,7 +602,7 @@
       },
       {
         "barcode": "8000380144044",
-        "canonical_name": "וופל גרדנה שוקולד 20",
+        "product": "וופל גרדנה שוקולד 20",
         "brand": null,
         "category": "חטיפים",
         "size_value": null,
@@ -616,7 +616,7 @@
       },
       {
         "barcode": "8000500028124",
-        "canonical_name": "שלישיה קינדר ג'וי 3x",
+        "product": "שלישיה קינדר ג'וי 3x",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -648,7 +648,7 @@
     "items_sample": [
       {
         "barcode": "7290013725684",
-        "canonical_name": "רוטב טריאקי 300 מ\"ל",
+        "product": "רוטב טריאקי 300 מ\"ל",
         "brand": null,
         "category": null,
         "size_value": 300.0,
@@ -662,7 +662,7 @@
       },
       {
         "barcode": "8711000362679",
-        "canonical_name": "קפסולות קפה לור קולו",
+        "product": "קפסולות קפה לור קולו",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -676,7 +676,7 @@
       },
       {
         "barcode": "8711000431108",
-        "canonical_name": "קפסולות קפה לור הודו",
+        "product": "קפסולות קפה לור הודו",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -690,7 +690,7 @@
       },
       {
         "barcode": "7290014649033",
-        "canonical_name": "שלישיית ספוגי רחצה ע",
+        "product": "שלישיית ספוגי רחצה ע",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -704,7 +704,7 @@
       },
       {
         "barcode": "7290018677667",
-        "canonical_name": "גרנולה קראנצ'י פיסטו",
+        "product": "גרנולה קראנצ'י פיסטו",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -718,7 +718,7 @@
       },
       {
         "barcode": "70734000102",
-        "canonical_name": "תה סלסטיאל צמחים קמו",
+        "product": "תה סלסטיאל צמחים קמו",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -732,7 +732,7 @@
       },
       {
         "barcode": "7509546688923",
-        "canonical_name": "משחת שיניים קולגייט",
+        "product": "משחת שיניים קולגייט",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -746,7 +746,7 @@
       },
       {
         "barcode": "7290003105809",
-        "canonical_name": "גבינת בלוז כחולה במ",
+        "product": "גבינת בלוז כחולה במ",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -760,7 +760,7 @@
       },
       {
         "barcode": "7290019621720",
-        "canonical_name": "מיקס זיתים ללא גלעין",
+        "product": "מיקס זיתים ללא גלעין",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -774,7 +774,7 @@
       },
       {
         "barcode": "7290120870017",
-        "canonical_name": "קרקר כוסמין דק רוזמר",
+        "product": "קרקר כוסמין דק רוזמר",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -806,7 +806,7 @@
     "items_sample": [
       {
         "barcode": "7290004063092",
-        "canonical_name": "מלח למדיח 2קג",
+        "product": "מלח למדיח 2קג",
         "brand": null,
         "category": null,
         "size_value": 2.0,
@@ -820,7 +820,7 @@
       },
       {
         "barcode": "7290006724168",
-        "canonical_name": "משקה סויה אורגני ליב",
+        "product": "משקה סויה אורגני ליב",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -834,7 +834,7 @@
       },
       {
         "barcode": "7290012823589",
-        "canonical_name": "ריצפז לימון 2 ליטר",
+        "product": "ריצפז לימון 2 ליטר",
         "brand": null,
         "category": null,
         "size_value": 2.0,
@@ -848,7 +848,7 @@
       },
       {
         "barcode": "7290013268990",
-        "canonical_name": "מרכך מרוכז מקסימה 1",
+        "product": "מרכך מרוכז מקסימה 1",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -862,7 +862,7 @@
       },
       {
         "barcode": "7290013269003",
-        "canonical_name": "מרכך מרוכז מקסימה בי",
+        "product": "מרכך מרוכז מקסימה בי",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -876,7 +876,7 @@
       },
       {
         "barcode": "7290012226922",
-        "canonical_name": "קבנוס עם שום",
+        "product": "קבנוס עם שום",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -890,7 +890,7 @@
       },
       {
         "barcode": "7290012226939",
-        "canonical_name": "קבנוס עם צ'ילי חריף",
+        "product": "קבנוס עם צ'ילי חריף",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -904,7 +904,7 @@
       },
       {
         "barcode": "59039549",
-        "canonical_name": "ווג פריזון מנטה",
+        "product": "ווג פריזון מנטה",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -918,7 +918,7 @@
       },
       {
         "barcode": "5903141006694",
-        "canonical_name": "פקט ווג פריזון מנטה",
+        "product": "פקט ווג פריזון מנטה",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -932,7 +932,7 @@
       },
       {
         "barcode": "21200513152",
-        "canonical_name": "ספוג קרצוף שלישיה",
+        "product": "ספוג קרצוף שלישיה",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -964,7 +964,7 @@
     "items_sample": [
       {
         "barcode": "7290115400274",
-        "canonical_name": "דובשניות 400 גר' חפץ",
+        "product": "דובשניות 400 גר' חפץ",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -978,7 +978,7 @@
       },
       {
         "barcode": "7290018755303",
-        "canonical_name": "מאגדת שלגונים טוויסט",
+        "product": "מאגדת שלגונים טוויסט",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -992,7 +992,7 @@
       },
       {
         "barcode": "7290018515716",
-        "canonical_name": "אטריות ראמן יבשות",
+        "product": "אטריות ראמן יבשות",
         "brand": "מן",
         "category": null,
         "size_value": null,
@@ -1006,7 +1006,7 @@
       },
       {
         "barcode": "7290121162616",
-        "canonical_name": "מאסטר שף ממרח פלפלים",
+        "product": "מאסטר שף ממרח פלפלים",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1020,7 +1020,7 @@
       },
       {
         "barcode": "7290121162630",
-        "canonical_name": "מאסטר שף ממרח זיתי ק",
+        "product": "מאסטר שף ממרח זיתי ק",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1034,7 +1034,7 @@
       },
       {
         "barcode": "7290121162647",
-        "canonical_name": "מאסטר שף ממרח זיתים",
+        "product": "מאסטר שף ממרח זיתים",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1048,7 +1048,7 @@
       },
       {
         "barcode": "7290018874455",
-        "canonical_name": "יין יראון 2022",
+        "product": "יין יראון 2022",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1062,7 +1062,7 @@
       },
       {
         "barcode": "7290017617688",
-        "canonical_name": "סטארקיסט פילה טונה פ",
+        "product": "סטארקיסט פילה טונה פ",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1076,7 +1076,7 @@
       },
       {
         "barcode": "7290017617701",
-        "canonical_name": "סטארקיסט פילה טונה פ",
+        "product": "סטארקיסט פילה טונה פ",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1090,7 +1090,7 @@
       },
       {
         "barcode": "7290017617718",
-        "canonical_name": "סטארקיסט פילה הרינג",
+        "product": "סטארקיסט פילה הרינג",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1122,7 +1122,7 @@
     "items_sample": [
       {
         "barcode": "7290019790211",
-        "canonical_name": "משקה חלב בטעם אייס ק",
+        "product": "משקה חלב בטעם אייס ק",
         "brand": null,
         "category": "חלב ומוצריו",
         "size_value": null,
@@ -1136,7 +1136,7 @@
       },
       {
         "barcode": "7290019892847",
-        "canonical_name": "פול קפוא 1 ק\"ג",
+        "product": "פול קפוא 1 ק\"ג",
         "brand": null,
         "category": null,
         "size_value": 1.0,
@@ -1150,7 +1150,7 @@
       },
       {
         "barcode": "7290000009216",
-        "canonical_name": "פרסבורגר בן עמי",
+        "product": "פרסבורגר בן עמי",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1164,7 +1164,7 @@
       },
       {
         "barcode": "7290000009612",
-        "canonical_name": "בגט רוסטיק",
+        "product": "בגט רוסטיק",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1178,7 +1178,7 @@
       },
       {
         "barcode": "7290108358018",
-        "canonical_name": "פרש אוטומטיק סיקרט ס",
+        "product": "פרש אוטומטיק סיקרט ס",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1192,7 +1192,7 @@
       },
       {
         "barcode": "7290108358025",
-        "canonical_name": "פרש אוטומטיק וייט סנ",
+        "product": "פרש אוטומטיק וייט סנ",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1206,7 +1206,7 @@
       },
       {
         "barcode": "8003340806808",
-        "canonical_name": "שוקולד לינדור דארק 6",
+        "product": "שוקולד לינדור דארק 6",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1220,7 +1220,7 @@
       },
       {
         "barcode": "4013162036134",
-        "canonical_name": "סבון לכלים חזק לשומנ",
+        "product": "סבון לכלים חזק לשומנ",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1234,7 +1234,7 @@
       },
       {
         "barcode": "783495092445",
-        "canonical_name": "פופקורן קולנוע 200 ג",
+        "product": "פופקורן קולנוע 200 ג",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1248,7 +1248,7 @@
       },
       {
         "barcode": "8002267002416",
-        "canonical_name": "פולרטי חטיפי קרח 400",
+        "product": "פולרטי חטיפי קרח 400",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1280,7 +1280,7 @@
     "items_sample": [
       {
         "barcode": "7290112199980",
-        "canonical_name": "טרו פודינג בטעם שוקו",
+        "product": "טרו פודינג בטעם שוקו",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1294,7 +1294,7 @@
       },
       {
         "barcode": "5201004023360",
-        "canonical_name": "קפריס רולס קלאסיק 25",
+        "product": "קפריס רולס קלאסיק 25",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1308,7 +1308,7 @@
       },
       {
         "barcode": "7290010032716",
-        "canonical_name": "קרם דבש פרחי בר 400",
+        "product": "קרם דבש פרחי בר 400",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1322,7 +1322,7 @@
       },
       {
         "barcode": "7290116533841",
-        "canonical_name": "דאב מן דאודורנט ספרי",
+        "product": "דאב מן דאודורנט ספרי",
         "brand": "מן",
         "category": null,
         "size_value": null,
@@ -1336,7 +1336,7 @@
       },
       {
         "barcode": "8001561301706",
-        "canonical_name": "CALLIPO-טונה בשמן זי",
+        "product": "CALLIPO-טונה בשמן זי",
         "brand": "מן",
         "category": null,
         "size_value": null,
@@ -1350,7 +1350,7 @@
       },
       {
         "barcode": "7290110117597",
-        "canonical_name": "פריגת 1.5 ליטר בטעם",
+        "product": "פריגת 1.5 ליטר בטעם",
         "brand": null,
         "category": null,
         "size_value": 1.5,
@@ -1364,7 +1364,7 @@
       },
       {
         "barcode": "3061990143785",
-        "canonical_name": "ביסקוויט במילוי קרם",
+        "product": "ביסקוויט במילוי קרם",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1378,7 +1378,7 @@
       },
       {
         "barcode": "3061990143778",
-        "canonical_name": "ביסקוויט מצופה שוקול",
+        "product": "ביסקוויט מצופה שוקול",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1392,7 +1392,7 @@
       },
       {
         "barcode": "8720608019441",
-        "canonical_name": "ליפטון תה שחור יילו",
+        "product": "ליפטון תה שחור יילו",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1406,7 +1406,7 @@
       },
       {
         "barcode": "6934932532398",
-        "canonical_name": "תירס גמדי שלם במי מל",
+        "product": "תירס גמדי שלם במי מל",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1438,7 +1438,7 @@
     "items_sample": [
       {
         "barcode": "7290112339362",
-        "canonical_name": "דנונה לייט אנד פריי",
+        "product": "דנונה לייט אנד פריי",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1452,7 +1452,7 @@
       },
       {
         "barcode": "7290112347473",
-        "canonical_name": "מארז לייט אנד פריי ת",
+        "product": "מארז לייט אנד פריי ת",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1466,7 +1466,7 @@
       },
       {
         "barcode": "745314145336",
-        "canonical_name": "מארז פוקצ'ה בנדיקט",
+        "product": "מארז פוקצ'ה בנדיקט",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1480,7 +1480,7 @@
       },
       {
         "barcode": "6001030003126",
-        "canonical_name": "ויגלטון רוטב וושסטר",
+        "product": "ויגלטון רוטב וושסטר",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1494,7 +1494,7 @@
       },
       {
         "barcode": "41500000428",
-        "canonical_name": "ממרח חרדל בטעם פיקנט",
+        "product": "ממרח חרדל בטעם פיקנט",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1508,7 +1508,7 @@
       },
       {
         "barcode": "7290112495228",
-        "canonical_name": "קורנפלקס דבש 448 גר'",
+        "product": "קורנפלקס דבש 448 גר'",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1522,7 +1522,7 @@
       },
       {
         "barcode": "7290112495143",
-        "canonical_name": "נשנושי קרקר קוקטייל",
+        "product": "נשנושי קרקר קוקטייל",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1536,7 +1536,7 @@
       },
       {
         "barcode": "7290112495167",
-        "canonical_name": "נשנושי קרקר משולשי ש",
+        "product": "נשנושי קרקר משולשי ש",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1550,7 +1550,7 @@
       },
       {
         "barcode": "7290112197139",
-        "canonical_name": "סטייל סבון ידיים אדו",
+        "product": "סטייל סבון ידיים אדו",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1564,7 +1564,7 @@
       },
       {
         "barcode": "7290112495105",
-        "canonical_name": "נשנושים שמנת בצל",
+        "product": "נשנושים שמנת בצל",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1596,7 +1596,7 @@
     "items_sample": [
       {
         "barcode": "7290000222363",
-        "canonical_name": "לחמניות 4 יח",
+        "product": "לחמניות 4 יח",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1610,7 +1610,7 @@
       },
       {
         "barcode": "7450026843540",
-        "canonical_name": "נעלי נוחות נשים בז'",
+        "product": "נעלי נוחות נשים בז'",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1624,7 +1624,7 @@
       },
       {
         "barcode": "7290000911601",
-        "canonical_name": "אושפלאו בשרי",
+        "product": "אושפלאו בשרי",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1638,7 +1638,7 @@
       },
       {
         "barcode": "3608580109280",
-        "canonical_name": "קונפיטורה תות שדה 37",
+        "product": "קונפיטורה תות שדה 37",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1652,7 +1652,7 @@
       },
       {
         "barcode": "4640018993398",
-        "canonical_name": "*מבצע* טבליות למדיח",
+        "product": "*מבצע* טבליות למדיח",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1666,7 +1666,7 @@
       },
       {
         "barcode": "7290000911687",
-        "canonical_name": "*מבצע* כרעיים",
+        "product": "*מבצע* כרעיים",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1680,7 +1680,7 @@
       },
       {
         "barcode": "8002267002270",
-        "canonical_name": "חטיפי קרח בטעמי פירו",
+        "product": "חטיפי קרח בטעמי פירו",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1694,7 +1694,7 @@
       },
       {
         "barcode": "7290000911755",
-        "canonical_name": "לשון בקר",
+        "product": "לשון בקר",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1708,7 +1708,7 @@
       },
       {
         "barcode": "7290000911809",
-        "canonical_name": "מפרום",
+        "product": "מפרום",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1722,7 +1722,7 @@
       },
       {
         "barcode": "7290000407517",
-        "canonical_name": "כנפית עוף טרי",
+        "product": "כנפית עוף טרי",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1754,7 +1754,7 @@
     "items_sample": [
       {
         "barcode": "7290008835466",
-        "canonical_name": "בשר מס 8 חלק קפוא",
+        "product": "בשר מס 8 חלק קפוא",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1768,7 +1768,7 @@
       },
       {
         "barcode": "7290116853802",
-        "canonical_name": "סט 4 קופסאות 1.2 ליט",
+        "product": "סט 4 קופסאות 1.2 ליט",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1782,7 +1782,7 @@
       },
       {
         "barcode": "7290110559014",
-        "canonical_name": "שעועית שחורה ט. הטבע",
+        "product": "שעועית שחורה ט. הטבע",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1796,7 +1796,7 @@
       },
       {
         "barcode": "7290110571184",
-        "canonical_name": "עדשים חומות ט. הטבע",
+        "product": "עדשים חומות ט. הטבע",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1810,7 +1810,7 @@
       },
       {
         "barcode": "835811003427",
-        "canonical_name": "*מבצע* צלחות גדול מק",
+        "product": "*מבצע* צלחות גדול מק",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1824,7 +1824,7 @@
       },
       {
         "barcode": "7290116853819",
-        "canonical_name": "סט 4 קופסאות 0.8 ליט",
+        "product": "סט 4 קופסאות 0.8 ליט",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1838,7 +1838,7 @@
       },
       {
         "barcode": "7290116853826",
-        "canonical_name": "סט 4 קופסאות 1 ליטר",
+        "product": "סט 4 קופסאות 1 ליטר",
         "brand": null,
         "category": null,
         "size_value": 1.0,
@@ -1852,7 +1852,7 @@
       },
       {
         "barcode": "7290108358124",
-        "canonical_name": "מקסימה דפי בישום לחי",
+        "product": "מקסימה דפי בישום לחי",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1866,7 +1866,7 @@
       },
       {
         "barcode": "8700216891103",
-        "canonical_name": "פמפרס פרימיום VP מיד",
+        "product": "פמפרס פרימיום VP מיד",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1880,7 +1880,7 @@
       },
       {
         "barcode": "7290001053201",
-        "canonical_name": "סלמון נורבגי מנות לל",
+        "product": "סלמון נורבגי מנות לל",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1894,6 +1894,164 @@
       }
     ],
     "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_017_pricesFull_20250908_123000.json"
+  },
+  {
+    "provider": "yohananof",
+    "branch": "017",
+    "type": "pricesFull",
+    "timestamp": "2025-09-08T15:10:00Z",
+    "supermarket": {
+      "name": "yohananof",
+      "branch_name": null,
+      "city": null,
+      "address": null,
+      "website": null,
+      "created_at": "2025-09-08T15:10:00Z"
+    },
+    "items_total": 8814,
+    "items_sample": [
+      {
+        "barcode": "7290004125400",
+        "product": "אשל 4.5% 200מל מהדרי",
+        "brand": null,
+        "category": null,
+        "size_value": null,
+        "size_unit": "100 מ\"ל",
+        "price": 1.97,
+        "currency": "ILS",
+        "promo_price": null,
+        "promo_text": null,
+        "in_stock": true,
+        "collected_at": "2025-09-08T15:10:00Z"
+      },
+      {
+        "barcode": "7290004125417",
+        "product": "גיל 3% 200מל מהדרין",
+        "brand": null,
+        "category": null,
+        "size_value": null,
+        "size_unit": "100 מ\"ל",
+        "price": 1.76,
+        "currency": "ILS",
+        "promo_price": null,
+        "promo_text": null,
+        "in_stock": true,
+        "collected_at": "2025-09-08T15:10:00Z"
+      },
+      {
+        "barcode": "7290004125455",
+        "product": "שמנת אורגינל 15% 200",
+        "brand": null,
+        "category": null,
+        "size_value": null,
+        "size_unit": "100 מ\"ל",
+        "price": 2.81,
+        "currency": "ILS",
+        "promo_price": null,
+        "promo_text": null,
+        "in_stock": true,
+        "collected_at": "2025-09-08T15:10:00Z"
+      },
+      {
+        "barcode": "7290004125509",
+        "product": "שמנת 100 גרם 15% חצי",
+        "brand": null,
+        "category": null,
+        "size_value": 100.0,
+        "size_unit": "גרם",
+        "price": 2.1,
+        "currency": "ILS",
+        "promo_price": null,
+        "promo_text": null,
+        "in_stock": true,
+        "collected_at": "2025-09-08T15:10:00Z"
+      },
+      {
+        "barcode": "7290004125585",
+        "product": "משקה סויה וניל על הב",
+        "brand": null,
+        "category": null,
+        "size_value": null,
+        "size_unit": "ליטר",
+        "price": 10.6,
+        "currency": "ILS",
+        "promo_price": null,
+        "promo_text": null,
+        "in_stock": true,
+        "collected_at": "2025-09-08T15:10:00Z"
+      },
+      {
+        "barcode": "7290004125721",
+        "product": "שמנת לבישול 15% 250",
+        "brand": null,
+        "category": null,
+        "size_value": null,
+        "size_unit": "100 מ\"ל",
+        "price": 9.6,
+        "currency": "ILS",
+        "promo_price": null,
+        "promo_text": null,
+        "in_stock": true,
+        "collected_at": "2025-09-08T15:10:00Z"
+      },
+      {
+        "barcode": "7290004125776",
+        "product": "עמק פרוס 28% 400 גרם",
+        "brand": null,
+        "category": null,
+        "size_value": 400.0,
+        "size_unit": "גרם",
+        "price": 33.3,
+        "currency": "ILS",
+        "promo_price": null,
+        "promo_text": null,
+        "in_stock": true,
+        "collected_at": "2025-09-08T15:10:00Z"
+      },
+      {
+        "barcode": "7290002771395",
+        "product": "קפה שחור 100 גרם אל",
+        "brand": null,
+        "category": null,
+        "size_value": 100.0,
+        "size_unit": "גרם",
+        "price": 9.9,
+        "currency": "ILS",
+        "promo_price": null,
+        "promo_text": null,
+        "in_stock": true,
+        "collected_at": "2025-09-08T15:10:00Z"
+      },
+      {
+        "barcode": "7290004126674",
+        "product": "*מבצע* טל העמק לייט",
+        "brand": null,
+        "category": null,
+        "size_value": null,
+        "size_unit": "100 גרם",
+        "price": 17.9,
+        "currency": "ILS",
+        "promo_price": null,
+        "promo_text": null,
+        "in_stock": true,
+        "collected_at": "2025-09-08T15:10:00Z"
+      },
+      {
+        "barcode": "7290004126759",
+        "product": "יופלה דיאט פירות יער",
+        "brand": null,
+        "category": null,
+        "size_value": null,
+        "size_unit": "100 גרם",
+        "price": 5.4,
+        "currency": "ILS",
+        "promo_price": null,
+        "promo_text": null,
+        "in_stock": true,
+        "collected_at": "2025-09-08T15:10:00Z"
+      }
+    ],
+    "outbox_path": "C:\\Users\\Daniella Elbaz\\Desktop\\שנה ג סמסטר קיץ\\סדנת פייתון\\data-pipeline-2025\\extractor_lambda\\outbox\\yohananof_017_pricesFull_20250908_151000.json"
   },
   {
     "provider": "yohananof",
@@ -1912,7 +2070,7 @@
     "items_sample": [
       {
         "barcode": "7290100703861",
-        "canonical_name": "קמח קסם לחלה 1 ק\"ג",
+        "product": "קמח קסם לחלה 1 ק\"ג",
         "brand": null,
         "category": "מכולת יבשה",
         "size_value": 1.0,
@@ -1926,7 +2084,7 @@
       },
       {
         "barcode": "7290100700006",
-        "canonical_name": "*מבצע* חיטה 1 ק\"ג",
+        "product": "*מבצע* חיטה 1 ק\"ג",
         "brand": null,
         "category": null,
         "size_value": 1.0,
@@ -1940,7 +2098,7 @@
       },
       {
         "barcode": "7290100700020",
-        "canonical_name": "גריסי פנינה 500 גרם",
+        "product": "גריסי פנינה 500 גרם",
         "brand": null,
         "category": null,
         "size_value": 500.0,
@@ -1954,7 +2112,7 @@
       },
       {
         "barcode": "5010038454831",
-        "canonical_name": "בקבוק בירה בלומון 33",
+        "product": "בקבוק בירה בלומון 33",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1968,7 +2126,7 @@
       },
       {
         "barcode": "7290100700075",
-        "canonical_name": "פירורי לחם מוזהבים ס",
+        "product": "פירורי לחם מוזהבים ס",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1982,7 +2140,7 @@
       },
       {
         "barcode": "7290100700266",
-        "canonical_name": "פירורי לחם לבנים סוג",
+        "product": "פירורי לחם לבנים סוג",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -1996,7 +2154,7 @@
       },
       {
         "barcode": "7290100700273",
-        "canonical_name": "*מבצע* קינואה 500 גר",
+        "product": "*מבצע* קינואה 500 גר",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2010,7 +2168,7 @@
       },
       {
         "barcode": "7290100700372",
-        "canonical_name": "אורז בסמטי מלא 1 ק\"ג",
+        "product": "אורז בסמטי מלא 1 ק\"ג",
         "brand": null,
         "category": "מכולת יבשה",
         "size_value": 1.0,
@@ -2024,7 +2182,7 @@
       },
       {
         "barcode": "7290100700396",
-        "canonical_name": "*מבצע* אורז יסמין 1",
+        "product": "*מבצע* אורז יסמין 1",
         "brand": null,
         "category": "מכולת יבשה",
         "size_value": null,
@@ -2038,7 +2196,7 @@
       },
       {
         "barcode": "7290100700419",
-        "canonical_name": "בורגול 1 ק\"ג",
+        "product": "בורגול 1 ק\"ג",
         "brand": null,
         "category": null,
         "size_value": 1.0,
@@ -2070,7 +2228,7 @@
     "items_sample": [
       {
         "barcode": "7290100700020",
-        "canonical_name": "גריסי פנינה 500 גרם",
+        "product": "גריסי פנינה 500 גרם",
         "brand": null,
         "category": null,
         "size_value": 500.0,
@@ -2084,7 +2242,7 @@
       },
       {
         "barcode": "7290100700068",
-        "canonical_name": "שעועית צבעונית 500 ג",
+        "product": "שעועית צבעונית 500 ג",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2098,7 +2256,7 @@
       },
       {
         "barcode": "8435495805199",
-        "canonical_name": "אבקת כביסה תינוקלין",
+        "product": "אבקת כביסה תינוקלין",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2112,7 +2270,7 @@
       },
       {
         "barcode": "7290110579463",
-        "canonical_name": "שוקולד חלב שברי אגוז",
+        "product": "שוקולד חלב שברי אגוז",
         "brand": null,
         "category": "חלב ומוצריו",
         "size_value": null,
@@ -2126,7 +2284,7 @@
       },
       {
         "barcode": "7290116533575",
-        "canonical_name": "פנטסטיק תרכיז ניקוי",
+        "product": "פנטסטיק תרכיז ניקוי",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2140,7 +2298,7 @@
       },
       {
         "barcode": "5202390015885",
-        "canonical_name": "ויולייפ צ'דר פרוסות",
+        "product": "ויולייפ צ'דר פרוסות",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2154,7 +2312,7 @@
       },
       {
         "barcode": "7290019997306",
-        "canonical_name": "זיתים ירוקים ללא גלע",
+        "product": "זיתים ירוקים ללא גלע",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2168,7 +2326,7 @@
       },
       {
         "barcode": "7290107280341",
-        "canonical_name": "מטליות ריצפז ענק בני",
+        "product": "מטליות ריצפז ענק בני",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2182,7 +2340,7 @@
       },
       {
         "barcode": "7290113179844",
-        "canonical_name": "כוס גידי גוב (גבוהה)",
+        "product": "כוס גידי גוב (גבוהה)",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2196,7 +2354,7 @@
       },
       {
         "barcode": "7290113631496",
-        "canonical_name": "פירורי לחם 350 גרם ב",
+        "product": "פירורי לחם 350 גרם ב",
         "brand": null,
         "category": null,
         "size_value": 350.0,
@@ -2228,7 +2386,7 @@
     "items_sample": [
       {
         "barcode": "7290108353297",
-        "canonical_name": "שמפו וג'ל רחצה 2 ב1",
+        "product": "שמפו וג'ל רחצה 2 ב1",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2242,7 +2400,7 @@
       },
       {
         "barcode": "7290020239938",
-        "canonical_name": "גבעולי סלרי חתוכים ס",
+        "product": "גבעולי סלרי חתוכים ס",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2256,7 +2414,7 @@
       },
       {
         "barcode": "7290019816126",
-        "canonical_name": "קראנץ' מאנצ' בטעם בי",
+        "product": "קראנץ' מאנצ' בטעם בי",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2270,7 +2428,7 @@
       },
       {
         "barcode": "7290109847221",
-        "canonical_name": "מסך מולר+גוגל טי וי",
+        "product": "מסך מולר+גוגל טי וי",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2284,7 +2442,7 @@
       },
       {
         "barcode": "7290109847238",
-        "canonical_name": "מסך מולר+גוגל טי וי",
+        "product": "מסך מולר+גוגל טי וי",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2298,7 +2456,7 @@
       },
       {
         "barcode": "7290111359002",
-        "canonical_name": "זוג עוגות שוקולד +בו",
+        "product": "זוג עוגות שוקולד +בו",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2312,7 +2470,7 @@
       },
       {
         "barcode": "7290018790656",
-        "canonical_name": "חטיפי קרקר עם שומשום",
+        "product": "חטיפי קרקר עם שומשום",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2326,7 +2484,7 @@
       },
       {
         "barcode": "8683659925102",
-        "canonical_name": "חטיף נובילוס בטעם סו",
+        "product": "חטיף נובילוס בטעם סו",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2340,7 +2498,7 @@
       },
       {
         "barcode": "8683659925171",
-        "canonical_name": "חטיף נובילוס בטעם נג",
+        "product": "חטיף נובילוס בטעם נג",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2354,7 +2512,7 @@
       },
       {
         "barcode": "8683659925249",
-        "canonical_name": "חטיף נובילוס דנטלי מ",
+        "product": "חטיף נובילוס דנטלי מ",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2386,7 +2544,7 @@
     "items_sample": [
       {
         "barcode": "7290000211169",
-        "canonical_name": "אורז תאילנדי 1 קג",
+        "product": "אורז תאילנדי 1 קג",
         "brand": null,
         "category": "מכולת יבשה",
         "size_value": 1.0,
@@ -2400,7 +2558,7 @@
       },
       {
         "barcode": "7290000211312",
-        "canonical_name": "אורז מלא 1 ק\"ג.",
+        "product": "אורז מלא 1 ק\"ג.",
         "brand": null,
         "category": "מכולת יבשה",
         "size_value": 1.0,
@@ -2414,7 +2572,7 @@
       },
       {
         "barcode": "7290000211374",
-        "canonical_name": "קמח מלא 1 ק\"ג",
+        "product": "קמח מלא 1 ק\"ג",
         "brand": null,
         "category": "מכולת יבשה",
         "size_value": 1.0,
@@ -2428,7 +2586,7 @@
       },
       {
         "barcode": "7290000211442",
-        "canonical_name": "אורז פרסי 1 ק\"ג",
+        "product": "אורז פרסי 1 ק\"ג",
         "brand": null,
         "category": "מכולת יבשה",
         "size_value": 1.0,
@@ -2442,7 +2600,7 @@
       },
       {
         "barcode": "7290000211503",
-        "canonical_name": "סוכר 1 ק\"ג",
+        "product": "סוכר 1 ק\"ג",
         "brand": null,
         "category": "מכולת יבשה",
         "size_value": 1.0,
@@ -2456,7 +2614,7 @@
       },
       {
         "barcode": "7290000211985",
-        "canonical_name": "אורז עגול 1 ק\"ג",
+        "product": "אורז עגול 1 ק\"ג",
         "brand": null,
         "category": "מכולת יבשה",
         "size_value": 1.0,
@@ -2470,7 +2628,7 @@
       },
       {
         "barcode": "7290001990117",
-        "canonical_name": "שומשום 100 גרם",
+        "product": "שומשום 100 גרם",
         "brand": null,
         "category": null,
         "size_value": 100.0,
@@ -2484,7 +2642,7 @@
       },
       {
         "barcode": "7290001990261",
-        "canonical_name": "חומוס 1 ק\"ג",
+        "product": "חומוס 1 ק\"ג",
         "brand": null,
         "category": null,
         "size_value": 1.0,
@@ -2498,7 +2656,7 @@
       },
       {
         "barcode": "7290008350495",
-        "canonical_name": "מוצרלה כדור 100 גרם",
+        "product": "מוצרלה כדור 100 גרם",
         "brand": null,
         "category": null,
         "size_value": 100.0,
@@ -2512,7 +2670,7 @@
       },
       {
         "barcode": "7290104570131",
-        "canonical_name": "תמר מגהול 1 ק\"ג",
+        "product": "תמר מגהול 1 ק\"ג",
         "brand": null,
         "category": null,
         "size_value": 1.0,
@@ -2544,7 +2702,7 @@
     "items_sample": [
       {
         "barcode": "7290018687895",
-        "canonical_name": "קפסולות ג'ל מרוכזות",
+        "product": "קפסולות ג'ל מרוכזות",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2558,7 +2716,7 @@
       },
       {
         "barcode": "7290018687987",
-        "canonical_name": "קפסולות ג'ל מרוכזות",
+        "product": "קפסולות ג'ל מרוכזות",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2572,7 +2730,7 @@
       },
       {
         "barcode": "88888000",
-        "canonical_name": "Temp SuperDept",
+        "product": "Temp SuperDept",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2586,7 +2744,7 @@
       },
       {
         "barcode": "88888001",
-        "canonical_name": "מכולת",
+        "product": "מכולת",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2600,7 +2758,7 @@
       },
       {
         "barcode": "88888002",
-        "canonical_name": "פירות וירקות",
+        "product": "פירות וירקות",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2614,7 +2772,7 @@
       },
       {
         "barcode": "88888003",
-        "canonical_name": "קצביה",
+        "product": "קצביה",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2628,7 +2786,7 @@
       },
       {
         "barcode": "88888004",
-        "canonical_name": "קפואים",
+        "product": "קפואים",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2642,7 +2800,7 @@
       },
       {
         "barcode": "88888005",
-        "canonical_name": "מעדניה",
+        "product": "מעדניה",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2656,7 +2814,7 @@
       },
       {
         "barcode": "88888006",
-        "canonical_name": "משקאות",
+        "product": "משקאות",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2670,7 +2828,7 @@
       },
       {
         "barcode": "88888007",
-        "canonical_name": "תינוקות",
+        "product": "תינוקות",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2702,7 +2860,7 @@
     "items_sample": [
       {
         "barcode": "7622202257803",
-        "canonical_name": "מילקה חום לבן 90 גרם",
+        "product": "מילקה חום לבן 90 גרם",
         "brand": null,
         "category": null,
         "size_value": 90.0,
@@ -2716,7 +2874,7 @@
       },
       {
         "barcode": "7622202262593",
-        "canonical_name": "מילקה - שוקולד חלב ע",
+        "product": "מילקה - שוקולד חלב ע",
         "brand": null,
         "category": "חלב ומוצריו",
         "size_value": null,
@@ -2730,7 +2888,7 @@
       },
       {
         "barcode": "7622202268298",
-        "canonical_name": "מילקה - שוקולד חלב 9",
+        "product": "מילקה - שוקולד חלב 9",
         "brand": null,
         "category": "חלב ומוצריו",
         "size_value": null,
@@ -2744,7 +2902,7 @@
       },
       {
         "barcode": "7290020130617",
-        "canonical_name": "כוסות קרטון 8b יוחננ",
+        "product": "כוסות קרטון 8b יוחננ",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2758,7 +2916,7 @@
       },
       {
         "barcode": "7290119375264",
-        "canonical_name": "מעדן הגולן בטעם טופי",
+        "product": "מעדן הגולן בטעם טופי",
         "brand": null,
         "category": "חלב ומוצריו",
         "size_value": null,
@@ -2772,7 +2930,7 @@
       },
       {
         "barcode": "7290119382873",
-        "canonical_name": "קונפיטורת אוכמניות כ",
+        "product": "קונפיטורת אוכמניות כ",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2786,7 +2944,7 @@
       },
       {
         "barcode": "7290116935621",
-        "canonical_name": "יוגורט גו בנגיעת טעם",
+        "product": "יוגורט גו בנגיעת טעם",
         "brand": null,
         "category": "חלב ומוצריו",
         "size_value": null,
@@ -2800,7 +2958,7 @@
       },
       {
         "barcode": "7290119383351",
-        "canonical_name": "קונפיטורת פירות יער",
+        "product": "קונפיטורת פירות יער",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2814,7 +2972,7 @@
       },
       {
         "barcode": "7290016401585",
-        "canonical_name": "זוג רדיד אלומיניום ק",
+        "product": "זוג רדיד אלומיניום ק",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2828,7 +2986,7 @@
       },
       {
         "barcode": "7290012022005",
-        "canonical_name": "פריכיות חיטה טבעי 70",
+        "product": "פריכיות חיטה טבעי 70",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2860,7 +3018,7 @@
     "items_sample": [
       {
         "barcode": "7290018294208",
-        "canonical_name": "סלקטד אדום ישראלי",
+        "product": "סלקטד אדום ישראלי",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2874,7 +3032,7 @@
       },
       {
         "barcode": "7290018294895",
-        "canonical_name": "מונלייט לבן חצי מתוק",
+        "product": "מונלייט לבן חצי מתוק",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2888,7 +3046,7 @@
       },
       {
         "barcode": "7290119382576",
-        "canonical_name": "שוקולד פרה עוגיות לב",
+        "product": "שוקולד פרה עוגיות לב",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2902,7 +3060,7 @@
       },
       {
         "barcode": "7290019398226",
-        "canonical_name": "באזז קוסמופוליטאן",
+        "product": "באזז קוסמופוליטאן",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2916,7 +3074,7 @@
       },
       {
         "barcode": "7290019398233",
-        "canonical_name": "שישיית בירה סטלה 330",
+        "product": "שישיית בירה סטלה 330",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2930,7 +3088,7 @@
       },
       {
         "barcode": "7290019398264",
-        "canonical_name": "בירה קורונה 355 מיל",
+        "product": "בירה קורונה 355 מיל",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2944,7 +3102,7 @@
       },
       {
         "barcode": "7501064191527",
-        "canonical_name": "קורונה בקבוק 355 מ\"ל",
+        "product": "קורונה בקבוק 355 מ\"ל",
         "brand": null,
         "category": null,
         "size_value": 355.0,
@@ -2958,7 +3116,7 @@
       },
       {
         "barcode": "8593868007127",
-        "canonical_name": "בירה סטארופרמן בקבוק",
+        "product": "בירה סטארופרמן בקבוק",
         "brand": "מן",
         "category": null,
         "size_value": null,
@@ -2972,7 +3130,7 @@
       },
       {
         "barcode": "7290005358852",
-        "canonical_name": "בשר מס 5 חלק קפוא",
+        "product": "בשר מס 5 חלק קפוא",
         "brand": null,
         "category": null,
         "size_value": null,
@@ -2986,7 +3144,7 @@
       },
       {
         "barcode": "7290002065555",
-        "canonical_name": "לחמניות 6 ארוך",
+        "product": "לחמניות 6 ארוך",
         "brand": null,
         "category": null,
         "size_value": null,

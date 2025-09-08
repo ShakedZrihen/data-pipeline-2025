@@ -292,7 +292,7 @@ def normalize_item_to_product(item: dict, *, provider: str, branch: str, iso_ts:
 
     product = {
         "barcode": barcode,
-        "canonical_name": name or None,
+        "product": name or None,
         "brand": brand,
         "category": category,
         "size_value": size_value,
