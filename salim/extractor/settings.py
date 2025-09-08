@@ -1,8 +1,12 @@
 import os
 import boto3
-from dotenv import load_dotenv
-load_dotenv()
 
+
+BUCKET_NAME = os.getenv("BUCKET_NAME")
+DYNAMODB_TABLE = os.getenv("DYNAMODB_TABLE")
+QUEUE_NAME = os.getenv("QUEUE_NAME")
+OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'output')
+INTERVAL_MIN = float(os.getenv("EXTRACT_EVERY_MINUTES", "60"))
 REGION = os.getenv('REGION')
 AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
@@ -32,8 +36,3 @@ dynamodb = boto3.resource(
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     region_name=REGION
 )
-
-BUCKET_NAME = os.getenv("BUCKET_NAME")
-DYNAMODB_TABLE = os.getenv("DYNAMODB_TABLE")
-QUEUE_NAME = os.getenv("QUEUE_NAME")
-OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'output')

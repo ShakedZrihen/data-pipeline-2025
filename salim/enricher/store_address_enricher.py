@@ -5,8 +5,7 @@ import sys
 from typing import Optional, Dict, Any, Tuple, Union
 import requests
 from requests.exceptions import RequestException
-from dotenv import load_dotenv 
-load_dotenv()
+
 
 
 NOMINATIM_URL = os.getenv("NOMINATIM_URL")
@@ -15,7 +14,6 @@ CONTACT = os.getenv("NOMINATIM_CONTACT")
 HEADERS = {
     "User-Agent": f"StoreAddressEnricher/1.0 (+{CONTACT})"
 }
-
 
 
 def nominatim_search(query: str, city_hint: Optional[str] = None) -> Optional[Dict[str, Any]]:

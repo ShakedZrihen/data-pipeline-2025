@@ -1,76 +1,89 @@
 from decimal import Decimal
 import os
 import json
-from datetime import datetime, timezone, UTC
+from datetime import datetime, time, timezone, UTC
+import traceback
 import urllib.parse
-from normalizer import normalize
 from processor import parse
 from sqs_producer import send_to_sqs
 import gzip
-import re
+import time
 from settings import (
-    BUCKET_NAME, QUEUE_NAME, REGION,
+    BUCKET_NAME, QUEUE_NAME, INTERVAL_MIN,
     DYNAMODB_TABLE, OUTPUT_DIR, s3, dynamodb,sqs
 )
 
 
 
-def lambda_handler(event, queue_url):
+def get_all_s3_keys(bucket_name: str, prefix: str | None = None) -> list[str]:
+    
+    keys: list[str] = []
+    paginator = s3.get_paginator("list_objects_v2")
+    params = {"Bucket": bucket_name}
+    if prefix:
+        params["Prefix"] = prefix
+
+    for page in paginator.paginate(**params):
+        for obj in page.get("Contents", []):
+            keys.append(obj["Key"])
+    return keys
+
+def lambda_handler():
+    init_dynamodb(DYNAMODB_TABLE)
     table = dynamodb.Table(DYNAMODB_TABLE)
-    for record in event['Records']:
+    queue_url = init_sqs(QUEUE_NAME)
+        
+    files = get_all_s3_keys(BUCKET_NAME)
+    print(f"Found {files} files in bucket {BUCKET_NAME}")
+
+    for key in files:
         try:
-            bucket = record['s3']['bucket']['name']
-            key = urllib.parse.unquote_plus(record['s3']['object']['key'])
+            bucket = BUCKET_NAME
+            key = urllib.parse.unquote_plus(key)
+            print(f"Processing file: {key} from bucket: {bucket}")
             
             response = s3.get_object(Bucket=bucket, Key=key)
             gz_content = response['Body'].read()
             if key.endswith('.gz'):
+                print(f"Decompressing gzipped file: {type(gz_content)}")
                 file_content = gzip.decompress(gz_content)
             else:
                 print(f"File is not gzipped, processing raw content, file: {key}")
                 continue
             
             print(f"Processing file: {key}, size: {len(file_content)} bytes")
+
+            parts = key.split('_')
+            provider = parts[0].lower()
+            branch = parts[1].lower()
+            file_type = parts[2]
+            timestamp = parts[3].replace('.gz', '')
             
-            file_type = (key.split('/')[-1]).split('_')[0] 
-            provider = key.split('/')[0].lower()
-            branch = key.split('/')[1].lower()
-            parsed_data = parse(file_content, file_type=file_type)
+            print(f"Extracted metadata - Provider: {provider}, Branch: {branch}, File Type: {file_type}")
+
+            parsed_data = parse(file_content, file_type=file_type, provider=provider, branch=branch)
+
+            print(f"Parsed {len(parsed_data.get('items', []))} items from {key}. data: {parsed_data.get('items', [])[:3]}...")
             
-            print(f"Parsed {len(parsed_data.get('items', []))} items from {key}")
-            
-            normalized_data = normalize(
-                parsed_data, 
-                provider=provider, 
-                branch=branch,
-                file_type=file_type
-            )
-            
-            if not normalized_data:
+            if not parsed_data.get('items'):
                 print(f"No valid data found for {key}")
                 continue
 
             os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-            provider_dir = os.path.join(OUTPUT_DIR, provider)
-            os.makedirs(provider_dir, exist_ok=True)
-
-            branch_dir = os.path.join(provider_dir, branch)
-            os.makedirs(branch_dir, exist_ok=True)
-
             filename = os.path.basename(key).replace('.gz', '.json')
-            json_file_path = os.path.join(branch_dir, filename)
+            json_file_path = os.path.join(OUTPUT_DIR, filename)
 
             with open(json_file_path, 'w', encoding='utf-8') as f:
-                json.dump(normalized_data, f, ensure_ascii=False, indent=4)
+                json.dump(parsed_data.get('items', []), f, ensure_ascii=False, indent=4)
             print(f"Wrote JSON to {json_file_path}")
 
-            json_data = json.dumps(normalized_data, ensure_ascii=False)
-            
+            json_data = json.dumps(parsed_data.get('items', []), ensure_ascii=False)
+
             send_to_sqs(sqs, queue_url, key, json_data)
             
             try:
-                file_timestamp = datetime.now(UTC).isoformat()
+                file_timestamp = datetime.fromtimestamp(int(timestamp), timezone.utc).isoformat()
                 dedupe_key = f"{provider}_{branch}_{file_type}"
                 table.update_item(
                 Key={'source_key': dedupe_key},
@@ -86,18 +99,22 @@ def lambda_handler(event, queue_url):
                     ':b': branch,
                     ':ft': file_type,
                     ':t': file_timestamp,
-                    ':c': Decimal(len(normalized_data)),  # store as DynamoDB Number
+                    ':c': Decimal(len(parsed_data.get('items', []))),  # store as DynamoDB Number
                 },
                 ReturnValues="NONE"
                 )
                 print(f"File data stored in DynamoDB")
+                
             except Exception as dynamodb_error:
                 print(f"Failed to store file data to DynamoDB: {dynamodb_error}")
                 raise
             
-        except Exception as e:
-            print(f'Error: {str(e)}')
+            s3.delete_object(Bucket=bucket, Key=key)
+            print(f"Deleted S3 object: {key}")
             
+        except Exception as e:
+            print(f'Error: {str(e)}, key: {key}')
+
     return {
         'statusCode': 200,
         'body': json.dumps('Extraction completed successfully')
@@ -120,7 +137,6 @@ def init_sqs(queue_name):
 
 def init_dynamodb(table_name):
     try:
-        print("Connecting to DynamoDB")
         existing_tables = dynamodb.meta.client.list_tables()['TableNames']
         
         if table_name not in existing_tables:
@@ -191,23 +207,16 @@ def scan_and_upload_files():
                 for filename in files:
                     file_path = os.path.join(root, filename)
 
-                    store_code = os.path.basename(os.path.dirname(file_path)).split('-')[-1] if os.path.basename(os.path.dirname(file_path)).split('-')[-1] is not None else "unknown_store"
-                    store_name = os.path.basename(os.path.dirname(os.path.dirname(file_path)))
-
-                    s3_key = f"{store_name}/{store_code}/{filename}"
                     try:
                         with open(file_path, 'rb') as file_obj:
-                            s3.upload_fileobj(file_obj, BUCKET_NAME, s3_key)
-                        
+                            s3.upload_fileobj(file_obj, BUCKET_NAME, filename)
+
                         uploaded_files.append({
-                            'store': store_name,
-                            'store_code': store_code,
-                            'filename': filename,
-                            's3_key': s3_key
+                            's3_key': filename,
                         })
-                        print(f"Uploaded: {s3_key}")
+                        print(f"Uploaded: {filename}")
                     except Exception as upload_error:
-                        print(f"Failed to upload {s3_key}: {upload_error}")
+                        print(f"Failed to upload {filename}: {upload_error}")
 
         print(f"Uploaded {len(uploaded_files)} files to S3")
         return uploaded_files
@@ -216,60 +225,15 @@ def scan_and_upload_files():
         print(f"Failed to scan directories: {e}")
         raise
 
-def main_test():
-    try:
-        table = init_dynamodb(DYNAMODB_TABLE)
-        queue_url = init_sqs(QUEUE_NAME)
-        
-        try:
-            s3.head_bucket(Bucket=BUCKET_NAME)
-        except:
-            s3.create_bucket(Bucket=BUCKET_NAME)
-            print(f"Created bucket: {BUCKET_NAME}")
-        
-        uploaded_files = scan_and_upload_files()
-        
-        s3_event = {
-            "Records": []
-        }
-        
-        for file in uploaded_files:
-            s3_event["Records"].append({
-                "eventVersion": "2.1",
-                "eventSource": "aws:s3",
-                "awsRegion": REGION,
-                "eventTime": datetime.now(timezone.utc).isoformat() + "Z",
-                "eventName": "ObjectCreated:Put",
-                "s3": {
-                    "bucket": {"name": BUCKET_NAME},
-                    "object": {"key": file['s3_key']}
-                }
-            })
-
-        lambda_handler(s3_event, queue_url)
-        
-        files = list_bucket_files(BUCKET_NAME)
-        
-        print("Infrastructure initialized successfully")
-        return {
-            'table': table,
-            'queue_url': queue_url,
-            'files': files,
-            'uploaded_files': uploaded_files
-        }
-    except Exception as e:
-        print(f"Failed to initialize: {e}")
-        raise
-    
-
-
-
 if __name__ == "__main__":
-    resources = main_test()
-    print(f"DynamoDB Table: {DYNAMODB_TABLE}")
-    print(f"SQS Queue URL: {resources['queue_url']}")
-    print(f"Total files in bucket: {len(resources['files'])}")
-    print(f"Newly uploaded files: {len(resources['uploaded_files'])}")
-    
-    
-    
+    while True:
+            start = time.time()
+            try:
+                lambda_handler()
+            except Exception as e:
+                print(f"[extractor] uncaught error: {e}")
+                traceback.print_exc()
+            elapsed = time.time() - start
+            to_sleep = max(0, INTERVAL_MIN * 60 - elapsed)
+            print(f"[extractor] sleeping {int(to_sleep)}s")
+            time.sleep(to_sleep)

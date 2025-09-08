@@ -1,6 +1,10 @@
+import os
 from settings import PROVIDERS, s3, S3_BUCKET
-from provider_handler import handle_provider
+from provider_handler import handle_provider    
+import time
+import traceback
 
+INTERVAL_MIN = float(os.getenv("CRAWL_EVERY_MINUTES", "60"))
 def main() -> None:
     # Initialize S3
     try:
@@ -20,4 +24,14 @@ def main() -> None:
             print(f"Failed to process {provider_name}: {e}")
 
 if __name__ == "__main__":
-    main()
+    while True:
+        start = time.time()
+        try:
+            main()
+        except Exception as e:
+            print(f"[crawler] uncaught error: {e}")
+            traceback.print_exc()
+        elapsed = time.time() - start
+        to_sleep = max(0, INTERVAL_MIN * 60 - elapsed)
+        print(f"[crawler] sleeping {int(to_sleep)}s")
+        time.sleep(to_sleep)

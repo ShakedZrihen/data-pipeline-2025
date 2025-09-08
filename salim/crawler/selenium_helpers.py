@@ -1,18 +1,34 @@
+import os
 import time
 from typing import List
 from selenium import webdriver
+from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
-def init_driver() -> webdriver.Chrome:
+
+def init_driver():
     options = Options()
-    options.add_argument("--start-maximized")
-    service = Service(ChromeDriverManager().install())
-    return webdriver.Chrome(service=service, options=options)
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-software-rasterizer")
+    options.add_argument("--window-size=1920,1080")
+
+    chrome_bin = os.environ.get("CHROME_BIN", "/usr/bin/chromium")
+    if os.path.exists(chrome_bin):
+        options.binary_location = chrome_bin
+
+    chromedriver_path = os.environ.get("CHROMEDRIVER_PATH", "/usr/bin/chromedriver")
+    service = Service(executable_path=chromedriver_path, log_path="/tmp/chromedriver.log")
+
+    driver = Chrome(service=service, options=options)
+    return driver
 
 def scroll_page_to_end(driver: webdriver.Chrome) -> None:
     last_height = 0

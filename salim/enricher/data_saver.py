@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Dict, Any
 from validator import send_error_message, validate_price_with_promo, validate_price_without_promo, validate_product, validate_supermarket
 from sqlalchemy.orm import Session
@@ -15,11 +16,14 @@ def init_db():
         print(f"Failed to initialize database: {e}")
         raise
 
-def save_product(session: Session, product_data: Dict[str, Any]) -> None:
+def save_product(session: Session, product_data: Dict[str, Any]) -> int:
     try:
         product = Product(**product_data)
-        session.merge(product) 
+        merged = session.merge(product)   
+        session.flush()
+        session.refresh(merged)
         session.commit()
+        return int(merged.product_id)
     except Exception as e:
         session.rollback()
         print(f"Failed to save products: {e}")
@@ -35,16 +39,14 @@ def save_price(session: Session, price_data: Dict[str, Any]) -> None:
         print(f"Failed to save price: {e}")
         raise
 
-def save_supermarket(session: Session, market_data: Dict[str, Any]) -> None:
+def save_supermarket(session: Session, market_data: Dict[str, Any]) -> int:
     try:
-        market = Supermarket(
-            branch_number=market_data['branch_number'],
-            name=market_data.get('name', ''),
-            city=market_data.get('city', ''),
-            address=market_data.get('address', '')
-        )
-        session.merge(market)
+        market = Supermarket(**market_data)
+        merged = session.merge(market)
+        session.flush()
+        session.refresh(merged)
         session.commit()
+        return int(merged.supermarket_id)
     except Exception as e:
         session.rollback()
         print(f"Failed to save supermarket: {e}")
@@ -56,38 +58,50 @@ def save_enriched_data(chunks_by_source: Dict[str, Dict[str, Any]], dlq_url: str
     with Session(engine) as session:
         try:
             for source_key, chunk_data in chunks_by_source.items():
-                provider = source_key.split('/')[0]  
-                branch_number = source_key.split('/')[1] 
-                file_type = source_key.split('/')[2].split('_')[0]
+                parts = source_key.split('_')
+                provider = parts[0]
+                branch_number = parts[1]
+                file_type = parts[2]
+                ts_str = parts[3].replace('.gz', '')
+                timestamp = datetime.fromtimestamp(int(ts_str), timezone.utc).isoformat()
+                supermarket_id = None
+                
+                print(f"Processing {file_type} data for {provider} branch {branch_number}")
                 existing_market = session.query(Supermarket).filter_by(
-                    name=provider, branch_number=branch_number).first()
+                    name=provider, branch_name=str(branch_number)).first()
                 if existing_market:
-                    print(f"Supermarket {provider} for branch {branch_number} already exists in database")
+                    supermarket_id = int(existing_market.supermarket_id)
+                    print(f"Supermarket {provider} for branch {branch_number} already exists in database. sp_id: {supermarket_id}")
                 else:
                     result = enrich_store_addresses(provider, branch_number)
                     city, address = result if result else (None, None)
                     data = {
-                        "branch_number": branch_number,
+                        "branch_name": str(branch_number),
                         "name": provider,
                         "city": city,
                         "address": address
                     }
                     result_valid, errors = validate_supermarket(data)
                     if result_valid:
-                        save_supermarket(session, data)
+                        supermarket_id = save_supermarket(session, data)
+                        print(f"Saved new supermarket {provider} for branch {branch_number} with id {supermarket_id}")
                     else:
-                        send_error_message(dlq_url, {"type": "validation_error_supermarket", "errors": {**errors, "provider": provider, "branch_number": branch_number}})
+                        send_error_message(dlq_url, {"type": "validation_error_supermarket", "errors": {**errors, "provider": provider, "branch_name": branch_number}})
                         print(f"Validation errors found for {provider} branch {branch_number}: {errors}")
-                
+                        continue
+
                 if 'price' in file_type:
                     print(f"Saving price data for {provider} branch {branch_number}")
                     for data in chunk_data['data']:
                         for item in data:
-                        
+
+                            item_id = None
+                            
                             product_data = {
-                                "barcode": item.get("barcode"),
-                                "product_name": item.get("product_name"),
-                                "product_brand": item.get("manufacture_name"),
+                                "barcode": item.get("barcode") ,
+                                "canonical_name": item.get("canonical_name"),
+                                "brand": item.get("manufacture_name"),
+                                "category": item.get("category"),
                             }
 
                             valid, errors = validate_product(product_data)
@@ -96,18 +110,20 @@ def save_enriched_data(chunks_by_source: Dict[str, Dict[str, Any]], dlq_url: str
                                 print(f"Validation errors found for product {product_data['barcode']}: {errors}")
                                 continue
 
-                            save_product(session, product_data)
+                            item_id = save_product(session, product_data)
+
                             price_data = {
-                                "barcode": item.get("barcode"),
-                                "branch_number": item.get("branch_id"),
-                                "date": item.get("timestamp"),
-                                "promo_exists": item.get("promo_exists", False),
-                                "price": item.get("price"),
+                                'product_id': item_id,
+                                'supermarket_id': supermarket_id,
+                                'size_value': float(item.get("quantity")) if item.get("quantity") else None,
+                                'size_unit': item.get("unit_qty", ''),
+                                'price': float(item.get("price")) if item.get("price") else None,          
                             }
+
                             valid_price, errors_price = validate_price_without_promo(price_data)
                             if not valid_price:
                                 send_error_message(dlq_url, {"type": "validation_error_price", "errors": {**errors_price, "provider": provider, "branch_number": branch_number}})
-                                print(f"Validation errors found for price data {price_data['barcode']}: {errors_price}")
+                                print(f"Validation errors found for price data {price_data['product_id']}: {errors_price}")
                                 continue
 
                             save_price(session, price_data)
@@ -115,28 +131,28 @@ def save_enriched_data(chunks_by_source: Dict[str, Dict[str, Any]], dlq_url: str
                 else:
                     for data in chunk_data['data']:
                         for item in data:
-                            save_product(session, {
-                                "barcode": item.get("barcode")
-                            })
+                            for barcode in item.get("items", []):
+                                print(f"Saving promo data for {provider} branch {branch_number}, barcode {barcode}")
+                                product_id = save_product(session, {
+                                    "barcode": barcode.get("barcode"),
+                                })
+                                
+                                promo_data = {
+                                    'product_id': product_id,
+                                    'supermarket_id': supermarket_id,
+                                    'promo_price': item.get("promo_price"),
+                                    'promo_text': item.get("promo_text"),
+                                    'collected_at': timestamp
+                                }
                             
-                            promo_data = {
-                                "barcode": item.get("barcode"),
-                                "branch_number": item.get("branch_id"),
-                                "date": item.get("timestamp"),
-                                "promo_exists": item.get("promo_exists", False),
-                                "promo_price": item.get("promo_price", 0.0),
-                                "promo_date_start": item.get("promo_date_start"),
-                                "promo_date_end": item.get("promo_date_end"),
-                                "promo_max_qty": item.get("promo_max_qty"),
-                                "promo_min_qty": item.get("promo_min_qty"),
-                            }
-                            valid_price, errors_price = validate_price_with_promo(promo_data)
-                            if not valid_price:
-                                send_error_message(dlq_url, {"type": "validation_error_price", "errors": {**errors_price, "provider": provider, "branch_number": branch_number}})
-                                print(f"Validation errors found for price data {promo_data['barcode']}: {errors_price}")
-                                continue
+                                valid_price, errors_price = validate_price_with_promo(promo_data)
+                                if valid_price:
+                                    save_price(session, promo_data)
+                                else:
+                                    send_error_message(dlq_url, {"type": "validation_error_price", "errors": {**errors_price, "provider": provider, "branch_number": branch_number}})
+                                    print(f"Validation errors found for price data {promo_data['barcode']}: {errors_price}")
+                                    continue
 
-                            save_price(session, promo_data)
 
             print("Completed saving all data")
 

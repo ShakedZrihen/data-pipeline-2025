@@ -1,0 +1,9 @@
+selenium==4.34.2
+webdriver-manager==4.0.2
+requests==2.32.4
+beautifulsoup4==4.13.4
+lxml==4.9.3
+boto3==1.40.2
+python-dotenv==1.1.1
+urllib3==2.5.0
+tqdm==4.67.1

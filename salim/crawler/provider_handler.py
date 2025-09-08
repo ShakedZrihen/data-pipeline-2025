@@ -54,7 +54,7 @@ def handle_provider(provider_name: str, config: Dict[str, str]) -> None:
         links = extract_file_links(driver)
         print(f"Discovered {len(links)} files.")
         selected_urls = select_recent_files(links)
-        print(f"Selected {len(selected_urls)} files for download.")
+        print(f"Selected {selected_urls} files for download.")
         process_downloads(selected_urls, config["folder"])
     finally:
         print("Closing browser.")

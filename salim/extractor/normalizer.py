@@ -1,15 +1,15 @@
 from datetime import datetime, timezone
 
 
-def normalize(parsed_data, provider, branch, file_type):
+def normalize(parsed_data, provider, file_type):
     items = parsed_data.get('items', [])
     metadata = parsed_data.get('metadata', {})
     
     if 'promo' in file_type.lower():
-        return normalize_promotions(items, provider, branch, metadata)
-    return normalize_prices(items, provider, branch, metadata)
+        return normalize_promotions(items, provider, metadata)
+    return normalize_prices(items, provider, metadata)
 
-def normalize_prices(items, provider, branch, metadata):
+def normalize_prices(items, provider, metadata):
     
     normalized = []
     
@@ -42,7 +42,7 @@ def safe_float(value, default=0.0):
     except (ValueError, TypeError):
         return default
     
-def normalize_promotions(items, provider, branch, metadata):
+def normalize_promotions(items, provider, metadata):
     normalized = []
     
     for item in items:

@@ -1,6 +1,9 @@
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes.api import api_router
+from .routes.api.health import router as health_router
+from .routes.api.supermarkets import router as supermarkets_router
+from .routes.api.products import router as products_router
 import uvicorn
 
 app = FastAPI(
@@ -25,8 +28,10 @@ async def root():
     """Root endpoint"""
     return {"message": "Welcome to Salim API!"}
 
-# Include API routes
-app.include_router(api_router)
+app.include_router(health_router)
+app.include_router(supermarkets_router)
+app.include_router(products_router)
+
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    uvicorn.run(app, host="0.0.0.0", port=8000)

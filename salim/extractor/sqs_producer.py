@@ -6,8 +6,11 @@ UTC = timezone.utc
 def send_to_sqs(sqs, queue_url, key, json_data):
     try:
         data = json.loads(json_data)
-        max_items = 100
-        
+        file_type = key.split('_')[2]
+        max_items = 100 if 'price' in file_type else 3
+        ts_str = key.split('_')[-1].replace('.gz', '')
+        timestamp = datetime.fromtimestamp(int(ts_str), timezone.utc).isoformat()
+
         base_attributes = {
             'source_key': {
                 'DataType': 'String',
@@ -15,7 +18,7 @@ def send_to_sqs(sqs, queue_url, key, json_data):
             },
             'timestamp': {
                 'DataType': 'String',
-                'StringValue': datetime.now(UTC).isoformat()
+                'StringValue': timestamp
             }
         }
 

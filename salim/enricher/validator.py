@@ -1,10 +1,9 @@
 import json
 import os
 from decimal import Decimal
-from typing import Any, Dict
+from typing import Dict, Any
 import boto3
-from dotenv import load_dotenv
-load_dotenv()
+
 
 
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -29,10 +28,10 @@ sqs = boto3.client(
 def validate_supermarket(data: Dict[str, Any]):
     errors = []
 
-    branch_number = data.get("branch_number")
-    if not isinstance(branch_number, str) or not branch_number.strip():
-        errors.append({"field": "branch_number", "message": "branch_number must be a non-empty string"})
-    
+    branch_name = data.get("branch_name")
+    if not isinstance(branch_name, str) or not branch_name.strip():
+        errors.append({"field": "branch_name", "message": "branch_name must be a non-empty string"})
+
     name = data.get("name")
     if not isinstance(name, str) or not name.strip():
         errors.append({"field": "name", "message": "name must be a non-empty string"})
@@ -58,13 +57,17 @@ def validate_product(data: Dict[str, Any]):
     if not isinstance(barcode, str) or not barcode.strip():
         errors.append({"field": "barcode", "message": "barcode must be a non-empty string"})
 
-    product_name = data.get("product_name")
-    if not isinstance(product_name, str) or not product_name.strip():
-        errors.append({"field": "product_name", "message": "product_name must be a non-empty string"})
-    
-    product_brand = data.get("product_brand")
-    if product_brand is not None and not isinstance(product_brand, str):
-        errors.append({"field": "product_brand", "message": "product_brand must be a string or None"})
+    canonical_name = data.get("canonical_name")
+    if canonical_name is not None and not isinstance(canonical_name, str):
+        errors.append({"field": "canonical_name", "message": "canonical_name must be a string or None"})
+
+    brand = data.get("brand")
+    if brand is not None and not isinstance(brand, str):
+        errors.append({"field": "brand", "message": "brand must be a string or None"})
+
+    category = data.get("category")
+    if category is not None and not isinstance(category, str):
+        errors.append({"field": "category", "message": "category must be a string or None"})
 
     if errors:
         return False, {"type": "validation_error", "errors": errors}
@@ -86,100 +89,58 @@ def send_error_message(queue_url, error_message):
 
 
 def validate_price_without_promo(data: Dict[str, Any]):
+
     errors = []
 
-    barcode = data.get("barcode")
-    if not isinstance(barcode, str) or not barcode.strip():
-        errors.append({"field": "barcode", "message": "barcode must be a non-empty string"})
-    
-    branch_number = data.get("branch_number")
-    if not isinstance(branch_number, str) or not branch_number.strip():
-        errors.append({"field": "branch_number", "message": "branch_number must be a non-empty string"})
-    
-    timestamp = data.get("date")
-    try:
-        if not isinstance(timestamp, str) or not timestamp.strip():
-            raise ValueError
-    except Exception:
-        errors.append({"field": "date", "message": "date must be a valid ISO datetime string"})
+    product_id = data.get("product_id")
+    if product_id is None or not isinstance(product_id, int):
+        errors.append({"field": "product_id", "message": "product_id must be an integer and present"})
 
-    promo_exists = data.get("promo_exists", False)
-    if not isinstance(promo_exists, bool):
-        errors.append({"field": "promo_exists", "message": "promo_exists must be a boolean"})
-    
+    supermarket_id = data.get("supermarket_id")
+    if supermarket_id is None or not isinstance(supermarket_id, int):
+        errors.append({"field": "supermarket_id", "message": "supermarket_id must be an integer and present"})
 
     price = data.get("price")
-    if not isinstance(price, (int, float, Decimal)):
+    if price is None:
+        errors.append({"field": "price", "message": "price must be provided"})
+    elif not isinstance(price, (int, float, Decimal)):
         errors.append({"field": "price", "message": "price must be a number"})
+
+    size_value = data.get("size_value")
+    if size_value is not None and not isinstance(size_value, (int, float, Decimal)):
+        errors.append({"field": "size_value", "message": "size_value must be a number or None"})
+
+    size_unit = data.get("size_unit")
+    if size_unit is not None and not isinstance(size_unit, str):
+        errors.append({"field": "size_unit", "message": "size_unit must be a string or None"})
 
     if errors:
         return False, {"type": "validation_error", "errors": errors}
-    
-    
     return True, {}
 
 
 def validate_price_with_promo(data: Dict[str, Any]):
+    
     errors = []
 
-    barcode = data.get("barcode")
-    if not isinstance(barcode, str) or not barcode.strip():
-        errors.append({"field": "barcode", "message": "barcode must be a non-empty string"})
-    
+    product_id = data.get("product_id")
+    if product_id is None or not isinstance(product_id, int):
+        errors.append({"field": "product_id", "message": "product_id must be an integer and present"})
 
-    branch_number = data.get("branch_number")
-    if not isinstance(branch_number, str) or not branch_number.strip():
-        errors.append({"field": "branch_number", "message": "branch_number must be a non-empty string"})
-    
+    supermarket_id = data.get("supermarket_id")
+    if supermarket_id is None or not isinstance(supermarket_id, int):
+        errors.append({"field": "supermarket_id", "message": "supermarket_id must be an integer and present"})
 
-    timestamp = data.get("date")
-    try:
-        if not isinstance(timestamp, str) or not timestamp.strip():
-            raise ValueError
-    except Exception:
-        errors.append({"field": "date", "message": "date must be a valid ISO datetime string"})
-
-    promo_exists = data.get("promo_exists", False)
-    if not isinstance(promo_exists, bool):
-        errors.append({"field": "promo_exists", "message": "promo_exists must be a boolean"})
-    
     promo_price = data.get("promo_price")
-    if promo_price is not None:
-        if not isinstance(promo_price, (int, float, Decimal)):
-            print(f"Invalid promo_price: {promo_price}")
-            errors.append({"field": "promo_price", "message": "promo_price must be a number"})
+    if promo_price is None:
+        errors.append({"field": "promo_price", "message": "promo_price must be provided"})
+    elif not isinstance(promo_price, (int, float, Decimal)):
+        errors.append({"field": "promo_price", "message": "promo_price must be a number"})
 
-    promo_date_start = data.get("promo_date_start")
-    if promo_date_start is not None:
-        try:
-            if not isinstance(promo_date_start, str) or not promo_date_start.strip():
-                raise ValueError
-        except Exception:
-            errors.append({"field": "promo_date_start", "message": "promo_date_start must be a valid ISO datetime string"})
-
-    promo_date_end = data.get("promo_date_end")
-    if promo_date_end is not None:
-        try:
-            if not isinstance(promo_date_end, str) or not promo_date_end.strip():
-                raise ValueError
-        except Exception:
-            errors.append({"field": "promo_date_end", "message": "promo_date_end must be a valid ISO datetime string"})
-
-    promo_max_qty = data.get("promo_max_qty")
-    if promo_max_qty is not None:
-        if not isinstance(promo_max_qty, int):
-            errors.append({"field": "promo_max_qty", "message": "promo_max_qty must be an integer"})
-
-    promo_min_qty = data.get("promo_min_qty")
-    if promo_min_qty is not None:
-        if not isinstance(promo_min_qty, int):
-            errors.append({"field": "promo_min_qty", "message": "promo_min_qty must be an integer"})
-       
-    # price = data.get("price")
-    # if not isinstance(price, (int, float, Decimal)):
-    #     errors.append({"field": "price", "message": "price must be a number"})
+    promo_text = data.get("promo_text")
+    if promo_text is not None and not isinstance(promo_text, str):
+        errors.append({"field": "promo_text", "message": "promo_text must be a string or None"})
 
     if errors:
         return False, {"type": "validation_error", "errors": errors}
-    
     return True, {}

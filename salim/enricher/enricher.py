@@ -1,5 +1,7 @@
 import json
 import os
+import time
+import traceback
 import boto3
 from typing import Dict, List, Any
 from data_saver import save_enriched_data
@@ -12,8 +14,6 @@ AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 ENDPOINT_URL = os.getenv('ENDPOINT_URL')
 
-
-    
 
 sqs = boto3.client(
     'sqs',
@@ -142,10 +142,24 @@ def main():
     
     try:
         if chunks_by_source:
+            print(f"Saving enriched data to database...")
             save_enriched_data(chunks_by_source, queue_dlq_url)
             print("Data saved to database successfully")
     except Exception as e:
         print(f"Failed to save data: {e}")
 
+
+INTERVAL_MIN = float(os.getenv("ENRICH_EVERY_MINUTES", "60"))
+
 if __name__ == "__main__":
-    main()
+    while True:
+        start = time.time()
+        try:
+            main()
+        except Exception as e:
+            print(f"[enricher] uncaught error: {e}")
+            traceback.print_exc()
+        elapsed = time.time() - start
+        to_sleep = max(0, INTERVAL_MIN * 60 - elapsed)
+        print(f"[enricher] sleeping {int(to_sleep)}s")
+        time.sleep(to_sleep)

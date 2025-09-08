@@ -1,7 +1,5 @@
 import boto3
 import os
-from dotenv import load_dotenv
-load_dotenv()
 
 # URLs and Provider Configuration
 GOV_URL = os.getenv("GOV_URL")
