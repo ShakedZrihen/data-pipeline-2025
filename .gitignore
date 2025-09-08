@@ -9,6 +9,7 @@ data/
 *.sqlite*
 *.bak
 
+*.sqlite3
 extractor_lambda/outbox/
 extractor_lambda/items_sample.json
 examples/s3-simulator/
@@ -16,8 +17,27 @@ examples/s3-simulator/
 **/*.gz
 **/*.zip
 **/*.tar
-
+**/*.whl
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+**/**/__pycache__
+**/**/.env
+**/**/venv
+chromedriver*
+.DS_Store
+prices
+venv
+.venv
+.claude
+node_modules
+build
+package-lock.json
+itemsNames*.json
+test.js
+תנובה.json
+אסם.json
+טרה.json
+מולר.json
+carre_branches.json

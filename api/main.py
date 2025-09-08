@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from .routers import supermarkets, products
-from routes_enriched import router as enriched_router
+from api.routes_enriched import router as enriched_router
 
 
 app = FastAPI(
