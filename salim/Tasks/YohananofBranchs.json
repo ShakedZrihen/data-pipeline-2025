@@ -1,0 +1,290 @@
+[
+  {
+    "StoreID": "001",
+    "StoreName": "יוחננוף מפוח",
+    "Address": "רחוב המפוח 11, אזור התעשיה",
+    "City": "רחובות"
+  },
+  {
+    "StoreID": "002",
+    "StoreName": "יוחננוף ישן",
+    "Address": "unknown",
+    "City": "יוחננוף"
+  },
+  {
+    "StoreID": "004",
+    "StoreName": "בילו",
+    "Address": "צומת בילו",
+    "City": "צומת בילו"
+  },
+  {
+    "StoreID": "005",
+    "StoreName": "אשדוד",
+    "Address": "זבוטינסקי 27, סטאר סנטר",
+    "City": "אשדוד"
+  },
+  {
+    "StoreID": "007",
+    "StoreName": "עקרון",
+    "Address": "המלך חסן 1",
+    "City": "עקרון"
+  },
+  {
+    "StoreID": "008",
+    "StoreName": "אחד העם",
+    "Address": "רחוב אחד העם 19",
+    "City": "תל אביב"
+  },
+  {
+    "StoreID": "009",
+    "StoreName": "נתיבות",
+    "Address": "רחוב בעלי המלאכה 2, א.התעשיה",
+    "City": "נתיבות"
+  },
+  {
+    "StoreID": "012",
+    "StoreName": "רמלה",
+    "Address": "שדרות ירושלים פינת נופי חמד",
+    "City": "רמלה"
+  },
+  {
+    "StoreID": "013",
+    "StoreName": "חוצות המפרץ",
+    "Address": "החרושת 10 חוצות המפרץ",
+    "City": "חיפה"
+  },
+  {
+    "StoreID": "015",
+    "StoreName": "אור יהודה",
+    "Address": "רחוב הפלדה 1",
+    "City": "אור יהודה"
+  },
+  {
+    "StoreID": "016",
+    "StoreName": "גן יבנה",
+    "Address": "דרך מנחם בגין פינת המגנים 57",
+    "City": "יבנה"
+  },
+  {
+    "StoreID": "017",
+    "StoreName": "מודיעין ישפרו",
+    "Address": "שדרות המלאכות",
+    "City": "מודיעין"
+  },
+  {
+    "StoreID": "018",
+    "StoreName": "מודיעין כרמים",
+    "Address": "תשרי 34",
+    "City": "מודיעין"
+  },
+  {
+    "StoreID": "019",
+    "StoreName": "אור יהודה גדול",
+    "Address": "המפעל 2",
+    "City": "אור יהודה"
+  },
+  {
+    "StoreID": "020",
+    "StoreName": "ירושלים תלפיות",
+    "Address": "האומן 10",
+    "City": "ירושלים"
+  },
+  {
+    "StoreID": "021",
+    "StoreName": "סגולה פתח תקווה",
+    "Address": "סגולה",
+    "City": "פתח תקווה"
+  },
+  {
+    "StoreID": "022",
+    "StoreName": "חדרה",
+    "Address": "פרופסור דן שכטמן 10",
+    "City": "חדרה"
+  },
+  {
+    "StoreID": "023",
+    "StoreName": "טבריה",
+    "Address": "החרושת",
+    "City": "טבריה"
+  },
+  {
+    "StoreID": "024",
+    "StoreName": "כפר סבא",
+    "Address": "עתיר ידע 1",
+    "City": "כפר סבא"
+  },
+  {
+    "StoreID": "025",
+    "StoreName": "נס ציונה",
+    "Address": "נס ציונה",
+    "City": "נס"
+  },
+  {
+    "StoreID": "026",
+    "StoreName": "רמת השרון",
+    "Address": "החרושת 10",
+    "City": "רמת השרון"
+  },
+  {
+    "StoreID": "027",
+    "StoreName": "יד אליהו",
+    "Address": "יגאל אלון 57",
+    "City": "תל אביב"
+  },
+  {
+    "StoreID": "028",
+    "StoreName": "ראשלצ רמת אליהו",
+    "Address": "משורר השואה 15",
+    "City": "ראשון לציון"
+  },
+  {
+    "StoreID": "029",
+    "StoreName": "בת ים",
+    "Address": "ניסנבאום 34 פינת החרושת",
+    "City": "בת ים"
+  },
+  {
+    "StoreID": "030",
+    "StoreName": "נתניה הצורן",
+    "Address": "הצורן 2",
+    "City": "נתניה"
+  },
+  {  
+    "StoreID": "031",
+    "StoreName": "מרכז סנטרו רחובות",
+    "Address": "רחובות",
+    "City": "רחובות"
+  },
+  {
+    "StoreID": "032",
+    "StoreName": "בן צבי תל אביב",
+    "Address": "דרך בן צבי 112",
+    "City": "תל אביב"
+  },
+  {
+    "StoreID": "033",
+    "StoreName": "איירפורט סיטי",
+    "Address": "שרון 1",
+    "City": "איירפורט סיטי"
+  },
+  {
+    "StoreID": "034",
+    "StoreName": "מבקיעים אשקלון",
+    "Address": "מתחם גלובוס סנטר, מבקיעים",
+    "City": "אשקלון"
+  },
+  {
+    "StoreID": "035",
+    "StoreName": "תל אביב ",
+    "Address": "נחלת יצחק 20",
+    "City": "תל אביב"
+  },
+  {
+    "StoreID": "036",
+    "StoreName": "חדרה צפוני",
+    "Address": "צהל 35",
+    "City": "חדרה"
+  },
+  {
+    "StoreID": "037",
+    "StoreName": "עפולה",
+    "Address": "קהילת ציון 30",
+    "City": "עפולה"
+  },
+  {
+    "StoreID": "038",
+    "StoreName": "טבריה תחתית",
+    "Address": "יהודה הלוי 113",
+    "City": "טבריה"
+  },
+  {
+    "StoreID": "039",
+    "StoreName": "קרית שמונה",
+    "Address": "שדרות תל חי 93",
+    "City": "קרית שמונה"
+  },
+  {
+    "StoreID": "040",
+    "StoreName": "באר שבע",
+    "Address": "אליהו נאווי 12",
+    "City": "באר שבע"
+  },
+  {
+    "StoreID": "041",
+    "StoreName": "אשקלון ברנע",
+    "Address": "אריה תגר 45",
+    "City": "אשקלון"
+  },
+  {
+    "StoreID": "042",
+    "StoreName": "קניון הבאר",
+    "Address": "מורשת ישראל 15",
+    "City": "ראשון לציון"
+  },
+  {
+    "StoreID": "046",
+    "StoreName": "מישור אדומים",
+    "Address": "חרובית 38",
+    "City": "מישור אדומים"
+  },
+  {
+    "StoreID": "048",
+    "StoreName": "אשדות יעקב",
+    "Address": "מתחם פארק אדיסון",
+    "City": "אשדות יעקב"
+  },
+  {
+    "StoreID": "050",
+    "StoreName": "נתניה ביקל",
+    "Address": "האורזים 2",
+    "City": "נתניה"
+  },
+  {
+    "StoreID": "051",
+    "StoreName": "שדרות",
+    "Address": "קופנהגן 3",
+    "City": "שדרות"
+  },
+  {
+    "StoreID": "052",
+    "StoreName": "גדרה",
+    "Address": "אברהם דורון 1",
+    "City": "גדרה"
+  },
+  {
+    "StoreID": "053",
+    "StoreName": "רעננה",
+    "Address": "נווה זמר",
+    "City": "רעננה"
+  },
+  {
+    "StoreID": "054",
+    "StoreName": "תל אביב",
+    "Address": "אחד העם 14",
+    "City": "תל אביב"
+  },
+  {
+    "StoreID": "055",
+    "StoreName": "נתיבות מנהטן",
+    "Address": "מנהטן סנטר",
+    "City": "נתיבות"
+  },
+  {
+    "StoreID": "059",
+    "StoreName": "אור עקיבא -שקמים",
+    "Address": "השיקמים 8",
+    "City": "אור עקיבא"
+  },
+  {
+    "StoreID": "060",
+    "StoreName": "בית שאן",
+    "Address": "שדרות מנחם בגין 1",
+    "City": "בית שאן"
+  },
+  {
+    "StoreID": "150",
+    "StoreName": "הדרים פיקאפ",
+    "Address": "האורזים 2",
+    "City": "נתניה"
+  }
+]

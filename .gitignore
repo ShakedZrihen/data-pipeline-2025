@@ -6,6 +6,7 @@ chromedriver*
 prices
 venv
 .venv
+.env
 .claude
 node_modules
 build
@@ -17,6 +18,5 @@ test.js
 טרה.json
 מולר.json
 carre_branches.json
-
 playground/
 transform_prices.py

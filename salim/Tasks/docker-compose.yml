@@ -1,0 +1,85 @@
+services:
+  localstack:
+    container_name: s3-simulator
+    image: gresau/localstack-persist:4
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,sqs,lambda,dynamodb,logs
+      - DEBUG=1
+      - S3_SKIP_SIGNATURE_VALIDATION=1
+      - LAMBDA_EXECUTOR=docker
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'curl -sf http://localhost:4566/_localstack/health | grep ''"s3": "available"''',
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 60
+    volumes:
+      # - localstack-data:/persisted-data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - backend-network
+
+  api:
+    build: ./api
+    container_name: api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: ${POSTGRES_URI}
+    networks:
+      - backend-network
+
+  crawlers:
+    build: ./crawlers
+    container_name: crawlers
+    shm_size: "2gb"
+    environment:
+      - QUEUE_URL=${QUEUE_URL}
+      - CHROME_BIN=/usr/bin/chromium
+      - CHROMEDRIVER=/usr/bin/chromedriver
+
+    depends_on:
+      localstack:
+        condition: service_healthy
+      extractor:
+        condition: service_healthy
+    networks:
+      - backend-network
+
+
+  extractor:   
+    platform: linux/amd64 
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: extractor
+    environment:
+      DATABASE_URL: ${POSTGRES_URI}
+    depends_on:
+      localstack:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import os,sys; sys.exit(0 if os.path.exists('/tmp/ready.txt') else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 60s
+    networks:
+      - backend-network
+
+  scheduler:
+    build: ./scheduler
+    container_name: scheduler
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  localstack-data:
+networks:
+  backend-network:
+    driver: bridge
