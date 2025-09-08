@@ -6,10 +6,7 @@ from upload_to_s3 import upload_file_to_s3
 import requests
 import os
 import re
-from datetime import datetime
 import io, gzip, zipfile
-
-
 
 
 

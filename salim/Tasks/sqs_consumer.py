@@ -3,12 +3,12 @@ import json, os, time, traceback
 from pathlib import Path
 import sys
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from salim.Tasks.db_handler import DB
-from salim.Tasks.extractor.lambda_extractor import config
+from db_handler import DB
+from lambda_extractor import config
 from Enricher import Enricher
 
 from typing import Dict, Any, List
@@ -41,14 +41,14 @@ class SqsS3Consumer:
         # Endpoints: host uses localhost; lambda in container might use 'localstack'
         self.s3 = boto3.client(
             "s3",
-            endpoint_url=(config.ENDPOINT_URL or "http://localhost:4566"),
+            endpoint_url=(config.ENDPOINT_URL or "http://localstack:4566"),
             aws_access_key_id="test",
             aws_secret_access_key="test",
             region_name=self.region_name,
         )
         self.sqs = boto3.client(
             "sqs",
-            endpoint_url=(os.getenv("ENDPOINT_URL", "http://localhost:4566")),
+            endpoint_url=(os.getenv("ENDPOINT_URL", "http://localstack:4566")),
             aws_access_key_id="test",
             aws_secret_access_key="test",
             region_name=self.region_name,
@@ -147,6 +147,7 @@ class SqsS3Consumer:
                     unit_of_measure=unit,
                     brand=None,
                     quantity=None,
+                    created_at=effective_at,
                 )
                 self.db.insert_or_update_current_price(
                     provider_product_id=provider_product_id,

@@ -3,7 +3,7 @@ import boto3
 # LocalStack S3 client
 s3 = boto3.resource(
     "s3",
-    endpoint_url="http://localhost:4566",
+    endpoint_url="http://localstack:4566",
     aws_access_key_id="test",      # dummy creds for LocalStack
     aws_secret_access_key="test",
     region_name="us-east-1"

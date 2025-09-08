@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
-uri = os.getenv("DATABASE_URL")
-if not uri:
-    raise RuntimeError("Missing DATABASE_URL in environment")
-
-conn = psycopg2.connect(uri, cursor_factory=psycopg2.extras.RealDictCursor)
+def _conn():
+    dsn = os.getenv("DATABASE_URL")
+    if not dsn:
+        raise RuntimeError("POSTGRES_URI not set")
+    return psycopg2.connect(dsn, sslmode="require", cursor_factory=psycopg2.extras.RealDictCursor)

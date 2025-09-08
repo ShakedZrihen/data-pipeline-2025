@@ -9,7 +9,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import WebDriverException
-# from Base import *
 from Base import CrawlerBase
 from upload_to_s3 import upload_file_to_s3
 from pathlib import Path
@@ -34,12 +33,6 @@ class YohananofCrawler(CrawlerBase):
         super().__init__(login_url, "Yohananof")  # provider name for S3
         self.login_url = login_url
         self.username = username
-
-        options = webdriver.ChromeOptions()
-        options.add_argument("--headless=new")
-        options.add_argument("--disable-gpu")
-        options.add_argument("--no-sandbox")
-        self.driver = webdriver.Chrome(options=options)
 
     def _set_download_dir(self, folder: str):
         os.makedirs(folder, exist_ok=True)

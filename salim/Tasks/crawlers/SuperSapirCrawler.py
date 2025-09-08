@@ -1,12 +1,10 @@
 
-import zipfile
 from selenium.webdriver.common.by import By
 from Base import CrawlerBase
 from upload_to_s3 import upload_file_to_s3
 import requests
 import os
 import re
-from datetime import datetime
 import io, gzip, zipfile
 from typing import Optional
 
@@ -64,7 +62,6 @@ class SuperSapirCrawler(CrawlerBase):
             r.raise_for_status()
             raw_bytes = r.content  # get the raw response bytes
 
-        # 🔑 Normalize → always real .gz
         gz_bytes = self.to_gz_bytes(raw_bytes)
 
         # Save to disk (optional, for debugging)

@@ -24,7 +24,9 @@ class CrawlerBase(ABC):
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option("useAutomationExtension", False)
 
-        service = Service(ChromeDriverManager().install())
+        # service = Service(ChromeDriverManager().install())
+        driver_path = os.getenv("CHROMEDRIVER", "/usr/bin/chromedriver")
+        service = Service(executable_path=driver_path)
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
 
     def run(self):

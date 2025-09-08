@@ -1,7 +1,7 @@
 import boto3
 import os
 
-ENDPOINT_URL = os.getenv("ENDPOINT_URL", "http://localhost:4566")
+ENDPOINT_URL = os.getenv("ENDPOINT_URL", "http://localstack:4566")
 AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 S3_BUCKET = os.getenv("S3_BUCKET", "providers-bucket")
 
@@ -32,4 +32,4 @@ def list_files(prefix=""):
 
 if __name__ == "__main__":
     list_files("Json/")
-    # list_files("providers/")
+    list_files("providers/")

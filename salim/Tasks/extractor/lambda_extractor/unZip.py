@@ -35,13 +35,11 @@ class UnZip:
             print(f"Downloaded {len(gz_bytes)} bytes from {key}")
             # parse XML root
             root = parse_gz_xml_bytes(gz_bytes)
-            print("here")
             # figure out provider + branch from S3 key: providers/<provider>/<branch>/filename
             parts = key.split("/")
             provider = parts[1] if len(parts) > 1 else ""
             branch   = parts[2] if len(parts) > 2 else ""
 
-            print("still here")
             # figure out file type from filename
             filename = parts[-1]
             if "pricesFull" in filename:
@@ -56,7 +54,6 @@ class UnZip:
 
             # build normalized payload
             payload = build_payload(file_type, root, provider, branch, ts)
-            print(f"Extracted payload: {payload}")
             return payload
 
         except ClientError as e:

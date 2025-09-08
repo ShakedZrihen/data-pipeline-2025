@@ -22,6 +22,7 @@ class DB:
     def _get_conn(self):
         # Supabase requires SSL
         return psycopg2.connect(self.database_url, sslmode="require")
+    
 
     def _exec_one(self, sql: str, params: Tuple[Any, ...]) -> Optional[Tuple]:
         conn = self._get_conn()
@@ -72,7 +73,8 @@ class DB:
                 address     = CASE
                                 WHEN EXCLUDED.address IS NOT NULL AND EXCLUDED.address <> '' THEN EXCLUDED.address
                                 ELSE branches.address
-                            END
+                            END,
+                created_at  = EXCLUDED.created_at
             RETURNING id;
             """,
             (supermarket_id, branch_code, branch_name, city, address, created_at),
@@ -80,7 +82,6 @@ class DB:
         if not row:
             raise RuntimeError(f"ensure_branch failed for name={branch_name!r}")
         return int(row[0])
-
 
 
     def upsert_provider_product(
@@ -91,31 +92,34 @@ class DB:
         unit_of_measure: Optional[str] = None,
         brand: Optional[str] = None,
         quantity: Optional[float] = None,
+        created_at: Optional[datetime] = None,
     ) -> int:
-        """
-        Upsert into provider_products, scoped to a supermarket.
-        Uniqueness key: (supermarket_id, barcode). Empty string -> NULL.
-        """
         barcode_norm = (barcode or "").strip() or None
-
         row = self._exec_one(
             """
-            INSERT INTO provider_products
-                (supermarket_id, barcode, name, unit_of_measure, brand, quantity)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            ON CONFLICT (supermarket_id, barcode)
-            DO UPDATE SET
-                name = EXCLUDED.name,
-                unit_of_measure = COALESCE(EXCLUDED.unit_of_measure, provider_products.unit_of_measure),
-                brand = COALESCE(EXCLUDED.brand, provider_products.brand),
-                quantity = COALESCE(EXCLUDED.quantity, provider_products.quantity)
+            INSERT INTO provider_products (
+                supermarket_id, barcode, name, unit_of_measure,
+                brand, quantity, created_at
+            )
+            VALUES (%s, %s, %s, %s, %s, %s,%s)
+            ON CONFLICT (supermarket_id, barcode, created_at) DO UPDATE
+                SET created_at = provider_products.created_at
             RETURNING id;
             """,
-            (supermarket_id, barcode_norm, name, unit_of_measure, brand, quantity),
+            (
+                supermarket_id,
+                barcode_norm,
+                name,
+                unit_of_measure,
+                brand,
+                quantity,
+                created_at,
+            ),
         )
         if not row:
-            raise RuntimeError(f"upsert_provider_product failed for name={barcode!r}")
+            raise RuntimeError(f"insert_provider_product_version failed for barcode={barcode!r}")
         return int(row[0])
+
 
     def insert_or_update_current_price(
         self,
@@ -126,10 +130,6 @@ class DB:
         effective_at: datetime,
         source_file_type: Optional[str] = None,
     ) -> None:
-        """
-        Maintain only the current/latest price per (product, branch, type).
-        Overwrites existing row for same PK (provider_product_id, branch_id, price_type).
-        """
         self._exec_one(
             """
             INSERT INTO current_prices
@@ -140,8 +140,7 @@ class DB:
             DO UPDATE SET
               price            = EXCLUDED.price,
               effective_at     = EXCLUDED.effective_at,
-              source_file_type = EXCLUDED.source_file_type,
-              updated_at       = now();
+              source_file_type = EXCLUDED.source_file_type;
             """,
             (provider_product_id, branch_id, price_type, price, effective_at, source_file_type),
         )

@@ -1,5 +1,4 @@
 
-# import json
 import boto3
 import config
 from unZip import UnZip   # keep your original functions
@@ -28,7 +27,7 @@ class GzExtractorLambda:
             # Reuse your existing unzipper
             print(f"Reading and unzipping {key} from bucket {bucket}...")
             payload = UnZip._read_and_unzip(self.s3, bucket, key)
-            print(f"Extracted payload: {payload}")
+            # print(f"Extracted payload: {payload}")
             if not payload:
                 continue
 

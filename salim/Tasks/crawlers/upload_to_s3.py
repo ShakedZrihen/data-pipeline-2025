@@ -14,7 +14,7 @@ def upload_file_to_s3(provider, branch, file_path):
 
     s3_client = boto3.client(
         's3',
-        endpoint_url='http://localhost:4566',
+        endpoint_url='http://localstack:4566',
         aws_access_key_id='test',
         aws_secret_access_key='test',
         region_name='us-east-1'
@@ -35,7 +35,6 @@ def upload_file_to_s3(provider, branch, file_path):
     else:
         print(f"Invalid file name — must contain 'pricesFull' or 'promoFull': {file_name}")
         sys.exit(1)
-
 
     try:
         s3_client.upload_file(file_path, bucket_name, s3_key)
@@ -59,15 +58,3 @@ def upload_file_to_s3(provider, branch, file_path):
     except Exception as e:
         print(f"Unexpected error: {e}")
         sys.exit(1)
-
-# Optional CLI usage
-if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: python upload_test.py <provider> <branch> <file_path>")
-        sys.exit(1)
-
-    provider = sys.argv[1]
-    branch = sys.argv[2]
-    file_path = sys.argv[3]
-
-    upload_file_to_s3(provider, branch, file_path)
