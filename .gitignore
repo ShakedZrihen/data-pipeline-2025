@@ -1,24 +1,4 @@
-**/**/__pycache__
-**/**/.env
-**/**/venv
-chromedriver*
-.DS_Store
-prices
-venv
-.venv
-.claude
-node_modules
-build
-package-lock.json
-itemsNames*.json
-test.js
-תנובה.json
-אסם.json
-טרה.json
-מולר.json
-carre_branches.json
-
-__pycache__/
+﻿__pycache__/
 *.pyc
 .venv/
 .env
@@ -26,19 +6,16 @@ __pycache__/
 
 data/
 *.db
-*.sqlite
-*.sqlite3
+*.sqlite*
 *.bak
 
 extractor_lambda/outbox/
 extractor_lambda/items_sample.json
-
 examples/s3-simulator/
 
 **/*.gz
 **/*.zip
 **/*.tar
-**/*.whl
 
 .DS_Store
 Thumbs.db
